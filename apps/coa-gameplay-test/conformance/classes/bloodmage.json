@@ -2368,6 +2368,3512 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Mucking Around 681444 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectBasePoints 99 + DieSides 1 = +100% ($s1) on EffectSpellClassMask[2] 256 = Scarlet Delirium 803688 (Spell.dbc PowerType -2 POWER_HEALTH, ManaCost 10, ManaCostPercentage 20, CastingTimeIndex 5 = 2000 ms). Bloodmage (class 20, fallback_class 11 Druid, CoA.ClassLevelSixtyStats.Enable 0) level-60 BaseHP = 65 (rev_20260903_01_live_class_baseline.sql:928) + 1483 (player_class_stats.sql:769) - 44 (player_class_stats.sql:710) = 1504 via rev_20260912_00_custom_class_stat_progression.sql. SpellInfo::CalcPowerCost (SpellInfo.cpp:3205-3214) computes 10 + int32(CalculatePct(1504, 20)) = 10 + 300 = 310 health before 681444, and 310 * 2 = 620 health after SPELLMOD_COST +100%. With caster_health [10000, 10000], regen off, target caster (no enemies in range so 803688 deals no leech), wait_ms 2500 (500 ms buffer past the 2000 ms before cast): health reads 9690 before (control) and 9380 after a real learn of 681444 (exact integer match, excluding 0% = 9690 and doubled +200% = 9070). Reference search 2026-11-26: see cast_held."
+    },
+    {
+      "spell": 92112,
+      "name": "Thirst (health-cost spell grants 1 stack of Thirst)",
+      "kind": "metric_delta",
+      "variant": "health_cost_grants_thirst",
+      "label_suffix": "health_cost_grants_thirst",
+      "quote": "Spells that cost health now grant Thirst.",
+      "trigger_spell": 572907,
+      "gate_spell": 92112,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706613
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "92112 Thirst (AscensionCompat.cpp:3449-3452): casting a SpellFamilyName 26 spell with PowerType -2 (POWER_HEALTH) and power cost > 0 grants +1 stack of 706613 Thirst. Sanguine Rupture 572907 (instant, PowerType -2, 14% base health, ExcludeCasterAuraSpell 802877) grants 0 stacks before learning 92112 and 1 stack after (expire_ms 1600 clears 1500 ms GCD). Reference search 2026-11-26: coa-history (186 logs) 92112: 0 (passive), 706613 Thirst: 583 SPELL_AURA_APPLIED_DOSE in 5 logs, 706621 Insatiable: 56 applies in 4 logs, 706663 Insatiable: 35 applies in 4 logs; coabuildhub spells_master_index.json 92112 matches verbatim."
+    },
+    {
+      "spell": 92112,
+      "name": "Thirst (Rage-cost spell grants 0 stacks of Thirst)",
+      "kind": "metric_delta",
+      "variant": "rage_cost_no_thirst",
+      "label_suffix": "rage_cost_no_thirst",
+      "quote": "Spells that cost health now grant Thirst.",
+      "trigger_spell": 578305,
+      "gate_spell": 92112,
+      "target": "dummy",
+      "cast_power": 500,
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706613
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for 92112 Thirst: Bloodbolt 578305 costs Rage (PowerType 1, ManaCost 300), not health, so casting it with 92112 learned grants 0 stacks of 706613. Reference search 2026-11-26: coa-history (186 logs) 92112: 0 (passive), 706613 Thirst: 583 SPELL_AURA_APPLIED_DOSE in 5 logs, 706621 Insatiable: 56 applies in 4 logs, 706663 Insatiable: 35 applies in 4 logs; coabuildhub spells_master_index.json 92112 matches verbatim."
+    },
+    {
+      "spell": 92112,
+      "name": "Thirst (reaching 10 stacks triggers Insatiable 706621; 9 stacks does not)",
+      "kind": "metric_delta",
+      "variant": "insatiable_at_ten",
+      "label_suffix": "insatiable_at_ten",
+      "quote": "Reaching $706613u stacks makes you Insatiable,",
+      "trigger_spell": 572907,
+      "gate_spell": 572907,
+      "learn": [
+        92112
+      ],
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_wait_ms": 1600,
+      "target": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706621,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706663,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 706621
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 706613
+            },
+            "before_expected": 9,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "9 real Sanguine Rupture 572907 casts reach 9 stacks (before); 10th cast reaches 10 stacks (after)."
+          }
+        ]
+      },
+      "observe_source": "$706613u = 10 (Spell.dbc 706613 StackAmount 10; AscensionResourceTalents.cpp:125-131 casts 706621 Insatiable when Thirst reaches 10 stacks). Control (before): 9 real casts of 572907 build 9 stacks of 706613 with 706621 absent (0). Treatment (after): 10th cast reaches 10 stacks and applies 706621 (1). Reference search 2026-11-26: coa-history (186 logs) 92112: 0 (passive), 706613 Thirst: 583 SPELL_AURA_APPLIED_DOSE in 5 logs, 706621 Insatiable: 56 applies in 4 logs, 706663 Insatiable: 35 applies in 4 logs; coabuildhub spells_master_index.json 92112 matches verbatim."
+    },
+    {
+      "spell": 92112,
+      "name": "Thirst (Insatiable 706663 reduces damage dealt by 30% on first tick)",
+      "kind": "metric_delta",
+      "variant": "insatiable_damage_reduction",
+      "label_suffix": "insatiable_damage_reduction",
+      "quote": "reducing your damage dealt by $706663s1% every $706621t1 sec until Thirst ends.",
+      "trigger_spell": 802580,
+      "gate_spell": 92112,
+      "learn": [
+        578305
+      ],
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_trigger_casts": [
+        {
+          "spell": 578305,
+          "target": "dummy",
+          "delay_ms": 3400,
+          "in_before": true,
+          "reset_cooldown": true
+        }
+      ],
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "phase_power": [
+        1,
+        500,
+        500
+      ],
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706621,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706663,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 9370,
+      "expected": 6565,
+      "expected_ratio": 0.7,
+      "tolerance": 0.02,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 706663
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "0 stacks of 706663 without 92112; exactly 1 stack of 706663 at 3400 ms after reaching 10 Thirst stacks."
+          }
+        ]
+      },
+      "observe_source": "$706663s1 = -30% (Spell.dbc 706663 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 all schools, BasePoints -31 + DieSides 1 = -30%). 9 Sanguine Rupture casts + Taldaram's Torment 802580 reach 10 Thirst stacks; Bloodbolt 578305 (SpellFamilyFlags[1] 131072, outside 706613 damage masks) is cast 3400 ms later (+20000 SP, 823764 spellpen, 16255 -100% crit; wait_ms 1000 covers 333 ms flight): ratio 0.70 +- 0.02 (G-19 band [0.68, 0.72], excludes 1.00 and 0.40). Reference search 2026-11-26: coa-history (186 logs) 92112: 0 (passive), 706613 Thirst: 583 SPELL_AURA_APPLIED_DOSE in 5 logs, 706621 Insatiable: 56 applies in 4 logs, 706663 Insatiable: 35 applies in 4 logs; coabuildhub spells_master_index.json 92112 matches verbatim."
+    },
+    {
+      "spell": 92112,
+      "name": "Thirst (Insatiable tick 1 has not fired before 2700 ms, excluding -10% period)",
+      "kind": "metric_delta",
+      "variant": "insatiable_period_before",
+      "label_suffix": "insatiable_period_before",
+      "quote": "reducing your damage dealt by $706663s1% every $706621t1 sec until Thirst ends.",
+      "trigger_spell": 572907,
+      "gate_spell": 92112,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_wait_ms": 1600,
+      "target": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706621,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706663,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706663
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2760,
+      "game_time": {
+        "after": [
+          2720,
+          2940
+        ]
+      },
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 706621
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "706621 Insatiable is active (1) at [2720, 2940] ms while 706663 has not yet ticked (0)."
+          }
+        ]
+      },
+      "observe_source": "Lower period bracket for $706621t1 = 3000 ms (Spell.dbc 706621 EffectAmplitude[0] = 3000 ms, Triggers 706663): after 10 Sanguine Rupture casts apply 706621, reading at wait_ms 2760 (game_time.after [2720, 2940] ms, strictly > 2700 ms = -10%) finds 706621 active (1) and 706663 still 0 stacks, excluding periods <= 2700 ms. Paired with insatiable_period_and_end. Reference search 2026-11-26: coa-history (186 logs) 92112: 0 (passive), 706613 Thirst: 583 SPELL_AURA_APPLIED_DOSE in 5 logs, 706621 Insatiable: 56 applies in 4 logs, 706663 Insatiable: 35 applies in 4 logs; coabuildhub spells_master_index.json 92112 matches verbatim."
+    },
+    {
+      "spell": 92112,
+      "name": "Thirst (Insatiable ticks by 3250 ms and ends early when Thirst expires at 20 s)",
+      "kind": "metric_delta",
+      "variant": "insatiable_period_and_end",
+      "label_suffix": "insatiable_period_and_end",
+      "quote": "reducing your damage dealt by $706663s1% every $706621t1 sec until Thirst ends.",
+      "trigger_spell": 572907,
+      "gate_spell": 92112,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_wait_ms": 1600,
+      "target": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706621,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706663,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706663
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 3180,
+      "expiry_wait_ms": 17500,
+      "game_time": {
+        "after": [
+          3050,
+          3290
+        ],
+        "expired": [
+          20200,
+          21200
+        ]
+      },
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Upper period bracket and Thirst-end removal for $706621t1 = 3000 ms until Thirst ends (706613 DurationIndex 18 = 20000 ms; 706663 DurationIndex 8 = 15000 ms; AscensionResourceTalents.cpp:150-160 removes 706621 and 706663 when 706613 expires): reads 706663 = 1 stack at game_time.after [3050, 3290] ms (< 3300 ms = +10%, excluding periods >= 3300 ms), then reads 706663 = 0 at game_time.expired [20200, 21200] ms right after 706613 expires at 20000 ms (before 706663's natural 24000 ms expiry). Paired with insatiable_period_before. Reference search 2026-11-26: coa-history (186 logs) 92112: 0 (passive), 706613 Thirst: 583 SPELL_AURA_APPLIED_DOSE in 5 logs, 706621 Insatiable: 56 applies in 4 logs, 706663 Insatiable: 35 applies in 4 logs; coabuildhub spells_master_index.json 92112 matches verbatim."
+    },
+    {
+      "spell": 92112,
+      "name": "Thirst (generates 5 Rage = 50 internal Rage per stack gained)",
+      "kind": "metric_delta",
+      "variant": "thirst_rage",
+      "label_suffix": "thirst_rage",
+      "quote": "@s:706613:0@",
+      "trigger_spell": 572907,
+      "gate_spell": 92112,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 50,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Quote hangs under @s:706613:0@ (92112 embeds 706613: 'Generates $/10;681202s1 Rage'). $/10;681202s1 = 5 displayed Rage = 50 internal Rage (Spell.dbc 681202 Effect[0] SPELL_EFFECT_ENERGIZE BasePoints 49 + DieSides 1 = 50, MiscValue 1 POWER_RAGE; AscensionResourceTalents.cpp:31,184 energizes 50 per stack gained). Sanguine Rupture 572907 cast with no enemies present (target caster) yields 0 Rupture Rage; Rage reads 0 before learning 92112 and 50 after (exact match). Reference search 2026-11-26: coa-history (186 logs) 92112: 0 (passive), 706613 Thirst: 583 SPELL_AURA_APPLIED_DOSE in 5 logs, 706621 Insatiable: 56 applies in 4 logs, 706663 Insatiable: 35 applies in 4 logs; coabuildhub spells_master_index.json 92112 matches verbatim."
+    },
+    {
+      "spell": 92112,
+      "name": "Thirst (increases health cost of spells by 5% per stack)",
+      "kind": "metric_delta",
+      "variant": "thirst_health_cost",
+      "label_suffix": "thirst_health_cost",
+      "quote": "@s:706613:0@",
+      "trigger_spell": 572907,
+      "gate_spell": 92112,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_wait_ms": 1600,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "health",
+      "fields": {},
+      "before_expected": 8950,
+      "expected": 8846,
+      "tolerance": 3,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Quote hangs under @s:706613:0@ (92112 embeds 706613: 'and then increases the health costs of your spells by $s1%'). $s1 = 5% (Spell.dbc 706613 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 14 SPELLMOD_COST BasePoints 4 + 1 = +5%/stack, mask[2] 2147483920 includes Sanguine Rupture 572907). Bloodmage level-60 BaseHP = 1504 -> 572907 14% base health = 210 HP/cast. 5 casts without 92112 spend 5 x 210 = 1050 HP (health 8950). With 92112 learned, casts 1..5 run at 0..4 Thirst stacks (+0/5/10/15/20%), spending 210+220+231+241+252 = 1154 HP (health 8846, delta -104 HP, tol 3 excludes 0% = 8950 and 2x = 8742). Reference search 2026-11-26: coa-history (186 logs) 92112: 0 (passive), 706613 Thirst: 583 SPELL_AURA_APPLIED_DOSE in 5 logs, 706621 Insatiable: 56 applies in 4 logs, 706663 Insatiable: 35 applies in 4 logs; coabuildhub spells_master_index.json 92112 matches verbatim."
+    },
+    {
+      "spell": 92112,
+      "name": "Thirst ($?s504252 Reckless Abandon adds +1% crit per stack; 0% without 504252)",
+      "kind": "metric_delta",
+      "variant": "thirst_reckless_abandon_crit",
+      "label_suffix": "thirst_reckless_abandon_crit",
+      "quote": "@s:706613:0@",
+      "trigger_spell": 572907,
+      "gate_spell": 504252,
+      "learn": [
+        92112
+      ],
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_wait_ms": 1600,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 3.75,
+      "expected": 8.75,
+      "expected_gain": 5.0,
+      "tolerance": 0.1,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 706613
+            },
+            "before_expected": 5,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "5 real Sanguine Rupture casts build 5 stacks of 706613 Thirst in both phases."
+          }
+        ]
+      },
+      "observe_source": "Quote hangs under @s:706613:0@ (92112 embeds 706613: '$?s504252[, your critical strike chance by $504252s1%][]'). $?s504252 conditional ($504252s1 = 1% per stack, AscensionResourceTalents.cpp:64,79,112-123 applies SPELL_AURA_MOD_CRIT_PCT scaled by 706613 stack count). With 92112 learned and 5 real Thirst stacks in both phases: false branch (before learning 504252) adds +0% crit; true branch (after learning 504252) adds +5.0% Shadow spell crit (tol 0.1 excludes 0% and +10%). Reference search 2026-11-26: coa-history (186 logs) 92112: 0 (passive), 706613 Thirst: 583 SPELL_AURA_APPLIED_DOSE in 5 logs, 706621 Insatiable: 56 applies in 4 logs, 706663 Insatiable: 35 applies in 4 logs; coabuildhub spells_master_index.json 92112 matches verbatim."
+    },
+    {
+      "spell": 92112,
+      "name": "Thirst (increases Bloodmoon Blast damage by 3% per stack)",
+      "kind": "metric_delta",
+      "variant": "thirst_spell_damage",
+      "label_suffix": "thirst_spell_damage",
+      "quote": "@s:706613:0@",
+      "trigger_spell": 501614,
+      "gate_spell": 92112,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501614,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 9830,
+      "expected": 11345,
+      "expected_ratio": 1.15,
+      "tolerance": 0.02,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Quote hangs under @s:706613:0@ (92112 embeds 706613: 'and increases their damage by $s3%.'). $s3 = 3% per stack (Spell.dbc 706613 Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 0 SPELLMOD_DAMAGE BasePoints 2 + 1 = +3%/stack, mask[1] 2105344 includes Bloodmoon Blast 501614 SpellFamilyFlags[1] 8192). 5 setup casts of Sanguine Rupture 572907 build 5 Thirst stacks (+15% damage) when 92112 is learned (0 before). Bloodmoon Blast 501614 at +20000 SP (823764 spellpen, 16255 -100% crit, wait_ms 3000 covers 2000 ms cast + 286 ms flight) measures ratio 1.15 +- 0.02 (excludes 1.00 and 1.30). Reference search 2026-11-26: coa-history (186 logs) 92112: 0 (passive), 706613 Thirst: 583 SPELL_AURA_APPLIED_DOSE in 5 logs, 706621 Insatiable: 56 applies in 4 logs, 706663 Insatiable: 35 applies in 4 logs; coabuildhub spells_master_index.json 92112 matches verbatim."
+    },
+    {
+      "spell": 92112,
+      "name": "Thirst (stacks cap at 10 after 12 health-cost casts)",
+      "kind": "metric_delta",
+      "variant": "thirst_stack_cap",
+      "label_suffix": "thirst_stack_cap",
+      "quote": "@s:706613:0@",
+      "trigger_spell": 572907,
+      "gate_spell": 92112,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_wait_ms": 1600,
+      "target": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706621,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706663,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706613
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Quote hangs under @s:706613:0@ (92112 embeds 706613: 'Stacks $u times.'). $u = 10 (Spell.dbc 706613 StackAmount 10; AscensionCustomResourceData.h:56 max 10). 12 consecutive casts of Sanguine Rupture 572907 yield 0 stacks before learning 92112 and cap at exactly 10 stacks after (excludes 11/12). Reference search 2026-11-26: coa-history (186 logs) 92112: 0 (passive), 706613 Thirst: 583 SPELL_AURA_APPLIED_DOSE in 5 logs, 706621 Insatiable: 56 applies in 4 logs, 706663 Insatiable: 35 applies in 4 logs; coabuildhub spells_master_index.json 92112 matches verbatim."
+    },
+    {
+      "spell": 561179,
+      "name": "Keleseth's Calamity (Requires Mortal Form: allowed in Mortal Form, refused in Blood Curse)",
+      "kind": "metric_delta",
+      "variant": "mortal_form_gate",
+      "label_suffix": "mortal_form_gate",
+      "quote": "Requires Mortal Form",
+      "trigger_spell": 561179,
+      "gate_spell": 561179,
+      "gate_timing": "start",
+      "setup_only_after": true,
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 500,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 561179
+      },
+      "before_expected": 0,
+      "expected": 22,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6500,
+      "observe_source": "561179 ExcludeCasterAuraSpell 802877 (AscensionPooledVitality.h:36-40). Control (before): in Mortal Form, 561179 cast starts cleanly (cast_failure 0). Treatment (after): real Blood Curse 562720 cast applies 802877 Cursed Form marker, refusing 561179 with SPELL_FAILED_CASTER_AURASTATE (22). Reference search 2026-11-26: coa-history (186 logs) 561179 Keleseth's Calamity: 838 SPELL_DAMAGE hits (255 crits, 822-6247) in 3 logs; installed Spell.dbc and pending_db_world/rev_1790836202740415940.sql govern."
+    },
+    {
+      "spell": 561179,
+      "name": "Keleseth's Calamity (area Shadow damage at 0 SP: 622-714)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Bend blood in an area, dealing ${$m1+0+$sps*0.69} Shadow damage to enemies.",
+      "trigger_spell": 561179,
+      "gate_spell": 561179,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "area_dummies": [
+        5
+      ],
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 0,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 561179,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 668,
+      "after_at_least": 622,
+      "after_at_most": 715,
+      "wait_ms": 6600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 561179,
+              "target": "area1"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Area spell (radius 8 yd) also strikes area1 at 5 yd (2 yd from primary dummy)."
+          }
+        ]
+      },
+      "observe_source": "Tooltip formula ${$m1+0+$sps*0.69}: Spell.dbc 561179 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE SchoolMask 32 Shadow, BasePoints 607, DieSides 91, RealPointsPerLevel 7.95, BaseLevel 58 -> at level 60: 607 + int(2*7.95) + 1..91 = 623..713 at 0 SP (band [622, 715]). Cast time 6000 ms (wait_ms 6600); 823764 spellpen, 16255 -100% crit. Paired with damage_sp. Reference search 2026-11-26: coa-history (186 logs) 561179 Keleseth's Calamity: 838 SPELL_DAMAGE hits (255 crits, 822-6247) in 3 logs; installed Spell.dbc and pending_db_world/rev_1790836202740415940.sql govern."
+    },
+    {
+      "spell": 561179,
+      "name": "Keleseth's Calamity (area Shadow damage at +20000 SP: 14422-14515)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Bend blood in an area, dealing ${$m1+0+$sps*0.69} Shadow damage to enemies.",
+      "trigger_spell": 561179,
+      "gate_spell": 561179,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 561179,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 14468,
+      "after_at_least": 14422,
+      "after_at_most": 14515,
+      "wait_ms": 6600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP scaling arm for ${$m1+0+$sps*0.69} (pending_db_world/rev_1790836202740415940.sql spell_bonus_data 560249 direct_bonus=0.69): 623..713 + 20000 * 0.69 (13800) = 14423..14513 (band [14422, 14515], proves 0.69 Shadow SP coeff). Reference search 2026-11-26: coa-history (186 logs) 561179 Keleseth's Calamity: 838 SPELL_DAMAGE hits (255 crits, 822-6247) in 3 logs; installed Spell.dbc and pending_db_world/rev_1790836202740415940.sql govern."
+    },
+    {
+      "spell": 561179,
+      "name": "Keleseth's Calamity (5 Thirst stacks reduce cast time below 4200 ms vs 6000 ms at 0)",
+      "kind": "metric_delta",
+      "variant": "thirst_cast_time_5",
+      "label_suffix": "thirst_cast_time_5",
+      "quote": "Each stack of Thirst reduces the cast time of this ability and increases its damage.",
+      "trigger_spell": 561179,
+      "gate_spell": 92112,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 4200,
+      "game_time": {
+        "after": [
+          4100,
+          4400
+        ]
+      },
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "Direction-only monotone cast-time reduction (Sun Cleric D-106; server observation 300796 e2 -7%/stack -> 6000 ms at 0 stacks, 3900 ms at 5 stacks, 2220 ms at 9 stacks). At wait_ms 4200 (game_time.after [4100, 4400] ms): 0 Thirst stacks still casting (1), 5 real earned Thirst stacks finished (0). Paired with thirst_cast_time_9 (5 vs 9 stacks). Reference search 2026-11-26: coa-history (186 logs) 561179 Keleseth's Calamity: 838 SPELL_DAMAGE hits (255 crits, 822-6247) in 3 logs; installed Spell.dbc and pending_db_world/rev_1790836202740415940.sql govern."
+    },
+    {
+      "spell": 561179,
+      "name": "Keleseth's Calamity (9 Thirst stacks reduce cast time further below 2600 ms vs 5 stacks)",
+      "kind": "metric_delta",
+      "variant": "thirst_cast_time_9",
+      "label_suffix": "thirst_cast_time_9",
+      "quote": "Each stack of Thirst reduces the cast time of this ability and increases its damage.",
+      "trigger_spell": 561179,
+      "gate_spell": 92112,
+      "gate_timing": "start",
+      "setup_only_after": true,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          5,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2600,
+      "game_time": {
+        "after": [
+          2500,
+          2800
+        ]
+      },
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for cast-time reduction (Sun Cleric D-106): before phase runs at 5 real earned Thirst stacks (still casting 1 at game_time.after [2500, 2800] ms, 3900 ms cast); after phase adds 4 more stacks to 9 via precondition fixture 706613 x9 (finished 0 by 2600 ms, 2220 ms cast). Together with thirst_cast_time_5 proves 0 > 5 > 9 strictly decreasing cast time. Reference search 2026-11-26: coa-history (186 logs) 561179 Keleseth's Calamity: 838 SPELL_DAMAGE hits (255 crits, 822-6247) in 3 logs; installed Spell.dbc and pending_db_world/rev_1790836202740415940.sql govern."
+    },
+    {
+      "spell": 561179,
+      "name": "Keleseth's Calamity (5 Thirst stacks strictly increase damage vs 0 stacks)",
+      "kind": "metric_delta",
+      "variant": "thirst_damage_5",
+      "label_suffix": "thirst_damage_5",
+      "quote": "Each stack of Thirst reduces the cast time of this ability and increases its damage.",
+      "trigger_spell": 561179,
+      "gate_spell": 92112,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 561179,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 14468,
+      "expected": 21700,
+      "after_at_least": 15000,
+      "after_at_most": 35000,
+      "tolerance": 60,
+      "wait_ms": 6600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Direction-only monotone damage increase (Sun Cleric D-106; server observation 706613 e1 +10%/stack -> 1.5x at 5 stacks). At +20000 SP (823764 spellpen, 16255 -100% crit): 0 Thirst stacks deals 14423..14513 (before_expected 14468 +- 60); 5 real earned Thirst stacks strictly exceeds 15000 (after_at_least 15000, no figure asserted). Paired with thirst_damage_9. Reference search 2026-11-26: coa-history (186 logs) 561179 Keleseth's Calamity: 838 SPELL_DAMAGE hits (255 crits, 822-6247) in 3 logs; installed Spell.dbc and pending_db_world/rev_1790836202740415940.sql govern."
+    },
+    {
+      "spell": 561179,
+      "name": "Keleseth's Calamity (9 Thirst stacks strictly increase damage vs 5 stacks)",
+      "kind": "metric_delta",
+      "variant": "thirst_damage_9",
+      "label_suffix": "thirst_damage_9",
+      "quote": "Each stack of Thirst reduces the cast time of this ability and increases its damage.",
+      "trigger_spell": 561179,
+      "gate_spell": 92112,
+      "gate_timing": "start",
+      "setup_only_after": true,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          706613,
+          5,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 561179,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 21700,
+      "expected": 27489,
+      "after_at_least": 23000,
+      "after_at_most": 45000,
+      "tolerance": 200,
+      "wait_ms": 4600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for damage increase (Sun Cleric D-106): 5 real Thirst stacks deal ~21700; 9 stacks (706613 x9 precondition fixture) strictly exceed 23000 (direction-only, proving 0 < 5 < 9). Reference search 2026-11-26: coa-history (186 logs) 561179 Keleseth's Calamity: 838 SPELL_DAMAGE hits (255 crits, 822-6247) in 3 logs; installed Spell.dbc and pending_db_world/rev_1790836202740415940.sql govern."
+    },
+    {
+      "spell": 572795,
+      "name": "Valanar's Vengeance (Requires Mortal Form: allowed in Mortal Form, refused in Blood Curse)",
+      "kind": "metric_delta",
+      "variant": "mortal_form_gate",
+      "label_suffix": "mortal_form_gate",
+      "quote": "Requires Mortal Form",
+      "trigger_spell": 572795,
+      "gate_spell": 572795,
+      "gate_timing": "start",
+      "setup_only_after": true,
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 500,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 572795
+      },
+      "before_expected": 0,
+      "expected": 22,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6500,
+      "observe_source": "572795 ExcludeCasterAuraSpell 802877 (AscensionPooledVitality.h:36-40). Allowed in Mortal Form (0); refused with SPELL_FAILED_CASTER_AURASTATE (22) after real Blood Curse 562720 cast. Reference search 2026-11-26: coa-history (186 logs) 572795 Valanar's Vengeance: 68 SPELL_CAST_START in 4 logs; installed Spell.dbc and pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql govern."
+    },
+    {
+      "spell": 572795,
+      "name": "Valanar's Vengeance (Shadow damage at 0 SP: 912-1035)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Launch a powerful blood bolt at an enemy, dealing ${$m1+$sp*1.2775} Shadow damage.",
+      "trigger_spell": 572795,
+      "gate_spell": 572795,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 0,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572795,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 973,
+      "after_at_least": 912,
+      "after_at_most": 1035,
+      "wait_ms": 7000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip formula ${$m1+$sp*1.2775}: Spell.dbc 572795 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE SchoolMask 32 Shadow, BasePoints 888, DieSides 122, RealPointsPerLevel 6.0, BaseLevel 56 -> at level 60: 888 + 4*6 + 1..122 = 913..1034 at 0 SP (band [912, 1035]). 6000 ms cast + 333 ms flight at 10 yd (wait_ms 7000); 823764 spellpen, 16255 -100% crit. Paired with damage_sp. Reference search 2026-11-26: coa-history (186 logs) 572795 Valanar's Vengeance: 68 SPELL_CAST_START in 4 logs; installed Spell.dbc and pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql govern."
+    },
+    {
+      "spell": 572795,
+      "name": "Valanar's Vengeance (Shadow damage at +20000 SP: 26462-26585)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Launch a powerful blood bolt at an enemy, dealing ${$m1+$sp*1.2775} Shadow damage.",
+      "trigger_spell": 572795,
+      "gate_spell": 572795,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572795,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 26523,
+      "after_at_least": 26462,
+      "after_at_most": 26585,
+      "wait_ms": 7000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP scaling arm for ${$m1+$sp*1.2775} (pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql spell_bonus_data 560315 direct_bonus=1.2775): 913..1034 + 20000*1.2775 (25550) = 26463..26584 (band [26462, 26585]). Reference search 2026-11-26: coa-history (186 logs) 572795 Valanar's Vengeance: 68 SPELL_CAST_START in 4 logs; installed Spell.dbc and pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql govern."
+    },
+    {
+      "spell": 572795,
+      "name": "Valanar's Vengeance (5 Thirst stacks reduce cast time below 4200 ms vs 6000 ms at 0)",
+      "kind": "metric_delta",
+      "variant": "thirst_cast_time_5",
+      "label_suffix": "thirst_cast_time_5",
+      "quote": "Each stack of Thirst reduces the cast time of this ability and increases its damage.",
+      "trigger_spell": 572795,
+      "gate_spell": 92112,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 4200,
+      "game_time": {
+        "after": [
+          4100,
+          4400
+        ]
+      },
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "Direction-only monotone cast-time reduction (Sun Cleric D-106; server observation 300796 e2 -7%/stack -> 6000 ms at 0 stacks, 3900 ms at 5 stacks, 2220 ms at 9 stacks). At game_time.after [4100, 4400] ms: 0 stacks still casting (1), 5 real stacks finished (0). Paired with thirst_cast_time_9. Reference search 2026-11-26: coa-history (186 logs) 572795 Valanar's Vengeance: 68 SPELL_CAST_START in 4 logs; installed Spell.dbc and pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql govern."
+    },
+    {
+      "spell": 572795,
+      "name": "Valanar's Vengeance (9 Thirst stacks reduce cast time further below 2600 ms vs 5 stacks)",
+      "kind": "metric_delta",
+      "variant": "thirst_cast_time_9",
+      "label_suffix": "thirst_cast_time_9",
+      "quote": "Each stack of Thirst reduces the cast time of this ability and increases its damage.",
+      "trigger_spell": 572795,
+      "gate_spell": 92112,
+      "gate_timing": "start",
+      "setup_only_after": true,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          5,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2600,
+      "game_time": {
+        "after": [
+          2500,
+          2800
+        ]
+      },
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for cast-time reduction (Sun Cleric D-106): 5 real Thirst stacks still casting (1) at game_time.after [2500, 2800] ms; 9 stacks (706613 x9 precondition fixture) finished (0). Reference search 2026-11-26: coa-history (186 logs) 572795 Valanar's Vengeance: 68 SPELL_CAST_START in 4 logs; installed Spell.dbc and pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql govern."
+    },
+    {
+      "spell": 572795,
+      "name": "Valanar's Vengeance (5 Thirst stacks strictly increase damage vs 0 stacks)",
+      "kind": "metric_delta",
+      "variant": "thirst_damage_5",
+      "label_suffix": "thirst_damage_5",
+      "quote": "Each stack of Thirst reduces the cast time of this ability and increases its damage.",
+      "trigger_spell": 572795,
+      "gate_spell": 92112,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572795,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 26523,
+      "expected": 39785,
+      "after_at_least": 27500,
+      "after_at_most": 65000,
+      "tolerance": 70,
+      "wait_ms": 7000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Direction-only monotone damage increase (Sun Cleric D-106; server observation 706613 e1 +10%/stack): at +20000 SP, 0 Thirst stacks deal 26463..26584 (before_expected 26523 +- 70); 5 real Thirst stacks strictly exceed 27500. Paired with thirst_damage_9. Reference search 2026-11-26: coa-history (186 logs) 572795 Valanar's Vengeance: 68 SPELL_CAST_START in 4 logs; installed Spell.dbc and pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql govern."
+    },
+    {
+      "spell": 572795,
+      "name": "Valanar's Vengeance (9 Thirst stacks strictly increase damage vs 5 stacks)",
+      "kind": "metric_delta",
+      "variant": "thirst_damage_9",
+      "label_suffix": "thirst_damage_9",
+      "quote": "Each stack of Thirst reduces the cast time of this ability and increases its damage.",
+      "trigger_spell": 572795,
+      "gate_spell": 92112,
+      "gate_timing": "start",
+      "setup_only_after": true,
+      "setup_casts": [
+        572907,
+        572907,
+        572907,
+        572907
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          706613,
+          5,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572795,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 39785,
+      "expected": 50394,
+      "after_at_least": 42000,
+      "after_at_most": 80000,
+      "tolerance": 250,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for damage increase (Sun Cleric D-106): 5 real Thirst stacks deal ~39785; 9 stacks (706613 x9 precondition fixture) strictly exceed 42000 (proving 0 < 5 < 9). Reference search 2026-11-26: coa-history (186 logs) 572795 Valanar's Vengeance: 68 SPELL_CAST_START in 4 logs; installed Spell.dbc and pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql govern."
+    },
+    {
+      "spell": 578305,
+      "name": "Bloodbolt (Shadow damage at reference stats: 375-387)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Hurl a bolt of blood at an enemy, dealing ${$m1+0+$sps*0.45+$AP*0.2} Shadow damage, healing you equal to the damage dealt.",
+      "trigger_spell": 578305,
+      "gate_spell": 578305,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "player_spell_power": 0,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 381,
+      "after_at_least": 374,
+      "after_at_most": 388,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip formula ${$m1+0+$sps*0.45+$AP*0.2}: Spell.dbc 578305 Effect[0] SPELL_EFFECT_HEALTH_LEECH SchoolMask 32 Shadow, BasePoints 330, DieSides 12, BaseLevel 60 -> 331..342 + AP 223*0.2 (44.6) + 0 SP = 375..387 (band [374, 388]). wait_ms 1500 covers 333 ms flight at 10 yd. Paired with damage_sp, damage_ap, leech_equal. Reference search 2026-11-26: coa-history (186 logs) 578305 Bloodbolt: 3764 SPELL_DAMAGE hits (1465 crits, mean 1371) in 17 logs; installed Spell.dbc and pending_db_world/rev_20260930_30_bloodmage_issue_batch.sql govern."
+    },
+    {
+      "spell": 578305,
+      "name": "Bloodbolt (Shadow damage at +20000 SP: 9374-9388)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Hurl a bolt of blood at an enemy, dealing ${$m1+0+$sps*0.45+$AP*0.2} Shadow damage, healing you equal to the damage dealt.",
+      "trigger_spell": 578305,
+      "gate_spell": 578305,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 9381,
+      "after_at_least": 9374,
+      "after_at_most": 9388,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP arm for ${$m1+0+$sps*0.45+$AP*0.2} (rev_20260930_30_bloodmage_issue_batch.sql 804685 direct_bonus=0.45): 375..387 + 20000*0.45 (9000) = 9375..9387 (band [9374, 9388]). Reference search 2026-11-26: coa-history (186 logs) 578305 Bloodbolt: 3764 SPELL_DAMAGE hits (1465 crits, mean 1371) in 17 logs; installed Spell.dbc and pending_db_world/rev_20260930_30_bloodmage_issue_batch.sql govern."
+    },
+    {
+      "spell": 578305,
+      "name": "Bloodbolt (Shadow damage at +10000 AP: 2374-2388)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Hurl a bolt of blood at an enemy, dealing ${$m1+0+$sps*0.45+$AP*0.2} Shadow damage, healing you equal to the damage dealt.",
+      "trigger_spell": 578305,
+      "gate_spell": 578305,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "player_attack_power": 10000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 2381,
+      "after_at_least": 2374,
+      "after_at_most": 2388,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AP arm for ${$m1+0+$sps*0.45+$AP*0.2} (rev_20260930_30_bloodmage_issue_batch.sql 804685 ap_bonus=0.2): 375..387 + 10000*0.2 (2000) = 2375..2387 (band [2374, 2388]). Reference search 2026-11-26: coa-history (186 logs) 578305 Bloodbolt: 3764 SPELL_DAMAGE hits (1465 crits, mean 1371) in 17 logs; installed Spell.dbc and pending_db_world/rev_20260930_30_bloodmage_issue_batch.sql govern."
+    },
+    {
+      "spell": 578305,
+      "name": "Bloodbolt (heals caster equal to 100% of damage dealt)",
+      "kind": "metric_delta",
+      "variant": "leech_equal",
+      "label_suffix": "leech_equal",
+      "quote": "Hurl a bolt of blood at an enemy, dealing ${$m1+0+$sps*0.45+$AP*0.2} Shadow damage, healing you equal to the damage dealt.",
+      "trigger_spell": 578305,
+      "gate_spell": 578305,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 578305,
+        "target": "caster"
+      },
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 578305,
+          "target": "dummy"
+        },
+        "ratio": 1.0,
+        "tolerance": 0.005,
+        "least": 1000,
+        "source": "Spell.dbc 578305 Effect[0] SPELL_EFFECT_HEALTH_LEECH EffectValueMultiplier[0] 1.0 heals caster equal to 100% of damage dealt."
+      },
+      "before_expected": 0,
+      "expected": 9381,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 578305 Effect[0] SPELL_EFFECT_HEALTH_LEECH EffectValueMultiplier[0] 1.0 heals caster for 100% of damage dealt. same_arm_ratio spell_heal_total / spell_damage_total reads 1.000 +- 0.005 (excludes 0.0 and 2.0). Reference search 2026-11-26: coa-history (186 logs) 578305 Bloodbolt: 3764 SPELL_DAMAGE hits (1465 crits, mean 1371) in 17 logs; installed Spell.dbc and pending_db_world/rev_20260930_30_bloodmage_issue_batch.sql govern."
+    },
+    {
+      "spell": 578305,
+      "name": "Bloodbolt ($?s681078 Empowered deals +100% damage = 2.0x to initial target at 10 Pooled Vitality stacks)",
+      "kind": "metric_delta",
+      "variant": "empowered_damage",
+      "label_suffix": "empowered_damage",
+      "quote": "Empowered: Deals $681396s1% increased damage to the initial target struck.",
+      "trigger_spell": 578305,
+      "gate_spell": 681078,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          680687,
+          10,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 9370,
+      "expected": 18740,
+      "expected_ratio": 2.0,
+      "tolerance": 0.02,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$?s681078 Empowered ($681396s1 = 100%, Spell.dbc 681396 e0 bp 99+1; AscensionBloodmageVitality.cpp:229-230 doubles GetHitDamage() when GetHitUnit() == GetExplTargetUnit()). Precondition fixture 680687 Pooled Vitality x10 in both phases: before learning 681078 (false branch) Bloodbolt deals 1.0x (~9381 at +20000 SP); after learning 681078 (true branch) it consumes 10 stacks and deals 2.0x (~18762, ratio 2.00 +- 0.02, excludes 1.0x and 3.0x). Paired with empowered_no_stacks. Reference search 2026-11-26: coa-history (186 logs) 578305 Bloodbolt: 3764 SPELL_DAMAGE hits (1465 crits, mean 1371) in 17 logs; installed Spell.dbc and pending_db_world/rev_20260930_30_bloodmage_issue_batch.sql govern."
+    },
+    {
+      "spell": 578305,
+      "name": "Bloodbolt ($?s681078 unempowered at 0 Pooled Vitality stacks stays 1.0x)",
+      "kind": "metric_delta",
+      "variant": "empowered_no_stacks",
+      "label_suffix": "empowered_no_stacks",
+      "quote": "Empowered: Deals $681396s1% increased damage to the initial target struck.",
+      "trigger_spell": 578305,
+      "gate_spell": 681078,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          680687,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 9370,
+      "expected": 9370,
+      "expected_ratio": 1.0,
+      "tolerance": 0.02,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Zero-stack control for $?s681078 Empowered Bloodbolt: with 681078 learned and 0 stacks of 680687 Pooled Vitality, Bloodbolt damage ratio remains 1.00 +- 0.02 (unempowered). Reference search 2026-11-26: coa-history (186 logs) 578305 Bloodbolt: 3764 SPELL_DAMAGE hits (1465 crits, mean 1371) in 17 logs; installed Spell.dbc and pending_db_world/rev_20260930_30_bloodmage_issue_batch.sql govern."
+    },
+    {
+      "spell": 704641,
+      "name": "Blood Prince's Command (all 8 Bloodbolt hits crit on target with Taldaram's Torment)",
+      "kind": "metric_delta",
+      "variant": "torment_crits",
+      "label_suffix": "torment_crits",
+      "quote": "Your Bloodbolt is now guaranteed to critically strike on enemies affected by Taldaram's Torment.",
+      "trigger_spell": 578305,
+      "gate_spell": 704641,
+      "learn": [
+        578305,
+        802580
+      ],
+      "cast_in_before": false,
+      "setup_casts": [
+        802580,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 8,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "704641 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 12 SPELLMOD_EFFECT2 BasePoints 99+1 = +100 on EffectSpellClassMask[2] 2097152 = Taldaram's Torment 802580 Effect[1] aura 308 SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER masking Bloodbolt [0, 131072, 0] (Spell.dbc). Real cast of 802580 (15 s duration) followed by 8 Bloodbolt 578305 casts at 1600 ms intervals (12.8 s < 15 s) with 823764 spellpen: all 8/8 hits critical (natural ~5% crit -> P(8/8 by chance) ~ 4e-11). Paired with torment_no_plain, no_torment_plain, no_talent_plain. Reference search 2026-11-26: coa-history (186 logs) 704641: 0 (passive; positive control 578305 Bloodbolt: 3764 hits); coabuildhub spells_master_index.json 704641 matches verbatim."
+    },
+    {
+      "spell": 704641,
+      "name": "Blood Prince's Command (0 plain Bloodbolt hits on target with Taldaram's Torment)",
+      "kind": "metric_delta",
+      "variant": "torment_no_plain",
+      "label_suffix": "torment_no_plain",
+      "quote": "Your Bloodbolt is now guaranteed to critically strike on enemies affected by Taldaram's Torment.",
+      "trigger_spell": 578305,
+      "gate_spell": 704641,
+      "learn": [
+        578305,
+        802580
+      ],
+      "cast_in_before": false,
+      "setup_casts": [
+        802580,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Zero non-crit companion to torment_crits for 704641 Blood Prince's Command: 0 plain hits across 8 Bloodbolt casts while 802580 Taldaram's Torment is active on the dummy. Reference search 2026-11-26: coa-history (186 logs) 704641: 0 (passive; positive control 578305 Bloodbolt: 3764 hits); coabuildhub spells_master_index.json 704641 matches verbatim."
+    },
+    {
+      "spell": 704641,
+      "name": "Blood Prince's Command (plain Bloodbolt hits occur without Taldaram's Torment)",
+      "kind": "metric_delta",
+      "variant": "no_torment_plain",
+      "label_suffix": "no_torment_plain",
+      "quote": "Your Bloodbolt is now guaranteed to critically strike on enemies affected by Taldaram's Torment.",
+      "trigger_spell": 578305,
+      "gate_spell": 704641,
+      "learn": [
+        578305
+      ],
+      "cast_in_before": false,
+      "setup_casts": [
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "after_at_most": 8,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Condition control for 704641: with 704641 learned but NO Taldaram's Torment on dummy, 8 Bloodbolt casts produce >= 1 plain hit (natural ~5% crit -> P(0 plain hits) ~ 4e-11). Reference search 2026-11-26: coa-history (186 logs) 704641: 0 (passive; positive control 578305 Bloodbolt: 3764 hits); coabuildhub spells_master_index.json 704641 matches verbatim."
+    },
+    {
+      "spell": 704641,
+      "name": "Blood Prince's Command (plain Bloodbolt hits occur on Torment target without talent)",
+      "kind": "metric_delta",
+      "variant": "no_talent_plain",
+      "label_suffix": "no_talent_plain",
+      "quote": "Your Bloodbolt is now guaranteed to critically strike on enemies affected by Taldaram's Torment.",
+      "trigger_spell": 578305,
+      "gate_spell": 504296,
+      "learn": [
+        578305,
+        802580
+      ],
+      "cast_in_before": false,
+      "setup_casts": [
+        802580,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "after_at_most": 8,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Talent control for 704641: with 802580 Taldaram's Torment on dummy and unrelated gate 504296 (704641 unlearned), 8 Bloodbolt casts produce >= 1 plain hit (natural ~5% crit -> P(0 plain hits) ~ 4e-11). Reference search 2026-11-26: coa-history (186 logs) 704641: 0 (passive; positive control 578305 Bloodbolt: 3764 hits); coabuildhub spells_master_index.json 704641 matches verbatim."
+    },
+    {
+      "spell": 807544,
+      "name": "The Cup Runneth Over (+20% SP scaling on Bloodmoon Blast at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "bloodmoon_sp",
+      "label_suffix": "bloodmoon_sp",
+      "quote": "Increases the spell power scaling of Bloodmoon Blast, Taldaram's Torment and Bloodbolt by $s1%.",
+      "trigger_spell": 501614,
+      "gate_spell": 807544,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501614,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 9830,
+      "expected": 11695,
+      "expected_gain": 1865,
+      "tolerance": 70,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 20% (Spell.dbc 807544 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 24 SPELLMOD_BONUS_MULTIPLIER BasePoints 19+1 = +20%, mask[1] 139264 = Bloodmoon Blast 8192 | Bloodbolt 131072). Bloodmoon Blast 501614 direct_bonus 0.466229 (rev_20260930_30_bloodmage_issue_batch.sql): at +20000 SP, SP term rises from 9324.6 to 11189.5 (+1865 +- 70, excluding 0 and +3730). Paired with bloodmoon_zero_sp and bloodbolt_sp. Reference search 2026-11-26: coa-history (186 logs) 807544: 0 (passive); coabuildhub spells_master_index.json 807544 matches verbatim."
+    },
+    {
+      "spell": 807544,
+      "name": "The Cup Runneth Over (0 SP control on Bloodmoon Blast: base damage unchanged)",
+      "kind": "metric_delta",
+      "variant": "bloodmoon_zero_sp",
+      "label_suffix": "bloodmoon_zero_sp",
+      "quote": "Increases the spell power scaling of Bloodmoon Blast, Taldaram's Torment and Bloodbolt by $s1%.",
+      "trigger_spell": 501614,
+      "gate_spell": 807544,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 0,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501614,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 500,
+      "expected": 500,
+      "expected_gain": 0,
+      "tolerance": 60,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Zero-SP control for 807544 on Bloodmoon Blast 501614: at 0 SP, base damage (513..568) gain is 0 +- 60, proving 807544 modifies spell power scaling rather than flat/overall spell damage. Reference search 2026-11-26: coa-history (186 logs) 807544: 0 (passive); coabuildhub spells_master_index.json 807544 matches verbatim."
+    },
+    {
+      "spell": 807544,
+      "name": "The Cup Runneth Over (+20% SP scaling on Bloodbolt at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "bloodbolt_sp",
+      "label_suffix": "bloodbolt_sp",
+      "quote": "Increases the spell power scaling of Bloodmoon Blast, Taldaram's Torment and Bloodbolt by $s1%.",
+      "trigger_spell": 578305,
+      "gate_spell": 807544,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 9370,
+      "expected": 11170,
+      "expected_gain": 1800,
+      "tolerance": 25,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Bloodbolt 578305 arm for 807544 Effect[0] (+20% SPELLMOD_BONUS_MULTIPLIER): direct_bonus 0.45 at +20000 SP gives +9000 SP bonus before 807544 and +10800 after (gain +1800 +- 25, excluding 0 and +3600). Reference search 2026-11-26: coa-history (186 logs) 807544: 0 (passive); coabuildhub spells_master_index.json 807544 matches verbatim."
+    },
+    {
+      "spell": 807544,
+      "name": "The Cup Runneth Over (+20% SP scaling on Taldaram's Torment DoT at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "torment_sp",
+      "label_suffix": "torment_sp",
+      "quote": "Increases the spell power scaling of Bloodmoon Blast, Taldaram's Torment and Bloodbolt by $s1%.",
+      "trigger_spell": 802580,
+      "gate_spell": 807544,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 802580,
+        "target": "dummy",
+        "periodic": true
+      },
+      "phase_since": true,
+      "before_expected": 20865,
+      "expected": 24865,
+      "expected_gain": 4000,
+      "tolerance": 200,
+      "wait_ms": 16000,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 20% (Spell.dbc 807544 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 40 SPELLMOD_SP_DOT_COEFFICIENT BasePoints 19+1 = +20%, mask[2] 2097152 = Taldaram's Torment 802580; Unit.cpp:9773). Taldaram's Torment 802580 (15 s, 5 ticks every 3 s) at +20000 SP with 823764 spellpen and 16255 -100% crit: measures +20% periodic SP scaling gain. Reference search 2026-11-26: coa-history (186 logs) 807544: 0 (passive); coabuildhub spells_master_index.json 807544 matches verbatim."
+    },
+    {
+      "spell": 561195,
+      "name": "Cursed Ground (Sanguine Rupture still casting at 1850 ms, excluding -10% = 1800 ms)",
+      "kind": "metric_delta",
+      "variant": "cast_held",
+      "label_suffix": "cast_held",
+      "quote": "Increases the cast time of Sanguine Rupture by $/1000;S1 sec,",
+      "trigger_spell": 572907,
+      "gate_spell": 561195,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1850,
+      "game_time": {
+        "after": [
+          1810,
+          1980
+        ]
+      },
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "$/1000;S1 = 2000 ms (Spell.dbc 561195 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 10 SPELLMOD_CASTING_TIME BasePoints 1999+1 = +2000 ms, mask[2] 2147483648 = Sanguine Rupture 572907 instant -> 2000 ms). At wait_ms 1850 (game_time.after [1810, 1980] ms, > 1800 ms = -10%): 0 before learning 561195 (instant), 1 after (still casting). Paired with cast_ended. Reference search 2026-11-26: coa-history (186 logs) 561195: 0 (passive), 561303 Cursed Ground: 888 SPELL_PERIODIC_DAMAGE ticks in 1 log; coabuildhub spells_master_index.json 561195 matches (lists 352 vs installed DBC 348)."
+    },
+    {
+      "spell": 561195,
+      "name": "Cursed Ground (Sanguine Rupture finishes by 2050 ms, excluding +10% = 2200 ms)",
+      "kind": "metric_delta",
+      "variant": "cast_ended",
+      "label_suffix": "cast_ended",
+      "quote": "Increases the cast time of Sanguine Rupture by $/1000;S1 sec,",
+      "trigger_spell": 572907,
+      "gate_spell": 561195,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2050,
+      "game_time": {
+        "after": [
+          2010,
+          2180
+        ]
+      },
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "Upper cast-time bracket for 561195 (+2000 ms on Sanguine Rupture 572907): casting reads 0 by game_time.after [2010, 2180] ms (< 2200 ms = +10%). Together with cast_held brackets +2000 ms inside [1810, 2180] ms. Reference search 2026-11-26: coa-history (186 logs) 561195: 0 (passive), 561303 Cursed Ground: 888 SPELL_PERIODIC_DAMAGE ticks in 1 log; coabuildhub spells_master_index.json 561195 matches (lists 352 vs installed DBC 348)."
+    },
+    {
+      "spell": 561195,
+      "name": "Cursed Ground (4 enemies hit do NOT trigger 561303 bleed)",
+      "kind": "metric_delta",
+      "variant": "bleed_four_control",
+      "label_suffix": "bleed_four_control",
+      "quote": "but now when you strike at least 5 enemies it causes them to bleed out,",
+      "trigger_spell": 572907,
+      "gate_spell": 561195,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5
+      ],
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 561303,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800775,
+              "target": "area3"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "All 4 dummies (primary + area1..area3 inside 8 yd radius) are struck by Sanguine Rupture 572907 -> 800775."
+          }
+        ]
+      },
+      "observe_source": "Threshold control (4 enemies < 5) for 561195 Cursed Ground (AscensionBloodmageTalents.cpp:665-680 SanguineRuptureMinimumTargets=5; rev_1790196256508614451.sql): 1 primary + 3 area_dummies inside 8 yd radius all take Sanguine Rupture 572907 damage, yet 561303 bleed is NOT applied (0 before and 0 after learning 561195). Paired with bleed_five_applies. Reference search 2026-11-26: coa-history (186 logs) 561195: 0 (passive), 561303 Cursed Ground: 888 SPELL_PERIODIC_DAMAGE ticks in 1 log; coabuildhub spells_master_index.json 561195 matches (lists 352 vs installed DBC 348)."
+    },
+    {
+      "spell": 561195,
+      "name": "Cursed Ground (5 enemies hit trigger 561303 bleed when 561195 is learned)",
+      "kind": "metric_delta",
+      "variant": "bleed_five_applies",
+      "label_suffix": "bleed_five_applies",
+      "quote": "but now when you strike at least 5 enemies it causes them to bleed out,",
+      "trigger_spell": 572907,
+      "gate_spell": 561195,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0
+      ],
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 561303,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "Threshold treatment (5 enemies >= 5) for 561195 Cursed Ground: 1 primary + 4 area_dummies inside 8 yd radius. Without 561195: 561303 bleed absent (0); with 561195 learned: 561303 bleed applied (1) on dummy after the 2000 ms cast. Paired with bleed_four_control. Reference search 2026-11-26: coa-history (186 logs) 561195: 0 (passive), 561303 Cursed Ground: 888 SPELL_PERIODIC_DAMAGE ticks in 1 log; coabuildhub spells_master_index.json 561195 matches (lists 352 vs installed DBC 348)."
+    },
+    {
+      "spell": 561195,
+      "name": "Cursed Ground (561303 bleed deals $561303o1 = 348 Shadow damage over 2 s)",
+      "kind": "metric_delta",
+      "variant": "bleed_damage",
+      "label_suffix": "bleed_damage",
+      "quote": "dealing an additional $561303o1 Shadow damage over $561303d.",
+      "trigger_spell": 572907,
+      "gate_spell": 561195,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0
+      ],
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 0,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 561303,
+        "target": "dummy",
+        "periodic": true
+      },
+      "before_expected": 0,
+      "expected": 348,
+      "tolerance": 4,
+      "wait_ms": 4800,
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "$561303o1 = 348 Shadow damage (Spell.dbc 561303 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE SchoolMask 32 Shadow, BasePoints 86 + DieSides 1 = 87/tick, Amplitude 500 ms, DurationIndex 39 = 2000 ms -> 4 ticks = 348; BaseLevel 16, MaxLevel 0, RealPointsPerLevel 1.02; under owner ruling O-37 borrowed $561303o1 without ppl follows displayed tooltip 348). SMSG_PERIODICAURALOG omits schoolMask in CoAGameplayTest.cpp:1442-1458, so fields uses periodic: true without school_mask. 0 before learning 561195; expects 348 +- 4 at 0 SP after (wait_ms 4800 covers 2000 ms cast + 2000 ms DoT + margin). Reference search 2026-11-26: coa-history (186 logs) 561195: 0 (passive), 561303 Cursed Ground: 888 SPELL_PERIODIC_DAMAGE ticks in 1 log; coabuildhub spells_master_index.json 561195 matches (lists 352 vs installed DBC 348)."
+    },
+    {
+      "spell": 561195,
+      "name": "Cursed Ground (561303 bleed lasts 2000 ms bracketed within +-10%)",
+      "kind": "metric_delta",
+      "variant": "bleed_duration",
+      "label_suffix": "bleed_duration",
+      "quote": "dealing an additional $561303o1 Shadow damage over $561303d.",
+      "trigger_spell": 572907,
+      "gate_spell": 561195,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0
+      ],
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 561303,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 3850,
+      "expiry_wait_ms": 250,
+      "game_time": {
+        "after": [
+          3810,
+          3980
+        ],
+        "expired": [
+          4020,
+          4190
+        ]
+      },
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$561303d = 2000 ms (Spell.dbc 561303 DurationIndex 39 = 2000 ms, applied after 2000 ms Sanguine Rupture cast). On dummy among 5 enemies: 0 before cast, held (1) at game_time.after [3810, 3980] ms (> 2000 + 1800 = 3800 ms), and gone (0) at game_time.expired [4020, 4190] ms (< 2000 + 2200 = 4200 ms), excluding 10% off 2000 ms on both sides. Reference search 2026-11-26: coa-history (186 logs) 561195: 0 (passive), 561303 Cursed Ground: 888 SPELL_PERIODIC_DAMAGE ticks in 1 log; coabuildhub spells_master_index.json 561195 matches (lists 352 vs installed DBC 348)."
+    },
+    {
+      "spell": 504085,
+      "name": "Sanguine Mend (Requires Mortal Form: allowed in Mortal Form, refused in Blood Curse)",
+      "kind": "metric_delta",
+      "variant": "mortal_form_gate",
+      "label_suffix": "mortal_form_gate",
+      "quote": "Requires Mortal Form",
+      "trigger_spell": 504085,
+      "gate_spell": 504085,
+      "gate_timing": "start",
+      "setup_only_after": true,
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 500,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504085
+      },
+      "before_expected": 0,
+      "expected": 22,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 3000,
+      "observe_source": "504085 ExcludeCasterAuraSpell 802877 (AscensionPooledVitality.h:36-40). Allowed in Mortal Form (0); refused with SPELL_FAILED_CASTER_AURASTATE (22) after real Blood Curse 562720 cast. Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
+    },
+    {
+      "spell": 504085,
+      "name": "Sanguine Mend (ally heal at reference stats: 1043-1097)",
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "quote": "Mend an ally's wounds, healing them for ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58}.",
+      "trigger_spell": 504085,
+      "gate_spell": 504085,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "ally_arm": {
+        "allies": 1
+      },
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "player_spell_power": 0,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 504085,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1070,
+      "after_at_least": 1043,
+      "after_at_most": 1097,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip formula ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58}: Spell.dbc 504085 Effect[0] SPELL_EFFECT_HEAL BasePoints 944, DieSides 52, RealPointsPerLevel 6.64, BaseLevel 56 -> at level 60: 944 + int(4*6.64) + 1..52 = 971..1022 + SPI 114*0.25 (28.5, AscensionBloodmageVitality.cpp:120-121) + AP 223*0.2 (44.6) + 0 SP = 1044..1096 (band [1043, 1097]). 2500 ms cast (wait_ms 3000). Paired with heal_sp, heal_ap, heal_spirit. Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
+    },
+    {
+      "spell": 504085,
+      "name": "Sanguine Mend (ally heal at +20000 SP: 12643-12697)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "Mend an ally's wounds, healing them for ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58}.",
+      "trigger_spell": 504085,
+      "gate_spell": 504085,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "ally_arm": {
+        "allies": 1
+      },
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 504085,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 12670,
+      "after_at_least": 12643,
+      "after_at_most": 12697,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP scaling arm for ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58} (rev_20261010_91_bloodmage_coefficients.sql 802310 direct_bonus=0.58): 1044..1096 + 20000*0.58 (11600) = 12644..12696 (band [12643, 12697]). Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
+    },
+    {
+      "spell": 504085,
+      "name": "Sanguine Mend (ally heal at +10000 AP: 3043-3097)",
+      "kind": "metric_delta",
+      "variant": "heal_ap",
+      "label_suffix": "heal_ap",
+      "quote": "Mend an ally's wounds, healing them for ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58}.",
+      "trigger_spell": 504085,
+      "gate_spell": 504085,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "ally_arm": {
+        "allies": 1
+      },
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "player_attack_power": 10000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 504085,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 3070,
+      "after_at_least": 3043,
+      "after_at_most": 3097,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AP scaling arm for ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58} (rev_20261010_91_bloodmage_coefficients.sql 802310 ap_bonus=0.2): 1044..1096 + 10000*0.2 (2000) = 3044..3096 (band [3043, 3097]). Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
+    },
+    {
+      "spell": 504085,
+      "name": "Sanguine Mend (ally heal at +300 Spirit: 1118-1172)",
+      "kind": "metric_delta",
+      "variant": "heal_spirit",
+      "label_suffix": "heal_spirit",
+      "quote": "Mend an ally's wounds, healing them for ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58}.",
+      "trigger_spell": 504085,
+      "gate_spell": 504085,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "ally_arm": {
+        "allies": 1
+      },
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "phase_auras": [
+        [
+          60235,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 504085,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1145,
+      "after_at_least": 1118,
+      "after_at_most": 1172,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spirit scaling arm for ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58} (AscensionBloodmageVitality.cpp:120-121 bonus = SPI * 0.25): precondition fixture 60235 Greatness (+300 Spirit) adds +75 healing: 1044..1096 + 75 = 1119..1171 (band [1118, 1172], disjoint from base [1043, 1097]). Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
+    },
+    {
+      "spell": 504085,
+      "name": "Sanguine Mend ($?s681078 Empowered becomes instant cast at 10 Pooled Vitality stacks)",
+      "kind": "metric_delta",
+      "variant": "empowered_instant",
+      "label_suffix": "empowered_instant",
+      "quote": "Empowered: Becomes instant cast and heals yourself for $680033s1% of the heal value.",
+      "trigger_spell": 504085,
+      "gate_spell": 681078,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "phase_auras": [
+        [
+          680687,
+          10,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "game_time": {
+        "after": [
+          450,
+          700
+        ]
+      },
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 504085,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "At 500 ms: unempowered 2500 ms cast has not landed (0), finishes during expire_ms (1), then Empowered instant cast lands immediately (2)."
+          }
+        ]
+      },
+      "observe_source": "$?s681078 Empowered instant cast (AscensionBloodmageTalents.cpp:1677-1689 copies 680033 Effect[1] -100% cast time onto 524899 Empowered Indicator when 681078 is learned and 680687 Pooled Vitality has 10 stacks). At wait_ms 500 (game_time.after [450, 700] ms): before learning 681078, still casting (1) with 0 heals landed; after learning 681078, finished (0) with 1 heal landed. Paired with empowered_instant_no_stacks. Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
+    },
+    {
+      "spell": 504085,
+      "name": "Sanguine Mend ($?s681078 unempowered at 0 Pooled Vitality stacks stays 2500 ms cast)",
+      "kind": "metric_delta",
+      "variant": "empowered_instant_no_stacks",
+      "label_suffix": "empowered_instant_no_stacks",
+      "quote": "Empowered: Becomes instant cast and heals yourself for $680033s1% of the heal value.",
+      "trigger_spell": 504085,
+      "gate_spell": 681078,
+      "target": "ally",
+      "ally_arm": {
+        "allies": 1
+      },
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "phase_auras": [
+        [
+          680687,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "game_time": {
+        "after": [
+          450,
+          700
+        ]
+      },
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "Zero-stack control for $?s681078 Empowered instant cast: with 681078 learned and 0 stacks of 680687, Sanguine Mend 504085 remains a 2500 ms cast (still casting 1 at game_time.after [450, 700] ms). Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
+    },
+    {
+      "spell": 504085,
+      "name": "Sanguine Mend ($?s681078 Empowered self-heals caster for 50% of heal value via 681032)",
+      "kind": "metric_delta",
+      "variant": "empowered_self_heal",
+      "label_suffix": "empowered_self_heal",
+      "quote": "Empowered: Becomes instant cast and heals yourself for $680033s1% of the heal value.",
+      "trigger_spell": 504085,
+      "gate_spell": 681078,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "caster_health": [
+        1000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "player_spell_power": 0,
+      "phase_auras": [
+        [
+          680687,
+          10,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681032,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_heal_total",
+        "fields": {
+          "spell": 504085,
+          "target": "caster"
+        },
+        "increments": true
+      },
+      "before_expected": 0.0,
+      "expected": 0.5,
+      "tolerance": 0.005,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$680033s1 = 50% (Spell.dbc 680033 Effect[0] BasePoints 49+1 = 50; AscensionBloodmageVitality.cpp:84-95 casts 681032 self-heal for effective healing / 2 via Spell.cpp:2874 m_healing = gain). Caster injured to 1000/10000 HP (regen off, 0 SP -> 504085 heals 1044..1096 with 0 overheal) with precondition fixture 680687 x10 and 16255 -100% crit: ratio_to_metric (681032 / 504085, increments) reads 0.000 before learning 681078 and 0.500 +- 0.005 after (excludes 0.0 and 1.0). Paired with empowered_self_heal_no_stacks. Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
+    },
+    {
+      "spell": 504085,
+      "name": "Sanguine Mend ($?s681078 unempowered at 0 stacks casts 0 self-heal 681032)",
+      "kind": "metric_delta",
+      "variant": "empowered_self_heal_no_stacks",
+      "label_suffix": "empowered_self_heal_no_stacks",
+      "quote": "Empowered: Becomes instant cast and heals yourself for $680033s1% of the heal value.",
+      "trigger_spell": 504085,
+      "gate_spell": 681078,
+      "target": "ally",
+      "ally_arm": {
+        "allies": 1
+      },
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "phase_auras": [
+        [
+          680687,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681032,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Zero-stack control for $?s681078 Empowered self-heal: with 681078 learned and 0 stacks of 680687, Sanguine Mend 504085 triggers 0 casts of 681032 self-heal. Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
+    },
+    {
+      "spell": 680730,
+      "name": "Dissipation R1 (Fleshcraft cooldown reduced by 60 s: 300 s -> 240 s)",
+      "kind": "cost_gate",
+      "variant": "fleshcraft_cd",
+      "label_suffix": "fleshcraft_cd",
+      "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
+      "gated_spell": 801952,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "caster",
+      "cast_power": 1000,
+      "margin_ms": 1000,
+      "observe_source": "$/1000;s1 = 60 s (Spell.dbc 680730 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN BasePoints -60001+1 = -60000 ms, mask[0] 8388608 = Fleshcraft 801952 RecoveryTime 300000 ms -> 240000 ms). Arms timed from priming cast: 241 s without 680730 (refused 67), 241 s with 680730 (succeeds 0), 239 s with 680730 (refused 67), bracketing 240 s inside [239 s, 241 s] (excluding 10% off 60 s = 234 s / 246 s). Reference search 2026-11-26: coa-history (186 logs) 680730: 0 (passive); coabuildhub spells_master_index.json 680730 matches verbatim."
+    },
+    {
+      "spell": 680730,
+      "name": "Dissipation R1 (Sated 532125 unlearned vs learned at 122 s)",
+      "kind": "metric_delta",
+      "variant": "sated_contrast",
+      "label_suffix": "sated_contrast",
+      "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
+      "trigger_spell": 532125,
+      "gate_spell": 680730,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          532125,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 532125,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 122000,
+      "game_time": {
+        "after": [
+          121000,
+          125000
+        ]
+      },
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$/1000;s1 = 60 s (Spell.dbc 680730 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 1 SPELLMOD_DURATION BasePoints -60001+1 = -60000 ms, mask[1] 64 = Sated 532125 DurationIndex 25 = 180000 ms -> 120000 ms). Sated 532125 cast directly on caster: at wait_ms 122000 (game_time.after [121000, 125000] ms < 126000 ms = 180-54 s), control without 680730 reads 1 (still active out of 180 s) while treatment with 680730 reads 0 (expired at 120 s). Paired with sated_duration. Reference search 2026-11-26: coa-history (186 logs) 680730: 0 (passive); coabuildhub spells_master_index.json 680730 matches verbatim."
+    },
+    {
+      "spell": 680730,
+      "name": "Dissipation R1 (Sated 532125 lasts 120 s bracketed within +-10% of 60 s cut)",
+      "kind": "metric_delta",
+      "variant": "sated_duration",
+      "label_suffix": "sated_duration",
+      "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
+      "trigger_spell": 532125,
+      "gate_spell": 680730,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 532125,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 118000,
+      "expiry_wait_ms": 4000,
+      "game_time": {
+        "after": [
+          116000,
+          119500
+        ],
+        "expired": [
+          120500,
+          124500
+        ]
+      },
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Duration bracket for 680730 Effect[1] (-60 s on Sated 532125 180 s -> 120 s): 0 before cast, held (1) at game_time.after [116000, 119500] ms (> 114000 ms = 180-66 s), gone (0) at game_time.expired [120500, 124500] ms (< 126000 ms = 180-54 s). Paired with sated_contrast. Reference search 2026-11-26: coa-history (186 logs) 680730: 0 (passive); coabuildhub spells_master_index.json 680730 matches verbatim."
+    },
+    {
+      "spell": 681491,
+      "name": "Dissipation R2 (Fleshcraft cooldown reduced by 120 s: 300 s -> 180 s)",
+      "kind": "cost_gate",
+      "variant": "fleshcraft_cd",
+      "label_suffix": "fleshcraft_cd",
+      "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
+      "gated_spell": 801952,
+      "resource": "cooldown",
+      "reduction": 120000,
+      "target": "caster",
+      "cast_power": 1000,
+      "margin_ms": 1000,
+      "observe_source": "$/1000;s1 = 120 s (Spell.dbc 681491 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN BasePoints -120001+1 = -120000 ms, mask[0] 8388608 = Fleshcraft 801952 RecoveryTime 300000 ms -> 180000 ms). Arms timed from priming cast: 181 s without 681491 (refused 67), 181 s with 681491 (succeeds 0), 179 s with 681491 (refused 67), bracketing 180 s inside [179 s, 181 s] (excluding 10% off 120 s = 168 s / 192 s). Reference search 2026-11-26: coa-history (186 logs) 681491: 0 (passive, Rank 2 of 680730); installed Spell.dbc governs."
+    },
+    {
+      "spell": 681491,
+      "name": "Dissipation R2 (Sated 532125 unlearned vs learned at 62 s)",
+      "kind": "metric_delta",
+      "variant": "sated_contrast",
+      "label_suffix": "sated_contrast",
+      "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
+      "trigger_spell": 532125,
+      "gate_spell": 681491,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          532125,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 532125,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 62000,
+      "game_time": {
+        "after": [
+          61000,
+          65000
+        ]
+      },
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$/1000;s1 = 120 s (Spell.dbc 681491 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 1 SPELLMOD_DURATION BasePoints -120001+1 = -120000 ms, mask[1] 64 = Sated 532125 180 s -> 60 s). At wait_ms 62000 (game_time.after [61000, 65000] ms < 72000 ms = 180-108 s), control without 681491 reads 1 while treatment with 681491 reads 0. Paired with sated_duration. Reference search 2026-11-26: coa-history (186 logs) 681491: 0 (passive, Rank 2 of 680730); installed Spell.dbc governs."
+    },
+    {
+      "spell": 681491,
+      "name": "Dissipation R2 (Sated 532125 lasts 60 s bracketed within +-10% of 120 s cut)",
+      "kind": "metric_delta",
+      "variant": "sated_duration",
+      "label_suffix": "sated_duration",
+      "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
+      "trigger_spell": 532125,
+      "gate_spell": 681491,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 532125,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 58000,
+      "expiry_wait_ms": 4000,
+      "game_time": {
+        "after": [
+          56000,
+          59500
+        ],
+        "expired": [
+          60500,
+          64500
+        ]
+      },
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Duration bracket for 681491 Effect[1] (-120 s on Sated 532125 180 s -> 60 s): 0 before cast, held (1) at game_time.after [56000, 59500] ms (> 48000 ms = 180-132 s), gone (0) at game_time.expired [60500, 64500] ms (< 72000 ms = 180-108 s). Paired with sated_contrast. Reference search 2026-11-26: coa-history (186 logs) 681491: 0 (passive, Rank 2 of 680730); installed Spell.dbc governs."
+    },
+    {
+      "spell": 704633,
+      "name": "Flesh Foundry (5 crits cut Fleshcraft 300 s CD by 20 s: still refused at 278.5 s)",
+      "kind": "metric_delta",
+      "variant": "fleshcraft_cd_held",
+      "label_suffix": "fleshcraft_cd_held",
+      "quote": "Your critical strikes now reduce the cooldown of Fleshcraft and the duration of Sated on the target by $/1000;504253s1 sec.",
+      "trigger_spell": 501614,
+      "gate_spell": 704633,
+      "learn": [
+        801952,
+        92112
+      ],
+      "target": "dummy",
+      "dummy_distance": 5,
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "disable_regeneration": true,
+      "caster_health": [
+        30000,
+        30000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        801952
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_trigger_casts": [
+        {
+          "spell": 501614,
+          "target": "dummy",
+          "delay_ms": 2500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 501614,
+          "target": "dummy",
+          "delay_ms": 2500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 501614,
+          "target": "dummy",
+          "delay_ms": 2500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 501614,
+          "target": "dummy",
+          "delay_ms": 2500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 801952,
+          "target": "caster",
+          "delay_ms": 266900,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 801952
+      },
+      "before_expected": 67,
+      "expected": 67,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 501614,
+              "target": "dummy",
+              "critical": true
+            },
+            "before_expected": 5,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "Exactly 5 forced Bloodmoon Blast 501614 crits land in control (5) and 5 in treatment (cumulative 10)."
+          }
+        ]
+      },
+      "observe_source": "$/1000;504253s1 = 4 s per crit (Spell.dbc 704633 Effect[0] aura 42 -> 504253 Effect 165 BasePoints -4001+1 = -4000 ms MiscValue 801952; rev_20260920_50_bloodmage_crit_procs.sql:55 spell_proc 69908). Fleshcraft 801952 RecoveryTime 300000 ms (cost 500 Rage; Thirst 92112 learned so the 5 Bloodmoon Blast 501614 casts natively generate 750 Rage >= 500 for the 2nd 801952 cast); 5 forced Bloodmoon Blast 501614 crits (verified via ally_arm) cut 20 s to 280 s (10% off 20 s is [278 s, 282 s]). Attempting 2nd 801952 at 278.5 s (1600 + 10000 + 266900 = 278500 ms > 278000 ms) is refused with SPELL_FAILED_NOT_READY (67) in both phases, excluding cuts >= 22 s. Paired with fleshcraft_cd_ready. Reference search 2026-11-26: coa-history (186 logs) 704633/504253/504412: 0 (passive/procs); coabuildhub spells_master_index.json 704633 matches verbatim."
+    },
+    {
+      "spell": 704633,
+      "name": "Flesh Foundry (5 crits cut Fleshcraft 300 s CD by 20 s: succeeds at 281.5 s)",
+      "kind": "metric_delta",
+      "variant": "fleshcraft_cd_ready",
+      "label_suffix": "fleshcraft_cd_ready",
+      "quote": "Your critical strikes now reduce the cooldown of Fleshcraft and the duration of Sated on the target by $/1000;504253s1 sec.",
+      "trigger_spell": 501614,
+      "gate_spell": 704633,
+      "learn": [
+        801952,
+        92112
+      ],
+      "target": "dummy",
+      "dummy_distance": 5,
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "disable_regeneration": true,
+      "caster_health": [
+        30000,
+        30000
+      ],
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        801952
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_trigger_casts": [
+        {
+          "spell": 501614,
+          "target": "dummy",
+          "delay_ms": 2500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 501614,
+          "target": "dummy",
+          "delay_ms": 2500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 501614,
+          "target": "dummy",
+          "delay_ms": 2500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 501614,
+          "target": "dummy",
+          "delay_ms": 2500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 801952,
+          "target": "caster",
+          "delay_ms": 269900,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 801952
+      },
+      "before_expected": 67,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 501614,
+              "target": "dummy",
+              "critical": true
+            },
+            "before_expected": 5,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "Exactly 5 forced Bloodmoon Blast 501614 crits land in control (5) and 5 in treatment (cumulative 10)."
+          }
+        ]
+      },
+      "observe_source": "Upper bracket for 704633 Flesh Foundry on Fleshcraft 801952 (300 s - 5 x 4 s = 280 s; Thirst 92112 learned so the 5 Bloodmoon Blast 501614 casts natively generate 750 Rage >= 500 for the 2nd 801952 cast): attempting 2nd 801952 at 281.5 s (1600 + 10000 + 269900 = 281500 ms < 282000 ms) is refused (67) without 704633 and succeeds (0) with 704633 learned, bracketing the 20 s reduction inside [278.5 s, 281.5 s]. Paired with fleshcraft_cd_held. Reference search 2026-11-26: coa-history (186 logs) 704633/504253/504412: 0 (passive/procs); coabuildhub spells_master_index.json 704633 matches verbatim."
+    },
+    {
+      "spell": 704633,
+      "name": "Flesh Foundry (5 healing crits on Sated target cut Sated 180 s duration by 20 s: expired by 161.5 s)",
+      "kind": "metric_delta",
+      "variant": "sated_cut_on_heal_crit",
+      "label_suffix": "sated_cut_on_heal_crit",
+      "quote": "Your critical strikes now reduce the cooldown of Fleshcraft and the duration of Sated on the target by $/1000;504253s1 sec.",
+      "trigger_spell": 532125,
+      "gate_spell": 704633,
+      "learn": [
+        504085
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "disable_regeneration": true,
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          532125,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 504085,
+          "target": "caster",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 504085,
+          "target": "caster",
+          "delay_ms": 3000,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 504085,
+          "target": "caster",
+          "delay_ms": 3000,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 504085,
+          "target": "caster",
+          "delay_ms": 3000,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 504085,
+          "target": "caster",
+          "delay_ms": 3000,
+          "in_before": true,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 532125,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 147900,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 504085,
+              "target": "caster",
+              "critical": true
+            },
+            "before_expected": 5,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "5 forced Sanguine Mend 504085 healing crits on the Sated caster in control (5) and 5 in treatment (cumulative 10)."
+          }
+        ]
+      },
+      "observe_source": "$/1000;504253s1 = 4 s per crit on Sated 532125 (Spell.dbc 704633 Effect[2] aura 42 -> 504412 Effect 177 BasePoints -4001+1 = -4000 ms, MiscValue 532125, TargetA 21 TARGET_UNIT_TARGET_ALLY). Sated 532125 (180 s) cast on caster (friendly self-target; cast_power 1000 covers 5 x 200-Rage Sanguine Mend casts), followed by 5 forced Sanguine Mend 504085 healing crits on caster (5 x -4 s = -20 s -> 160 s; 10% off 20 s is [158 s, 162 s]). Read at 161.5 s (1600 + 12000 + 147900 = 161500 ms): control without 704633 expects 1 (180 s), treatment expects 0 (expired at 160 s). Reference search 2026-11-26: coa-history (186 logs) 704633/504253/504412: 0 (passive/procs); coabuildhub spells_master_index.json 704633 matches verbatim."
+    },
+    {
+      "spell": 704633,
+      "name": "Flesh Foundry (critical strike rating +15% of base Spirit 114 -> +17)",
+      "kind": "metric_delta",
+      "variant": "crit_rating_base",
+      "label_suffix": "crit_rating_base",
+      "quote": "In addition, increases your critical strike rating by $s2% of your Spirit.",
+      "trigger_spell": 60234,
+      "gate_spell": 704633,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 10
+      },
+      "before_expected": 0,
+      "expected": 17,
+      "expected_gain": 17,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s2 = 15% of Spirit (Spell.dbc 704633 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT MiscValue 1792 = CR_CRIT_MELEE|RANGED|SPELL, MiscValueB 4 STAT_SPIRIT, BasePoints 14+1 = 15%). Reference Bloodmage Spirit = 114 (bloodmage.json): int32(CalculatePct(114, 15)) = int32(17.1) = +17 spell crit rating (rating 10, 0 -> 17, tol 0). Trigger 60234 (+300 Int) does not change Spirit. Paired with crit_rating_spirit (+300 Spirit -> +62). Reference search 2026-11-26: coa-history (186 logs) 704633/504253/504412: 0 (passive/procs); coabuildhub spells_master_index.json 704633 matches verbatim."
+    },
+    {
+      "spell": 704633,
+      "name": "Flesh Foundry (critical strike rating +15% of Spirit 423 with +300 Spirit -> +63)",
+      "kind": "metric_delta",
+      "variant": "crit_rating_spirit",
+      "label_suffix": "crit_rating_spirit",
+      "quote": "In addition, increases your critical strike rating by $s2% of your Spirit.",
+      "trigger_spell": 60234,
+      "gate_spell": 704633,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          60235,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "stat",
+            "fields": {
+              "stat": 4
+            },
+            "before_expected": 423,
+            "expected": 423,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Reference Human Bloodmage Spirit 114 (includes +3% The Human Spirit racial) plus fixture 60235 Greatness (+300 Spirit * 1.03 = +309) equals 423 in both phases."
+          }
+        ]
+      },
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 10
+      },
+      "before_expected": 0,
+      "expected": 63,
+      "expected_gain": 63,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "High-Spirit arm for 704633 Effect[1] (15% of Spirit -> CR_CRIT_SPELL): precondition fixture 60235 Greatness (+300 Spirit, verified by stat 4 = 423 including Human +3% racial in both phases) gives int32(CalculatePct(423, 15)) = int32(63.45) = +63 spell crit rating (0 -> 63, tol 0, excludes 0, +17 flat, +126 double, and +-10% off 15%). Paired with crit_rating_base. Reference search 2026-11-26: coa-history (186 logs) 704633/504253/504412: 0 (passive/procs); coabuildhub spells_master_index.json 704633 matches verbatim."
     }
   ],
   "player_observations": [],

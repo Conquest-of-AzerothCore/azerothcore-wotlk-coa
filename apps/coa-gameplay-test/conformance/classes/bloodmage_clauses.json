@@ -9,14 +9,17 @@
   {
     "spell": 92112,
     "clause": "Spells that cost health now grant Thirst.",
-    "labels": [],
+    "labels": [
+      "92112 behaviour_metric_delta health_cost_grants_thirst",
+      "92112 behaviour_metric_delta rage_cost_no_thirst"
+    ],
     "kind": "claim"
   },
   {
     "spell": 92112,
     "clause": "Reaching $706613u stacks makes you Insatiable,",
     "labels": [
-      "92112 max_stacks 706613 #0"
+      "92112 behaviour_metric_delta insatiable_at_ten"
     ],
     "kind": "claim"
   },
@@ -27,13 +30,14 @@
       {
         "claim": "reducing your damage dealt by $706663s1%",
         "labels": [
-          "92112 effect_value 706663e0 #1"
+          "92112 behaviour_metric_delta insatiable_damage_reduction"
         ]
       },
       {
         "claim": "every $706621t1 sec until Thirst ends.",
         "labels": [
-          "92112 aura_amplitude_ms #2"
+          "92112 behaviour_metric_delta insatiable_period_before",
+          "92112 behaviour_metric_delta insatiable_period_and_end"
         ]
       }
     ],
@@ -43,7 +47,7 @@
     "spell": 92112,
     "clause": "Generates $/10;681202s1 Rage",
     "labels": [
-      "92112 effect_value 681202e0 #3"
+      "92112 behaviour_metric_delta thirst_rage"
     ],
     "kind": "claim"
   },
@@ -54,12 +58,14 @@
       {
         "claim": "and then increases the health costs of your spells by $s1%",
         "labels": [
-          "92112 effect_value 706613e0 #4"
+          "92112 behaviour_metric_delta thirst_health_cost"
         ]
       },
       {
         "claim": "$?s504252[, your critical strike chance by $504252s1%][]",
-        "labels": []
+        "labels": [
+          "92112 behaviour_metric_delta thirst_reckless_abandon_crit"
+        ]
       }
     ],
     "kind": "claim"
@@ -68,7 +74,7 @@
     "spell": 92112,
     "clause": "and increases their damage by $s3%.",
     "labels": [
-      "92112 effect_value 706613e2 #5"
+      "92112 behaviour_metric_delta thirst_spell_damage"
     ],
     "kind": "claim"
   },
@@ -76,7 +82,7 @@
     "spell": 92112,
     "clause": "Stacks $u times.",
     "labels": [
-      "92112 max_stacks 706613 #6"
+      "92112 behaviour_metric_delta thirst_stack_cap"
     ],
     "kind": "claim"
   },
@@ -1614,7 +1620,7 @@
     "spell": 561179,
     "clause": "$?a802877[][]Requires Mortal Form",
     "labels": [
-      "561179 effect_value #1"
+      "561179 behaviour_metric_delta mortal_form_gate"
     ],
     "kind": "claim"
   },
@@ -1622,14 +1628,20 @@
     "spell": 561179,
     "clause": "Bend blood in an area, dealing ${$m1+0+$sps*0.69} Shadow damage to enemies.",
     "labels": [
-      "561179 effect_value e0 #0"
+      "561179 behaviour_metric_delta damage_base",
+      "561179 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim"
   },
   {
     "spell": 561179,
     "clause": "Each stack of Thirst reduces the cast time of this ability and increases its damage.",
-    "labels": [],
+    "labels": [
+      "561179 behaviour_metric_delta thirst_cast_time_5",
+      "561179 behaviour_metric_delta thirst_cast_time_9",
+      "561179 behaviour_metric_delta thirst_damage_5",
+      "561179 behaviour_metric_delta thirst_damage_9"
+    ],
     "kind": "claim"
   },
   {
@@ -1744,7 +1756,7 @@
     "spell": 572795,
     "clause": "$?a802877[][]Requires Mortal Form",
     "labels": [
-      "572795 effect_value #1"
+      "572795 behaviour_metric_delta mortal_form_gate"
     ],
     "kind": "claim"
   },
@@ -1752,14 +1764,20 @@
     "spell": 572795,
     "clause": "Launch a powerful blood bolt at an enemy, dealing ${$m1+$sp*1.2775} Shadow damage.",
     "labels": [
-      "572795 effect_value e0 #0"
+      "572795 behaviour_metric_delta damage_base",
+      "572795 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim"
   },
   {
     "spell": 572795,
     "clause": "Each stack of Thirst reduces the cast time of this ability and increases its damage.",
-    "labels": [],
+    "labels": [
+      "572795 behaviour_metric_delta thirst_cast_time_5",
+      "572795 behaviour_metric_delta thirst_cast_time_9",
+      "572795 behaviour_metric_delta thirst_damage_5",
+      "572795 behaviour_metric_delta thirst_damage_9"
+    ],
     "kind": "claim"
   },
   {
@@ -1796,14 +1814,18 @@
     "spell": 561195,
     "clause": "Increases the cast time of Sanguine Rupture by $/1000;S1 sec,",
     "labels": [
-      "561195 effect_value e0 #0"
+      "561195 behaviour_metric_delta cast_held",
+      "561195 behaviour_metric_delta cast_ended"
     ],
     "kind": "claim"
   },
   {
     "spell": 561195,
     "clause": "but now when you strike at least 5 enemies it causes them to bleed out,",
-    "labels": [],
+    "labels": [
+      "561195 behaviour_metric_delta bleed_four_control",
+      "561195 behaviour_metric_delta bleed_five_applies"
+    ],
     "kind": "claim"
   },
   {
@@ -1813,13 +1835,13 @@
       {
         "claim": "dealing an additional $561303o1 Shadow damage",
         "labels": [
-          "561195 effect_value #1"
+          "561195 behaviour_metric_delta bleed_damage"
         ]
       },
       {
         "claim": "over $561303d",
         "labels": [
-          "561195 spell_duration 561303 #2"
+          "561195 behaviour_metric_delta bleed_duration"
         ]
       }
     ],
@@ -2419,12 +2441,17 @@
       {
         "claim": "Reduces the cooldown of Fleshcraft by $/1000;s1 sec.",
         "labels": [
-          "680730 effect_value e0 #0"
+          "680730 cost_gate 801952 fleshcraft_cd without",
+          "680730 cost_gate 801952 fleshcraft_cd with",
+          "680730 cost_gate 801952 fleshcraft_cd beyond"
         ]
       },
       {
         "claim": "and reduces the duration of the Sated debuff by $/1000;s1 sec.",
-        "labels": []
+        "labels": [
+          "680730 behaviour_metric_delta sated_contrast",
+          "680730 behaviour_metric_delta sated_duration"
+        ]
       }
     ],
     "kind": "claim"
@@ -2798,12 +2825,17 @@
       {
         "claim": "Reduces the cooldown of Fleshcraft by $/1000;s1 sec.",
         "labels": [
-          "681491 effect_value e0 #0"
+          "681491 cost_gate 801952 fleshcraft_cd without",
+          "681491 cost_gate 801952 fleshcraft_cd with",
+          "681491 cost_gate 801952 fleshcraft_cd beyond"
         ]
       },
       {
         "claim": "and reduces the duration of the Sated debuff by $/1000;s1 sec.",
-        "labels": []
+        "labels": [
+          "681491 behaviour_metric_delta sated_contrast",
+          "681491 behaviour_metric_delta sated_duration"
+        ]
       }
     ],
     "kind": "claim"
@@ -3065,12 +3097,15 @@
       {
         "claim": "Your critical strikes now reduce the cooldown of Fleshcraft by $/1000;504253s1 sec.",
         "labels": [
-          "704633 effect_value 504253e0 #0"
+          "704633 behaviour_metric_delta fleshcraft_cd_held",
+          "704633 behaviour_metric_delta fleshcraft_cd_ready"
         ]
       },
       {
         "claim": "and reduce the duration of Sated on the target by $/1000;504253s1 sec.",
-        "labels": []
+        "labels": [
+          "704633 behaviour_metric_delta sated_cut_on_heal_crit"
+        ]
       }
     ],
     "kind": "claim"
@@ -3079,7 +3114,8 @@
     "spell": 704633,
     "clause": "In addition, increases your critical strike rating by $s2% of your Spirit.",
     "labels": [
-      "704633 effect_value e1 #1"
+      "704633 behaviour_metric_delta crit_rating_base",
+      "704633 behaviour_metric_delta crit_rating_spirit"
     ],
     "kind": "claim"
   },
@@ -3126,7 +3162,12 @@
   {
     "spell": 704641,
     "clause": "Your Bloodbolt is now guaranteed to critically strike on enemies affected by Taldaram's Torment.",
-    "labels": [],
+    "labels": [
+      "704641 behaviour_metric_delta torment_crits",
+      "704641 behaviour_metric_delta torment_no_plain",
+      "704641 behaviour_metric_delta no_torment_plain",
+      "704641 behaviour_metric_delta no_talent_plain"
+    ],
     "kind": "claim"
   },
   {
@@ -4425,7 +4466,7 @@
     "spell": 504085,
     "clause": "$?a802877[][]Requires Mortal Form",
     "labels": [
-      "504085 effect_value #1"
+      "504085 behaviour_metric_delta mortal_form_gate"
     ],
     "kind": "claim"
   },
@@ -4433,7 +4474,10 @@
     "spell": 504085,
     "clause": "Mend an ally's wounds, healing them for ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58}.",
     "labels": [
-      "504085 effect_value e0 #0"
+      "504085 behaviour_metric_delta heal_base",
+      "504085 behaviour_metric_delta heal_sp",
+      "504085 behaviour_metric_delta heal_ap",
+      "504085 behaviour_metric_delta heal_spirit"
     ],
     "kind": "claim"
   },
@@ -4443,11 +4487,17 @@
     "claims": [
       {
         "claim": "$?s681078[Empowered: Becomes instant cast][]",
-        "labels": []
+        "labels": [
+          "504085 behaviour_metric_delta empowered_instant",
+          "504085 behaviour_metric_delta empowered_instant_no_stacks"
+        ]
       },
       {
         "claim": "$?s681078[and heals yourself for $680033s1% of the heal value.][]",
-        "labels": []
+        "labels": [
+          "504085 behaviour_metric_delta empowered_self_heal",
+          "504085 behaviour_metric_delta empowered_self_heal_no_stacks"
+        ]
       }
     ],
     "kind": "claim"
@@ -4702,14 +4752,20 @@
     "spell": 578305,
     "clause": "Hurl a bolt of blood at an enemy, dealing ${$m1+0+$sps*0.45+$AP*0.2} Shadow damage, healing you equal to the damage dealt.",
     "labels": [
-      "578305 effect_value e0 #0"
+      "578305 behaviour_metric_delta damage_base",
+      "578305 behaviour_metric_delta damage_sp",
+      "578305 behaviour_metric_delta damage_ap",
+      "578305 behaviour_metric_delta leech_equal"
     ],
     "kind": "claim"
   },
   {
     "spell": 578305,
     "clause": "$?s681078[\r\n\r\nEmpowered: Deals $681396s1% increased damage to the initial target struck.][]",
-    "labels": [],
+    "labels": [
+      "578305 behaviour_metric_delta empowered_damage",
+      "578305 behaviour_metric_delta empowered_no_stacks"
+    ],
     "kind": "claim"
   },
   {
@@ -5415,12 +5471,16 @@
       {
         "claim": "Increases the spell power scaling of Bloodmoon Blast and Bloodbolt by $s1%.",
         "labels": [
-          "807544 effect_value e0 #0"
+          "807544 behaviour_metric_delta bloodmoon_sp",
+          "807544 behaviour_metric_delta bloodmoon_zero_sp",
+          "807544 behaviour_metric_delta bloodbolt_sp"
         ]
       },
       {
         "claim": "Increases the spell power scaling of Taldaram's Torment by $s1%.",
-        "labels": []
+        "labels": [
+          "807544 behaviour_metric_delta torment_sp"
+        ]
       }
     ],
     "kind": "claim"
