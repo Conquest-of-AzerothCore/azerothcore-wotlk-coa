@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Deadman's Signet at Alien Egg POI 2 uses pickup-scale ring model (#10126)",
+  "contract": "#10126 reported a giant gold ring at the Alien Egg (quest 4821) objective spot in Thousand Needles. Quest 4821 POI 2 (center -5610, -2080, map 37.4, 56.0) has no Alien Egg (175565) spawn in base AzerothCore (its two spawns 17196 and 17197 stand in POI 1); Deadman's Signet (entry 515510, guid 6941618) sits at (-5613.1, -2081.7, -62.819) inside Snake_Nest_002.m2 with displayId 63516 (JewelCraft_Ring03.mdx, 96.43x86.64x77.83 yd). Expected: guid 6941618 stays spawned and uses pickup-scale displayId 1015946 (jewelcraft_ring03.m2, 0.61x0.82x1.10 yd).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -5611.0,
+    "y": -2081.7,
+    "z": -64.4,
+    "o": 3.14
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: Deadman's Signet spawn 6941618 is active in POI 2",
+      "metric": "spawn_active",
+      "spawn": 6941618,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Deadman's Signet uses pickup-scale ring displayId 1015946 instead of giant 63516",
+      "metric": "spawn_display",
+      "spawn": 6941618,
+      "equals": 1015946
+    }
+  ]
+}
