@@ -423,12 +423,16 @@ void Refresh(Player* player)
     SetAmount(player, 680639, 1, int32(5 * player->GetStat(STAT_INTELLECT)));
     for (uint32 id : {803500, 803492, 807750, 807751, 807752, 807446, 805481, 805491, 681471})
         player->RemoveAurasDueToSpell(id);
-    bool replacement = player->IsAlive() && player->HasAura(803238) && player->HasSpell(Highest(player, 800231));
+    uint32 sunflare = Highest(player, 800231);
+    bool replacement = player->IsAlive() && player->HasAura(803238) && player->HasSpell(sunflare);
     if (replacement && !player->HasSpell(504764))
         player->learnSpellWithoutAnnouncement(504764);
     for (auto const& pair : player->GetSpellMap())
-        if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800231))
-            player->SetTemporarySpellReplacement(pair.first, replacement ? 504764 : 0);
+        if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800231) &&
+            (!replacement || pair.first != sunflare))
+            player->SetTemporarySpellReplacement(pair.first, 0);
+    if (replacement)
+        player->SetTemporarySpellReplacement(sunflare, 504764);
     if (!replacement && !player->HasAura(807059))
         player->removeSpell(504764, SPEC_MASK_ALL, true);
     bool conversion = player->IsAlive() && player->HasAura(Dawn) && player->HasSpell(DawnCast);
