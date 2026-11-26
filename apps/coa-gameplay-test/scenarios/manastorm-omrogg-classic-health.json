@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Manastorm Shattered Halls: Warbringer O'mrogg carries a Classic dungeon boss health budget",
+  "contract": [
+    "Segment 760 runs Warbringer O'mrogg (16809), an expansion-1 template with the captured HealthModifier 46.",
+    "At level 60 that was 229,034 base health, about seven times the 32,046 median of the level 56-62 Classic",
+    "dungeon bosses. Manastorm now rebases Burning Crusade dungeon creatures on the Classic base-health column and",
+    "removes the 37.95 / 11.5 boss modifier gap before depth scaling, so his base health is 42,543. With the solo",
+    "multipliers that put Marisa du'Paige between 70,000 and 110,000, the old budget lies above 120,000."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 760"
+    },
+    {
+      "action": "assert",
+      "label": "The player entered a private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "n",
+      "guid": 151179
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the preparation bubble at the boss clears its safety aura",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "O'mrogg's maximum health uses the Classic dungeon boss budget",
+      "actor": "n",
+      "metric": "nearby_creature_max_health",
+      "entry": 16809,
+      "within_ms": 5000,
+      "min": 15000,
+      "max": 60000
+    }
+  ]
+}

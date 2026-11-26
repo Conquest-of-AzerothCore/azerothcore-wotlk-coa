@@ -32,6 +32,7 @@
 #include "ManastormAffixEngine.h"
 #include "ManastormGreedyDemon.h"
 #include "ManastormVoiceOfMillhouse.h"
+#include "ManastormOutlandHealth.h"
 #include "ManastormSubstitutedObjectives.h"
 #include <algorithm>
 #include <cmath>
@@ -3372,6 +3373,30 @@ namespace
         return ManastormSubstitutedObjectives::Find(
             segment.NativeObjectiveCreatureEntry,
             segment.ObjectiveCreatureEntry);
+    }
+
+    bool IsTbcDungeon(
+        Map const* map)
+    {
+        return map &&
+            map->IsNonRaidDungeon() &&
+            map->GetEntry() &&
+            map->GetEntry()->Expansion() ==
+                EXPANSION_THE_BURNING_CRUSADE &&
+            map->GetId() != 269 &&
+            map->GetId() != 560;
+    }
+
+    double GetOutlandCreatureHealthRatio(
+        Creature const* creature,
+        ManastormRun const& run)
+    {
+        bool const isTbcDungeonObjective =
+            IsTbcDungeon(creature->FindMap()) &&
+            IsObjectiveBoss(creature, run) &&
+            creature->GetEntry() == run.GetSegment().ObjectiveCreatureEntry;
+
+        return ManastormOutlandHealth::Ratio(isTbcDungeonObjective);
     }
 
     void ApplySubstitutedObjectiveMana(
@@ -7072,6 +7097,18 @@ void ManastormMgr::ApplyCreatureHealthScaling(
                     normalizedMaxHealth,
                     GetRaidCreatureHealthRatio(
                         creature)));
+    }
+    else if (IsTbcDungeon(
+        creature->FindMap()))
+    {
+        normalizedMaxHealth =
+            std::max<uint32>(
+                1,
+                ScaleUnsignedValue(
+                    normalizedMaxHealth,
+                    GetOutlandCreatureHealthRatio(
+                        creature,
+                        run)));
     }
 
     double endlessMultiplier =
