@@ -4,7 +4,9 @@
 #include "ManastormRun.h"
 #include "SharedDefines.h"
 
+#include <atomic>
 #include <memory>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -104,6 +106,10 @@ public:
         Unit* attacker,
         Unit* victim,
         uint32& damage);
+    void OnHeal(
+        Unit* healer,
+        Unit* receiver,
+        uint32 gain);
     bool IsPlayerProtectedDuringTransition(Player const* player) const;
     bool HasPersonalLevelScaling(Map const* map, Player const* viewer);
 
@@ -120,9 +126,9 @@ public:
         uint32 damage,
         DamageEffectType damageType);
 
-    std::size_t GetActiveRunCount() const
+    std::size_t GetActiveRunCount() const noexcept
     {
-        return _runs.size();
+        return _activeRunCount.load(std::memory_order_relaxed);
     }
 
     bool ForceStageAffix(
@@ -250,8 +256,14 @@ private:
         ObjectGuid::LowType immediateMemberGuid = 0,
         bool transferAll = false);
 
+    ManastormRun* FindRunById(uint64 runId);
+    void RefreshRunCountersUnlocked() noexcept;
+
     uint64 _nextRunId = 1;
 
+    mutable std::shared_mutex _runsMutex;
+    std::atomic<std::size_t> _activeRunCount{ 0 };
+    std::atomic<std::size_t> _activeGroupRunCount{ 0 };
     std::unordered_map<uint64, std::unique_ptr<ManastormRun>> _runs;
     std::unordered_map<ObjectGuid::LowType, uint64> _memberRunIds;
     std::unordered_map<uint64, uint64> _stageRunIds;
