@@ -76,6 +76,14 @@ void Days()
     assert(Spare(4, 1) == 3);
     assert(Spare(1, 1) == 0);
     assert(Spare(1, 3) == 0);
+
+    assert(CanRepeatDaily(1, 1, true));
+    assert(!CanRepeatDaily(1, 1, false));
+    assert(!CanRepeatDaily(1, 2, true));
+    assert(CanRepeatDaily(2, 2, true));
+    assert(CanRepeatDaily(2, 1, false));
+    assert(!CanRepeatDaily(0, 1, true));
+    assert(!CanRepeatDaily(0, 0, false));
 }
 
 void Prices()

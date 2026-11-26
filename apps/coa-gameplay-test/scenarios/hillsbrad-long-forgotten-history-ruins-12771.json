@@ -1,0 +1,440 @@
+{
+  "schema": 1,
+  "name": "Long Forgotten History's relics lie in the troll ruin (#12771)",
+  "contract": "#12771: the six Troll Relics of quest 255122 (gameobjects 255065, 255069, 255070) and the Angered Spirits (255495) stood on the open hill north of the Hillsbrad troll ruin, outside the ruin the quest sends the player to. Expected: the relics and four spirits stand inside the ruin core, between its walls, on the vmap floor measured with point_ground_gap (5 yd grid, x 296-376, y -1436 to -1536), with no wall at their position and no overhang above them. The quest's objective area covers x 314-364, y -1450 to -1522.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 336.0,
+    "y": -1476.0,
+    "z": 43.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the Troll Relics are loaded in the ruin",
+      "metric": "nearby_gameobject_count",
+      "entry": 255065,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Troll Relic 9001624 stands in the ruin core",
+      "metric": "spawn_distance",
+      "guid": 9001624,
+      "spawn_type": "gameobject",
+      "x": 326,
+      "y": -1461,
+      "z": 42.35,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001624 rests on the ruin floor (-0.2 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "guid": 9001624,
+      "spawn_type": "gameobject",
+      "min": -0.2,
+      "max": 0.35
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001624 is not inside a ruin wall",
+      "metric": "spawn_clearance",
+      "guid": 9001624,
+      "spawn_type": "gameobject",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001624 has open sky above it",
+      "metric": "spawn_headroom",
+      "guid": 9001624,
+      "spawn_type": "gameobject",
+      "min": 3.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Troll Relic 9001625 stands in the ruin core",
+      "metric": "spawn_distance",
+      "guid": 9001625,
+      "spawn_type": "gameobject",
+      "x": 321,
+      "y": -1481,
+      "z": 43.01,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001625 rests on the ruin floor (-0.2 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "guid": 9001625,
+      "spawn_type": "gameobject",
+      "min": -0.2,
+      "max": 0.35
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001625 is not inside a ruin wall",
+      "metric": "spawn_clearance",
+      "guid": 9001625,
+      "spawn_type": "gameobject",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001625 has open sky above it",
+      "metric": "spawn_headroom",
+      "guid": 9001625,
+      "spawn_type": "gameobject",
+      "min": 3.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Troll Relic 9001626 stands in the ruin core",
+      "metric": "spawn_distance",
+      "guid": 9001626,
+      "spawn_type": "gameobject",
+      "x": 341,
+      "y": -1491,
+      "z": 44.03,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001626 rests on the ruin floor (-0.2 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "guid": 9001626,
+      "spawn_type": "gameobject",
+      "min": -0.2,
+      "max": 0.35
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001626 is not inside a ruin wall",
+      "metric": "spawn_clearance",
+      "guid": 9001626,
+      "spawn_type": "gameobject",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001626 has open sky above it",
+      "metric": "spawn_headroom",
+      "guid": 9001626,
+      "spawn_type": "gameobject",
+      "min": 3.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Troll Relic 9001627 stands in the ruin core",
+      "metric": "spawn_distance",
+      "guid": 9001627,
+      "spawn_type": "gameobject",
+      "x": 336,
+      "y": -1511,
+      "z": 56.45,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001627 rests on the ruin floor (-0.2 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "guid": 9001627,
+      "spawn_type": "gameobject",
+      "min": -0.2,
+      "max": 0.35
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001627 is not inside a ruin wall",
+      "metric": "spawn_clearance",
+      "guid": 9001627,
+      "spawn_type": "gameobject",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001627 has open sky above it",
+      "metric": "spawn_headroom",
+      "guid": 9001627,
+      "spawn_type": "gameobject",
+      "min": 3.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Troll Relic 9001628 stands in the ruin core",
+      "metric": "spawn_distance",
+      "guid": 9001628,
+      "spawn_type": "gameobject",
+      "x": 356,
+      "y": -1516,
+      "z": 57.11,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001628 rests on the ruin floor (-0.2 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "guid": 9001628,
+      "spawn_type": "gameobject",
+      "min": -0.2,
+      "max": 0.35
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001628 is not inside a ruin wall",
+      "metric": "spawn_clearance",
+      "guid": 9001628,
+      "spawn_type": "gameobject",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001628 has open sky above it",
+      "metric": "spawn_headroom",
+      "guid": 9001628,
+      "spawn_type": "gameobject",
+      "min": 3.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Troll Relic 9001629 stands in the ruin core",
+      "metric": "spawn_distance",
+      "guid": 9001629,
+      "spawn_type": "gameobject",
+      "x": 346,
+      "y": -1466,
+      "z": 42.62,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001629 rests on the ruin floor (-0.2 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "guid": 9001629,
+      "spawn_type": "gameobject",
+      "min": -0.2,
+      "max": 0.35
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001629 is not inside a ruin wall",
+      "metric": "spawn_clearance",
+      "guid": 9001629,
+      "spawn_type": "gameobject",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Troll Relic 9001629 has open sky above it",
+      "metric": "spawn_headroom",
+      "guid": 9001629,
+      "spawn_type": "gameobject",
+      "min": 3.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Angered Spirit 9950848 stands in the ruin core",
+      "metric": "spawn_distance",
+      "guid": 9950848,
+      "spawn_type": "creature",
+      "x": 336,
+      "y": -1471,
+      "z": 42.26,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950848 rests on the ruin floor (-0.2 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "guid": 9950848,
+      "spawn_type": "creature",
+      "min": -0.2,
+      "max": 0.35
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950848 is not inside a ruin wall",
+      "metric": "spawn_clearance",
+      "guid": 9950848,
+      "spawn_type": "creature",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950848 has open sky above it",
+      "metric": "spawn_headroom",
+      "guid": 9950848,
+      "spawn_type": "creature",
+      "min": 3.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Angered Spirit 9950849 stands in the ruin core",
+      "metric": "spawn_distance",
+      "guid": 9950849,
+      "spawn_type": "creature",
+      "x": 331,
+      "y": -1486,
+      "z": 43.11,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950849 rests on the ruin floor (-0.2 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "guid": 9950849,
+      "spawn_type": "creature",
+      "min": -0.2,
+      "max": 0.35
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950849 is not inside a ruin wall",
+      "metric": "spawn_clearance",
+      "guid": 9950849,
+      "spawn_type": "creature",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950849 has open sky above it",
+      "metric": "spawn_headroom",
+      "guid": 9950849,
+      "spawn_type": "creature",
+      "min": 3.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Angered Spirit 9950851 stands in the ruin core",
+      "metric": "spawn_distance",
+      "guid": 9950851,
+      "spawn_type": "creature",
+      "x": 331,
+      "y": -1516,
+      "z": 56.61,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950851 rests on the ruin floor (-0.2 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "guid": 9950851,
+      "spawn_type": "creature",
+      "min": -0.2,
+      "max": 0.35
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950851 is not inside a ruin wall",
+      "metric": "spawn_clearance",
+      "guid": 9950851,
+      "spawn_type": "creature",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950851 has open sky above it",
+      "metric": "spawn_headroom",
+      "guid": 9950851,
+      "spawn_type": "creature",
+      "min": 3.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Angered Spirit 9950854 stands in the ruin core",
+      "metric": "spawn_distance",
+      "guid": 9950854,
+      "spawn_type": "creature",
+      "x": 351,
+      "y": -1476,
+      "z": 42.57,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950854 rests on the ruin floor (-0.2 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "guid": 9950854,
+      "spawn_type": "creature",
+      "min": -0.2,
+      "max": 0.35
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950854 is not inside a ruin wall",
+      "metric": "spawn_clearance",
+      "guid": 9950854,
+      "spawn_type": "creature",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Angered Spirit 9950854 has open sky above it",
+      "metric": "spawn_headroom",
+      "guid": 9950854,
+      "spawn_type": "creature",
+      "min": 3.0
+    }
+  ]
+}
