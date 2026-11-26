@@ -81,7 +81,8 @@ from behaviours import require_scripted_crit_probe
 from profile import (CASTER, DBC_DIR, base_steps, control_entries, for_entry, load_class_file,
                      load_fixture_class_file)
 from tooltip import Records
-from values import ALLY, DUMMY_DISTANCE, TARGET, Expectation, FORCED_CRIT_RATING, cast_distance, dataset
+from values import (ALLY, CAST_MARGIN_MS, DUMMY_DISTANCE, TARGET, Expectation, FORCED_CRIT_RATING, cast_distance,
+                    dataset)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -6194,6 +6195,31 @@ class CastConditionScenarioTests(unittest.TestCase):
         self.assertLess(after_read, cancel)
         self.assertLess(cancel, attacks[1])
         self.assertLess(attacks[1], before_read)
+        swing_waits = [step['ms'] for step in steps if step.get('action') == 'wait' and step.get('label') == 'swings']
+        self.assertEqual(swing_waits, [3300 + CAST_MARGIN_MS, 3300 + CAST_MARGIN_MS])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_peaceful_gate_cast_attack_swings_refuses_incompatible_options_and_preserves_contract(self):
+        base = {'spell': 562723, 'name': 'Moon Gaze', 'kind': 'metric_delta', 'variant': 'no_attack',
+                'label_suffix': 'no_attack',
+                'quote': 'While active, you are unable to move, attack, or cast spells or abilities.',
+                'trigger_spell': 562723, 'gate_spell': 562723, 'gate_cast': True, 'target': 'dummy',
+                'attack_swings': 1, 'metric': 'melee_attack_count', 'fields': {}, 'before_expected': 1,
+                'expected': 0, 'tolerance': 0, 'wait_ms': 500, 'expire_ms': 500, 'void_on_cast_failure': True}
+        bloodmage = load_class_file(20)
+        for bad in (
+            {**base, 'forced_chance': {'talent': 562723, 'aura': 562723, 'entry': 6}},
+            {**base, 'expected_gain': -1},
+            {**base, 'before_expected': 2, 'expected': 1, 'expected_ratio': 0.5, 'tolerance': 0.05},
+        ):
+            with self.subTest(bad=bad), self.assertRaisesRegex(ValueError, 'peaceful gate-cast attack_swings'):
+                metric_delta_scenario(bloodmage, metric_delta_spec(bad))
+        rich = {**base, 'setup_casts': [800157], 'phase_auras': [[803393, 1, 'caster', 'caster']]}
+        scenario, _ = metric_delta_scenario(bloodmage, metric_delta_spec(rich))
+        run.validate(scenario)
+        self.assertIn('setup casts [800157]', scenario['contract'])
+        self.assertIn("[[803393, 1, 'caster', 'caster']]", scenario['contract'])
+        self.assertIn(f'plus {CAST_MARGIN_MS} ms', scenario['contract'])
 
 
 class JudgeCastConditionTests(unittest.TestCase):
@@ -13153,6 +13179,21 @@ class ResurrectAmountTests(unittest.TestCase):
     def test_amounts_need_a_resurrection(self):
         with self.assertRaises(ValueError):
             cast_combat_spec({'spell': 803605, 'name': 'n', 'quote': 'q', 'resurrect_amounts': True})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cast_combat_resurrect_amounts_refuses_effect_18_and_non_resurrect(self):
+        bloodmage = load_class_file(20)
+        effect18 = cast_combat_spec({
+            'spell': 803585, 'name': 'Vampyr Bite',
+            'quote': 'Brings a dead player back to life with $s1% health and mana.',
+            'resurrect': True, 'resurrect_amounts': True})
+        with self.assertRaisesRegex(ValueError, r'113.*Effect\[0\]=18'):
+            cast_combat_scenario(bloodmage, effect18)
+        non_res = cast_combat_spec({
+            'spell': 562723, 'name': 'Moon Gaze', 'quote': 'Cannot be used in combat.',
+            'resurrect': True, 'resurrect_amounts': True})
+        with self.assertRaisesRegex(ValueError, 'requires a resurrection effect'):
+            cast_combat_scenario(bloodmage, non_res)
 
 
 class MetricDeltaDummyDistanceTests(unittest.TestCase):

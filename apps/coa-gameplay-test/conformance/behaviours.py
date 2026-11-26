@@ -2126,21 +2126,30 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                 prefix += [{'action': 'wait', 'label': 'let the phase auras settle', 'ms': spec.wait_ms}]
             return prefix + swings
 
-        if spec.phase_auras:
-            contract += (f' Each phase sets the auras {[list(aura) for aura in spec.phase_auras]} (spell, stacks, on, '
-                         f'by) and waits {spec.wait_ms} ms before it starts attacking.')
         peaceful_gate = spec.gate_cast and bool(
             int(records.field('Spell', gate_spell, 'Attributes') or 0) & NOT_IN_COMBAT_ONLY_PEACEFUL)
         if peaceful_gate:
+            unsupported = [name for name, value in (('forced_chance', spec.forced_chance),
+                                                    ('expected_gain', spec.expected_gain),
+                                                    ('expected_ratio', spec.expected_ratio))
+                           if value is not None]
+            if unsupported:
+                raise ValueError(f'{spec.spell} peaceful gate-cast attack_swings runs after before before and does '
+                                 f'not support {unsupported}')
             swings = [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
                       {'action': 'wait', 'label': 'swings',
-                       'ms': spec.attack_swings * swing_interval(class_file) + 500},
+                       'ms': spec.attack_swings * swing_interval(class_file) + CAST_MARGIN_MS},
                       {'action': 'stop_attack', 'actor': CASTER}]
             contract = (f'Peaceful gate-cast attack check: {gate_spell} requires out of combat, so the treatment '
-                        f'phase casts {gate_spell} first while peaceful, attempts {spec.attack_swings} auto-attack '
-                        f'swing interval(s) plus 500 ms at the dummy and reads {spec.metric} {spec.fields} (after), '
-                        f'then cancels {gate_spell}, waits {spec.expire_ms} ms and swings at the dummy without it '
+                        f'phase casts {gate_spell} first while peaceful (setup casts {list(spec.setup_casts)} made '
+                        f'once beforehand), attempts {spec.attack_swings} auto-attack swing interval(s) plus '
+                        f'{CAST_MARGIN_MS} ms at the dummy and reads {spec.metric} {spec.fields} (after), then '
+                        f'cancels {gate_spell}, waits {spec.expire_ms} ms and swings at the dummy without it '
                         f'(before).')
+        if spec.phase_auras:
+            contract += (f' Each phase sets the auras {[list(aura) for aura in spec.phase_auras]} (spell, stacks, on, '
+                         f'by) and waits {spec.wait_ms} ms before it starts attacking.')
+        if peaceful_gate:
             steps = (base_steps(class_file) + setup_steps + gate_steps
                      + [{'action': 'wait', 'label': 'let the gate cast settle', 'ms': spec.expire_ms}]
                      + attack_phase(True)
@@ -5406,8 +5415,15 @@ def cast_combat_scenario(class_file: dict, spec: CastCombatSpec) -> tuple[dict, 
             Expectation(alive_after, BEHAVIOUR_CAST_COMBAT, spec.spell, spec.cast_spell, None, str(STATE_PRESENT),
                         prose_rule(entry.quote, spec.spell), {**model, 'reading': 'alive', 'arm': 'cast'})]
     if spec.resurrect_amounts:
-        effect = next(index for index in range(3)
-                      if records.field('Spell', spec.cast_spell, f'Effect[{index}]') in RESURRECT_EFFECTS)
+        resurrect_effects = [(index, int(records.field('Spell', spec.cast_spell, f'Effect[{index}]') or 0))
+                             for index in range(3)
+                             if records.field('Spell', spec.cast_spell, f'Effect[{index}]') in RESURRECT_EFFECTS]
+        if not resurrect_effects:
+            raise ValueError(f'{spec.spell} cast_combat resurrect_amounts requires a resurrection effect')
+        effect, effect_type = resurrect_effects[0]
+        if effect_type != 113:
+            raise ValueError(f'{spec.spell} cast_combat resurrect_amounts only supports flat SPELL_EFFECT_RESURRECT_NEW '
+                             f'(113), got Effect[{effect}]={effect_type}')
         health = (int(records.field('Spell', spec.cast_spell, f'EffectBasePoints[{effect}]'))
                   + int(records.field('Spell', spec.cast_spell, f'EffectDieSides[{effect}]') or 0))
         mana = int(records.field('Spell', spec.cast_spell, f'EffectMiscValue[{effect}]'))

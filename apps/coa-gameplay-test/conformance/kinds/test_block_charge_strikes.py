@@ -77,8 +77,7 @@ class BlockChargeStrikesTests(unittest.TestCase):
         self.assertEqual(expectation.model['expected'], {'control': 1, 'treatment': 2})
         self.assertIs(expectation.model['require_block'], False)
         self.assertFalse(any(step['action'] == 'learn' and step.get('spell') == BLOCK_SPELL for step in steps))
-        self.assertFalse(any(step['action'] == 'equip' and step.get('slot') == 16 and step.get('item') == 231296
-                             for step in steps))
+        self.assertFalse(any(step['action'] == 'equip' and step.get('slot') == 16 for step in steps))
         avoidances = [step for step in steps if step['action'] == 'set_combat_avoidance']
         self.assertEqual([(step['block'], step['dodge'], step['parry']) for step in avoidances], [(0, 0, 0)] * 2)
         strikes = [step for step in steps if step['action'] == 'cast' and step['spell'] == 34580]

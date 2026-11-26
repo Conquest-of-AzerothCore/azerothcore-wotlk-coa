@@ -39,8 +39,10 @@ Extend `apps/coa-gameplay-test/conformance/behaviours.py` ([doc](../../apps/coa-
   reached.
 - For `metric_delta` with `attack_swings` and `gate_cast: true`, when `gate_spell` carries
   `SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL`, run the cast-and-attack treatment arm first while peaceful (`after`),
-  cancel `gate_spell`'s aura, and then run the control swing arm (`before`) using a symmetric `swing_interval + 500 ms`
-  window so the peaceful cast is not blocked by permanent combat from an earlier attack phase.
+  cancel `gate_spell`'s aura, and then run the control swing arm (`before`) using a symmetric
+  `swing_interval + CAST_MARGIN_MS` window so the peaceful cast is not blocked by permanent combat from an earlier
+  attack phase. Reject `forced_chance`, `expected_gain`, and `expected_ratio` on this inverted-order branch and
+  preserve `setup_casts` and `phase_auras` notes in `contract`.
 - Existing `outdoors`, `mounted`, `avoided`, and non-peaceful `attack_swings` scenarios remain byte-identical.
 
 ## Consequences

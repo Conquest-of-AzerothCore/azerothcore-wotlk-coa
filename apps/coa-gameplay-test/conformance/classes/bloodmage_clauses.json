@@ -3654,8 +3654,7 @@
         "claim": "every $t1 sec",
         "labels": [
           "706605 behaviour_metric_delta tick_before",
-          "706605 behaviour_metric_delta tick_first",
-          "706605 behaviour_metric_delta tick_second"
+          "706605 behaviour_metric_delta tick_amplitude"
         ]
       },
       {

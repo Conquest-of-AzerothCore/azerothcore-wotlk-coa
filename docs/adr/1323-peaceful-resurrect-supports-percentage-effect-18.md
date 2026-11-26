@@ -32,7 +32,9 @@ Extend `apps/coa-gameplay-test/conformance/behaviours.py` and
 `apps/coa-gameplay-test/conformance/kinds/peaceful_resurrect.py`
 ([doc](../../apps/coa-gameplay-test/conformance/docs/kinds/peaceful_resurrect.md)):
 
-- Update `RESURRECT_EFFECTS = frozenset({18, 113})` in `behaviours.py`.
+- Update `RESURRECT_EFFECTS = frozenset({18, 113})` in `behaviours.py`, and guard `cast_combat_scenario` so
+  `resurrect_amounts=True` rejects non-`113` effects (including effect 18) with `ValueError` instead of misreading
+  percentage points as flat health/mana.
 - In `peaceful_resurrect.py`, detect `Effect == 18` (`SPELL_EFFECT_RESURRECT`) vs `Effect == 113`
   (`SPELL_EFFECT_RESURRECT_NEW`).
 - For effect 18, measure `max_health_peaceful` and `max_power_peaceful` (power 0) on `ALLY` after resurrection and

@@ -2396,7 +2396,7 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Eternal Curse 92114 (level-10 automatic passive of specialization 99 Eternal, AscensionTaughtAbilityData.h:32 {20, 99, 10, 92114, 800157}): SynchronizeTaughtAbilities (AscensionCompat.cpp:1082-1104) teaches active spell Eternal Curse 800157 when 92114 is learned in specialization 99. Switches to spec 99 (specialization 99, ADR 1102), unlearns auto-learned [92114, 800157, 674] via unlearn_after_specialization (ADR 1292) so control reads knows_spell(800157) == 0; real learn of 92114 between phases teaches 800157 (after == 1). Reference search 2026-11-26: coa-history 92114/804320/807736 0 events (passive/hidden), 800157 5 SPELL_CAST_SUCCESS / 7 SPELL_AURA_APPLIED / 9 SPELL_AURA_REMOVED across 2 logs; coabuildhub spells_master_index.json 92114 matches structure (older snapshot states 80% threat vs installed server Spell.dbc 807736e1 95%, installed Spell.dbc governs per G-9)."
+      "observe_source": "Eternal Curse 92114 (level-10 automatic passive of specialization 99 Eternal, AscensionTaughtAbilityData.h:32 {20, 99, 10, 92114, 800157}): SynchronizeTaughtAbilities (AscensionCompat.cpp:1104-1143, called from AscensionCompat.cpp:1079) teaches active spell Eternal Curse 800157 when 92114 is learned in specialization 99. Switches to spec 99 (specialization 99, ADR 1102), unlearns auto-learned [92114, 800157, 674] via unlearn_after_specialization (ADR 1292) so control reads knows_spell(800157) == 0; real learn of 92114 between phases teaches 800157 (after == 1). Reference search 2026-11-26: coa-history 92114/804320/807736 0 events (passive/hidden), 800157 5 SPELL_CAST_SUCCESS (4 logs) / 7 SPELL_AURA_APPLIED (6 logs) / 9 SPELL_AURA_REMOVED (7 logs); coabuildhub spells_master_index.json 92114 matches structure (older snapshot states 80% threat vs installed server Spell.dbc 807736e1 95%, installed Spell.dbc governs per G-9)."
     },
     {
       "spell": 92114,
@@ -2415,10 +2415,10 @@
           "main_hand": 2534,
           "off_hand": 2534,
           "skill_line": 173,
-          "source": "Worn Dagger 2534 (item_template class 2 subclass 15 dagger, InventoryType 13 one-hand, skill_line 173 Daggers, bloodmage.json Eternal weapon set): off-hand slot 16 refuses before 92114 is learned in specialization 99 and accepts 2534 after 92114 teaches Dual Wield 674 (AscensionTaughtAbilityData.h:33, AscensionCompat.cpp:1132-1141)"
+          "source": "Rondel 2534 (item_template class 2 subclass 15 dagger, InventoryType 13 one-hand, skill_line 173 Daggers, bloodmage.json Eternal weapon set): off-hand slot 16 refuses before 92114 is learned in specialization 99 and accepts 2534 after 92114 teaches Dual Wield 674 (AscensionTaughtAbilityData.h:33, AscensionCompat.cpp:1132-1141)"
         }
       ],
-      "observe_source": "Eternal Curse 92114 (specialization 99 Eternal, AscensionTaughtAbilityData.h:33 {20, 99, 10, 92114, 674}): SynchronizeTaughtAbilities teaches Dual Wield 674 and AscensionCompat.cpp:1132-1141 sets SetCanDualWield(HasSpell(674)). Uses equip_grant with specialization 99 and unlearn_after_specialization [92114, 800157, 674] (ADR 1320): off-hand Worn Dagger 2534 (slot 16) is rejected before learning 92114 and accepted after a real learn of 92114. Reference search 2026-11-26: see teaches_eternal_curse."
+      "observe_source": "Eternal Curse 92114 (specialization 99 Eternal, AscensionTaughtAbilityData.h:33 {20, 99, 10, 92114, 674}): SynchronizeTaughtAbilities (AscensionCompat.cpp:1104-1143) teaches Dual Wield 674 and AscensionCompat.cpp:1132-1141 sets SetCanDualWield(HasSpell(674)). Uses equip_grant with specialization 99 and unlearn_after_specialization [92114, 800157, 674] (ADR 1320): off-hand Rondel 2534 (slot 16) is rejected before learning 92114 and accepted after a real learn of 92114. Reference search 2026-11-26: see teaches_eternal_curse."
     },
     {
       "spell": 92114,
@@ -2469,11 +2469,11 @@
             "before_expected": 0,
             "expected": 1,
             "tolerance": 0,
-            "source": "Cursed Form caster requirement aura 525031 applied by aura_ascension_bloodmage_cursed_form::OnApply (AscensionBloodmageTalents.cpp:504-508)"
+            "source": "Cursed Form caster requirement aura 525031 applied by SyncCursedFormRequirement (AscensionBloodmageTalents.cpp:276-293, invoked from OnAuraApply at AscensionBloodmageTalents.cpp:482)"
           }
         ]
       },
-      "observe_source": "Casting Eternal Curse 800157 applies shapeshift form 57 (800157 Effect[1] SPELL_AURA_MOD_SHAPESHIFT MiscValue 57), Cursed Form marker 802877, and Cursed Form requirement 525031 (AscensionBloodmageTalents.cpp:487-538). Uncast before phase reads 0 for 802877, 800157, and 525031; real cast of 800157 in after phase reads 1 for all three. Reference search 2026-11-26: see teaches_eternal_curse."
+      "observe_source": "Casting Eternal Curse 800157 applies shapeshift form 57 (800157 Effect[1] SPELL_AURA_MOD_SHAPESHIFT MiscValue 57), Cursed Form marker 802877, and Cursed Form requirement 525031 via SyncCursedFormRequirement (AscensionBloodmageTalents.cpp:276-293,482). Uncast before phase reads 0 for 802877, 800157, and 525031; real cast of 800157 in after phase reads 1 for all three. Reference search 2026-11-26: see teaches_eternal_curse."
     },
     {
       "spell": 92114,
@@ -3264,7 +3264,7 @@
     },
     {
       "spell": 706605,
-      "name": "Blood Feast (no tick before 445 ms, excluding 450 ms amplitude)",
+      "name": "Blood Feast (no tick on apply or before 445 ms)",
       "kind": "metric_delta",
       "variant": "tick_before",
       "label_suffix": "tick_before",
@@ -3306,14 +3306,14 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Lower-edge amplitude check for Blood Feast 706605 Effect[0] EffectAmplitude[0] = 500 ms ($t1 = 0.5 sec; /srv/coa/server-data/dbc Spell.dbc). Reads spell_heal_count(706608) at wait_ms 380 (game_time [300, 445] ms, strictly < 450 ms = 500 - 10%): 0 heals before and 0 heals after, proving tick 1 has not fired early. Paired with tick_first, tick_second, and corpse_drain_cap (10 ticks over 5000 ms). Reference search 2026-11-26: see mortal_form."
+      "observe_source": "No-immediate-tick check for Blood Feast 706605 Effect[0] EffectAmplitude[0] = 500 ms ($t1 = 0.5 sec; /srv/coa/server-data/dbc Spell.dbc). Reads spell_heal_count(706608) at wait_ms 380 (game_time [300, 445] ms): 0 heals before and 0 heals after, proving no tick fires on apply or before 445 ms. Paired with tick_amplitude (which rejects both 450 ms and 550 ms +-10% amplitude mutants). Reference search 2026-11-26: see mortal_form."
     },
     {
       "spell": 706605,
-      "name": "Blood Feast (first tick by 600 ms)",
+      "name": "Blood Feast (9 ticks by 4650 ms, discriminating 450 ms and 550 ms amplitudes)",
       "kind": "metric_delta",
-      "variant": "tick_first",
-      "label_suffix": "tick_first",
+      "variant": "tick_amplitude",
+      "label_suffix": "tick_amplitude",
       "quote": "and Rage every $t1 sec$?s681077[, and then causes you to burst, healing party and raid members within $520312a1 yds for ${$520312m1+$520312ppl1+$SP*0.7525}][].",
       "trigger_spell": 706605,
       "gate_spell": 706605,
@@ -3341,64 +3341,18 @@
         "target": "caster"
       },
       "before_expected": 0,
-      "expected": 1,
+      "expected": 9,
       "tolerance": 0,
-      "wait_ms": 620,
+      "wait_ms": 4650,
       "expire_ms": 5600,
       "game_time": {
         "after": [
-          550,
-          880
+          4550,
+          4850
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "First-tick amplitude check for Blood Feast 706605 Effect[0] EffectAmplitude[0] = 500 ms ($t1 = 0.5 sec; Spell.dbc). Reads spell_heal_count(706608) at wait_ms 620 (game_time [550, 880] ms, between tick 1 at 500 ms and tick 2 at 1000 ms): 0 before and 1 after. Paired with tick_before, tick_second, and corpse_drain_cap. Reference search 2026-11-26: see mortal_form."
-    },
-    {
-      "spell": 706605,
-      "name": "Blood Feast (second tick by 1150 ms)",
-      "kind": "metric_delta",
-      "variant": "tick_second",
-      "label_suffix": "tick_second",
-      "quote": "and Rage every $t1 sec$?s681077[, and then causes you to burst, healing party and raid members within $520312a1 yds for ${$520312m1+$520312ppl1+$SP*0.7525}][].",
-      "trigger_spell": 706605,
-      "gate_spell": 706605,
-      "target": "caster",
-      "measure_actor": "caster",
-      "corpse": {
-        "entry": 6,
-        "health": 100,
-        "distance": 5
-      },
-      "setup_casts": [
-        92559
-      ],
-      "setup_target": "corpse",
-      "setup_only_after": true,
-      "setup_wait_ms": 1500,
-      "caster_health": [
-        1000,
-        10000
-      ],
-      "disable_regeneration": true,
-      "metric": "spell_heal_count",
-      "fields": {
-        "spell": 706608,
-        "target": "caster"
-      },
-      "before_expected": 0,
-      "expected": 2,
-      "tolerance": 0,
-      "wait_ms": 1150,
-      "expire_ms": 5600,
-      "game_time": {
-        "after": [
-          1100,
-          1400
-        ]
-      },
-      "void_on_cast_failure": true,
-      "observe_source": "Second-tick amplitude check for Blood Feast 706605 Effect[0] EffectAmplitude[0] = 500 ms ($t1 = 0.5 sec; Spell.dbc). Reads spell_heal_count(706608) at wait_ms 1150 (game_time [1100, 1400] ms, between tick 2 at 1000 ms and tick 3 at 1500 ms): 0 before and 2 after. Combined with tick_before (< 450 ms -> 0), tick_first (-> 1), and corpse_drain_cap (10 ticks/corpse over 5000 ms -> excludes >= 550 ms), brackets 500 ms inside +-10% on both sides. Reference search 2026-11-26: see mortal_form."
+      "observe_source": "Two-sided +-10% amplitude check for Blood Feast 706605 Effect[0] EffectAmplitude[0] = 500 ms ($t1 = 0.5 sec; /srv/coa/server-data/dbc Spell.dbc). Reads spell_heal_count(706608) from 1 corpse at wait_ms 4650 (game_time [4550, 4850] ms, between tick 9 at 4500 ms and tick 10 at 5000 ms): 0 before and 9 exact after. Across the entire [4550, 4850] ms window, a -10% mutant (450 ms) fires tick 10 at 4500 ms (>= 10 heals, failing) and a +10% mutant (550 ms) reaches tick 9 only at 4950 ms (<= 8 heals, failing); paired with tick_before (0 heals in [300, 445] ms) also rules out an immediate apply tick. Reference search 2026-11-26: see mortal_form."
     },
     {
       "spell": 706605,
@@ -3455,7 +3409,7 @@
         "distance": 5,
         "kill_spell": 92559
       },
-      "observe_source": "Blood Feast 706605 carries SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000; /srv/coa/server-data/dbc Spell.dbc). cast_condition out_of_combat with corpse fixture (ADR 1321) kills a nearby creature 6 with 92559, casts 706605 while out of combat (combat == 0, cast_failure == 0), cancels 706605 and waits GCD, engages dummy (combat == 1), and attempts 706605 expecting SPELL_FAILED_AFFECTING_COMBAT (1). Reference search 2026-11-26: see mortal_form."
+      "observe_source": "Blood Feast 706605 carries SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000; /srv/coa/server-data/dbc Spell.dbc). cast_condition out_of_combat with corpse fixture (ADR 1321) kills a nearby creature 6 with 92559, casts 706605 while out of combat (combat == 0, cast_failure == 0), cancels 706605 and waits max(GCD_WAIT_MS, duration_ms + CAST_MARGIN_MS) = 5500 ms for the channeled aura to clear, engages dummy (combat == 1), and attempts 706605 expecting SPELL_FAILED_AFFECTING_COMBAT (1). Reference search 2026-11-26: see mortal_form."
     },
     {
       "spell": 704660,
@@ -3472,7 +3426,7 @@
         803393
       ],
       "cast_power": 0,
-      "observe_source": "No Mercy 704660 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 24 (SPELLMOD_CHARGES) BasePoints 0 + DieSides 1 = +1 on EffectSpellClassMask[2] matching Thick Pelt 556233 (ProcCharges 1, ProcFlags 0x2a8 physical hits taken, PowerType 0, ManaCost 0; /srv/coa/server-data/dbc Spell.dbc). Uses block_charge_strikes with require_block: false, striker_untriggered: true (556233 default spell_proc AttributesMask 0 ignores triggered creature casts), striker_auras: [803393] (+100% hit), cast_power: 0 (ADR 1322), striking with Impale 34580 (5 yd, IMPOSSIBLE_DODGE_PARRY_BLOCK, instant, 0 CD): control (without 704660) consumes 556233 on hit 1; treatment (after real learn of 704660) keeps 556233 through hit 1 and consumes it on hit 2. Reference search 2026-11-26: coa-history 704660 0 events (passive), 556233 422 applies / 423 removals; coabuildhub spells_master_index.json 704660 matches verbatim ('Allows your Thick Pelt to affect an additional hit.')."
+      "observe_source": "No Mercy 704660 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER EffectMiscValue[0] = 4 (SPELLMOD_CHARGES) BasePoints 0 + DieSides 1 = +1 on EffectSpellClassMask[0] = 1073741824 matching Thick Pelt 556233 (ProcCharges 1, ProcFlags 0x2a8 physical hits taken, PowerType 0, ManaCost 0; /srv/coa/server-data/dbc Spell.dbc). Uses block_charge_strikes with require_block: false, striker_untriggered: true (556233 default spell_proc AttributesMask 0 ignores triggered creature casts), striker_auras: [803393] (+100% hit), cast_power: 0 (ADR 1322), striking with Impale 34580 (5 yd, IMPOSSIBLE_DODGE_PARRY_BLOCK, instant, 0 CD): control (without 704660) consumes 556233 on hit 1; treatment (after real learn of 704660) keeps 556233 through hit 1 and consumes it on hit 2. Reference search 2026-11-26: coa-history 704660 0 events (passive), 556233 422 applies / 423 removals; coabuildhub spells_master_index.json 704660 matches verbatim ('Allows your Thick Pelt to affect an additional hit.')."
     }
   ],
   "player_observations": [],
