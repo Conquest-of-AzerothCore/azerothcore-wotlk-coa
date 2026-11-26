@@ -948,7 +948,7 @@ class RunnerTests(unittest.TestCase):
                 run.validate(scenario)
 
     def test_system_mail_needs_a_known_kind_and_an_item(self):
-        for kind in ('postmaster', 'reward', 'server'):
+        for kind in ('postmaster', 'reward', 'recovery', 'refund', 'server'):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].insert(0, {'action': 'system_mail', 'actor': 'caster', 'item': 6948, 'kind': kind})
             self.assertIs(run.validate(scenario), scenario)

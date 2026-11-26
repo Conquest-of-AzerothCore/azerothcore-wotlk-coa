@@ -9020,15 +9020,19 @@ private:
         else if (action == "system_mail")
         {
             std::string const kind = step.get<std::string>("kind");
-            Require(kind == "postmaster" || kind == "reward" || kind == "server",
-                    "system_mail kind must be postmaster, reward or server");
+            Require(kind == "postmaster" || kind == "reward" || kind == "recovery" || kind == "refund"
+                        || kind == "server",
+                    "system_mail kind must be postmaster, reward, recovery, refund or server");
             Item* item = Item::CreateItem(step.get<uint32>("item"), 1, player);
             Require(item != nullptr, "system_mail could not create the item");
             CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
             item->SaveToDB(trans);
             MailSender const sender = kind == "postmaster" ? MailSender(MAIL_CREATURE, 34337)
                                                            : MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM);
-            std::string const subject = kind == "reward" ? RECRUIT_A_FRIEND_REWARD_MAIL_SUBJECT : "System mail";
+            std::string const subject = kind == "reward" ? RECRUIT_A_FRIEND_REWARD_MAIL_SUBJECT
+                : kind == "recovery"                     ? ITEM_RECOVERY_MAIL_SUBJECT
+                : kind == "refund"                       ? WORLDFORGED_REFUND_MAIL_SUBJECT
+                                                         : "System mail";
             MailDraft(subject, "Sent by the gameplay test.").AddItem(item)
                 .SendMailTo(trans, MailReceiver(player, player->GetGUID().GetCounter()), sender);
             CharacterDatabase.CommitTransaction(trans);
