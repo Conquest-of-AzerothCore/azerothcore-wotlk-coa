@@ -338,6 +338,14 @@
     "kind": "claim"
   },
   {
+    "spell": 501679,
+    "clause": "Strike an enemy, dealing ${$m1+0+$AP*0.2+$SP*.2} Physical damage and generating Rage.",
+    "labels": [
+      "501679 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
     "spell": 501682,
     "clause": "Howl into the souls of nearby enemies, dealing ${$m1+0+$AP*0.285} Shadow damage",
     "labels": [
@@ -361,6 +369,60 @@
           "501682 aura_duration_ms #2"
         ]
       }
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501614,
+    "clause": "$?a802877[][]Requires Mortal Form",
+    "labels": [
+      "501614 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501614,
+    "clause": "Blast an enemy for ${$m1+$sps*0.466229} Shadow damage",
+    "labels": [
+      "501614 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501614,
+    "clause": "and generates Rage$?s500107[, and 1 stack of Thirst.][.]$?s807489[\r\n\r\nUsable while moving.][]",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500126,
+    "clause": "Leap behind an enemy, dealing ${$804866m2+$804866ppl2+$AP*0.2} Physical Damage,",
+    "labels": [
+      "500126 effect_value 804866e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500126,
+    "clause": "dazing them for $/1000;s3 sec,",
+    "labels": [
+      "500126 effect_value e2 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500126,
+    "clause": "and generating $/10;804864s1 Rage.",
+    "labels": [
+      "500126 effect_value 804864e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500444,
+    "clause": "Swipe at nearby enemies, dealing ${$m1+0+$AP*.2+$SP*0.2} Physical damage.",
+    "labels": [
+      "500444 effect_value e0 #0"
     ],
     "kind": "claim"
   },
@@ -755,6 +817,46 @@
     "kind": "claim"
   },
   {
+    "spell": 504296,
+    "clause": "Protects the caster with blood magic.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 504296,
+    "clause": "Your health regeneration now continues in combat and is increased by $s2%.",
+    "labels": [
+      "504296 effect_value e1 #0",
+      "504296 aura_amount e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504296,
+    "clause": "Increases armor contribution from items by $s1%.",
+    "labels": [
+      "504296 effect_value e0 #1",
+      "504296 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504296,
+    "clause": "Lasts $d.",
+    "labels": [
+      "504296 aura_duration_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504296,
+    "clause": "@ext: Only 1 Shield can be active at a time.:ext@",
+    "labels": [
+      "504296 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
     "spell": 504627,
     "clause": "Bond yourself to an ally for $d,",
     "labels": [
@@ -896,6 +998,40 @@
     "kind": "claim"
   },
   {
+    "spell": 504849,
+    "clause": "Protects the caster with vital magic, increasing your Shadow and Nature healing received by $s1%",
+    "labels": [
+      "504849 effect_value e0 #0",
+      "504849 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504849,
+    "clause": "and restoring $804309s1% of your maximum health every $t2 sec.",
+    "labels": [
+      "504849 effect_value 804309e0 #1",
+      "504849 aura_amplitude_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504849,
+    "clause": "Lasts $d.",
+    "labels": [
+      "504849 aura_duration_ms #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504849,
+    "clause": "@ext: Only 1 Shield can be active at a time.:ext@",
+    "labels": [
+      "504849 effect_value #4"
+    ],
+    "kind": "claim"
+  },
+  {
     "spell": 504893,
     "clause": "Increases all primary stats by $s1%.",
     "labels": [
@@ -941,6 +1077,37 @@
     "clause": "Your Bloodbolt now heals for an additional $s1% of the damage dealt.",
     "labels": [
       "504896 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504897,
+    "clause": "Protects the caster with a coagulated barrier, reducing spell pushback suffered from damaging attacks by 100%",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 504897,
+    "clause": "and reducing the duration of interrupt and silence effects by $s2%.",
+    "labels": [
+      "504897 effect_value e1 #0",
+      "504897 aura_amount e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504897,
+    "clause": "Lasts $d.",
+    "labels": [
+      "504897 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504897,
+    "clause": "@ext: Only 1 Shield can be active at a time.:ext@",
+    "labels": [
+      "504897 effect_value #2"
     ],
     "kind": "claim"
   },
@@ -1638,6 +1805,54 @@
     "kind": "claim"
   },
   {
+    "spell": 562228,
+    "clause": "Shows the location of all nearby Humanoids, Giants, and Beasts on the minimap.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 562720,
+    "clause": "Ascend into a Cursed Form for $d, enabling the use of unique abilities, causing you to generate health and Rage over time.",
+    "labels": [
+      "562720 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 562720,
+    "clause": "This ability goes on cooldown upon returning to Mortal Form.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 562720,
+    "clause": "@ext:While in a Cursed Form you are treated as if you were a Demon.:ext@",
+    "labels": [
+      "562720 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 562723,
+    "clause": "Allow your blood curse to take control and embrace your inner self for $d, allowing you to access your Cursed Form ability bar.",
+    "labels": [
+      "562723 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 562723,
+    "clause": "While active, you are unable to move, attack, or cast spells or abilities.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 562723,
+    "clause": "Cannot be used in combat.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
     "spell": 563736,
     "clause": "Each point of Rage now increases the damage of Bloodbolt by 1%,",
     "labels": [],
@@ -1718,6 +1933,67 @@
     "clause": "Your Blood Shield now increases your health regeneration by an additional $s1%.",
     "labels": [
       "570758 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572116,
+    "clause": "Bloodthorns sprout from all party and raid members for $d,",
+    "labels": [
+      "572116 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572116,
+    "clause": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
+    "labels": [
+      "572116 effect_value e0 #1",
+      "572116 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572116,
+    "clause": "Can occur only once every half a second.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 572412,
+    "clause": "Induce your blood into an enemy to shock their nervous system, reducing their attack power by ${($m1+0)*-1} for $d",
+    "labels": [
+      "572412 effect_value e0 #0",
+      "572412 aura_amount e0 #0",
+      "572412 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572412,
+    "clause": "and removing $652375s1 enrage effect.",
+    "labels": [
+      "572412 effect_value 652375e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572403,
+    "clause": "Blood magic infuses the target ally, increasing their Spirit by $s1 for $d.",
+    "labels": [
+      "572403 effect_value e0 #0",
+      "572403 aura_amount e0 #0",
+      "572403 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572404,
+    "clause": "Blood magic infuses all party and raid members, increasing their Spirit by $s1 for $d.",
+    "labels": [
+      "572404 effect_value e0 #0",
+      "572404 aura_amount e0 #0",
+      "572404 aura_duration_ms #1"
     ],
     "kind": "claim"
   },
@@ -1812,6 +2088,36 @@
     "kind": "claim"
   },
   {
+    "spell": 573357,
+    "clause": "Animate a bloody amalgam to aid you in combat for $d.",
+    "labels": [
+      "573357 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 573357,
+    "clause": "The amalgam will periodically unleash a Blood Strike on its target, dealing ${$589023m1*$<scalingbp>+$sps*.4+$AP*.15} Shadow damage,",
+    "labels": [
+      "573357 effect_value 589023e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 573357,
+    "clause": "healing you for $504711s1% of the damage dealt.",
+    "labels": [
+      "573357 effect_value 504711e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 573357,
+    "clause": "$?s681078[\r\n\r\nEmpowered: Duration increased by $/1000;681398s2 sec and you summon 1 additional amalgam.][]$?s560259[ \r\n\r\nDuration increased by $/1000;570744s1 sec per stack of Thirst.][]",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
     "spell": 575335,
     "clause": "Increases the critical strike chance and critical damage of Ravenous Strike and Claw Sweep by $s1% against Diseased targets.",
     "labels": [
@@ -1831,6 +2137,23 @@
     "clause": "Periodic damage dealt by Rotclaw now hits $s1% more often and your Bloodfang Bite, Claw Sweep, and Bloodbolt additionally scales with dodge rating.",
     "labels": [
       "578120 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680299,
+    "clause": "Establish a sanguine pact with all nearby allies, increasing their Stamina by $s1.",
+    "labels": [
+      "680299 effect_value e0 #0",
+      "680299 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680299,
+    "clause": "Lasts $d.",
+    "labels": [
+      "680299 aura_duration_ms #1"
     ],
     "kind": "claim"
   },
@@ -3090,6 +3413,38 @@
     "kind": "claim"
   },
   {
+    "spell": 706605,
+    "clause": "$?a802877[][]Requires Mortal Form",
+    "labels": [
+      "706605 effect_value #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706605,
+    "clause": "Drains the essence from up to $706607i nearby enemy corpses over $d to quickly regain $706608s1% maximum health",
+    "labels": [
+      "706605 effect_value #0",
+      "706605 aura_duration_ms #1",
+      "706605 effect_value 706608e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706605,
+    "clause": "and Rage every $t1 sec$?s681077[, and then causes you to burst, healing party and raid members within $520312a1 yds for ${$520312m1+$520312ppl1+$SP*0.7525}][].",
+    "labels": [
+      "706605 aura_amplitude_ms #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706605,
+    "clause": "Cannot be used in combat.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
     "spell": 706617,
     "clause": "Increases your stealth detection significantly.",
     "labels": [],
@@ -3100,6 +3455,23 @@
     "clause": "Increases the critical strike chance of Valanar's Vengeance and Keleseth's Calamity by $s1%.",
     "labels": [
       "706619 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707339,
+    "clause": "Enact a sanguinary ritual with an ally, increasing their Stamina by $s1.",
+    "labels": [
+      "707339 effect_value e0 #0",
+      "707339 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707339,
+    "clause": "Lasts $d.",
+    "labels": [
+      "707339 aura_duration_ms #1"
     ],
     "kind": "claim"
   },
@@ -3234,6 +3606,14 @@
     "kind": "claim"
   },
   {
+    "spell": 707900,
+    "clause": "Instantly regenerate $s1% of your maximum Rage in exchange for health.",
+    "labels": [
+      "707900 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
     "spell": 800154,
     "clause": "Critical strikes with Ravenous Strike or Bloodfang Bite, or using Howl spells, now triggers Call of the Darkwing.",
     "labels": [],
@@ -3253,6 +3633,35 @@
     "labels": [
       "800154 effect_value 802358e0 #0"
     ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572551,
+    "clause": "Bite an enemy, dealing ${$m1+0+$AP*0.265+$SP*.265} Physical damage and creates a Bite Wound.",
+    "labels": [
+      "572551 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572551,
+    "clause": "Dealing damage to this target with auto attacks now restores health to you equal to 50% of the damage dealt.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 800175,
+    "clause": "Increases your movement speed by $s1%.",
+    "labels": [
+      "800175 effect_value e0 #0",
+      "800175 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800175,
+    "clause": "Acts like a mount.",
+    "labels": [],
     "kind": "claim"
   },
   {
@@ -3305,6 +3714,61 @@
         ]
       }
     ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802580,
+    "clause": "$?a802877[][]Requires Mortal Form",
+    "labels": [
+      "802580 effect_value #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802580,
+    "clause": "Corrupt an enemy's heart, causing them to bleed for $o1 Shadow damage over $d.",
+    "labels": [
+      "802580 aura_duration_ms #0",
+      "802580 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802580,
+    "clause": "Generates $/10;582765s1 Rage every time it deals damage.",
+    "labels": [
+      "802580 effect_value 582765e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802580,
+    "clause": "@ext:Periodic damage dealt through this can critically strike.:ext@",
+    "labels": [
+      "802580 effect_value #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572907,
+    "clause": "$?a802877[][]Requires Mortal Form",
+    "labels": [
+      "572907 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572907,
+    "clause": "Explode with boiling blood, dealing ${$m1+0+$sps*0.35} Shadow damage to enemies and generating Rage for each enemy hit.",
+    "labels": [
+      "572907 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572907,
+    "clause": "$?s500107[\r\n\r\nGenerates 1 stack of Thirst.][]",
+    "labels": [],
     "kind": "claim"
   },
   {
@@ -3563,6 +4027,37 @@
     "kind": "claim"
   },
   {
+    "spell": 803585,
+    "clause": "Brings a dead player back to life with $s1% health and mana.",
+    "labels": [
+      "803585 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803585,
+    "clause": "For the next $d,",
+    "labels": [
+      "803585 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803585,
+    "clause": "the target takes $s3% increased healing, but being damaged ends the effect.",
+    "labels": [
+      "803585 effect_value e2 #2",
+      "803585 aura_amount e2 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803585,
+    "clause": "Cannot be cast when in combat.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
     "spell": 801952,
     "clause": "Mend blood and bone, healing an ally for $s1% of their maximum health and applies Sated.",
     "labels": [
@@ -3598,6 +4093,14 @@
     "spell": 801955,
     "clause": "While active you can dodge or parry while casting.",
     "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 801957,
+    "clause": "Taunts an enemy to attack you for $d.",
+    "labels": [
+      "801957 aura_duration_ms #0"
+    ],
     "kind": "claim"
   },
   {
@@ -3730,6 +4233,51 @@
     "kind": "claim"
   },
   {
+    "spell": 504085,
+    "clause": "$?a802877[][]Requires Mortal Form",
+    "labels": [
+      "504085 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504085,
+    "clause": "Mend an ally's wounds, healing them for ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58}.",
+    "labels": [
+      "504085 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504085,
+    "clause": "$?s681078[\r\n\r\nEmpowered: Becomes instant cast and heals yourself for $680033s1% of the heal value.][]",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 501667,
+    "clause": "Bloodthorns sprout from an ally for $d,",
+    "labels": [
+      "501667 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501667,
+    "clause": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
+    "labels": [
+      "501667 effect_value e0 #1",
+      "501667 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501667,
+    "clause": "Can occur only once every half a second.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
     "spell": 802315,
     "clause": "Your Taldaram's Torment now generates $/10;s1 additional Rage per tick",
     "labels": [
@@ -3832,6 +4380,28 @@
     "kind": "claim"
   },
   {
+    "spell": 804203,
+    "clause": "Enter a blood trance, consuming Rage every sec to allow you to heal for $s1% of all damage dealt for $d.",
+    "labels": [
+      "804203 effect_value e0 #0",
+      "804203 aura_amount e0 #0",
+      "804203 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804203,
+    "clause": "Can only trigger once per second.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 804203,
+    "clause": "If you run out of Rage the effect will end early.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
     "spell": 804207,
     "clause": "Let loose a wicked howl, increasing your maximum health by $s1% for $d.",
     "claims": [
@@ -3908,6 +4478,20 @@
   {
     "spell": 804604,
     "clause": "Your Bloodmoon Blast now generates 3 additional Rage per hit.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 578305,
+    "clause": "Hurl a bolt of blood at an enemy, dealing ${$m1+0+$sps*0.45+$AP*0.2} Shadow damage, healing you equal to the damage dealt.",
+    "labels": [
+      "578305 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 578305,
+    "clause": "$?s681078[\r\n\r\nEmpowered: Deals $681396s1% increased damage to the initial target struck.][]",
     "labels": [],
     "kind": "claim"
   },
@@ -4247,6 +4831,20 @@
     "labels": [
       "806177 aura_duration_ms #0"
     ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806182,
+    "clause": "Envelop an ally in darkness, temporarily reducing all threat for $d.",
+    "labels": [
+      "806182 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806182,
+    "clause": "While active, the target's stealth detection is significantly increased.",
+    "labels": [],
     "kind": "claim"
   },
   {
@@ -4607,6 +5205,44 @@
     "labels": [
       "807919 effect_value e0 #0"
     ],
+    "kind": "claim"
+  },
+  {
+    "spell": 1108493,
+    "clause": "Empowers magic used against the targeted party member, increasing damage taken from spells by up to $s1",
+    "labels": [
+      "1108493 effect_value e0 #0",
+      "1108493 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 1108493,
+    "clause": "and healing spells by up to $s2.",
+    "labels": [
+      "1108493 effect_value e1 #1",
+      "1108493 aura_amount e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 1108493,
+    "clause": "Lasts $d.",
+    "labels": [
+      "1108493 aura_duration_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 1200012,
+    "clause": "Sacrifice 90% of your own health to carve a large blood rune into the ground.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 1200012,
+    "clause": "Once allies are inside, they may help summon party and raid members to your current location.",
+    "labels": [],
     "kind": "claim"
   }
 ]

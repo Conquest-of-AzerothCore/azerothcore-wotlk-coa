@@ -64,7 +64,168 @@
   "off_hand_weapons": [],
   "known_auras": [],
   "probe_auras": [],
-  "extra_spells": [],
+  "extra_spells": [
+    {
+      "spell": 500123,
+      "name": "Ravenous Strike",
+      "citation": "2026-08-23 18:32:50.782, spell 501679 Ravenous Strike, Ascension combat log, private archive"
+    },
+    {
+      "spell": 500125,
+      "name": "Bloodmoon Blast",
+      "citation": "2026-08-31 20:31:41.403, spell 501614 Bloodmoon Blast, Ascension combat log, private archive"
+    },
+    {
+      "spell": 500126,
+      "name": "Lunge",
+      "citation": "2026-08-23 18:32:31.659, spell 500126 Lunge, Ascension combat log, private archive"
+    },
+    {
+      "spell": 500169,
+      "name": "Claw Sweep",
+      "citation": "2026-08-23 18:30:55.994, spell 500444 Claw Sweep, Ascension combat log, private archive"
+    },
+    {
+      "spell": 504296,
+      "name": "Blood Shield",
+      "citation": "2026-08-23 18:28:27.773, spell 504296 Blood Shield, Ascension combat log, private archive"
+    },
+    {
+      "spell": 504849,
+      "name": "Vital Shield",
+      "citation": "2026-08-19 22:05:44.791, spell 504849 Vital Shield, Ascension combat log, private archive"
+    },
+    {
+      "spell": 504897,
+      "name": "Coagulated Shield",
+      "citation": "2026-08-09 18:03:51.916, spell 504897 Coagulated Shield, Ascension combat log, private archive"
+    },
+    {
+      "spell": 562228,
+      "name": "Detect Life",
+      "citation": "ascensionsidekick data.js coaKits Bloodmage Sanguine kit, fetched 2026-09-18"
+    },
+    {
+      "spell": 562720,
+      "name": "Blood Curse",
+      "citation": "ascensionsidekick data.js coaKits Bloodmage Accursed kit, fetched 2026-09-18"
+    },
+    {
+      "spell": 562723,
+      "name": "Moon Gaze",
+      "citation": "2026-08-17 20:07:10.386, spell 562723 Moon Gaze, Ascension combat log, private archive"
+    },
+    {
+      "spell": 572116,
+      "name": "Greater Bloodthorns",
+      "citation": "2026-08-23 18:28:29.489, spell 572116 Greater Bloodthorns, Ascension combat log, private archive"
+    },
+    {
+      "spell": 572305,
+      "name": "Hypovolemic Shock",
+      "citation": "2026-08-23 18:52:48.518, spell 572412 Hypovolemic Shock, Ascension combat log, private archive"
+    },
+    {
+      "spell": 572400,
+      "name": "Bloodsoaked Offering",
+      "citation": "2026-08-08 18:41:21.485, spell 572403 Bloodsoaked Offering, Ascension combat log, private archive"
+    },
+    {
+      "spell": 572404,
+      "name": "Greater Bloodsoaked Offering",
+      "citation": "ascensionsidekick data.js coaKits Bloodmage Sanguine kit, fetched 2026-09-18"
+    },
+    {
+      "spell": 573299,
+      "name": "Animated Blood",
+      "citation": "2026-08-31 20:33:42.749, spell 573357 Animated Blood, Ascension combat log, private archive"
+    },
+    {
+      "spell": 680299,
+      "name": "Greater Sanguinary Offering",
+      "citation": "2026-08-23 18:28:31.012, spell 680299 Greater Sanguinary Offering, Ascension combat log, private archive"
+    },
+    {
+      "spell": 706605,
+      "name": "Blood Feast",
+      "citation": "2026-08-09 17:29:40.378, spell 706605 Blood Feast, Ascension combat log, private archive"
+    },
+    {
+      "spell": 706630,
+      "name": "Sanguinary Offering",
+      "citation": "2026-08-04 15:08:10.722, spell 707338 Sanguinary Offering, Ascension combat log, private archive"
+    },
+    {
+      "spell": 707900,
+      "name": "Blood Tap",
+      "citation": "2026-08-31 20:33:37.864, spell 707900 Blood Tap, Ascension combat log, private archive"
+    },
+    {
+      "spell": 800156,
+      "name": "Bloodfang Bite",
+      "citation": "2026-08-23 18:32:19.754, spell 572551 Bloodfang Bite, Ascension combat log, private archive"
+    },
+    {
+      "spell": 800175,
+      "name": "Running Wild",
+      "citation": "ascensionsidekick data.js coaKits Bloodmage Eternal kit, fetched 2026-09-18"
+    },
+    {
+      "spell": 800772,
+      "name": "Taldaram's Torment",
+      "citation": "2026-08-31 20:31:52.242, spell 802580 Taldaram's Torment, Ascension combat log, private archive"
+    },
+    {
+      "spell": 800774,
+      "name": "Sanguine Rupture",
+      "citation": "2026-08-23 18:42:09.291, spell 572907 Sanguine Rupture, Ascension combat log, private archive"
+    },
+    {
+      "spell": 801563,
+      "name": "Vampyr Bite",
+      "citation": "2026-08-17 20:17:25.763, spell 803585 Vampyr Bite, Ascension combat log, private archive"
+    },
+    {
+      "spell": 801957,
+      "name": "Bare Fangs",
+      "citation": "2026-06-08 01:22:30.666, spell 801957 Bare Fangs, Ascension combat log, private archive"
+    },
+    {
+      "spell": 802310,
+      "name": "Sanguine Mend",
+      "citation": "2026-08-31 20:34:35.709, spell 504085 Sanguine Mend, Ascension combat log, private archive"
+    },
+    {
+      "spell": 802313,
+      "name": "Bloodthorns",
+      "citation": "2026-08-04 15:08:09.122, spell 501665 Bloodthorns, Ascension combat log, private archive"
+    },
+    {
+      "spell": 804203,
+      "name": "Apotheosis",
+      "citation": "2026-08-23 18:42:06.973, spell 804203 Apotheosis, Ascension combat log, private archive"
+    },
+    {
+      "spell": 804685,
+      "name": "Bloodbolt",
+      "citation": "2026-08-31 20:31:57.008, spell 578305 Bloodbolt, Ascension combat log, private archive"
+    },
+    {
+      "spell": 806182,
+      "name": "Shadow Vigil",
+      "citation": "2026-08-23 18:49:43.482, spell 806182 Shadow Vigil, Ascension combat log, private archive"
+    },
+    {
+      "spell": 1108459,
+      "name": "Slaughterhouse Offering",
+      "citation": "2026-08-09 19:30:16.391, spell 1108463 Slaughterhouse Offering, Ascension combat log, private archive"
+    },
+    {
+      "spell": 1200012,
+      "name": "Blood Covenant",
+      "citation": "2026-08-23 18:25:38.772, spell 1200012 Blood Covenant, Ascension combat log, private archive"
+    }
+  ],
   "disabled_foreign_effects": [],
   "foreign_aura_grants": [],
   "effect_overrides": [],
