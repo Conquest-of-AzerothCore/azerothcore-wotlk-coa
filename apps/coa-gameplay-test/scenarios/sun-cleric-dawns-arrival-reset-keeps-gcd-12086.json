@@ -10,12 +10,14 @@
     "client action button (same mechanism as Electrocutioner #11288 in SpellEffects.cpp), Gavel of Light looked ready",
     "immediately after Dawnbreak while the server still refused it with SPELL_FAILED_NOT_READY for 1.5 s. Reduce now",
     "schedules a next-update resend of the remaining global cooldown via SMSG_SPELL_COOLDOWN for each active cleared rank",
-    "(matching ResendRemainingGlobalCooldowns in SpellEffects.cpp). The scenario learns Gavel of Light ranks 1 through 8 so",
-    "502473 is the active owned rank while 800611 is superseded, puts 502473 on its 5 s category cooldown, then casts",
+    "(matching ResendRemainingGlobalCooldowns in SpellEffects.cpp). Gavel of Light is a mana spell (PowerType 0), so",
+    "SpellInfo::ComputeIsStackableWithRanks returns true and Player::addSpell keeps every learned rank active (ranks 1..8",
+    "including 800611 and 502473 both have spell_active == 1). The scenario learns Gavel of Light ranks 1 through 8, puts",
+    "502473 on its 5 s category cooldown (confirming no SMSG_SPELL_COOLDOWN packet is sent by the cast itself), then casts",
     "Dawnbreak until Dawn's Arrival (503691) procs (up to 20 casts at 40%: miss probability 0.6^20 = 3.7e-5). After the",
-    "reset, 502473's server cooldown is 0, 502473 receives SMSG_SPELL_COOLDOWN with 1..1500 ms for the remaining GCD,",
-    "superseded rank 800611 receives no cooldown packet (-1), and after the GCD clears the free Gavel cast succeeds and",
-    "consumes 503691 without starting a new server cooldown."
+    "reset, 502473's server cooldown is 0, active learned ranks 502473 and 800611 receive SMSG_SPELL_COOLDOWN with",
+    "1..1500 ms for the remaining GCD, non-Gavel Dawnbreak (800654) receives no cooldown packet (-1), and after the GCD",
+    "clears the free Gavel cast succeeds and consumes 503691 without starting a new server cooldown."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -64,11 +66,11 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: Gavel of Light rank 1 (800611) is superseded",
+      "label": "SETUP: Gavel of Light rank 1 (800611) also remains active (mana spell downranking)",
       "actor": "cleric",
       "metric": "spell_active",
       "spell": 800611,
-      "equals": 0
+      "equals": 1
     },
     {
       "action": "assert",
@@ -100,6 +102,14 @@
       "metric": "cooldown_ms",
       "spell": 502473,
       "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: normal Gavel cast sent no SMSG_SPELL_COOLDOWN packet for 502473",
+      "actor": "cleric",
+      "metric": "spell_cooldown_packet_ms",
+      "spell": 502473,
+      "equals": -1
     },
     {
       "action": "assert",
@@ -140,7 +150,7 @@
     },
     {
       "action": "assert",
-      "label": "CONTRACT: the reset re-sent the remaining global cooldown packet for active rank 502473",
+      "label": "DISCRIMINATING: the reset re-sent the remaining global cooldown packet for active rank 502473",
       "actor": "cleric",
       "metric": "spell_cooldown_packet_ms",
       "spell": 502473,
@@ -149,10 +159,19 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: superseded rank 800611 received no cooldown packet",
+      "label": "CONTRACT: the reset also re-sent the remaining global cooldown packet for active learned rank 800611",
       "actor": "cleric",
       "metric": "spell_cooldown_packet_ms",
       "spell": 800611,
+      "min": 1,
+      "max": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: non-Gavel Dawnbreak (800654) received no cooldown resend packet",
+      "actor": "cleric",
+      "metric": "spell_cooldown_packet_ms",
+      "spell": 800654,
       "equals": -1
     },
     {
