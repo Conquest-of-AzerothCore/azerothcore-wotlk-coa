@@ -22,7 +22,6 @@
 #include "WorldSession.h"
 #include <algorithm>
 #include <cmath>
-#include <limits>
 #include <optional>
 
 namespace AscensionNecromancer
@@ -494,9 +493,6 @@ void Order(Player* player, Unit* target, uint32 spell)
 namespace
 {
 using namespace AscensionNecromancer;
-constexpr uint32 DataCommandSpell = 1;
-constexpr uint32 DataEmpoweredPlagueBonus = 2;
-
 class npc_ascension_necromancer : public ScriptedAI
 {
   public:
@@ -506,7 +502,6 @@ class npc_ascension_necromancer : public ScriptedAI
     ObjectGuid _breathTarget;
     EventMap _events;
     uint32 _command = 0;
-    uint32 _empoweredPlagueBonus = 0;
     uint32 _spell = 0;
     uint8 _cost = 0;
     bool _exploded = false;
@@ -628,14 +623,8 @@ class npc_ascension_necromancer : public ScriptedAI
     }
     void SetData(uint32 key, uint32 value) override
     {
-        if (key == DataCommandSpell)
+        if (key == 1)
             _command = value;
-    }
-    uint32 GetData(uint32 key) const override
-    {
-        if (key == DataEmpoweredPlagueBonus)
-            return _empoweredPlagueBonus;
-        return 0;
     }
     void MoveInLineOfSight(Unit* who) override
     {
@@ -735,9 +724,7 @@ class npc_ascension_necromancer : public ScriptedAI
             Cast(me, target, 801513);
             break;
         case 50068:
-            _empoweredPlagueBonus = uint32(std::max(0, Amount(505223, 1, player)));
-            Cast(me, me, 504022);
-            _empoweredPlagueBonus = 0;
+            Copy(me, me, 504022, std::max(1, Amount(504022, 0, player) + Amount(505223, 1, player)));
             break;
         case 50115:
             _events.RescheduleEvent(5, 3s);
@@ -1116,23 +1103,9 @@ class spell_ascension_necromancer_command_area : public SpellScript
     void Reach1(std::list<WorldObject*>& targets) { Reach(targets, EFFECT_1); }
     void Reach2(std::list<WorldObject*>& targets) { Reach(targets, EFFECT_2); }
 
-    void EmpowerAbominationPlague(SpellEffIndex)
-    {
-        Creature* minion = GetCaster() ? GetCaster()->ToCreature() : nullptr;
-        uint32 bonus = minion && minion->AI() ? minion->AI()->GetData(DataEmpoweredPlagueBonus) : 0;
-        if (!bonus)
-            return;
-        int32 current = GetEffectValue();
-        uint32 headroom = uint32(std::numeric_limits<int32>::max() - std::max(0, current));
-        SetEffectValue(current + int32(std::min(bonus, headroom)));
-    }
-
     void Register() override
     {
         SpellInfo const* info = sSpellMgr->GetSpellInfo(m_scriptSpellId);
-        if (m_scriptSpellId == 504022 && info && info->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE)
-            OnEffectLaunchTarget += SpellEffectFn(
-                spell_ascension_necromancer_command_area::EmpowerAbominationPlague, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         for (uint8 index = EFFECT_0; index < MAX_SPELL_EFFECTS; ++index)
         {
             std::optional<Targets> target = EnemyArea(info->Effects[index]);
