@@ -3,7 +3,7 @@
   "name": "Worldforged Loch Modan pickups sit at or above ground and open (#10219)",
   "contract": [
     "#10219 reported Loch Modan Worldforged items spawning underground. An audit of all Loch Modan spawns from the 2026_09_23_05 realm-map pass against calibrated Eastern Kingdoms terrain heights and VMaps found six active pickups still 0.515 to 1.638 yd under terrain: 6940384 (Muck Coated Pendant, 97118, -1.638 yd), 6940402 (Stolen Shipment, 97121, -1.621 yd), 6940507 (Tattered Cloth Roll, 95533, -1.261 yd), 6941158 (Special Brewing Gear, 518319, -1.261 yd), 6941035 (Wreckage Piece, 95531, -0.692 yd), and 6940726 (Open Wound, 95532, -0.515 yd).",
-    "rev_20261126_10219_worldforged_loch_modan_underground.sql restores the five realm-dump spots (6901492, 6901495 inside Animalden.wmo, 6903342, 6901047 on Gyrocopter.m2, 6901048) and applies the Loch Modan LootCollector coordinate (-5268.45, -4132.88, 335.382) to 6941158. Expected: all six stand at their restored coordinates with spawn_ground_gap >= -0.3 yd (all six fail pre-fix), the five dry pickups are not submerged (6940384 Drowned Pendant rests on the Loch bed), and a player at 6941158 opens it for loot."
+    "rev_20261126_10219_worldforged_loch_modan_underground.sql restores the five realm-dump spots (6901492, 6901495 inside Animalden.wmo, 6903342 inside Taurentent01.wmo, 6901047 on Gyrocopter.m2, 6901048) and applies the Loch Modan LootCollector coordinate (-5268.45, -4132.88, 335.382) to 6941158. Expected: all six stand at their restored coordinates (all six fail pre-fix); the four open-sky spawns measure spawn_ground_gap >= -0.3 yd; 6940402 (flush on Animalden.wmo floor 367.110 with outer roof at +1.985 yd inside ProbeTerrain's +2.0 yd probe) and 6940507 (flush on .map 345.734 with Taurentent01.wmo roof at +1.623 yd) discriminate via spawn_headroom (0.923 yd vs 10.0 yd broken and 1.323 yd vs 0.782 yd broken); the five dry pickups are not submerged; and a player at 6941158 opens it for loot."
   ],
   "timeout_ms": 60000,
   "location": {
@@ -68,13 +68,13 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Stolen Shipment 6940402 sits above ground instead of -1.62 yd underground",
+      "label": "DISCRIMINATING: Stolen Shipment 6940402 sits under Animalden.wmo inner ceiling (0.92 yd headroom vs 10.0 yd outside)",
       "actor": "p",
-      "metric": "spawn_ground_gap",
+      "metric": "spawn_headroom",
       "guid": 6940402,
       "spawn_type": "gameobject",
-      "min": -0.3,
-      "max": 0.8
+      "min": 0.7,
+      "max": 1.2
     },
     {
       "action": "assert",
@@ -99,13 +99,13 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Tattered Cloth Roll 6940507 rests on ground instead of -1.26 yd underground",
+      "label": "DISCRIMINATING: Tattered Cloth Roll 6940507 sits under Taurentent01.wmo roof (1.32 yd headroom vs 0.78 yd broken)",
       "actor": "p",
-      "metric": "spawn_ground_gap",
+      "metric": "spawn_headroom",
       "guid": 6940507,
       "spawn_type": "gameobject",
-      "min": -0.3,
-      "max": 0.3
+      "min": 1.0,
+      "max": 1.6
     },
     {
       "action": "assert",
