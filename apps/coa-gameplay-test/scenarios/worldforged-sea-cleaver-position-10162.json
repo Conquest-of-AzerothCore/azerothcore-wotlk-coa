@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Worldforged Sea Cleaver stands at its recorded Stranglethorn shore spot (#10162)",
+  "contract": "#10162 reported Sea Cleaver (item 415058, Pirate's Lost Axe entry 95717, guid 6941038) missing at Jaguero Isle in Stranglethorn Vale. The realm-map pass placed it 24.56 yd off-shore and 8 yd underwater at (-14826.400, 561.200, -7.989). Restoring the first-pass realm-dump spot (row 6901140: -14816.906, 583.855, 4.415, +1.92 yd above .map terrain 2.4954) puts it on dry land within reach of the reporter's spot. Expected: it stands at the restored spot, is not submerged, has clear headroom, and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -14815.195,
+    "y": 582.016,
+    "z": 1.94,
+    "o": 2.3
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the pickup is in the area",
+      "metric": "nearby_gameobject_count",
+      "entry": 95717,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup stands at its first-pass spot (-14816.906, 583.855, 4.415)",
+      "metric": "spawn_distance",
+      "x": -14816.906,
+      "y": 583.855,
+      "z": 4.415,
+      "max": 0.3,
+      "guid": 6941038,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup is on dry land, not submerged in the ocean",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6941038,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup has open headroom",
+      "metric": "spawn_headroom",
+      "min": 5.0,
+      "guid": 6941038,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95717
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
