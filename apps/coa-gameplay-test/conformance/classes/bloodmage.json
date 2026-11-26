@@ -2862,7 +2862,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Spell power scaling check for Vampiric Fang 553272 (rev_20261010_91_bloodmage_coefficients.sql sets direct_damage = 0.34 on rank-1 804726): at +2000 SP, 0.34 * 2000 = +680 -> [361+680, 412+680] = [1041, 1092] non-crit Shadow damage against 0 uncast control (disjoint from 0 SP [361, 412] and 2x SP [1721, 1772]). Reference search 2026-11-26: see damage_base."
+      "observe_source": "Spell power scaling check for Vampiric Fang 553272 (rev_20261010_91_bloodmage_coefficients.sql sets direct_bonus = 0.34 on rank-1 804726): at +2000 SP, 0.34 * 2000 = +680 -> [361+680, 412+680] = [1041, 1092] non-crit Shadow damage against 0 uncast control (disjoint from 0 SP [361, 412] and 2x SP [1721, 1772]). Reference search 2026-11-26: see damage_base."
     },
     {
       "spell": 553272,
@@ -3173,7 +3173,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "$s1 = 50 (504071 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 49 + DieSides 1 = +50%, MiscValue 0 SPELLMOD_DAMAGE, EffectSpellClassMask[1] 32 matching Vampiric Feast 804934 SpellFamilyFlags[1] 32; Spell.dbc). Vampiric Feast 804934 (triggered by Transgression 801076 on direct spell damage, AscensionBloodmageTalents.cpp:887-917, rev_20261006_95) has SPELL_EFFECT_HEALTH_LEECH EffectValueMultiplier 0.5 and SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (0x20000000): SpellDamageBonusDone returns early on IGNORE_CASTER_MODIFIERS (Unit.cpp:9794) leaving damage unchanged, while SpellHealingBonusDone applies SPELLMOD_DAMAGE (Unit.cpp:10964), raising heal/damage from 0.50 (before learning 504071) to 0.75 (after learning 504071, tol 0.01 excludes 0.50 and 1.00). Casts Transgression 801076 (verified via after_setup_reads) then Bloodbolt 578305 at dummy 10 yd away (~333 ms flight, wait_ms 1500 gives >1100 ms buffer). Reference search 2026-11-26: coa-history 804934 Vampiric Feast 257 damage (mean 323.0) and 257 heal (mean 161.0 = 0.50x) across 3 logs, 504071 passive 0 events; coabuildhub 504071 matches verbatim."
+      "observe_source": "$s1 = 50 (504071 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 49 + DieSides 1 = +50%, MiscValue 0 SPELLMOD_DAMAGE, EffectSpellClassMask[1] 32 matching Vampiric Feast 804934 SpellFamilyFlags[1] 32; Spell.dbc). Tooltip promises +50% leech on Vampiric Feast 804934 (triggered by Transgression 801076 on direct spell damage, AscensionBloodmageTalents.cpp:887-917, rev_20261006_95, base SPELL_EFFECT_HEALTH_LEECH EffectValueMultiplier 0.5 -> expected heal/damage ratio 0.50 before learning 504071 and 0.75 after, tol 0.01 excluding 0.50 and 1.00). Server defect: 804934 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (0x20000000), so SpellInfo::IsAffectedBySpellMods / SpellInfo::IsAffectedBySpellMod (SpellInfo.cpp:1549-1579) rejects 504071's modifier (and 504071 Effect[0] uses SPELLMOD_DAMAGE rather than SPELLMOD_VALUE_MULTIPLIER), leaving heal/damage at ~0.50. Casts Transgression 801076 (verified via after_setup_reads) then Bloodbolt 578305 at dummy 10 yd away (~333 ms flight, wait_ms 1500 gives >1100 ms buffer). Reference search 2026-11-26: coa-history 804934 Vampiric Feast 257 damage (mean 323.0) and 257 heal (mean 161.0 = 0.50x) across 3 logs, 504071 passive 0 events; coabuildhub 504071 matches verbatim."
     },
     {
       "spell": 504071,
@@ -3231,11 +3231,11 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "$/1000;561152s1 = 5000 ms (561152 Effect[0] 177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 4999 + DieSides 1 = +5000 ms on Transgression 801076, base duration 15000 ms -> 20000 ms; Spell.dbc). AscensionBloodmageSecondary.cpp:74,340-349 casts 561152 when Torture 504071 is active and Vampiric Fang 553272 consumes >= 9 stacks of Thirst 706613. Casts Transgression 801076 (verified via after_setup_reads), waits setup_wait_ms 1600 ms, then casts Vampiric Fang 553272 at dummy with 9 stacks of Thirst 706613: without 504071 (control), 801076 expires at 15000 ms and reads 0 at 18000 ms post-Fang (19600 ms post-Transgression); with 504071 learned, 801076 reads present (1) at game_time.after [17900, 18300] ms (19500..19900 ms post-Transgression, > +4500 ms = -10% of 5s extension) and expired (0) at game_time.expired [18650, 19150] ms (20250..20750 ms post-Transgression, bracketing the 5000 ms extension within +-10% on both sides). Reference search 2026-11-26: coa-history 801076 6 casts across 3 logs; coabuildhub 504071 matches verbatim."
+      "observe_source": "$/1000;561152s1 = 5000 ms (561152 Effect[0] 177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 4999 + DieSides 1 = +5000 ms on Transgression 801076, base duration 15000 ms -> 20000 ms; Spell.dbc). AscensionBloodmageSecondary.cpp:74,340-349 casts 561152 when Torture 504071 is active and Vampiric Fang 553272 consumes >= 9 stacks of Thirst 706613. Casts Transgression 801076 (verified via after_setup_reads), waits setup_wait_ms 1600 ms, then casts Vampiric Fang 553272 at dummy with 9 stacks of Thirst 706613: without 504071 (control), 801076 expires at 15000 ms and reads 0 at 18000 ms post-Fang (19600 ms post-Transgression); with 504071 learned, 801076 reads present (1) at game_time.after [17900, 18300] ms (19500..19900 ms post-Transgression, > +4500 ms = -10% of the 5 s extension). Paired with extends_transgression_gone to bracket the 5000 ms extension within +-10% on both sides. Reference search 2026-11-26: coa-history 801076 6 casts across 3 logs; coabuildhub 504071 matches verbatim."
     },
     {
       "spell": 504071,
-      "name": "Torture (extended Transgression expires by 20.6 sec)",
+      "name": "Torture (extended Transgression expires by 20.5 sec)",
       "kind": "metric_delta",
       "variant": "extends_transgression_gone",
       "label_suffix": "extends_transgression_gone",
@@ -3285,11 +3285,11 @@
       "game_time": {
         "after": [
           18650,
-          19150
+          18900
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "$/1000;561152s1 = 5000 ms (561152 Effect[0] 177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 4999 + DieSides 1 = +5000 ms on Transgression 801076, base duration 15000 ms -> 20000 ms; Spell.dbc). AscensionBloodmageSecondary.cpp:74,340-349 casts 561152 when Torture 504071 is active and Vampiric Fang 553272 consumes >= 9 stacks of Thirst 706613. Casts Transgression 801076 (verified via after_setup_reads), waits setup_wait_ms 1600 ms, then casts Vampiric Fang 553272 at dummy with 9 stacks of Thirst 706613: without 504071 (control), 801076 expires at 15000 ms and reads 0 at 18000 ms post-Fang (19600 ms post-Transgression); with 504071 learned, 801076 reads present (1) at game_time.after [17900, 18300] ms (19500..19900 ms post-Transgression, > +4500 ms = -10% of 5s extension) and expired (0) at game_time.expired [18650, 19150] ms (20250..20750 ms post-Transgression, bracketing the 5000 ms extension within +-10% on both sides). Reference search 2026-11-26: coa-history 801076 6 casts across 3 logs; coabuildhub 504071 matches verbatim.",
+      "observe_source": "Upper-bound expiry companion to extends_transgression_held for Torture 504071 (+5000 ms extension on Transgression 801076 -> 20000 ms total; Spell.dbc 561152). Casts Transgression 801076 (verified via after_setup_reads), waits setup_wait_ms 1600 ms, then casts Vampiric Fang 553272 at dummy with 9 stacks of Thirst 706613 and waits wait_ms 18800 ms: Transgression 801076 reads expired (0 -> 0) at game_time.after [18650, 18900] ms (20250..20500 ms post-Transgression, <= +5500 ms = +10% of the 5 s extension), while ally_arm confirms 561152 cast once in the treatment phase (0 -> 1) so 0 is genuine expiry of the extended aura. Paired with extends_transgression_held to bracket the 5000 ms extension within +-10% on both sides. Reference search 2026-11-26: see extends_transgression_held.",
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -3383,7 +3383,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Below-threshold boundary control (8 vs 9 stacks of Thirst 706613) for Torture 504071 (AscensionBloodmageSecondary.cpp:74 TORTURE_MINIMUM_THIRST_STACKS = 9): with 8 stacks of Thirst 706613, Transgression 801076 (verified active via after_setup_reads) expires at its base 15000 ms and reads 0 at 14400 ms post-Fang (16000 ms post-Transgression, game_time.after [14300, 14700] ms) in both phases, and ally_arm proves 561152 never cast (0 -> 0). Reference search 2026-11-26: see extends_transgression_9."
+      "observe_source": "Below-threshold boundary control (8 vs 9 stacks of Thirst 706613) for Torture 504071 (AscensionBloodmageSecondary.cpp:74 TORTURE_MINIMUM_THIRST_STACKS = 9): with 8 stacks of Thirst 706613, Transgression 801076 (verified active via after_setup_reads) expires at its base 15000 ms and reads 0 at 14400 ms post-Fang (16000 ms post-Transgression, game_time.after [14300, 14700] ms) in both phases, and ally_arm proves 561152 never cast (0 -> 0). Reference search 2026-11-26: see extends_transgression_held."
     },
     {
       "spell": 806421,
@@ -3432,6 +3432,21 @@
         "count": 1,
         "wait_ms": 300
       },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "health",
+            "before_expected": 39925,
+            "expected": 39925,
+            "tolerance": 0,
+            "source": "Molten Armor 35916 (75 Fire damage) lands on caster in both phases (40000 -> 39925 HP = 39.925% > 35%)"
+          }
+        ]
+      },
       "metric": "aura",
       "fields": {
         "spell": 504284
@@ -3441,7 +3456,7 @@
       "wait_ms": 300,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Above-threshold negative control (40% HP > 35%) for Essence Harvester 806421 (AscensionBloodmageTalents.cpp:1009-1020): struck by Molten Armor 35916 (75 dmg -> 39.925% HP > 35%) with 806421 learned does not trigger Wretched 504284 (0 -> 0). Reference search 2026-11-26: see below_35_grants_wretched."
+      "observe_source": "Above-threshold negative control (40% HP > 35%) for Essence Harvester 806421 (AscensionBloodmageTalents.cpp:1009-1020): struck by Molten Armor 35916 (75 dmg -> 39925/100000 HP = 39.925% > 35%, proven landed in both phases via ally_arm caster health = 39925 -> 39925) with 806421 learned does not trigger Wretched 504284 (0 -> 0). Reference search 2026-11-26: see below_35_grants_wretched."
     },
     {
       "spell": 806421,
@@ -3482,75 +3497,109 @@
     },
     {
       "spell": 806421,
-      "name": "Essence Harvester (1-minute ICD blocks re-trigger at ~55.6 sec)",
+      "name": "Essence Harvester (1-minute ICD blocks re-trigger at 55.0 sec)",
       "kind": "metric_delta",
       "variant": "icd_held",
       "label_suffix": "icd_held",
       "quote": "Can only occur once per minute.",
       "trigger_spell": 60235,
       "gate_spell": 806421,
-      "gate_timing": "start",
       "target": "caster",
       "disable_regeneration": true,
-      "strike": {
+      "caster_health": [
+        30000,
+        100000
+      ],
+      "after_trigger_strike": {
         "spell": 35916,
-        "health": 30000,
-        "max_health": 100000,
-        "count": 1,
-        "wait_ms": 300
+        "delay_ms": 100,
+        "count": 2,
+        "wait_ms": 55000
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "health",
+            "before_expected": 30000,
+            "expected": 29850,
+            "tolerance": 0,
+            "source": "Both 75-damage Molten Armor 35916 strikes land on caster in the treatment phase (30000 -> 29925 -> 29850; unstruck control stays 30000)"
+          }
+        ]
       },
       "metric": "aura_apply_count",
       "fields": {
         "spell": 504284
       },
-      "before_expected": 1,
+      "before_expected": 0,
       "expected": 1,
       "wait_ms": 300,
-      "expire_ms": 55000,
+      "expire_ms": 500,
       "game_time": {
         "after": [
-          250,
-          600
+          110200,
+          110800
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "rev_20260920_52_bloodmage_scripted_procs.sql sets spell_proc.Cooldown = 60000 ms (1 minute) on 806421. With 806421 learned at start, first Molten Armor 35916 strike at 30% HP applies Wretched 504284 (aura_apply_count = 1); second strike ~55.6 s later (300 ms strike wait + 300 ms trigger wait + 55000 ms expire_ms, past -10% = 54.0 s and < 60.0 s) is blocked by the 60 s ICD so aura_apply_count stays 1. Reference search 2026-11-26: see below_35_grants_wretched."
+      "observe_source": "rev_20260920_52_bloodmage_scripted_procs.sql sets spell_proc.Cooldown = 60000 ms (1 minute) on 806421. Control phase (before learning 806421) is unstruck at 30000/100000 HP (aura_apply_count(504284) = 0, health = 30000). Treatment phase learns 806421 and uses after_trigger_strike (delay_ms 100, count 2, wait_ms 55000) + spec wait_ms 300 so both Molten Armor 35916 strikes sit inside game_time.after [110200, 110800] ms (100 + 2*55000 + 300 = 110400 ms; strike-to-strike interval = 55000 ms, strictly between -10% = 54000 ms and 60000 ms): strike #1 applies Wretched 504284 (count = 1), strike #2 at +55000 ms is blocked by the 60 s ICD (count stays 1), and ally_arm proves both 75-damage strikes landed (health 30000 -> 29850). Reference search 2026-11-26: see below_35_grants_wretched."
     },
     {
       "spell": 806421,
-      "name": "Essence Harvester (1-minute ICD reopens by ~62.1 sec)",
+      "name": "Essence Harvester (1-minute ICD reopens by 61.5 sec)",
       "kind": "metric_delta",
       "variant": "icd_reopen",
       "label_suffix": "icd_reopen",
       "quote": "Can only occur once per minute.",
       "trigger_spell": 60235,
       "gate_spell": 806421,
-      "gate_timing": "start",
       "target": "caster",
       "disable_regeneration": true,
-      "strike": {
+      "caster_health": [
+        30000,
+        100000
+      ],
+      "after_trigger_strike": {
         "spell": 35916,
-        "health": 30000,
-        "max_health": 100000,
-        "count": 1,
-        "wait_ms": 300
+        "delay_ms": 100,
+        "count": 2,
+        "wait_ms": 61500
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "health",
+            "before_expected": 30000,
+            "expected": 29850,
+            "tolerance": 0,
+            "source": "Both 75-damage Molten Armor 35916 strikes land on caster in the treatment phase (30000 -> 29925 -> 29850; unstruck control stays 30000)"
+          }
+        ]
       },
       "metric": "aura_apply_count",
       "fields": {
         "spell": 504284
       },
-      "before_expected": 1,
+      "before_expected": 0,
       "expected": 2,
       "wait_ms": 300,
-      "expire_ms": 61500,
+      "expire_ms": 500,
       "game_time": {
         "after": [
-          250,
-          600
+          123200,
+          123800
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Companion to icd_held for Essence Harvester 806421 (60000 ms ICD): second Molten Armor 35916 strike ~62.1 s later (300 + 300 + 61500 ms, below +10% = 66.0 s) reopens the 60 s ICD so aura_apply_count(504284) becomes 2. Together icd_held (~55.6 s) and icd_reopen (~62.1 s) bracket 60 s inside +-10% on both sides. Reference search 2026-11-26: see below_35_grants_wretched."
+      "observe_source": "Companion to icd_held for Essence Harvester 806421 (60000 ms ICD): treatment phase uses after_trigger_strike (delay_ms 100, count 2, wait_ms 61500) + spec wait_ms 300 so both Molten Armor 35916 strikes sit inside game_time.after [123200, 123800] ms (100 + 2*61500 + 300 = 123400 ms; strike-to-strike interval = 61500 ms, strictly between 60000 ms and +10% = 66000 ms), reopening the 60 s ICD so aura_apply_count(504284) reads 0 -> 2 while ally_arm proves both 75-damage strikes landed (health 30000 -> 29850). Together icd_held (55000 ms) and icd_reopen (61500 ms) bracket 60000 ms inside +-10% on both sides. Reference search 2026-11-26: see below_35_grants_wretched."
     },
     {
       "spell": 806421,
@@ -3658,7 +3707,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "$t1 = 1000 ms (Wretched 504284 Effect[0] EffectAmplitude 1000 ms; Spell.dbc). Strike lands 100 ms before trigger 60235: at game_time.after [4650, 4850] ms (4750..4950 ms after strike, strictly < 5000 ms), spell_energize_total(504283) reads 400 (4 ticks; a 900 ms period = -10% would already have 5 ticks = 500 at 4500 ms); at game_time.expired [5050, 5250] ms (5150..5350 ms after strike, strictly > 5000 ms), it reads 500 (5 ticks; an 1100 ms period = +10% would still read 400 until 5500 ms). Brackets the 1000 ms period inside +-10% on both sides. Reference search 2026-11-26: see below_35_grants_wretched.",
+      "observe_source": "$t1 = 1000 ms (Wretched 504284 Effect[0] EffectAmplitude 1000 ms; Spell.dbc). Treatment phase triggers 60235 then applies after_trigger_strike (delay_ms 100, wait_ms 100 -> strike lands +100 ms after 60235) followed by wait_ms 4750 and expiry_wait_ms 400: at game_time.after [4850, 5050] ms (4750..4950 ms after strike, strictly < 5000 ms), spell_energize_total(504283) reads 400 (4 ticks; a 900 ms period = -10% would already have 5 ticks = 500 at 4500 ms); at game_time.expired [5250, 5450] ms (5150..5350 ms after strike, strictly > 5000 ms), it reads 500 (5 ticks; an 1100 ms period = +10% would still read 400 until 5500 ms). Brackets the 1000 ms period inside +-10% on both sides. Reference search 2026-11-26: see below_35_grants_wretched.",
       "gate_timing": "start",
       "trigger_only_after": true,
       "caster_health": [
@@ -3704,7 +3753,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "$d = 10000 ms (Wretched 504284 DurationIndex 1 = 10000 ms; Spell.dbc). Strike lands 100 ms before trigger 60235: before learning 806421 (control), Wretched 504284 reads 0; after learning 806421, Wretched 504284 reads present (1) at game_time.after [9250, 9650] ms (9350..9750 ms after strike, > 9000 ms = -10%) and expired (0) at game_time.expired [10400, 10800] ms (10500..10900 ms after strike, < 11000 ms = +10%), bracketing 10000 ms inside +-10% on both sides. Reference search 2026-11-26: see below_35_grants_wretched.",
+      "observe_source": "$d = 10000 ms (Wretched 504284 DurationIndex 1 = 10000 ms; Spell.dbc). Treatment phase triggers 60235 then applies after_trigger_strike (delay_ms 100, wait_ms 100 -> strike lands +100 ms after 60235) followed by wait_ms 9300 and expiry_wait_ms 1200: control reads 0; treatment reads Wretched 504284 present (1) at game_time.after [9350, 9750] ms (9250..9650 ms after strike, > 9000 ms = -10%) and expired (0) at game_time.expired [10550, 10950] ms (10450..10850 ms after strike, < 11000 ms = +10%), bracketing 10000 ms inside +-10% on both sides. Reference search 2026-11-26: see below_35_grants_wretched.",
       "gate_timing": "start",
       "trigger_only_after": true,
       "caster_health": [
@@ -3883,7 +3932,7 @@
           9350
         ]
       },
-      "observe_source": "$t2 = 5000 ms (560256 Effect[1] EffectAmplitude 5000 ms; Spell.dbc). Learn happens 500 ms before trigger 60235: at game_time.after [9050, 9350] ms (9550..9850 ms after learn, strictly < 10000 ms), spell_energize_total(560256) reads 40 (1 tick; a 4500 ms period = -10% would already have 2 ticks = 80 at 9000 ms); at game_time.expired [9750, 10050] ms (10250..10550 ms after learn, strictly > 10000 ms), it reads 80 (2 ticks; a 5500 ms period = +10% would still read 40 until 11000 ms). Brackets 5000 ms inside +-10% on both sides. Reference search 2026-11-26: see max_rage."
+      "observe_source": "$t2 = 5000 ms (560256 Effect[1] EffectAmplitude 5000 ms; Spell.dbc). Learn happens 500 ms before trigger 60235: at game_time.after [9050, 9350] ms (9550..9850 ms after learn, strictly < 10000 ms), spell_energize_total(560256) reads 40 (1 tick; a 4500 ms period = -10% would already have 2 ticks = 80 at 9000 ms). Paired with regen_period_after to bracket 5000 ms inside +-10% on both sides. Reference search 2026-11-26: see max_rage."
     },
     {
       "spell": 560256,
@@ -3917,7 +3966,7 @@
           10050
         ]
       },
-      "observe_source": "$t2 = 5000 ms (560256 Effect[1] EffectAmplitude 5000 ms; Spell.dbc). Learn happens 500 ms before trigger 60235: at game_time.after [9050, 9350] ms (9550..9850 ms after learn, strictly < 10000 ms), spell_energize_total(560256) reads 40 (1 tick; a 4500 ms period = -10% would already have 2 ticks = 80 at 9000 ms); at game_time.expired [9750, 10050] ms (10250..10550 ms after learn, strictly > 10000 ms), it reads 80 (2 ticks; a 5500 ms period = +10% would still read 40 until 11000 ms). Brackets 5000 ms inside +-10% on both sides. Reference search 2026-11-26: see max_rage."
+      "observe_source": "Upper-bound companion to regen_period_before for Dark Pact 560256 (Effect[1] EffectAmplitude 5000 ms; Spell.dbc). Learn happens 500 ms before trigger 60235: at game_time.after [9750, 10050] ms (10250..10550 ms after learn, strictly > 10000 ms), spell_energize_total(560256) reads 80 (2 ticks; a 5500 ms period = +10% would still read 40 until 11000 ms). Paired with regen_period_before to bracket 5000 ms inside +-10% on both sides. Reference search 2026-11-26: see max_rage."
     },
     {
       "spell": 704690,
