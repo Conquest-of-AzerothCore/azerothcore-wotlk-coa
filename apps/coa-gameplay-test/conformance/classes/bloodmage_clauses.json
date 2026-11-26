@@ -186,7 +186,7 @@
     "spell": 300585,
     "clause": "Increases the damage of Bloodbolt by $s2%,",
     "labels": [
-      "300585 effect_value e1 #0"
+      "300585 behaviour_hit_ratio base_damage"
     ],
     "kind": "claim"
   },
@@ -197,12 +197,14 @@
       {
         "claim": "plus an additional $s2%",
         "labels": [
-          "300585 effect_value e1 #1"
+          "300585 behaviour_hit_ratio below_35_additional"
         ]
       },
       {
         "claim": "while below 35% health",
-        "labels": []
+        "labels": [
+          "300585 behaviour_hit_ratio below_35_additional"
+        ]
       }
     ],
     "kind": "claim"
@@ -550,7 +552,9 @@
     "spell": 504103,
     "clause": "Atherann's Anguish now costs $/10;s2 less Rage.",
     "labels": [
-      "504103 effect_value e1 #0"
+      "504103 cost_gate 680680 anguish_cost without",
+      "504103 cost_gate 680680 anguish_cost with",
+      "504103 cost_gate 680680 anguish_cost beyond"
     ],
     "kind": "claim"
   },
@@ -561,23 +565,27 @@
       {
         "claim": "increases the damage of your next Valanar's Vengeance or Keleseth's Calamity by $504105s1% per tick",
         "labels": [
-          "504103 effect_value 504105e0 #1"
+          "504103 behaviour_metric_delta acuity_one_tick",
+          "504103 behaviour_hit_ratio acuity_valanar_damage",
+          "504103 behaviour_hit_ratio acuity_keleseth_damage",
+          "504103 behaviour_metric_delta acuity_consumed"
         ]
       },
       {
         "claim": "for $504105d",
         "labels": [
-          "504103 spell_duration 504105 #2"
+          "504103 behaviour_metric_delta acuity_duration"
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "acuity_one_tick (1/tick), acuity_valanar_damage (+15.00%/+14.95% at 5 stacks), acuity_keleseth_damage (+15.02%/+15.00% at 5 stacks), and acuity_duration (10000 ms) pass in both runs; acuity_consumed alerts (5 stacks remain after casting Valanar's Vengeance 572795 vs expected 0) because Spell.dbc 504105 has ProcCharges = 0 and no consumption script, so 'your next' never consumes the buff."
   },
   {
     "spell": 504103,
     "clause": "stacking $504105u times.",
     "labels": [
-      "504103 max_stacks 504105 #3"
+      "504103 behaviour_metric_delta acuity_stacks"
     ],
     "kind": "claim"
   },
@@ -585,7 +593,12 @@
     "spell": 504103,
     "clause": "Valanar's Vengeance and Keleseth's Calamity now reduce the cooldown of Malediction by $/1000;505153s1 sec.",
     "labels": [
-      "504103 effect_value 505153e0 #4"
+      "504103 cost_gate 800776 malediction_cd_valanar without",
+      "504103 cost_gate 800776 malediction_cd_valanar with",
+      "504103 cost_gate 800776 malediction_cd_valanar beyond",
+      "504103 cost_gate 800776 malediction_cd_keleseth without",
+      "504103 cost_gate 800776 malediction_cd_keleseth with",
+      "504103 cost_gate 800776 malediction_cd_keleseth beyond"
     ],
     "kind": "claim"
   },
@@ -2278,12 +2291,14 @@
       {
         "claim": "for $d",
         "labels": [
-          "680680 aura_duration_ms #0"
+          "680680 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "accumulating 30% of the damage you deal to affected enemies and then exploding for that amount of Shadow damage",
-        "labels": []
+        "labels": [
+          "680680 behaviour_metric_delta accumulate_explode"
+        ]
       }
     ],
     "kind": "claim"
@@ -2291,7 +2306,9 @@
   {
     "spell": 680680,
     "clause": "Damage caused by this ability cannot critically strike.",
-    "labels": [],
+    "labels": [
+      "680680 behaviour_metric_delta cannot_crit"
+    ],
     "kind": "claim"
   },
   {
@@ -2410,25 +2427,28 @@
       {
         "claim": "reducing damage dealt by $524182s1%",
         "labels": [
-          "680733 effect_value 524182e0 #0"
+          "680733 behaviour_metric_delta damage_reduced_1stack",
+          "680733 behaviour_metric_delta damage_reduced_4stack"
         ]
       },
       {
         "claim": "for $524182d",
         "labels": [
-          "680733 spell_duration 524182 #1"
+          "680733 behaviour_metric_delta duration"
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "All Bloodcraft checks alert in both runs: 524182 never applies (0 stacks; dummy melee deals unreduced 98900 vs expected 98922 at 1 stack / 98988 at 4 stacks) because data/sql/updates/pending_db_world/rev_20260920_41_bloodmage_damage_proc_triggers.sql:44 sets AttributesMask = 0 (missing PROC_ATTR_TRIGGERED_CAN_PROC = 2), so Darkfallen Lament's triggered leech 630874 never procs 680733."
   },
   {
     "spell": 680733,
     "clause": "stacking $524182u times.",
     "labels": [
-      "680733 max_stacks 524182 #2"
+      "680733 behaviour_metric_delta stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Alerts in both runs (0 stacks vs expected 4): triggered Darkfallen Lament leech 630874 never procs 680733 because pending_db_world/rev_20260920_41_bloodmage_damage_proc_triggers.sql:44 has AttributesMask = 0."
   },
   {
     "spell": 680745,
@@ -2437,17 +2457,19 @@
       {
         "claim": "dealing ${($680744d*1000/$680744t1)*($680744m1*$<scalingbp>+$sps*0.2)} Shadow damage",
         "labels": [
-          "680745 effect_value 680744e0 #0"
+          "680745 behaviour_metric_delta damage_base",
+          "680745 behaviour_metric_delta damage_sp"
         ]
       },
       {
         "claim": "over $680744d",
         "labels": [
-          "680745 spell_duration 680744 #1"
+          "680745 behaviour_metric_delta duration"
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "damage_base passes (1390/1390 in [1385, 1422]) and duration passes (10000 ms), but damage_sp alerts in both runs (1415/1395 at +5000 SP vs expected [6385, 6422]) because Spell.dbc 680744 has EffectBonusMultiplier[0] = 0.0 and no spell_bonus_data row (0 SP scaling vs tooltip $sps*0.2 per tick)."
   },
   {
     "spell": 680823,
@@ -2464,23 +2486,26 @@
       {
         "claim": "healing up to $524181i allies affected by Blood Rituals",
         "labels": [
-          "680828 effect_value #0"
+          "680828 behaviour_metric_delta rituals_gate",
+          "680828 behaviour_metric_delta ally_cap_12"
         ]
       },
       {
         "claim": "over $d",
         "labels": [
-          "680828 aura_duration_ms #1"
+          "680828 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "for ${($d*1000/$T1)*($524180m1+$524180ppl1+$bh*0.1)}",
         "labels": [
-          "680828 effect_value #4"
+          "680828 behaviour_metric_delta heal_base",
+          "680828 behaviour_metric_delta heal_sp"
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "rituals_gate (16 heals with Blood Rituals vs 0 without), duration (8000 ms), and heal_base (1296 exact) pass in both runs. Two confirmed server defects alert in both runs: (1) ally_cap_12 heals all 13/13 Blood Rituals allies 16x because Spell.dbc 524180 has MaxAffectedTargets = 25 vs tooltip $524181i = 12; (2) heal_sp heals 1296 at +5000 SP vs expected 9296 because Spell.dbc 524180 has DmgClass = 0, EffectBonusMultiplier[0] = 0, and no spell_bonus_data row (0 SP scaling vs tooltip $bh*0.1 per tick)."
   },
   {
     "spell": 680828,
@@ -2489,19 +2514,22 @@
       {
         "claim": "within $524181a1 yds",
         "labels": [
-          "680828 effect_radius 524181e0 #2"
+          "680828 behaviour_metric_delta leech_radius_in",
+          "680828 behaviour_metric_delta leech_radius_out"
         ]
       },
       {
         "claim": "over $d",
         "labels": [
-          "680828 aura_duration_ms #3"
+          "680828 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "and leeching ${($d*1000/$t1)*($630874m1+$630874ppl1+$bh*1)} health from enemies",
         "labels": [
-          "680828 effect_value #5"
+          "680828 behaviour_metric_delta leech_damage_base",
+          "680828 behaviour_metric_delta leech_damage_sp",
+          "680828 behaviour_metric_delta leech_heal_ratio"
         ]
       }
     ],
@@ -2510,8 +2538,12 @@
   {
     "spell": 680828,
     "clause": "While active, you are immune to silence and interrupt effects, but cannot move.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "680828 behaviour_metric_delta immune_interrupt",
+      "680828 behaviour_metric_delta immune_silence"
+    ],
+    "kind": "claim",
+    "reason": "immune_interrupt passes in both runs (32/32 leech ticks survive Counterspell 2139). immune_silence alerts in both runs: Silence 15487 lands (aura = 1) and cancels Darkfallen Lament 680828 (aura = 0) because 680828 has PreventionType = 1 and lacks MECHANIC_SILENCE immunity (AuraEffect::HandleAuraModSilence SpellAuraEffects.cpp:3356-3360). 'cannot move' is Status 4 / tool gap G-39 (mentor D-78, same as Felsworn 806109): 680828 Effect[2] SPELL_AURA_MOD_STUN (12) calls Unit::SendMoveRoot sending SMSG_FORCE_MOVE_ROOT (Unit.cpp:16164-16173), which CoAGameplayTest.cpp:1619-1638 does not capture in extensionPackets and move_under_aura expect='blocked' cannot observe on a client-controlled player without CMSG_FORCE_MOVE_ROOT_ACK (Unit.h:1759, MovementHandler.cpp:601-604)."
   },
   {
     "spell": 681026,
@@ -2690,7 +2722,9 @@
     "spell": 681403,
     "clause": "Accumulates damage dealt to the target by you, your party or raid members, and their minions for $d, then unleashes the stored amount as Shadow damage.",
     "labels": [
-      "681403 aura_duration_ms #0"
+      "681403 behaviour_metric_delta duration",
+      "681403 behaviour_metric_delta unleash_caster",
+      "681403 behaviour_metric_delta unleash_ally"
     ],
     "kind": "claim"
   },
@@ -3244,14 +3278,17 @@
   {
     "spell": 704662,
     "clause": "While above 75% health,",
-    "labels": [],
+    "labels": [
+      "704662 behaviour_hit_ratio at_75_off"
+    ],
     "kind": "claim"
   },
   {
     "spell": 704662,
     "clause": "your damage taken is reduced by $s2%.",
     "labels": [
-      "704662 effect_value e1 #0"
+      "704662 behaviour_hit_ratio above_75_magic",
+      "704662 behaviour_hit_ratio above_75_physical"
     ],
     "kind": "claim"
   },
@@ -4952,12 +4989,17 @@
       {
         "claim": "Increases the damage of Veinburst, Bloodfang Bite, and Claw Sweep by $s1%",
         "labels": [
-          "806210 effect_value e0 #0"
+          "806210 behaviour_hit_ratio veinburst_below_35",
+          "806210 behaviour_hit_ratio bloodfang_below_35",
+          "806210 behaviour_hit_ratio claw_sweep_below_35"
         ]
       },
       {
         "claim": "on enemies below 35% health",
-        "labels": []
+        "labels": [
+          "806210 behaviour_hit_ratio veinburst_below_35",
+          "806210 behaviour_hit_ratio veinburst_above_35"
+        ]
       }
     ],
     "kind": "claim"
@@ -5152,12 +5194,14 @@
       {
         "claim": "over $806946d",
         "labels": [
-          "806944 spell_duration 806946 #0"
+          "806944 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "Your Valanar's Vengeance now deals an additional 50% of its initial damage dealt",
-        "labels": []
+        "labels": [
+          "806944 behaviour_metric_delta damage_ratio"
+        ]
       }
     ],
     "kind": "claim"
@@ -5165,7 +5209,9 @@
   {
     "spell": 806944,
     "clause": "healing you for 50% of the damage dealt.",
-    "labels": [],
+    "labels": [
+      "806944 behaviour_metric_delta heal_ratio"
+    ],
     "kind": "claim"
   },
   {

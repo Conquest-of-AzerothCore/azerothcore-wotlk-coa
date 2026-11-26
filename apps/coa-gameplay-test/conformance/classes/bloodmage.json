@@ -1129,6 +1129,2383 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "$s2 = 3 (704642 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 2 + DieSides 1 = 3; Spell.dbc). StatSystem.cpp:1043 adds aura 333 into Player::m_modSpellHitChance. Reads live spell_hit_chance before and after a real learn of 704642 (expected gain +3.0 points, control is before learn). Reference search 2026-11-26: coa-history 704642: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 704642 matches verbatim."
+    },
+    {
+      "spell": 680680,
+      "name": "Atherann's Anguish (hemoplague lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Unleash a hemoplague upon the target area, accumulating 30% of the damage you deal to affected enemies for $d, and then exploding for that amount of Shadow damage.",
+      "trigger_spell": 680680,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 680680,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 9300,
+      "expiry_wait_ms": 1400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9200,
+          9750
+        ],
+        "expired": [
+          10500,
+          10950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 10000 ms (680680 Spell.dbc DurationIndex 1 = 10000 ms, PowerType 1 Rage 400, TargetA 16 TARGET_UNIT_DEST_AREA_ENEMY; Spell.cpp:788-796 resolves destination from dummy unit target). Control (uncast before phase): 0. Treatment: 680680 present (1) at game_time [9200, 9750] ms (> 9000 ms = -10%) and expired (0) at game_time [10500, 10950] ms (< 11000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 680680: 11 SPELL_CAST_SUCCESS, 56 APPLIED/REMOVED across 3 logs; 680681: 29 SPELL_DAMAGE (0 crits); bindmysoul talents.normalized.json names Atherann's Anguish.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 680680,
+      "name": "Atherann's Anguish (accumulates 30% of damage dealt and explodes as Shadow damage)",
+      "kind": "metric_delta",
+      "variant": "accumulate_explode",
+      "label_suffix": "accumulate_explode",
+      "quote": "Unleash a hemoplague upon the target area, accumulating 30% of the damage you deal to affected enemies for $d, and then exploding for that amount of Shadow damage.",
+      "trigger_spell": 578305,
+      "setup_casts": [
+        680680
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 2000,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 680681,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 578305,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.3,
+      "tolerance": 0.002,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "680680 Effect[1] MiscValueB 30 (AtherannsAnguishPercent = 30, AscensionBloodmageTalents.cpp:115,1105-1176; pending_db_world/rev_20260930_30_bloodmage_issue_batch.sql and rev_20261026_08_coa_atheranns_anguish_explosion.sql zero 680681 spell_bonus_data so explosion deals exact stored amount). 680681 carries SchoolMask 32 (Shadow, Spell.dbc). Control (before, no 680680): Bloodbolt 578305 deals Shadow damage at +5000 SP (823764 beeg spellpen, 16255 -100% crit), 680681 deals 0 (ratio 0). Treatment: 680680 cast at dummy 2000 ms before Bloodbolt 578305; 9500 ms later (11500 ms after 680680 > 10000 ms expiry) 680681 explodes for exact 30% of Bloodbolt's damage (ratio 0.30 +- 0.002, excluding 0 and 0.60). Reference search 2026-11-26: coa-history 680681: 29 SPELL_DAMAGE hits (0 crits) in 3 logs; bindmysoul talents.normalized.json names Atherann's Anguish."
+    },
+    {
+      "spell": 680680,
+      "name": "Atherann's Anguish (explosion damage cannot critically strike)",
+      "kind": "metric_delta",
+      "variant": "cannot_crit",
+      "label_suffix": "cannot_crit",
+      "quote": "Damage caused by this ability cannot critically strike.",
+      "trigger_spell": 578305,
+      "setup_casts": [
+        680680
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 2000,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 680681,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 680681,
+              "target": "dummy",
+              "critical": true
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "680681 carries AttributesEx2 536870912 (SPELL_ATTR2_CANT_CRIT, Spell.dbc): 0 critical hits under forced spell crit"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 578305,
+              "target": "dummy",
+              "critical": true
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Positive crit control: forced spell crit lands a critical Bloodbolt 578305 in both phases (1 before, 2 cumulative after)"
+          }
+        ]
+      },
+      "observe_source": "680681 carries AttributesEx2 536870912 (SPELL_ATTR2_CANT_CRIT, Spell.dbc). With force_crit spell and 823764 beeg spellpen, Bloodbolt 578305 critically strikes in both phases (1 crit before, 2 cumulative crits after, confirming forced spell crit works). Control (no 680680): 0 hits of 680681. Treatment (680680 setup 2000 ms before Bloodbolt, read 9500 ms later after 10000 ms expiry): 680681 lands exactly 1 non-critical hit and 0 critical hits. Reference search 2026-11-26: coa-history 680681: 29 SPELL_DAMAGE hits with 0 crits across 3 logs."
+    },
+    {
+      "spell": 680745,
+      "name": "Agonizing Pain (bleed Shadow damage at reference stats: 0 SP)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Damage dealt by your Atherann's Anguish now causes enemies hit to bleed, dealing ${($680744d*1000/$680744t1)*($680744m1*$<scalingbp>+$sps*0.2)} Shadow damage over $680744d.",
+      "trigger_spell": 578305,
+      "gate_spell": 680745,
+      "setup_casts": [
+        680680
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 680744,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1404,
+      "after_at_least": 1385,
+      "after_at_most": 1422,
+      "wait_ms": 20000,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "680745 Effect[0] aura 42 triggers 680744 on 680681 hit (pending_db_world/rev_20260920_59_bloodmage_agonizing_pain_proc.sql). 680744 Spell.dbc: SchoolMask 32 Shadow, DurationIndex 1 = 10000 ms, Amplitude 2000 ms (5 ticks), BasePoints 280, DieSides 8 (roll 281..288), AscensionScalingBaseData.h:169 scalingbp(60) = 0.9874309669 -> per tick 277.47..284.38, 5 ticks at 0 SP = [1385, 1422] (tooltip ${($680744d*1000/$680744t1)*($680744m1*$<scalingbp>+$sps*0.2)} = 1387.34..1421.90). Control (before learning 680745): 0. Treatment (after learning 680745, wait 20000 ms = 8 s for 680680 expiry + 10 s for 680744 5 ticks + 2 s margin): [1385, 1422] Shadow damage. Reference search 2026-11-26: coa-history 680745/680744: 0 events in 186 logs; coabuildhub spells_master_index.json 680745 matches."
+    },
+    {
+      "spell": 680745,
+      "name": "Agonizing Pain (bleed Shadow damage at +5000 SP: +0.2 SP per tick)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Damage dealt by your Atherann's Anguish now causes enemies hit to bleed, dealing ${($680744d*1000/$680744t1)*($680744m1*$<scalingbp>+$sps*0.2)} Shadow damage over $680744d.",
+      "trigger_spell": 578305,
+      "gate_spell": 680745,
+      "setup_casts": [
+        680680
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_spell_power": {
+        "amount": 5000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 680744,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 6404,
+      "after_at_least": 6385,
+      "after_at_most": 6422,
+      "wait_ms": 20000,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "SP scaling arm for 680745 tooltip ${($680744d*1000/$680744t1)*($680744m1*$<scalingbp>+$sps*0.2)}: at +5000 Shadow SP, tooltip states +0.2 * 5000 = +1000 per tick (+5000 over 5 ticks) -> [6385, 6422] total Shadow damage (base [1385, 1422] + 5000). Control (before learning 680745): 0. Reference search 2026-11-26: coa-history 680745/680744: 0 events in 186 logs; coabuildhub spells_master_index.json 680745 matches."
+    },
+    {
+      "spell": 680745,
+      "name": "Agonizing Pain (bleed 680744 lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Damage dealt by your Atherann's Anguish now causes enemies hit to bleed, dealing ${($680744d*1000/$680744t1)*($680744m1*$<scalingbp>+$sps*0.2)} Shadow damage over $680744d.",
+      "trigger_spell": 680680,
+      "gate_spell": 680745,
+      "learn": [
+        578305
+      ],
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 578305,
+          "target": "dummy",
+          "delay_ms": 2000,
+          "in_before": false
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 680744,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 17300,
+      "expiry_wait_ms": 1400,
+      "expire_ms": 2000,
+      "game_time": {
+        "after": [
+          19150,
+          19750
+        ],
+        "expired": [
+          20450,
+          20950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$680744d = 10000 ms (Spell.dbc 680744 DurationIndex 1 = 10000 ms). Uncast control phase reads 0. In treatment phase, 680680 (10000 ms) is cast at dummy followed by Bloodbolt 578305 at +2000 ms; 680681 explodes at ~10000 ms after 680680 cast and applies 680744 with 680745 learned: 680744 present (1) at game_time [19150, 19750] ms (~9300 ms after 10000 ms explosion, > 9000 ms = -10%) and expired (0) at game_time [20450, 20950] ms (~10700 ms after explosion, < 11000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 680745/680744: 0 events in 186 logs; coabuildhub 680745 matches.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 504103,
+      "name": "The Council Assembled (Atherann's Anguish Rage cost -25)",
+      "kind": "cost_gate",
+      "label_suffix": "anguish_cost",
+      "quote": "Atherann's Anguish now costs $/10;s2 less Rage.",
+      "gated_spell": 680680,
+      "resource": "power",
+      "reduction": 250,
+      "target": "dummy",
+      "observe_source": "$/10;s2 = 25 (504103 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 14 SPELLMOD_COST, BasePoints -251 + DieSides 1 = -250 internal Rage = -25 displayed Rage, EffectSpellClassMask[3] 4096 matching 680680; Spell.dbc). 680680 base ManaCost 400 (40 Rage) drops to 150 (15 Rage): refused SPELL_FAILED_NO_POWER at 150 Rage without 504103 (control), succeeds at 150 Rage with 504103, refused at 149 Rage (beyond). Reference search 2026-11-26: coa-history 504103: 0 events (passive), 504105 Atherann's Acuity: 90 APPLIED_DOSE / 66 APPLIED in 3 logs; coabuildhub spells_master_index.json 504103 matches.",
+      "variant": "anguish_cost"
+    },
+    {
+      "spell": 504103,
+      "name": "The Council Assembled (Taldaram's Torment grants 1 stack of Atherann's Acuity per tick)",
+      "kind": "metric_delta",
+      "variant": "acuity_one_tick",
+      "label_suffix": "acuity_one_tick",
+      "quote": "Taldaram's Torment now increases the damage of your next Valanar's Vengeance or Keleseth's Calamity by $504105s1% per tick for $504105d,",
+      "trigger_spell": 802580,
+      "gate_spell": 504103,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 504105
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3500,
+      "expire_ms": 26000,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionBloodmageTalents.cpp:968-978: Taldaram's Torment 802580 (DurationIndex 8 = 15000 ms, Amplitude 3000 ms, 5 ticks; Spell.dbc) casts Atherann's Acuity 504105 on caster on each periodic tick when 504103 is learned. Control (before learning 504103): 0 stacks at 3500 ms (after 1st tick at 3000 ms). Treatment: 1 stack of 504105 at 3500 ms. Reference search 2026-11-26: coa-history 504105: 90 APPLIED_DOSE, 66 APPLIED, 66 REMOVED, 30 REFRESH in 3 logs; coabuildhub 504103 matches.",
+      "phase_auras": [
+        [
+          802580,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          504105,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 504103,
+      "name": "The Council Assembled (Atherann's Acuity 504105 stacks cap at 5)",
+      "kind": "metric_delta",
+      "variant": "acuity_stacks",
+      "label_suffix": "acuity_stacks",
+      "quote": "stacking $504105u times.",
+      "trigger_spell": 802580,
+      "gate_spell": 504103,
+      "setup_casts": [
+        802580
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 15500,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 504105
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 3500,
+      "expire_ms": 26000,
+      "void_on_cast_failure": true,
+      "observe_source": "$504105u = 5 (Spell.dbc 504105 StackAmount 5). Setup cast of Taldaram's Torment 802580 runs 5 ticks over 15000 ms, then trigger 802580 adds a 6th tick at +3000 ms (read at +3500 ms): 0 stacks before learning 504103 (control), capped at exactly 5 stacks (not 6) after learning 504103. Reference search 2026-11-26: coa-history 504105: 90 APPLIED_DOSE in 3 logs; coabuildhub 504103 says 'stacking 5 times'."
+    },
+    {
+      "spell": 504103,
+      "name": "The Council Assembled (Atherann's Acuity 504105 lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "acuity_duration",
+      "label_suffix": "acuity_duration",
+      "quote": "Taldaram's Torment now increases the damage of your next Valanar's Vengeance or Keleseth's Calamity by $504105s1% per tick for $504105d,",
+      "trigger_spell": 802580,
+      "gate_spell": 504103,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 504105
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 24300,
+      "expiry_wait_ms": 1400,
+      "expire_ms": 16000,
+      "game_time": {
+        "after": [
+          24150,
+          24750
+        ],
+        "expired": [
+          25450,
+          25950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$504105d = 10000 ms (Spell.dbc 504105 DurationIndex 1 = 10000 ms). Taldaram's Torment 802580 (15000 ms, 3000 ms amp) fires its 5th and final tick at 15000 ms, refreshing 504105 for 10000 ms (expiry at 25000 ms). Control (before learning 504103): 0. Treatment: 504105 present (1) at game_time [24150, 24750] ms (~9300 ms after 5th tick, > 9000 ms = -10%) and expired (0) at game_time [25450, 25950] ms (~10700 ms after 5th tick, < 11000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 504105: 66 APPLIED/REMOVED in 3 logs; coabuildhub 504103 says 'for 10 seconds'.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 504103,
+      "name": "The Council Assembled (5 stacks of Atherann's Acuity increase Valanar's Vengeance damage by +15%)",
+      "kind": "hit_ratio",
+      "variant": "acuity_valanar_damage",
+      "label_suffix": "acuity_valanar_damage",
+      "quote": "Taldaram's Torment now increases the damage of your next Valanar's Vengeance or Keleseth's Calamity by $504105s1% per tick for $504105d,",
+      "expected": 1.15,
+      "observe_spell": 572795,
+      "learn": [
+        572795,
+        23783
+      ],
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 23783,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          504103
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            504105,
+            0
+          ],
+          [
+            504105,
+            5
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 23783,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$504105s1 = 3% per stack (504105 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 0 SPELLMOD_DAMAGE, BasePoints 2 + DieSides 1 = 3, EffectSpellClassMask[0] 393216 = 262144 Valanar's Vengeance + 131072 Keleseth's Calamity, StackAmount 5; Spell.dbc). Real-cast stack generation of 504105 from Taldaram's Torment 802580 (1/tick, max 5, 10s) is proven by acuity_one_tick, acuity_stacks, and acuity_duration; this hit_ratio arm isolates 5 stacks of 504105 (cleared and reapplied to full 10000 ms duration before each 6000 ms cast via [504105, 0], [504105, 5]) (+15%, expected 1.15, +-2 pt band [13%, 17%], excluding 0% and +30%) on Valanar's Vengeance 572795 (SchoolMask 32 Shadow, 20 trials/arm). Gift of Life 23783 heals caster before each trial so 572795's 30% base health cost is paid. Reference search 2026-11-26: coa-history 504105: 90 APPLIED_DOSE in 3 logs; coabuildhub 504103 matches."
+    },
+    {
+      "spell": 504103,
+      "name": "The Council Assembled (5 stacks of Atherann's Acuity increase Keleseth's Calamity damage by +15%)",
+      "kind": "hit_ratio",
+      "variant": "acuity_keleseth_damage",
+      "label_suffix": "acuity_keleseth_damage",
+      "quote": "Taldaram's Torment now increases the damage of your next Valanar's Vengeance or Keleseth's Calamity by $504105s1% per tick for $504105d,",
+      "expected": 1.15,
+      "observe_spell": 561179,
+      "learn": [
+        561179,
+        23783
+      ],
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 23783,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          504103
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            504105,
+            0
+          ],
+          [
+            504105,
+            5
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 23783,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Second named ability on 504105 EffectSpellClassMask[0] 393216 (131072 = Keleseth's Calamity 561179; Spell.dbc). Real-cast stack generation of 504105 from Taldaram's Torment 802580 is proven by acuity_one_tick, acuity_stacks, and acuity_duration; this hit_ratio arm isolates 5 stacks of 504105 (cleared and reapplied to full 10000 ms duration before each 6000 ms cast via [504105, 0], [504105, 5]) (+15%, expected 1.15, +-2 pt band [13%, 17%], 20 trials/arm) on Keleseth's Calamity 561179. Gift of Life 23783 restores caster health before each trial. Reference search 2026-11-26: coa-history 504105: 90 APPLIED_DOSE in 3 logs; coabuildhub 504103 matches."
+    },
+    {
+      "spell": 504103,
+      "name": "The Council Assembled (casting Valanar's Vengeance consumes Atherann's Acuity 'next' buff)",
+      "kind": "metric_delta",
+      "variant": "acuity_consumed",
+      "label_suffix": "acuity_consumed",
+      "quote": "Taldaram's Torment now increases the damage of your next Valanar's Vengeance or Keleseth's Calamity by $504105s1% per tick for $504105d,",
+      "trigger_spell": 572795,
+      "gate_spell": 572795,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        802580
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 15500,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          802580,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          504105,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 504105
+      },
+      "before_expected": 5,
+      "expected": 0,
+      "wait_ms": 6500,
+      "expire_ms": 12000,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 504103 states 'increases the damage of your next Valanar's Vengeance or Keleseth's Calamity': tests whether casting Valanar's Vengeance 572795 consumes Atherann's Acuity 504105 (Spell.dbc 504105 ProcCharges 0). Both phases have 504103 learned and run setup Taldaram's Torment 802580 (15500 ms -> all 5 ticks complete, leaving 5 stacks of 504105 with ~9500 ms remaining and 802580 expired). Before phase (no 572795 cast, control): reads 5 stacks. After phase: casts Valanar's Vengeance 572795 (6000 ms cast -> finishes at ~6000 ms while 504105 still has ~3500 ms left) and reads 504105 stacks at 6500 ms: must drop to 0 if consumed on the next cast. Reference search 2026-11-26: coa-history 504105: 66 APPLIED / 66 REMOVED in 3 logs; coabuildhub 504103 says 'your next Valanar's Vengeance or Keleseth's Calamity'.",
+      "learn": [
+        504103
+      ]
+    },
+    {
+      "spell": 504103,
+      "name": "The Council Assembled (Valanar's Vengeance reduces Malediction cooldown by 5 sec)",
+      "kind": "cost_gate",
+      "label_suffix": "malediction_cd_valanar",
+      "quote": "Valanar's Vengeance and Keleseth's Calamity now reduce the cooldown of Malediction by $/1000;505153s1 sec.",
+      "gated_spell": 800776,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "after_casts": [
+        [
+          572795,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "after_cast_gap_ms": 6500,
+      "margin_ms": 400,
+      "target": "dummy",
+      "observe_source": "$/1000;505153s1 = 5 sec (505153 Effect[0] 165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN BasePoints -5001 + DieSides 1 = -5000 ms MiscValue 800776 Malediction; pending_db_world/rev_20260918_32_bloodmage_council_assembled_proc.sql scopes 504103 proc to SpellFamilyMask0 393216 = Valanar's Vengeance 262144 + Keleseth's Calamity 131072). Malediction 800776 RecoveryTime 30000 ms drops to 25000 ms after Valanar's Vengeance 572795 (cast at +2000 ms, 6000 ms cast + 500 ms margin): refused SPELL_FAILED_NOT_READY at 25400 ms without 504103 (control), succeeds at 25400 ms with 504103, refused at 24600 ms (beyond, margin 400 ms excludes 10% = 500 ms off on both sides). Reference search 2026-11-26: coa-history 505153: 0 events; coabuildhub 504103 matches.",
+      "variant": "malediction_cd_valanar"
+    },
+    {
+      "spell": 504103,
+      "name": "The Council Assembled (Keleseth's Calamity reduces Malediction cooldown by 5 sec)",
+      "kind": "cost_gate",
+      "label_suffix": "malediction_cd_keleseth",
+      "quote": "Valanar's Vengeance and Keleseth's Calamity now reduce the cooldown of Malediction by $/1000;505153s1 sec.",
+      "gated_spell": 800776,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "after_casts": [
+        [
+          561179,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "after_cast_gap_ms": 6500,
+      "margin_ms": 400,
+      "target": "dummy",
+      "observe_source": "Second trigger ability for 504103 -> 505153 (-5000 ms on Malediction 800776 RecoveryTime 30000 ms; pending_db_world/rev_20260918_32_bloodmage_council_assembled_proc.sql SpellFamilyMask0 393216 includes 131072 Keleseth's Calamity 561179): casting Keleseth's Calamity 561179 at +2000 ms (6000 ms cast + 500 ms margin) opens Malediction 800776 at 25400 ms with 504103, refused without 504103 (control) and refused at 24600 ms (beyond). Reference search 2026-11-26: coa-history 505153: 0 events; coabuildhub 504103 matches.",
+      "variant": "malediction_cd_keleseth"
+    },
+    {
+      "spell": 806944,
+      "name": "Cardiac Arrest (Valanar's Vengeance deals additional 50% of initial damage over 2 sec)",
+      "kind": "metric_delta",
+      "variant": "damage_ratio",
+      "label_suffix": "damage_ratio",
+      "quote": "Your Valanar's Vengeance now deals an additional 50% of its initial damage dealt over $806946d,",
+      "trigger_spell": 572795,
+      "gate_spell": 806944,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806946,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572795,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.5,
+      "tolerance": 0.005,
+      "wait_ms": 9500,
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "806944 Effect[0] aura 354 triggers 806946 on Valanar's Vengeance 572795 hit (pending_db_world/rev_20260930_30_bloodmage_issue_batch.sql, AscensionBloodmageTalents.cpp:117,1426-1459: CardiacArrestDamagePercent = 50 split across 4 ticks of 500 ms over DurationIndex 39 = 2000 ms). Control (before learning 806944): 806946 deals 0 (ratio 0). Treatment: 806946 total periodic damage equals 50% of 572795 initial hit (ratio 0.50 +- 0.005, excluding 0 and 1.00; wait 9500 ms covers 6000 ms cast + 100 ms flight + 2000 ms DoT + 1400 ms margin). Reference search 2026-11-26: coa-history 806946: 176 SPELL_PERIODIC_DAMAGE (mean 744.0) and 176 SPELL_HEAL (mean 372.0 = exact 50%) in 4 logs; coabuildhub 806944 matches."
+    },
+    {
+      "spell": 806944,
+      "name": "Cardiac Arrest (heals caster for 50% of Cardiac Arrest damage dealt)",
+      "kind": "metric_delta",
+      "variant": "heal_ratio",
+      "label_suffix": "heal_ratio",
+      "quote": "healing you for 50% of the damage dealt.",
+      "trigger_spell": 572795,
+      "gate_spell": 806944,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health_pct": 60,
+      "disable_regeneration": true,
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 806946,
+        "target": "caster"
+      },
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 806946,
+          "target": "dummy"
+        },
+        "ratio": 0.5,
+        "tolerance": 0.005,
+        "least": 100,
+        "source": "Tooltip 806944: healing you for 50% of the damage dealt; Spell.dbc 806946 Effect[0] aura 53 SPELL_AURA_PERIODIC_LEECH EffectValueMultiplier[0] 0.5"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 9500,
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 806946 Effect[0] aura 53 SPELL_AURA_PERIODIC_LEECH EffectValueMultiplier[0] = 0.5 heals caster for 50% of 806946 periodic damage dealt. Control (before learning 806944): 0 damage and 0 heal from 806946. Treatment: same_arm_ratio compares incremental 806946 spell_heal_total on caster to incremental 806946 spell_damage_total on dummy (expected 0.50 +- 0.005, least 100 damage, excluding 0 and 1.00). Reference search 2026-11-26: coa-history 806946: 176 SPELL_HEAL (mean 372.0) vs 176 SPELL_PERIODIC_DAMAGE (mean 744.0) = exact 50.0% in 4 logs; coabuildhub 806944 matches."
+    },
+    {
+      "spell": 806944,
+      "name": "Cardiac Arrest (leech 806946 lasts 2 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Your Valanar's Vengeance now deals an additional 50% of its initial damage dealt over $806946d,",
+      "trigger_spell": 572795,
+      "gate_spell": 806944,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 806946,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 7950,
+      "expiry_wait_ms": 300,
+      "expire_ms": 2500,
+      "game_time": {
+        "after": [
+          7900,
+          8100
+        ],
+        "expired": [
+          8200,
+          8400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$806946d = 2000 ms (Spell.dbc 806946 DurationIndex 39 = 2000 ms). Valanar's Vengeance 572795 (CastingTimeIndex 171 = 6000 ms, Speed 30 -> 100 ms flight at dummy_distance 3 yd) lands at ~6100 ms and applies 806946 when 806944 is learned. Control (before learning 806944): 0. Treatment: 806946 present (1) at game_time [7900, 8100] ms (~1850 ms after impact, > 1800 ms = -10%) and expired (0) at game_time [8200, 8400] ms (~2150 ms after impact, < 2200 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 806946: 28 APPLIED/REMOVED in 3 logs; coabuildhub 806944 matches.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 681403,
+      "name": "Infuse (debuff lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Accumulates damage dealt to the target by you, your party or raid members, and their minions for $d, then unleashes the stored amount as Shadow damage.",
+      "trigger_spell": 681403,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 681403,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 9300,
+      "expiry_wait_ms": 1400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9200,
+          9750
+        ],
+        "expired": [
+          10500,
+          10950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 10000 ms (Spell.dbc 681403 DurationIndex 1 = 10000 ms, PowerType -2 35% base health, TargetA 6 enemy). Control (uncast before phase): 0. Treatment: 681403 present (1) at game_time [9200, 9750] ms (> 9000 ms = -10%) and expired (0) at game_time [10500, 10950] ms (< 11000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 681403: 143 SPELL_CAST_SUCCESS / APPLIED / REMOVED in 7 logs; 681404: 107 SPELL_DAMAGE in 6 logs.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 681403,
+      "name": "Infuse (accumulates caster damage and unleashes 681404 as Shadow damage)",
+      "kind": "metric_delta",
+      "variant": "unleash_caster",
+      "label_suffix": "unleash_caster",
+      "quote": "Accumulates damage dealt to the target by you, your party or raid members, and their minions for $d, then unleashes the stored amount as Shadow damage.",
+      "trigger_spell": 578305,
+      "setup_casts": [
+        681403
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 2000,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 300,
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681404,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 578305,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.1,
+      "tolerance": 0.002,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "681403 Infuse (AscensionBloodmageTalents.cpp:119,1226-1322; pending_db_world/rev_20261004_05_bloodmage_infuse.sql): accumulates InfuseAccumulationPercent = 10% of damage dealt to target by caster/group/minions and unleashes 681404 (SchoolMask 32 Shadow) on 10000 ms expiry. Control (before, no 681403): Bloodbolt 578305 hits dummy, 681404 deals 0 (ratio 0). Treatment: 681403 cast at dummy 2000 ms before Bloodbolt 578305; 9500 ms later (11500 ms after 681403 > 10000 ms expiry) 681404 unleashes 10% of Bloodbolt's damage as Shadow damage (ratio 0.10 +- 0.002, excluding 0 and 0.20). Reference search 2026-11-26: coa-history 681403: 143 casts, 681404: 107 SPELL_DAMAGE in 6 logs."
+    },
+    {
+      "spell": 681403,
+      "name": "Infuse (accumulates grouped party member damage and unleashes 681404 as Shadow damage)",
+      "kind": "metric_delta",
+      "variant": "unleash_ally",
+      "label_suffix": "unleash_ally",
+      "quote": "Accumulates damage dealt to the target by you, your party or raid members, and their minions for $d, then unleashes the stored amount as Shadow damage.",
+      "trigger_spell": 681403,
+      "cast_in_before": false,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "select_dummy": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_attacks": [
+          {
+            "spell": 66903,
+            "power": 0,
+            "source": "Hammer of the Righteous 66903 (SchoolMask 2 Holy, DmgClass 0, exact 16000 base damage) cast by grouped ally at dummy while Infuse 681403 is active"
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 681404,
+              "target": "dummy",
+              "school_mask": 32
+            },
+            "source": "Infuse 681404 Shadow damage unleashed by caster on expiry (AscensionBloodmageTalents.cpp:1178-1322)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 66903,
+              "target": "dummy"
+            },
+            "source": "Grouped ally's 66903 damage dealt to the Infused dummy"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.1,
+            "tolerance": 0.002,
+            "floor_count": 0,
+            "source": "AscensionBloodmageTalents.cpp:119,1178-1194,1309-1312: 10% of grouped ally damage (1600 <= 3x casterMaxHealth cap) unleashed as Shadow damage 681404"
+          }
+        ]
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 681404,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 10000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Party-contributor arm for 681403 Infuse (AscensionBloodmageTalents.cpp:1178-1194 IsInfuseContributor accepts grouped party members). Control (before, no 681403): grouped ally casts 66903 (SchoolMask 2 Holy, DmgClass 0, exact 16000) at dummy -> 0 hits of 681404. Treatment: caster (with 823764 spellpen and 16255 effect 0 -100% crit so Shadow unleash 681404 has no partial resist or crit) casts 681403 on dummy, grouped ally casts 66903 (2000 ms settle) at dummy, wait 10000 ms (12000 ms total > 10000 ms expiry) -> 681404 lands 1 Shadow hit equal to 10% of ally damage (1600 / 16000 = 0.10 +- 0.002). Reference search 2026-11-26: coa-history 681403: 143 casts, 681404: 107 SPELL_DAMAGE in 6 logs.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ]
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (channel lasts 8 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Chant a sinister ritual, healing up to $524181i allies affected by Blood Rituals for ${($d*1000/$T1)*($524180m1+$524180ppl1+$bh*0.1)} over $d",
+      "trigger_spell": 680828,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 680828
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 7400,
+      "expiry_wait_ms": 1100,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7300,
+          7750
+        ],
+        "expired": [
+          8300,
+          8750
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 8000 ms (Spell.dbc 680828 DurationIndex 31 = 8000 ms, AttributesEx 1028 channeled, Amplitude 500 ms). Control (uncast before phase): 0. Treatment: 680828 present (1) at game_time [7300, 7750] ms (> 7200 ms = -10%) and expired (0) at game_time [8300, 8750] ms (< 8800 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 680828/524180/524181/630874: 0 events in 186 logs; bindmysoul talents.normalized.json names Darkfallen Lament.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (heals only allies affected by Blood Rituals)",
+      "kind": "ally_heal_reach",
+      "variant": "rituals_gate",
+      "quote": "Chant a sinister ritual, healing up to $524181i allies affected by Blood Rituals for ${($d*1000/$T1)*($524180m1+$524180ppl1+$bh*0.1)} over $d",
+      "allies": [
+        {
+          "id": "with_rituals",
+          "dx": 2,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "no_rituals",
+          "dx": 2,
+          "dy": 2,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000
+        }
+      ],
+      "casts": [
+        {
+          "spell": 680828,
+          "target": "caster",
+          "watch_ms": 8500
+        }
+      ],
+      "checks": [
+        {
+          "name": "rituals_gate",
+          "spell": 524180,
+          "healed": [
+            "with_rituals"
+          ],
+          "unhealed": [
+            "no_rituals"
+          ],
+          "reference": "with_rituals",
+          "minimum": 16,
+          "judge": "reach"
+        }
+      ],
+      "observe_source": "680828 Effect[0] aura 23 (amp 500 ms, 8000 ms = 16 ticks) triggers 524180 (TargetAuraSpell 706623 Blood Rituals, TargetA 22 / TargetB 30, EffectRadiusIndex 10 = 30 yd; Spell.dbc). Precondition fixture: with_rituals carries Blood Rituals 706623 (1 stack), no_rituals stands 2 yd away without 706623 (unwitnessed unhealed control placed adjacent to healed ally within 3 yd << 30 yd). Control (before learning 680828): 0 heals. Treatment: with_rituals receives >= 16 heals of 524180, no_rituals receives 0. Reference search 2026-11-26: coa-history 680828/524180: 0 events in 186 logs; bindmysoul names Darkfallen Lament."
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (heal target cap 12 allies with Blood Rituals)",
+      "kind": "ally_heal_reach",
+      "variant": "ally_cap_12",
+      "quote": "Chant a sinister ritual, healing up to $524181i allies affected by Blood Rituals for ${($d*1000/$T1)*($524180m1+$524180ppl1+$bh*0.1)} over $d",
+      "allies": [
+        {
+          "id": "ritual_1",
+          "dx": 3,
+          "dy": -1,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_2",
+          "dx": 4,
+          "dy": -1,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_3",
+          "dx": 5,
+          "dy": -1,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_4",
+          "dx": 2,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_5",
+          "dx": 3,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_6",
+          "dx": 4,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_7",
+          "dx": 5,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_8",
+          "dx": 2,
+          "dy": 1,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_9",
+          "dx": 3,
+          "dy": 1,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_10",
+          "dx": 4,
+          "dy": 1,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_11",
+          "dx": 5,
+          "dy": 1,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_12",
+          "dx": 2,
+          "dy": 2,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "ritual_13",
+          "dx": 3,
+          "dy": 2,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 50000,
+          "auras": [
+            [
+              706623,
+              1
+            ]
+          ]
+        }
+      ],
+      "casts": [
+        {
+          "spell": 680828,
+          "target": "caster",
+          "watch_ms": 8500
+        }
+      ],
+      "checks": [
+        {
+          "name": "ally_cap_12",
+          "spell": 524180,
+          "healed": [
+            "ritual_1",
+            "ritual_2",
+            "ritual_3",
+            "ritual_4",
+            "ritual_5",
+            "ritual_6",
+            "ritual_7",
+            "ritual_8",
+            "ritual_9",
+            "ritual_10",
+            "ritual_11",
+            "ritual_12"
+          ],
+          "unhealed": [
+            "ritual_13"
+          ],
+          "reference": "ritual_1",
+          "minimum": 16,
+          "judge": "reach"
+        }
+      ],
+      "observe_source": "Tooltip 680828 states 'healing up to $524181i allies affected by Blood Rituals' ($524181i = 12, Spell.dbc 524181 MaxAffectedTargets 12), whereas 524180 carries MaxAffectedTargets 25 (Spell.dbc). Places 13 grouped raid allies carrying precondition fixture Blood Rituals 706623 within 6 yd (<< 30 yd radius, schema 2): tests whether 524180 respects the tooltip cap of 12 allies or over-heals the 13th ally. Reference search 2026-11-26: coa-history 680828/524180: 0 events in 186 logs; bindmysoul names Darkfallen Lament."
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (heal amount at reference stats: 0 SP -> 1296)",
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "quote": "Chant a sinister ritual, healing up to $524181i allies affected by Blood Rituals for ${($d*1000/$T1)*($524180m1+$524180ppl1+$bh*0.1)} over $d",
+      "trigger_spell": 680828,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          50000
+        ],
+        "ally_auras": [
+          [
+            706623,
+            1,
+            "ally",
+            "caster"
+          ]
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 524180,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1296,
+      "tolerance": 16,
+      "wait_ms": 8800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 680828 formula ${($d*1000/$T1)*($524180m1+$524180ppl1+$bh*0.1)}: 680828 DurationIndex 31 = 8000 ms / Amplitude 500 ms = 16 ticks; 524180 Spell.dbc Effect[0] HEAL BasePoints 71 + DieSides 1 = 72, RealPointsPerLevel 4.5 (BaseLevel 58, MaxLevel 60 -> +9 at level 60) = 81 per tick -> 16 * 81 = 1296 at 0 SP (16255 -100% crit, tolerance 16 for rounding). Precondition fixture: grouped ally holds Blood Rituals 706623. Control (uncast before phase): 0. Reference search 2026-11-26: coa-history 680828/524180: 0 events in 186 logs."
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (heal amount at +5000 SP: +0.1 SP per tick -> 9296)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "Chant a sinister ritual, healing up to $524181i allies affected by Blood Rituals for ${($d*1000/$T1)*($524180m1+$524180ppl1+$bh*0.1)} over $d",
+      "trigger_spell": 680828,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "player_spell_power": {
+        "amount": 5000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          50000
+        ],
+        "ally_auras": [
+          [
+            706623,
+            1,
+            "ally",
+            "caster"
+          ]
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 524180,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 9296,
+      "tolerance": 16,
+      "wait_ms": 8800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP scaling arm for 680828 heal formula ${($d*1000/$T1)*($524180m1+$524180ppl1+$bh*0.1)}: at +5000 SP, tooltip states 81 + 0.1 * 5000 = 581 per tick x 16 ticks = 9296 (delta +8000 over base 1296; tolerance 16). Control (uncast before phase): 0. Reference search 2026-11-26: coa-history 680828/524180: 0 events in 186 logs."
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (leech damage at reference stats: 0 SP -> 1368)",
+      "kind": "metric_delta",
+      "variant": "leech_damage_base",
+      "label_suffix": "leech_damage_base",
+      "quote": "and leeching ${($d*1000/$t1)*($630874m1+$630874ppl1+$bh*1)} health from enemies within $524181a1 yds over $d.",
+      "trigger_spell": 680828,
+      "cast_in_before": false,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          673,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ],
+        [
+          673,
+          0,
+          -528
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 630874,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1360,
+      "tolerance": 1,
+      "wait_ms": 8800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 680828 Effect[1] periodic 500 ms over 8000 ms (16 ticks) triggers 630895 -> 630874 (SchoolMask 1 Physical, Effect[0] SPELL_EFFECT_HEALTH_LEECH: BasePoints 60 + DieSides 1 + RealPointsPerLevel 0.5 * (60 - 11) = 85.5 -> int32(85.5) = 85 per tick x 16 = 1360 at 0 SP, after Lesser Armor 673 effect 0 = -528 zeros the dummy armor to 0, verified by armor == 0 precondition). Wait 9000 ms (> 8000 ms channel). Expected 1360 +- 1. Reference search 2026-11-26: coa-history 680828/630874: 0 events in 186 logs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "armor",
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Lesser Armor 673 effect 0 set to -528 zeros the dummy's pinned 528 armor so Physical leech 630874 reads unmitigated (as Felsworn 803903 zero-armor arm)"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (leech damage at +5000 SP: +1.0 SP per tick -> 81368)",
+      "kind": "metric_delta",
+      "variant": "leech_damage_sp",
+      "label_suffix": "leech_damage_sp",
+      "quote": "and leeching ${($d*1000/$t1)*($630874m1+$630874ppl1+$bh*1)} health from enemies within $524181a1 yds over $d.",
+      "trigger_spell": 680828,
+      "cast_in_before": false,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "player_spell_power": {
+        "amount": 5000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          673,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ],
+        [
+          673,
+          0,
+          -528
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 630874,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 81360,
+      "tolerance": 1,
+      "wait_ms": 8800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 680828 tooltip leech formula ($d*1000/$t1)*($630874m1+$630874ppl1+$bh*1): at +5000 SP, 630874 EffectBonusMultiplier[0] = 1.0 (DmgClass 1 SPELL_DAMAGE_CLASS_MAGIC) yields int32(85.5 + 5000) = 5085 per tick x 16 ticks = 81360 unmitigated Physical damage (Lesser Armor 673 effect 0 = -528 zeros dummy armor, verified by armor == 0 precondition). Wait 9000 ms (> 8000 ms channel). Expected 81360 +- 1 (excludes 0 SP = 1360 and 2x SP = 161360). Reference search 2026-11-26: coa-history 680828/630874: 0 events in 186 logs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "armor",
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Lesser Armor 673 effect 0 set to -528 zeros the dummy's pinned 528 armor so Physical leech 630874 reads unmitigated (as Felsworn 803903 zero-armor arm)"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (leech heals caster for 100% of damage dealt)",
+      "kind": "metric_delta",
+      "variant": "leech_heal_ratio",
+      "label_suffix": "leech_heal_ratio",
+      "quote": "and leeching ${($d*1000/$t1)*($630874m1+$630874ppl1+$bh*1)} health from enemies within $524181a1 yds over $d.",
+      "trigger_spell": 680828,
+      "cast_in_before": false,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "caster_health_pct": 50,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 630874,
+        "target": "caster"
+      },
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 630874,
+          "target": "dummy"
+        },
+        "ratio": 1.0,
+        "tolerance": 0.01,
+        "least": 100,
+        "source": "Spell.dbc 630874 Effect[0] SPELL_EFFECT_HEALTH_LEECH EffectValueMultiplier[0] 1.0 heals caster for 100% of leech damage dealt"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 8800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 630874 Effect[0] SPELL_EFFECT_HEALTH_LEECH EffectValueMultiplier[0] = 1.0: proves 630874 leeches health back to caster at 1.00 ratio of damage dealt (same_arm_ratio 1.00 +- 0.01, least 100 damage, excluding 0 and 2.00). Control (uncast before phase): 0. Reference search 2026-11-26: coa-history 680828/630874: 0 events in 186 logs."
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (leech hits enemy inside 10 yd radius + reach + leeway)",
+      "kind": "metric_delta",
+      "variant": "leech_radius_in",
+      "label_suffix": "leech_radius_in",
+      "quote": "and leeching ${($d*1000/$t1)*($630874m1+$630874ppl1+$bh*1)} health from enemies within $524181a1 yds over $d.",
+      "trigger_spell": 680828,
+      "cast_in_before": false,
+      "target": "caster",
+      "select_dummy": true,
+      "dummy_distance": 13.4,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 630874,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 16,
+      "wait_ms": 8800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.275,
+            "expected": 1.275,
+            "tolerance": 0.02,
+            "precondition": true,
+            "source": "Dummy entry 36 combat_reach is 1.275 yd entering WorldObject::IsWithinDist3d"
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 13.4,
+            "expected": 13.4,
+            "tolerance": 0.2,
+            "precondition": true,
+            "source": "Dummy stands at 13.4 yd from caster (~0.5 yd inside 10 + 1.275 reach + 2.66 player leeway = 13.935 yd edge)"
+          }
+        ]
+      },
+      "observe_source": "$524181a1 = 10 yd (Spell.dbc 524181 & 630895 EffectRadiusIndex 13 = 10 yd, TargetA 22 TARGET_SRC_CASTER / TargetB 15 TARGET_UNIT_SRC_AREA_ENEMY). With dummy combat_reach 1.275 yd and player leeway 2.66 yd (Spell.cpp:1388-1394, Object.cpp:1787-1808), effective edge is 13.935 yd. Dummy at 13.4 yd (verified by distance_2d and combat_reach precondition arms) takes all 16 leech hits of 630874 (0 before cast, 16 after). Paired with leech_radius_out at 14.5 yd. Reference search 2026-11-26: coa-history 680828/630874: 0 events in 186 logs."
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (leech misses enemy outside 10 yd radius + reach + leeway)",
+      "kind": "metric_delta",
+      "variant": "leech_radius_out",
+      "label_suffix": "leech_radius_out",
+      "quote": "and leeching ${($d*1000/$t1)*($630874m1+$630874ppl1+$bh*1)} health from enemies within $524181a1 yds over $d.",
+      "trigger_spell": 680828,
+      "cast_in_before": false,
+      "target": "caster",
+      "select_dummy": true,
+      "dummy_distance": 14.5,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 630874,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 8800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.275,
+            "expected": 1.275,
+            "tolerance": 0.02,
+            "precondition": true,
+            "source": "Dummy entry 36 combat_reach is 1.275 yd entering WorldObject::IsWithinDist3d"
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 14.5,
+            "expected": 14.5,
+            "tolerance": 0.2,
+            "precondition": true,
+            "source": "Dummy stands at 14.5 yd from caster (~0.56 yd outside 10 + 1.275 reach + 2.66 player leeway = 13.935 yd edge)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 680828
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Positive cast proof: 680828 actually cast in treatment phase"
+          }
+        ]
+      },
+      "observe_source": "Outside-edge companion to leech_radius_in for 680828 ($524181a1 = 10 yd, effective edge 13.935 yd with 1.275 yd dummy reach + 2.66 yd player leeway). Dummy at 14.5 yd (verified by distance_2d and combat_reach precondition arms; 680828 spell_go_count == 1) takes 0 hits of 630874. Reference search 2026-11-26: coa-history 680828/630874: 0 events in 186 logs."
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (immune to silence while active)",
+      "kind": "metric_delta",
+      "variant": "immune_silence",
+      "label_suffix": "immune_silence",
+      "quote": "While active, you are immune to silence and interrupt effects, but cannot move.",
+      "trigger_spell": 680828,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "strike": {
+        "spell": 15487,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680828
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Darkfallen Lament 680828 remains active on caster after the silence attempt (0 before, 1 after)"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 15487
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 6000,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 680828 states 'While active, you are immune to silence and interrupt effects'. Striker casts Silence 15487 (aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9, DurationIndex 28 = 5000 ms) at caster in both phases: before (no 680828, control) Silence 15487 lands (1); after 6000 ms expiry, 1500 ms into Darkfallen Lament 680828 channel, Silence 15487 must not land (0) and 680828 must stay active (1). Reference search 2026-11-26: coa-history 680828: 0 events in 186 logs."
+    },
+    {
+      "spell": 680828,
+      "name": "Darkfallen Lament (immune to interrupt: Counterspell does not cut channel ticks)",
+      "kind": "metric_delta",
+      "variant": "immune_interrupt",
+      "label_suffix": "immune_interrupt",
+      "quote": "While active, you are immune to silence and interrupt effects, but cannot move.",
+      "trigger_spell": 680828,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "after_trigger_strike": {
+        "spell": 2139,
+        "delay_ms": 1500,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 630874,
+        "target": "dummy"
+      },
+      "before_expected": 16,
+      "expected": 32,
+      "wait_ms": 8800,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "680828 carries ChannelInterruptFlags 0 (Spell.dbc; SpellEffects.cpp:4839 refuses EffectInterruptCast when ChannelInterruptFlags & CHANNEL_INTERRUPT_FLAG_INTERRUPT == 0). Before phase (unstruck control): 680828 channels its full 8000 ms (read at 8800 ms) -> exactly 16 ticks of 630874. After phase: striker casts Counterspell 2139 (SPELL_EFFECT_INTERRUPT_CAST) at +1500 ms into the 8000 ms channel -> 680828 is not interrupted and completes all 16 ticks (cumulative 32; an interrupted channel at 1500 ms would stop at 3 ticks = 19 cumulative). Reference search 2026-11-26: coa-history 680828: 0 events in 186 logs."
+    },
+    {
+      "spell": 680733,
+      "name": "Bloodcraft (4 stacks reduce enemy damage dealt by 8%)",
+      "kind": "metric_delta",
+      "variant": "damage_reduced_4stack",
+      "label_suffix": "damage_reduced_4stack",
+      "quote": "Your damage dealt by Darkfallen Lament now applies Bloodcraft to affected enemies, reducing damage dealt by $524182s1% for $524182d,",
+      "trigger_spell": 680828,
+      "gate_spell": 680733,
+      "target": "caster",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "striker",
+          "striker"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100,
+        "after_trigger_ms": 2600,
+        "reaction": 0
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 98900,
+      "expected": 98988,
+      "tolerance": 2,
+      "wait_ms": 100,
+      "expire_ms": 14000,
+      "void_on_cast_failure": true,
+      "observe_source": "$524182s1 = -2% per stack (Spell.dbc 524182 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 all schools BasePoints -3 + DieSides 1 = -2, StackAmount 4 -> -8% at 4 stacks; pending_db_world/rev_20260920_41_bloodmage_damage_proc_triggers.sql procs 680733 on 630874 Darkfallen Lament damage). Darkfallen Lament 680828 ticks 5 times on striker (at 3 yd) by 2600 ms, capping 524182 at 4 stacks while keeping caster at full 100000 HP; striker then casts Light of the Naaru 41394 (1100 exact Holy damage, 16255 -100% crit on striker) at 2600 ms and caster health is read at 2800 ms (before 3000 ms leech tick). Control (before learning 680733): 100000 - 1100 = 98900. Treatment (4 stacks = -8%): 100000 - 1012 = 98988 (tolerance 2 excludes 0% = 98900 and -16% = 99076). Reference search 2026-11-26: coa-history 680733/524182: 0 events in 186 logs; coabuildhub 680733 matches."
+    },
+    {
+      "spell": 680733,
+      "name": "Bloodcraft (1 stack reduces enemy damage dealt by 2%)",
+      "kind": "metric_delta",
+      "variant": "damage_reduced_1stack",
+      "label_suffix": "damage_reduced_1stack",
+      "quote": "Your damage dealt by Darkfallen Lament now applies Bloodcraft to affected enemies, reducing damage dealt by $524182s1% for $524182d,",
+      "trigger_spell": 680828,
+      "gate_spell": 680733,
+      "target": "caster",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "striker",
+          "striker"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100,
+        "after_trigger_ms": 650,
+        "reaction": 0
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 98900,
+      "expected": 98922,
+      "tolerance": 2,
+      "wait_ms": 100,
+      "expire_ms": 14000,
+      "void_on_cast_failure": true,
+      "observe_source": "Single-stack (-2%) check for 680733 Bloodcraft: Darkfallen Lament 680828 lands its 1st tick of 630874 at 500 ms -> 1 stack of 524182 (-2%) on striker. At 650 ms striker casts Light of the Naaru 41394 (1100 exact Holy, 16255 -100% crit); caster health read at 850 ms (before 1000 ms tick): 98900 before learning 680733 (control), 100000 - 1078 = 98922 after (tolerance 2 excludes 0% = 98900 and -4% = 98944). Reference search 2026-11-26: coa-history 680733/524182: 0 events in 186 logs; coabuildhub 680733 matches."
+    },
+    {
+      "spell": 680733,
+      "name": "Bloodcraft (debuff 524182 lasts 5 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Your damage dealt by Darkfallen Lament now applies Bloodcraft to affected enemies, reducing damage dealt by $524182s1% for $524182d,",
+      "trigger_spell": 680828,
+      "gate_spell": 680733,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 524182,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 12650,
+      "expiry_wait_ms": 700,
+      "expire_ms": 14000,
+      "game_time": {
+        "after": [
+          12550,
+          12950
+        ],
+        "expired": [
+          13150,
+          13480
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$524182d = 5000 ms (Spell.dbc 524182 DurationIndex 28 = 5000 ms). Darkfallen Lament 680828 (8000 ms, 500 ms amp) fires its final tick at 8000 ms, refreshing 524182 for 5000 ms (expiry at 13000 ms). Control (before learning 680733): 0. Treatment: 524182 present (1) at game_time [12550, 12950] ms (~4650 ms after final tick, > 4500 ms = -10%) and expired (0) at game_time [13150, 13480] ms (~5350 ms after final tick, < 5500 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 680733/524182: 0 events in 186 logs; coabuildhub 680733 says 'for 5 seconds'.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 680733,
+      "name": "Bloodcraft (debuff 524182 stacks cap at 4)",
+      "kind": "metric_delta",
+      "variant": "stacks",
+      "label_suffix": "stacks",
+      "quote": "stacking $524182u times.",
+      "trigger_spell": 680828,
+      "gate_spell": 680733,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 524182,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "wait_ms": 5000,
+      "expire_ms": 14000,
+      "void_on_cast_failure": true,
+      "observe_source": "$524182u = 4 (Spell.dbc 524182 StackAmount 4). Darkfallen Lament 680828 lands 10 ticks of 630874 by 5000 ms: 0 stacks before learning 680733 (control), capped at exactly 4 stacks (not 10) after learning 680733. Reference search 2026-11-26: coa-history 680733/524182: 0 events in 186 logs; coabuildhub 680733 says 'stacking 4 times'."
+    },
+    {
+      "spell": 300585,
+      "name": "Enduring (Bloodbolt damage +25% above 35% health)",
+      "kind": "hit_ratio",
+      "variant": "base_damage",
+      "label_suffix": "base_damage",
+      "quote": "Increases the damage of Bloodbolt by $s2%,",
+      "expected": 1.25,
+      "observe_spell": 578305,
+      "learn": [
+        578305
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "target_health_pct": 50
+      },
+      "treatment": {
+        "learn": [
+          300585
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "target_health_pct": 50
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 25 (300585 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 0 SPELLMOD_DAMAGE, BasePoints 24 + DieSides 1 = 25, EffectSpellClassMask[4] 131072 matching Bloodbolt 578305; Spell.dbc). At target_health_pct 50 (above 35% threshold), Bloodbolt 578305 at +20000 SP with 823764 beeg spellpen measures +25% (expected 1.25, +-2 pt band [23%, 27%], excluding 0% and +50%/+56.25%). Reference search 2026-11-26: coa-history 300585: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 300585 matches."
+    },
+    {
+      "spell": 300585,
+      "name": "Enduring (additional +25% Bloodbolt damage below 35% health: 34% vs 36% boundary)",
+      "kind": "hit_ratio",
+      "variant": "below_35_additional",
+      "label_suffix": "below_35_additional",
+      "quote": "plus an additional $s2% while below 35% health.",
+      "expected": 1.25,
+      "observe_spell": 578305,
+      "learn": [
+        578305,
+        300585
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "target_health_pct": 36
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "target_health_pct": 34
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "300585 Effect[0] aura 112 rewritten to SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE MiscValue 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 24 + DieSides 1 = +25%, EffectSpellClassMask[1] 131072 matching Bloodbolt 578305 (AscensionBloodmageTalents.cpp:51,329-330; Unit.cpp:9427; Spell.dbc). Both arms have 300585 learned; control holds dummy at 36% HP (just above 35%, only Effect[1] active) and treatment holds dummy at 34% HP (just below 35%, Effect[0] also active): ratio treatment / control = 1.25 (+-2 pt band [23%, 27%], excluding 0% and +50%), proving both the additional +25% and the 35% threshold boundary. Reference search 2026-11-26: coa-history 300585: 0 events in 186 logs; coabuildhub 300585 matches."
+    },
+    {
+      "spell": 806210,
+      "name": "Terrorizer (Veinburst +25% damage below 35% health)",
+      "kind": "hit_ratio",
+      "variant": "veinburst_below_35",
+      "label_suffix": "veinburst_below_35",
+      "quote": "Increases the damage of Veinburst, Bloodfang Bite, and Claw Sweep on enemies below 35% health by $s1%.",
+      "expected": 1.25,
+      "observe_spell": 504819,
+      "learn": [
+        504819
+      ],
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 5000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "target_health_pct": 34
+      },
+      "treatment": {
+        "learn": [
+          806210
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "target_health_pct": 34
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 25 (806210 Effect[0] aura 112 rewritten to SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE MiscValue 13 AURA_STATE_HEALTHLESS_35_PERCENT, BasePoints 24 + DieSides 1 = +25%, single class mask [2097152, 8388608, 16384] covering Veinburst 504819, Bloodfang Bite 572551, and Claw Sweep 500444; AscensionBloodmageTalents.cpp:50,328-331; Spell.dbc). Subset rule G-23: Veinburst 504819 (Mortal Form, 1 of 3 abilities sharing the same single unscripted Effect[0] class mask) at target_health_pct 34 measures +25% (expected 1.25, +-2 pt band [23%, 27%], excluding 0% and +50%). Paired with veinburst_above_35 at 36%. Reference search 2026-11-26: coa-history 806210: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 806210 matches."
+    },
+    {
+      "spell": 806210,
+      "name": "Terrorizer (Veinburst +0% above 35% health at 36%)",
+      "kind": "hit_ratio",
+      "variant": "veinburst_above_35",
+      "label_suffix": "veinburst_above_35",
+      "quote": "Increases the damage of Veinburst, Bloodfang Bite, and Claw Sweep on enemies below 35% health by $s1%.",
+      "expected": 1.0,
+      "observe_spell": 504819,
+      "learn": [
+        504819
+      ],
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 5000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "target_health_pct": 36
+      },
+      "treatment": {
+        "learn": [
+          806210
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "target_health_pct": 36
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Above-threshold control for 806210 Terrorizer (AURA_STATE_HEALTHLESS_35_PERCENT): at target_health_pct 36 (just above 35%), Veinburst 504819 measures +0% (expected 1.00, +-2 pt band [-2%, +2%], excluding +25%). Paired with veinburst_below_35 at 34%. Reference search 2026-11-26: coa-history 806210: 0 events in 186 logs; coabuildhub 806210 matches."
+    },
+    {
+      "spell": 806210,
+      "name": "Terrorizer (Bloodfang Bite +25% damage below 35% health)",
+      "kind": "hit_ratio",
+      "variant": "bloodfang_below_35",
+      "label_suffix": "bloodfang_below_35",
+      "quote": "Increases the damage of Veinburst, Bloodfang Bite, and Claw Sweep on enemies below 35% health by $s1%.",
+      "expected": 1.25,
+      "observe_spell": 572551,
+      "learn": [
+        572551
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            525031,
+            1
+          ]
+        ],
+        "target_health_pct": 34
+      },
+      "treatment": {
+        "learn": [
+          806210
+        ],
+        "auras": [
+          [
+            525031,
+            1
+          ]
+        ],
+        "target_health_pct": 34
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "806210 Terrorizer (AscensionBloodmageTalents.cpp:50,328-331 -> ASCENSION_CLASSMASK_AURASTATE_DAMAGE AURA_STATE_HEALTHLESS_35_PERCENT = 13, EffectBasePoints[0] = 24 -> +25%, EffectSpellClassMask[1] = 8388608 matching Bloodfang Bite 572551 SpellFamilyFlags[1] = 8388608). Bloodfang Bite 572551 (CasterAuraSpell 525031 Cursed Form fixture, +20000 AP, non-crit) against dummy at 34% health (< 35%) measures +25% (+-2 pt band excludes 0% and +50%). Reference search 2026-11-26: coa-history 806210: 0 events in 186 logs."
+    },
+    {
+      "spell": 806210,
+      "name": "Terrorizer (Claw Sweep +25% damage below 35% health)",
+      "kind": "hit_ratio",
+      "variant": "claw_sweep_below_35",
+      "label_suffix": "claw_sweep_below_35",
+      "quote": "Increases the damage of Veinburst, Bloodfang Bite, and Claw Sweep on enemies below 35% health by $s1%.",
+      "expected": 1.25,
+      "observe_spell": 500444,
+      "learn": [
+        500444
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            525031,
+            1
+          ]
+        ],
+        "target_health_pct": 34
+      },
+      "treatment": {
+        "learn": [
+          806210
+        ],
+        "auras": [
+          [
+            525031,
+            1
+          ]
+        ],
+        "target_health_pct": 34
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "806210 Terrorizer (AscensionBloodmageTalents.cpp:50,328-331 -> ASCENSION_CLASSMASK_AURASTATE_DAMAGE AURA_STATE_HEALTHLESS_35_PERCENT = 13, EffectBasePoints[0] = 24 -> +25%, EffectSpellClassMask[2] = 16384 matching Claw Sweep 500444 SpellFamilyFlags[2] = 16384). Claw Sweep 500444 (CasterAuraSpell 525031 Cursed Form fixture, 5 yd AoE hitting dummy at 3 yd, +20000 AP, non-crit) against dummy at 34% health (< 35%) measures +25% (+-2 pt band excludes 0% and +50%). Reference search 2026-11-26: coa-history 806210: 0 events in 186 logs."
+    },
+    {
+      "spell": 704662,
+      "name": "Shadows In The Night (magic damage taken -5% at 76% health)",
+      "kind": "taken_hit",
+      "variant": "above_75_magic",
+      "label_suffix": "above_75_magic",
+      "judge": "damage_ratio",
+      "expected": 0.95,
+      "quote": "your damage taken is reduced by $s2%.",
+      "strike_spell": 41394,
+      "caster_health_pct": 76,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            704662
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704662,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            704662
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704662,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "$s2 = 5 (704662 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 127 all schools BasePoints -6 + DieSides 1 = -5%, CasterAuraState 23 AURA_STATE_HEALTH_ABOVE_75_PERCENT; Spell.dbc; Unit.cpp:765,8519-8555; Player.cpp:3485). Passive striker casts Light of the Naaru 41394 (1100 exact Holy) at caster held at 76% of 100000 HP (> 75%): 1045 vs 1100 = 0.95 (-5%, +-2 pt band [-7%, -3%], excluding 0% and -10%). Reference search 2026-11-26: coa-history 704662: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 704662 matches."
+    },
+    {
+      "spell": 704662,
+      "name": "Shadows In The Night (Physical damage taken -5% at 76% health)",
+      "kind": "taken_hit",
+      "variant": "above_75_physical",
+      "label_suffix": "above_75_physical",
+      "judge": "damage_ratio",
+      "expected": 0.95,
+      "quote": "your damage taken is reduced by $s2%.",
+      "strike_spell": 92559,
+      "caster_health_pct": 76,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            704662
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704662,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            704662
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704662,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Physical-school check for 704662 Shadows In The Night (Effect[1] MiscValue 127 all schools, -5% while > 75% HP; Spell.dbc): Void Zone 92559 (1000 Physical, DmgClass 0) at caster_health_pct 76 measures 0.95 (-5%, +-2 pt band [-7%, -3%], excluding 0% and -10%). Reference search 2026-11-26: coa-history 704662: 0 events in 186 logs; coabuildhub 704662 matches."
+    },
+    {
+      "spell": 704662,
+      "name": "Shadows In The Night (damage reduction off at 75% health entered from 90%)",
+      "kind": "taken_hit",
+      "variant": "at_75_off",
+      "label_suffix": "at_75_off",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "While above 75% health,",
+      "strike_spell": 41394,
+      "caster_health_from_pct": 90,
+      "caster_health_pct": 75,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            704662
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704662,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            704662
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704662,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Threshold boundary arm for 704662 Shadows In The Night (CasterAuraState 23 AURA_STATE_HEALTH_ABOVE_75_PERCENT, Unit.cpp:765 HealthAbovePct(75) strictly > 75%; Unit.cpp:8544-8555 unapplies aura effects when leaving state): caster enters 75% from 90% (caster_health_from_pct 90 -> caster_health_pct 75), proving reduction switches off at 75% (expected 1.00, +-2 pt band [-2%, +2%], excluding -5%). Paired with above_75_magic and above_75_physical at 76%. Reference search 2026-11-26: coa-history 704662: 0 events in 186 logs; coabuildhub 704662 matches."
     }
   ],
   "player_observations": [],
