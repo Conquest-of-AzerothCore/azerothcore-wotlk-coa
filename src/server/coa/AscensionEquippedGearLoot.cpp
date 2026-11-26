@@ -47,7 +47,7 @@ std::string DisplayVisualSignature(ClientDBC::Record const& record)
 {
     constexpr std::array<uint32, 4> modelFields = {1, 2, 3, 4};
     constexpr std::array<uint32, 8> textureFields = {15, 16, 17, 18, 19, 20, 21, 22};
-    constexpr std::array<uint32, 6> integerFields = {7, 8, 9, 13, 14, 23};
+    constexpr std::array<uint32, 7> integerFields = {7, 8, 9, 13, 14, 23, 24};
 
     bool hasVisual = false;
     std::string signature;
