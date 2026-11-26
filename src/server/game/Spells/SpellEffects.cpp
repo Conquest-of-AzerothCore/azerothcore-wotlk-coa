@@ -291,6 +291,7 @@ void Spell::EffectUnused(SpellEffIndex /*effIndex*/)
 namespace
 {
 constexpr uint32 ASCENSION_EARTHSHAPING_AURA = 680441;
+constexpr uint32 ASCENSION_MARK_OF_ORDER_AURA = 806269;
 constexpr uint32 ASCENSION_STATIC_AURA = 803102;
 constexpr uint32 ASCENSION_THUNDER_WARD_AURA = 800098;
 constexpr uint32 ASCENSION_CHARGED_CONDUIT_AURA = 803790;
@@ -423,10 +424,12 @@ void ModifyAscensionAuraStacks(Unit* caster, Unit* target, uint32 auraSpellId, i
     if (Aura* aura = target->GetAura(auraSpellId))
     {
         // Earthshaping's authored contract explicitly forbids refreshing its
-        // lifetime when another stack is gained. Other auras keep native
-        // ModStackAmount behavior.
+        // lifetime when another stack is gained, and Mark of Order's periodic
+        // self-stacking (806270 -> 806269) must preserve its remaining duration
+        // so the 20 s buff expires instead of refreshing indefinitely. Other
+        // auras keep native ModStackAmount behavior.
         bool preserveDuration = delta > 0 &&
-            auraSpellId == ASCENSION_EARTHSHAPING_AURA;
+            (auraSpellId == ASCENSION_EARTHSHAPING_AURA || auraSpellId == ASCENSION_MARK_OF_ORDER_AURA);
         int32 remaining = aura->GetDuration();
         aura->ModStackAmount(delta);
         if (preserveDuration)
