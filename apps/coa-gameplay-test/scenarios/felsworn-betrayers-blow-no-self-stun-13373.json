@@ -1,0 +1,1462 @@
+{
+  "schema": 1,
+  "name": "Betrayer's Blow never stuns the Felsworn or its party through self-targeted Chaos Rush (#13373)",
+  "contract": [
+    "Betrayer's Inclinations 804758 (Felsworn) tooltip: while active, your attacks against Demons have a 10%",
+    "chance to deliver Betrayer's Blow 804766, which damages and stuns the target. #13085 gave 804758 the proc",
+    "flags DONE_MELEE_AUTO_ATTACK | DONE_SPELL_MELEE_DMG_CLASS. Chaos Rush 500028 is a melee-class spell whose",
+    "effects all target the caster, so its hit fires the proc with the Felsworn as the action target, and the",
+    "blow is cast on the Felsworn. Spell::CheckCast skips the enemy check for an aura-triggered self cast, and",
+    "Inner Demon 804216 (shapeshift form 56, creature type Demon) passes the Demon-only target type, so #13373",
+    "reports a self stun. Expected: the blow only reaches a valid attack target, never the Felsworn or a party",
+    "member. The Felsworn, in Inner Demon and grouped with a warrior, casts Chaos Rush 150 times; before each",
+    "cast it returns to a passive wolf anchor and its creature type is checked to be Demon. With the defect",
+    "at least one blow lands on the Felsworn with probability 1 - 0.9^150 (residual about 1.4e-7). The",
+    "encounter timeline must show no Betrayer's Blow aura on either player, and neither may end stunned. The",
+    "positive path (blows on Demon enemies) stays covered by felsworn-betrayers-inclinations-demon-blow-13005."
+  ],
+  "timeout_ms": 600000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "felsworn", "race": 1, "class": 14, "level": 80},
+    {"id": "ally", "race": 1, "class": 1, "level": 80}
+  ],
+  "creatures": [
+    {
+      "id": "anchor", "owner": "felsworn", "entry": 299, "level": 80, "health": 1000000, "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "set_health", "actor": "felsworn", "value": 1000000, "maximum": 1000000},
+    {
+      "action": "group", "label": "FIXTURE: the Felsworn and the warrior share a party", "actor": "felsworn",
+      "target": "ally"
+    },
+    {"action": "learn", "actor": "felsworn", "spell": 804758},
+    {"action": "learn", "actor": "felsworn", "spell": 500028},
+    {"action": "learn", "actor": "felsworn", "spell": 804216},
+    {"action": "cast", "label": "Activate Betrayer's Inclinations", "actor": "felsworn", "spell": 804758},
+    {
+      "action": "assert", "label": "SETUP: Betrayer's Inclinations is active", "actor": "felsworn", "metric": "aura",
+      "spell": 804758, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the warrior is a Humanoid", "actor": "ally", "metric": "creature_type",
+      "equals": 7
+    },
+    {
+      "action": "encounter_start", "label": "Record aura applications near the anchor", "actor": "felsworn",
+      "boss_entry": 299, "radius": 30
+    },
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 1", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 2", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 3", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 4", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 5", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 6", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 7", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 8", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 9", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 10", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 11", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 12", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 13", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 14", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 15", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 16", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 17", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 18", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 19", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 20", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 21", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 22", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 23", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 24", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 25", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 26", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 27", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 28", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 29", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 30", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 31", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 32", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 33", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 34", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 35", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 36", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 37", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 38", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 39", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 40", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 41", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 42", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 43", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 44", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 45", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 46", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 47", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 48", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 49", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 50", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 51", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 52", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 53", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 54", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 55", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 56", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 57", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 58", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 59", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 60", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 61", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 62", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 63", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 64", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 65", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 66", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 67", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 68", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 69", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 70", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 71", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 72", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 73", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 74", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 75", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 76", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 77", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 78", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 79", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 80", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 81", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 82", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 83", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 84", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 85", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 86", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 87", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 88", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 89", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 90", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 91", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 92", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 93", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 94", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 95", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 96", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 97", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 98", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 99", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 100", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 101", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 102", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 103", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 104", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 105", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 106", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 107", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 108", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 109", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 110", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 111", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 112", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 113", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 114", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 115", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 116", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 117", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 118", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 119", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 120", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 121", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 122", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 123", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 124", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 125", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 126", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 127", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 128", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 129", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 130", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 131", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 132", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 133", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 134", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 135", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 136", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 137", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 138", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 139", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 140", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 141", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 142", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 143", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 144", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "set_aura", "actor": "felsworn", "spell": 804216, "stacks": 0},
+    {"action": "set_aura", "label": "FIXTURE: Inner Demon", "actor": "felsworn", "spell": 804216, "stacks": 1},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 145", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 146", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 147", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 148", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 149", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {"action": "relocate_to_creature", "actor": "felsworn", "entry": 299, "radius": 30},
+    {
+      "action": "assert", "label": "SETUP: Inner Demon makes the Felsworn a Demon", "actor": "felsworn",
+      "metric": "creature_type", "equals": 3
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {"action": "restore_charges", "actor": "felsworn", "spell": 500028},
+    {"action": "cast", "label": "Chaos Rush 150", "actor": "felsworn", "spell": 500028},
+    {"action": "wait", "ms": 1100},
+    {
+      "action": "assert", "label": "SETUP: every Chaos Rush completed", "actor": "felsworn",
+      "metric": "spell_cast_count", "spell": 500028, "min": 150
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Betrayer's Blow never lands on the Felsworn", "actor": "felsworn",
+      "metric": "timeline_count", "event": "aura_applied", "spell": 804766, "target_actors": ["felsworn"], "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Betrayer's Blow never lands on the party member",
+      "actor": "felsworn", "metric": "timeline_count", "event": "aura_applied", "spell": 804766,
+      "target_actors": ["ally"], "equals": 0
+    },
+    {
+      "action": "assert", "label": "REGRESSION: the Felsworn is not stunned", "actor": "felsworn", "metric": "stunned",
+      "equals": 0
+    },
+    {
+      "action": "assert", "label": "REGRESSION: the party member is not stunned", "actor": "ally", "metric": "stunned",
+      "equals": 0
+    }
+  ]
+}
