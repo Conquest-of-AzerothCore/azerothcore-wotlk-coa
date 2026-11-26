@@ -31,23 +31,8 @@ struct AppliedLift final : DataMap::Base
     float ratio = 1.0f;
 };
 
-void RaiseCreateStat(Unit* unit, Stats stat, float amount)
-{
-    unit->SetCreateStat(stat, unit->GetCreateStat(stat) + amount);
-    unit->UpdateStats(stat);
-}
-
 void HandleLiftModifiers(Unit* unit, Policy::Lift const& lift, bool apply)
 {
-    if (lift.stamina != 0.0f)
-    {
-        if (unit->IsPet())
-            RaiseCreateStat(unit, STAT_STAMINA, apply ? lift.stamina : -lift.stamina);
-        else
-            unit->HandleStatFlatModifier(UnitMods(int(UNIT_MOD_STAT_START) + int(STAT_STAMINA)), BASE_VALUE,
-                lift.stamina, apply);
-    }
-
     if (lift.health != 0.0f)
         unit->HandleStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, lift.health, apply);
 }
@@ -60,6 +45,7 @@ void DropLift(Unit* unit)
 
     Policy::Lift const lift = applied->lift;
     unit->CustomData.Erase(LiftKey);
+    unit->SetBattlegroundOutputRatio(1.0f);
     HandleLiftModifiers(unit, lift, false);
 }
 
@@ -85,18 +71,14 @@ void ApplyLift(Unit* unit, Policy::Lift const& lift, float ratio)
     uint32 const health = unit->GetHealth();
     uint32 const oldMax = unit->GetMaxHealth();
     DropLift(unit);
-    HandleLiftModifiers(unit, lift, true);
     auto* applied = new AppliedLift();
     applied->lift = lift;
     applied->ratio = ratio;
     unit->CustomData.Set(LiftKey, applied);
+    unit->SetBattlegroundOutputRatio(ratio);
+    HandleLiftModifiers(unit, lift, true);
 
     unit->SetHealth(Policy::KeptHealth(health, oldMax, unit->GetMaxHealth()));
-}
-
-float PlayerOutputHealth(Policy::LevelValues const& values)
-{
-    return static_cast<float>(values.health) + Policy::PlayerStaminaHealth(values.stats[STAT_STAMINA]);
 }
 
 uint32 LiftTargetLevel(Player const* player)
@@ -138,8 +120,8 @@ void RefreshPlayerLift(Player* player)
 
     Policy::LevelValues const own = PlayerLevelValues(player, level);
     Policy::LevelValues const lifted = PlayerLevelValues(player, uint8(target));
-    ApplyLift(player, Policy::LiftBetween(own, lifted),
-        Policy::OutputRatio(PlayerOutputHealth(own), PlayerOutputHealth(lifted)));
+    ApplyLift(player, Policy::PlayerLiftBetween(own, lifted),
+        Policy::OutputRatio(Policy::PlayerOutputHealth(own), Policy::PlayerOutputHealth(lifted)));
 }
 
 Policy::LevelValues PetLevelValues(PetLevelInfo const& info, bool hasMana)
@@ -185,6 +167,275 @@ void RemoveOwnerLifts(Player* player)
     if (Pet* pet = player->GetPet())
         RemoveLift(pet);
 }
+
+uint8 BattlegroundCatchUpSkipForSpell(uint32 spellId)
+{
+    switch (spellId)
+    {
+        case 12654:
+        case 12723:
+        case 20625:
+        case 22482:
+        case 25373:
+        case 25997:
+        case 29142:
+        case 29879:
+        case 33619:
+        case 35139:
+        case 38441:
+        case 42393:
+        case 45284:
+        case 45297:
+        case 47496:
+        case 49882:
+        case 50526:
+        case 50536:
+        case 51460:
+        case 55269:
+        case 56578:
+        case 56698:
+        case 59102:
+        case 60532:
+        case 61840:
+        case 62379:
+        case 63468:
+        case 64930:
+        case 66316:
+        case 67100:
+        case 67101:
+        case 67102:
+        case 69034:
+        case 69189:
+        case 70890:
+        case 71023:
+        case 71824:
+        case 71879:
+        case 272355:
+        case 277083:
+        case 277787:
+        case 277820:
+        case 278563:
+        case 278564:
+        case 278662:
+        case 280221:
+        case 280376:
+        case 281051:
+        case 300870:
+        case 504606:
+        case 524091:
+        case 525028:
+        case 561318:
+        case 570050:
+        case 570182:
+        case 572837:
+        case 573242:
+        case 574166:
+        case 575831:
+        case 578346:
+        case 583921:
+        case 680204:
+        case 680532:
+        case 680681:
+        case 681109:
+        case 681308:
+        case 681404:
+        case 681459:
+        case 704974:
+        case 705124:
+        case 705380:
+        case 705425:
+        case 705644:
+        case 705798:
+        case 705929:
+        case 706808:
+        case 706898:
+        case 707469:
+        case 707575:
+        case 707660:
+        case 707708:
+        case 707720:
+        case 707759:
+        case 782754:
+        case 782801:
+        case 783054:
+        case 801129:
+        case 801241:
+        case 801456:
+        case 802608:
+        case 802620:
+        case 802850:
+        case 803287:
+        case 803467:
+        case 803706:
+        case 804934:
+        case 805748:
+        case 805979:
+        case 806112:
+        case 806946:
+        case 807262:
+        case 807347:
+        case 807651:
+        case 807672:
+        case 986053:
+        case 1180001:
+        case 1180392:
+        case 1181271:
+        case 1556016:
+        case 1571152:
+            return BG_CATCH_UP_SKIP_DAMAGE;
+        case 15290:
+        case 20267:
+        case 22845:
+        case 23493:
+        case 23880:
+        case 24379:
+        case 26170:
+        case 27813:
+        case 27817:
+        case 27818:
+        case 30294:
+        case 31616:
+        case 34299:
+        case 37382:
+        case 39373:
+        case 45470:
+        case 48153:
+        case 48210:
+        case 48503:
+        case 48743:
+        case 48843:
+        case 48844:
+        case 50181:
+        case 50454:
+        case 50475:
+        case 52724:
+        case 52752:
+        case 54172:
+        case 54181:
+        case 54203:
+        case 54755:
+        case 54968:
+        case 55533:
+        case 56131:
+        case 56160:
+        case 56161:
+        case 58879:
+        case 59913:
+        case 63106:
+        case 64891:
+        case 66235:
+        case 66922:
+        case 67535:
+        case 69190:
+        case 70677:
+        case 70691:
+        case 70772:
+        case 70809:
+        case 98900:
+        case 275981:
+        case 276986:
+        case 280366:
+        case 282095:
+        case 289262:
+        case 301004:
+        case 301307:
+        case 500522:
+        case 500534:
+        case 504306:
+        case 504565:
+        case 504830:
+        case 520419:
+        case 520793:
+        case 520880:
+        case 521643:
+        case 523526:
+        case 524675:
+        case 524703:
+        case 524972:
+        case 560355:
+        case 560627:
+        case 560747:
+        case 560839:
+        case 561095:
+        case 561308:
+        case 570156:
+        case 570185:
+        case 572374:
+        case 572786:
+        case 574335:
+        case 574337:
+        case 653241:
+        case 680374:
+        case 681032:
+        case 681206:
+        case 681270:
+        case 681463:
+        case 706654:
+        case 706753:
+        case 707302:
+        case 707449:
+        case 712356:
+        case 712433:
+        case 712453:
+        case 712482:
+        case 800179:
+        case 802271:
+        case 802399:
+        case 803331:
+        case 804736:
+        case 805187:
+        case 806073:
+        case 807170:
+        case 807414:
+        case 807420:
+        case 807545:
+        case 807561:
+        case 807652:
+        case 807857:
+        case 807934:
+        case 807942:
+        case 810040:
+        case 954269:
+        case 954283:
+        case 1571402:
+        case 1581957:
+        case 1582343:
+        case 1584444:
+            return BG_CATCH_UP_SKIP_HEAL;
+        case 26470:
+        case 47753:
+        case 48707:
+        case 64413:
+        case 70845:
+        case 288805:
+        case 547574:
+        case 560374:
+        case 653283:
+        case 704277:
+        case 706759:
+        case 805422:
+        case 805718:
+            return BG_CATCH_UP_SKIP_ABSORB;
+        default:
+            return BG_CATCH_UP_SKIP_NONE;
+    }
+}
+
+class ascension_battleground_catch_up_spell_attr : public GlobalScript
+{
+public:
+    ascension_battleground_catch_up_spell_attr()
+        : GlobalScript("ascension_battleground_catch_up_spell_attr", {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* spellInfo) override
+    {
+        if (!spellInfo)
+            return;
+
+        if (uint8 const skip = BattlegroundCatchUpSkipForSpell(spellInfo->Id))
+            spellInfo->AscensionBattlegroundCatchUpSkip |= skip;
+    }
+};
 
 class ascension_battleground_wide_brackets_config : public WorldScript
 {
@@ -265,6 +516,7 @@ public:
             return;
 
         pet->CustomData.Erase(LiftKey);
+        pet->SetBattlegroundOutputRatio(1.0f);
         if (pet->IsInWorld())
             RefreshPetLift(pet);
     }
@@ -275,12 +527,14 @@ public:
     }
 };
 
-int32 ScaledSigned(Unit const* source, Unit const* target, int32 amount, SpellInfo const* spell, bool healing)
+int32 ScaledSigned(Unit const* source, Unit const* target, int32 amount, SpellInfo const* spell, bool healing,
+    bool absorb = false)
 {
     if (amount <= 0)
         return amount;
 
-    uint32 const scaled = AscensionBattlegroundCatchUp::ScaledOutput(source, target, uint32(amount), spell, healing);
+    uint32 const scaled = AscensionBattlegroundCombat::ScaledOutput(source, target, uint32(amount), spell, healing,
+        absorb);
     return int32(std::min<uint32>(scaled, uint32(std::numeric_limits<int32>::max())));
 }
 
@@ -301,17 +555,17 @@ public:
 
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& amount) override
     {
-        amount = AscensionBattlegroundCatchUp::ScaledOutput(attacker, target, amount, nullptr, false);
+        amount = AscensionBattlegroundCombat::ScaledOutput(attacker, target, amount, nullptr, false);
     }
 
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& amount, SpellInfo const* spell) override
     {
-        amount = AscensionBattlegroundCatchUp::ScaledOutput(attacker, target, amount, spell, false);
+        amount = AscensionBattlegroundCombat::ScaledOutput(attacker, target, amount, spell, false);
     }
 
     void OnBeforeHealAbsorb(HealInfo& healInfo) override
     {
-        healInfo.SetHeal(AscensionBattlegroundCatchUp::ScaledOutput(healInfo.GetHealer(), healInfo.GetTarget(),
+        healInfo.SetHeal(AscensionBattlegroundCombat::ScaledOutput(healInfo.GetHealer(), healInfo.GetTarget(),
             healInfo.GetHeal(), healInfo.GetSpellInfo(), true));
     }
 
@@ -322,7 +576,7 @@ public:
             return;
 
         WorldObject* const owner = effect->GetBase()->GetOwner();
-        amount = ScaledSigned(caster, owner ? owner->ToUnit() : nullptr, amount, effect->GetSpellInfo(), true);
+        amount = ScaledSigned(caster, owner ? owner->ToUnit() : nullptr, amount, effect->GetSpellInfo(), true, true);
     }
 };
 }
@@ -331,45 +585,24 @@ namespace AscensionBattlegroundCatchUp
 {
 float OutputRatio(Unit const* unit)
 {
-    if (!unit)
-        return 1.0f;
-
-    if (AppliedLift const* applied = unit->CustomData.Get<AppliedLift>(LiftKey))
-        return applied->ratio;
-
-    Unit const* owner = unit->GetCharmerOrOwner();
-    AppliedLift const* ownerLift = owner ? owner->CustomData.Get<AppliedLift>(LiftKey) : nullptr;
-    return ownerLift ? ownerLift->ratio : 1.0f;
+    return AscensionBattlegroundCombat::OutputRatio(unit);
 }
 
-uint32 ScaledOutput(Unit const* source, Unit const* target, uint32 amount, SpellInfo const* spell, bool healing)
+uint32 ScaledOutput(Unit const* source, Unit const* target, uint32 amount, SpellInfo const* spell, bool healing,
+    bool absorb)
 {
-    if (!source || !target || amount == 0 || AscensionBattlegroundCombat::SharedTopLevel(source, target) == 0)
-        return amount;
+    return AscensionBattlegroundCombat::ScaledOutput(source, target, amount, spell, healing, absorb);
+}
 
-    if (spell && spell->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT))
-        return amount;
-
-    if (spell && spell->AscensionInheritsResolvedAmount)
-        return amount;
-
-    if (healing && spell && (spell->HasEffect(SPELL_EFFECT_HEALTH_LEECH) || spell->HasAura(SPELL_AURA_PERIODIC_LEECH)))
-        return amount;
-
-    if (healing && spell &&
-        (spell->HasEffect(SPELL_EFFECT_HEAL_PCT) || spell->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) ||
-            spell->HasAura(SPELL_AURA_OBS_MOD_HEALTH)))
-        return amount;
-
-    if (source->IsHostileTo(target) == healing)
-        return amount;
-
-    return Policy::ScaleAmount(amount, OutputRatio(source));
+float UnscaledFactor(Unit const* source, Unit const* target, SpellInfo const* spell, bool healing, bool absorb)
+{
+    return AscensionBattlegroundCombat::UnscaledFactor(source, target, spell, healing, absorb);
 }
 }
 
 void AddSC_AscensionBattlegroundCatchUp()
 {
+    new ascension_battleground_catch_up_spell_attr();
     new ascension_battleground_catch_up_output();
     new ascension_battleground_wide_brackets_config();
     new ascension_battleground_catch_up_battleground();

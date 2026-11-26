@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionStarcaller.h"
 #include "AscensionStarcallerData.h"
 #include "ObjectAccessor.h"
@@ -252,7 +253,8 @@ class starcaller_spells : public AllSpellScript
                 factor *= 2;
             if (Named(info, 800370) && hit.damage < 0)
             {
-                int32 bonus = int32(target->GetMaxHealth() * .05f);
+                int32 bonus = int32(std::max<long long>(0, std::llround(double(target->GetMaxHealth()) * 0.05 *
+                    double(AscensionBattlegroundCombat::UnscaledFactor(player, target, info, true)))));
                 hit.damage -= bonus;
                 hit.damageBeforeTakenMods -= bonus;
             }

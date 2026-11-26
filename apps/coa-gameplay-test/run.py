@@ -283,7 +283,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'field', 'mask', 'caster',
                  'rating', 'op', 'subclass', 'part',
                  'base', 'key', 'index', 'pet', 'critical', 'target_pet', 'periodic', 'name', 'text',
                  'min_distance', 'owner_display', 'creator_only', 'caster_entry', 'ranged_weapon_subclass',
-                 'sheath_state', 'skill', 'amount', 'healing',
+                 'sheath_state', 'skill', 'amount', 'healing', 'absorb',
                  'cache', 'table', 'exclude', 'dungeon', 'source', 'opcode', 'from', 'slot', 'achievement', 'title',
                  'type_mask', 'hit_mask', 'spell_type_mask', 'items',
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality', 'heroic',
@@ -1322,6 +1322,7 @@ def validate(scenario, clock=REAL_CLOCK):
                         f'{where}: scaled output needs a player and target')
                 number(step.get('amount'), f'{where}.amount', 1, 2**31 - 1, True)
                 require(type(step.get('healing', False)) is bool, f'{where}.healing must be a boolean')
+                require(type(step.get('absorb', False)) is bool, f'{where}.absorb must be a boolean')
             if metric == 'sent_visible_item':
                 number(step.get('slot'), f'{where}.slot', 0, 18, True)
             if metric in {'creature_query_rank', 'creature_query_quest_item'}:

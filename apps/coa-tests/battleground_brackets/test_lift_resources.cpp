@@ -2,9 +2,9 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <memory>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 
 #define CHECK(condition) \
     do \
@@ -40,13 +40,13 @@ struct Unit
     bool pet = false;
     uint32 health = 100;
     uint32 maxHealth = 100;
+    float bgOutputRatio = 1.0f;
     std::array<uint32, MAX_POWERS> powers{100, 30, 40, 50, 60, 0, 70};
     std::array<uint32, MAX_POWERS> maxima{100, 100, 100, 100, 100, 0, 100};
     std::array<float, 5> stats{};
     bool IsPet() const { return pet; }
-    float GetCreateStat(Stats stat) const { return stats[stat]; }
-    void SetCreateStat(Stats stat, float value) { stats[stat] = value; }
-    void UpdateStats(Stats) { }
+    float GetBattlegroundOutputRatio() const { return bgOutputRatio; }
+    void SetBattlegroundOutputRatio(float ratio) { bgOutputRatio = ratio; }
     uint32 GetHealth() const { return health; }
     uint32 GetMaxHealth() const { return maxHealth; }
     uint32 GetPower(Powers power) const { return powers[power]; }
@@ -65,6 +65,8 @@ struct Unit
             maxima[POWER_MANA] += delta;
             SetPower(POWER_MANA, powers[POWER_MANA]);
         }
+        else if (mod >= UNIT_MOD_STAT_START && mod < UNIT_MOD_HEALTH)
+            stats[int(mod) - int(UNIT_MOD_STAT_START)] += apply ? amount : -amount;
     }
 };
 
@@ -78,15 +80,15 @@ struct Player : Unit
 uint32 LiftTargetLevel(Player const*) { return 29; }
 Policy::LevelValues PlayerLevelValues(Player const*, uint8 level)
 {
-    return {uint32(level) * 10, uint32(level) * 10, {}};
+    return {uint32(level) * 10, uint32(level) * 10, {0, 0, uint32(level) + 20, 0, 0}};
 }
 
 // ACTUAL_REFRESH
 
 int main()
 {
-    Policy::Lift const large{200, 0};
-    Policy::Lift const small{100, 0};
+    Policy::Lift const large{200.0f};
+    Policy::Lift const small{100.0f};
     for (bool pet : {false, true})
     {
         Unit unit;
@@ -96,9 +98,12 @@ int main()
         ApplyLift(&unit, large, 2.0f);
         CHECK(unit.maxHealth == 300 && unit.health == 300);
         CHECK(unit.CustomData.Get<AppliedLift>(LiftKey)->ratio == 2.0f);
+        CHECK(unit.GetBattlegroundOutputRatio() == 2.0f);
+        CHECK(unit.stats[STAT_STAMINA] == 0.0f);
         CHECK(unit.powers == powers && unit.maxima[POWER_MANA] == 100);
         RemoveLift(&unit);
         CHECK(unit.maxHealth == 100 && unit.health == 100);
+        CHECK(unit.GetBattlegroundOutputRatio() == 1.0f);
         CHECK(!unit.CustomData.Get<AppliedLift>(LiftKey));
 
         unit.SetHealth(50);
@@ -107,10 +112,12 @@ int main()
         ApplyLift(&unit, small, 1.5f);
         CHECK(unit.maxHealth == 200 && unit.health == 100);
         CHECK(unit.CustomData.Get<AppliedLift>(LiftKey)->ratio == 1.5f);
+        CHECK(unit.GetBattlegroundOutputRatio() == 1.5f);
         ApplyLift(&unit, large, 2.0f);
         CHECK(unit.health == 150);
         RemoveLift(&unit);
         CHECK(unit.health == 50 && unit.powers == powers);
+        CHECK(unit.GetBattlegroundOutputRatio() == 1.0f);
 
         unit.SetHealth(0);
         ApplyLift(&unit, large, 2.0f);
@@ -129,32 +136,46 @@ int main()
         ApplyLift(&unit, large, 2.0f);
         ApplyLift(&unit, {}, 1.0f);
         CHECK(unit.maxHealth == 100 && unit.health == 100);
+        CHECK(unit.GetBattlegroundOutputRatio() == 1.0f);
         CHECK(!unit.CustomData.Get<AppliedLift>(LiftKey));
     }
 
     Unit pet;
     pet.pet = true;
-    ApplyLift(&pet, {0, 5}, 1.0f);
-    CHECK(pet.stats[STAT_STAMINA] == 5.0f && pet.stats[STAT_STRENGTH] == 0.0f);
+    pet.maxHealth = 184;
+    pet.SetHealth(184);
+    Policy::LevelValues const impOwn{184, 0, {0, 0, 20, 0, 0}};
+    Policy::LevelValues const impTop{591, 0, {0, 0, 39, 0, 0}};
+    ApplyLift(&pet, Policy::LiftBetween(impOwn, impTop), Policy::OutputRatio(184.0f, 591.0f));
+    CHECK(pet.maxHealth == 591 && pet.health == 591);
+    CHECK(pet.stats[STAT_STAMINA] == 0.0f && pet.stats[STAT_STRENGTH] == 0.0f);
+    CHECK(pet.GetBattlegroundOutputRatio() > 3.211f && pet.GetBattlegroundOutputRatio() < 3.212f);
     RemoveLift(&pet);
-    CHECK(pet.stats[STAT_STAMINA] == 0.0f);
+    CHECK(pet.maxHealth == 184 && pet.health == 184);
+    CHECK(pet.stats[STAT_STAMINA] == 0.0f && pet.GetBattlegroundOutputRatio() == 1.0f);
 
     Player player;
-    player.maxHealth = 120;
-    player.SetHealth(120);
+    player.maxHealth = 260;
+    player.SetHealth(260);
     RefreshPlayerLift(&player);
-    CHECK(player.maxHealth == 290 && player.health == 290);
+    CHECK(player.maxHealth == 600 && player.health == 600);
+    CHECK(player.stats[STAT_STAMINA] == 0.0f);
     float const ratio = player.CustomData.Get<AppliedLift>(LiftKey)->ratio;
-    CHECK(ratio > 2.416f && ratio < 2.417f);
-    player.SetHealth(145);
+    CHECK(ratio > 2.307f && ratio < 2.308f);
+    CHECK(player.GetBattlegroundOutputRatio() == ratio);
+    player.SetHealth(300);
     player.level = 13;
-    player.maxHealth += 10;
+    player.maxHealth += 20;
     RefreshPlayerLift(&player);
-    CHECK(player.maxHealth == 290 && player.health == 140);
+    CHECK(player.maxHealth == 600 && player.health == 290);
+    CHECK(player.stats[STAT_STAMINA] == 0.0f);
+    CHECK(player.GetBattlegroundOutputRatio() > 2.142f && player.GetBattlegroundOutputRatio() < 2.143f);
     RefreshPlayerLift(&player);
-    CHECK(player.health == 140);
+    CHECK(player.health == 290);
     player.level = 29;
     RefreshPlayerLift(&player);
-    CHECK(player.maxHealth == 130 && player.health == 63);
+    CHECK(player.maxHealth == 280 && player.health == 135);
+    CHECK(player.stats[STAT_STAMINA] == 0.0f);
+    CHECK(player.GetBattlegroundOutputRatio() == 1.0f);
     CHECK(!player.CustomData.Get<AppliedLift>(LiftKey));
 }

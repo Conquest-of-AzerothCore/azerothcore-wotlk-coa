@@ -4159,7 +4159,7 @@ private:
                 Require(info != nullptr, "Scaled output needs a known spell");
             }
             return AscensionBattlegroundCatchUp::ScaledOutput(unit, GetUnit(step.get<std::string>("target")),
-                step.get<uint32>("amount"), info, step.get<bool>("healing", false));
+                step.get<uint32>("amount"), info, step.get<bool>("healing", false), step.get<bool>("absorb", false));
         }
         if (metric == "view_level")
             return GetUnit(step.get<std::string>("target"))->getLevelForTarget(unit);

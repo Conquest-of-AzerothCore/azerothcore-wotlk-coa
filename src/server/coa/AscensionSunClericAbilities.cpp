@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionSunCleric.h"
 #include "AscensionSunClericData.h"
 #include "ObjectAccessor.h"
@@ -13,6 +14,7 @@
 #include "Unit.h"
 #include "WorldPacket.h"
 #include <algorithm>
+#include <cmath>
 namespace
 {
 using namespace AscensionSunCleric;
@@ -382,8 +384,12 @@ public:
                     for (Unit* enemy : Nearby(target, 8))
                         if (enemy != target && player->IsValidAttackTarget(enemy) && count++ < 5)
                         {
+                            int32 cleaveDamage = damage
+                                ? std::max<int32>(1, int32(std::llround(double(damage) *
+                                    double(AscensionBattlegroundCombat::UnscaledFactor(player, enemy, info, false)))))
+                                : 0;
                             SpellNonMeleeDamage extra(player, enemy, info, info->GetSchoolMask());
-                            player->CalculateSpellDamageTaken(&extra, int32(damage), info);
+                            player->CalculateSpellDamageTaken(&extra, cleaveDamage, info);
                             Unit::DealDamageMods(enemy, extra.damage, &extra.absorb);
                             player->SendSpellNonMeleeDamageLog(&extra);
                             player->DealSpellDamage(&extra, true);
