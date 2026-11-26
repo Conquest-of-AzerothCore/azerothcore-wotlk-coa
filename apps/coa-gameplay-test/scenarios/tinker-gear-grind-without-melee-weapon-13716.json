@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Tinker: Gear Grind deals damage and generates Scrap without a 1H melee weapon (#13716)",
-  "contract": "Gear Grind (680975 -> 681245 -> 504594) replaces Makeshift Dynamite (572888 rank 7) with a 1.5 s ranged channel (DmgClass 3, EquippedItemClass -1) that triggers 4 ticks of Gear Grind Damage (505160, 0/500/1000/1500 ms via SPELL_ATTR5_EXTRA_INITIAL_PERIOD), each dealing Nature damage (base + level + 0.16*RAP) and triggering Generate 1 Scrap (707476 -> +1 stack of 801816). Spell.dbc left stale 1H melee weapon requirements on 505160 (EquippedItemClass 2, EquippedItemInventoryTypeMask 2105344, SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON, DmgClass 2), so Spell::CheckItems rejected every triggered 505160 tick when the Tinker carried only a ranged weapon (or a 2H weapon), letting 504594 channel cleanly with 0 hits, 0 damage and 0 Scrap. A level 80 Tinker with its starting main-hand weapon (431911) destroyed and a level 80 gun (1061370) equipped casts 504594 while Grinding Gears (681245) is active: 504594 must succeed, land all 4 hits of 505160 for positive damage, generate 4 Scrap stacks (801816), and consume 681245.",
+  "contract": "Gear Grind (680975 -> 681245 -> 504594) replaces Makeshift Dynamite (572888 rank 7) with a 1.5 s ranged channel (DmgClass 3, EquippedItemClass -1) that triggers 4 ticks of Gear Grind Damage (505160, 0/500/1000/1500 ms via SPELL_ATTR5_EXTRA_INITIAL_PERIOD), each dealing Stormstrike/Nature damage (Spell.dbc: BaseLevel 27, MaxLevel 0, BasePoints 73, DieSides 9, RealPointsPerLevel 5.0 -> 339..347 at level 80, plus 0.16*RAP per 504594 tooltip, SchoolMask 9) and triggering Generate 1 Scrap (707476 -> +1 stack of 801816). Spell.dbc left stale 1H melee weapon requirements on 505160 (EquippedItemClass 2, EquippedItemInventoryTypeMask 2105344, SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON, DmgClass 2), so Spell::CheckItems rejected every triggered 505160 tick when the Tinker carried only a ranged weapon (or a 2H weapon), letting 504594 channel cleanly with 0 hits, 0 damage and 0 Scrap. A level 80 Human Tinker with starting main-hand weapon (431911) destroyed, zero-stat gun Old Blunderbuss (2508, item_template.sql) equipped, ranged_hit_rating/ranged_crit_rating 10000 (deterministic 2.0x ranged spell crits, Unit.cpp:1720-1761), and spell penetration aura 823764 casts 504594 while Grinding Gears (681245) is active against a stationary Harvest Golem (36, min_level_armor 528 -> 3.350% armor DR at level 80, 0.9665x). With base RAP 300..332 (+48.00..53.12) and Tinker PvE class tuning aura 887016 (-20% = 0.80x at level 80, Spell.dbc BaseLevel 10 MaxLevel 60 RealPointsPerLevel -0.4), 4 critical hits deal 4*2*(387.00..400.12)*0.80*0.9665 = 2394..2475 (bounded 2300..2650, rejecting doubled ~4850 or non-crit ~1213 damage), generate 4 Scrap stacks (801816), and consume 681245.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -16,7 +16,8 @@
       "race": 1,
       "class": 28,
       "level": 80,
-      "ranged_hit_rating": 10000
+      "ranged_hit_rating": 10000,
+      "ranged_crit_rating": 10000
     }
   ],
   "creatures": [
@@ -26,7 +27,9 @@
       "entry": 36,
       "level": 80,
       "health": 5000000,
-      "distance": 10
+      "distance": 10,
+      "stationary": true,
+      "min_level_armor": true
     }
   ],
   "steps": [
@@ -59,15 +62,15 @@
     },
     {
       "action": "add_item",
-      "label": "Fixture: level 80 gun",
+      "label": "Fixture: zero-stat gun (Old Blunderbuss)",
       "actor": "tinker",
-      "item": 1061370
+      "item": 2508
     },
     {
       "action": "equip",
-      "label": "Equip the level 80 gun",
+      "label": "Equip the gun",
       "actor": "tinker",
-      "item": 1061370,
+      "item": 2508,
       "slot": 17
     },
     {
@@ -76,7 +79,7 @@
       "actor": "tinker",
       "metric": "equipped_item",
       "slot": 17,
-      "equals": 1061370
+      "equals": 2508
     },
     {
       "action": "learn",
@@ -149,21 +152,23 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING (#13716): Gear Grind lands exactly 4 damage hits (505160) after channel completes",
+      "label": "DISCRIMINATING (#13716): Gear Grind lands exactly 4 critical damage hits (505160) after channel completes",
       "actor": "tinker",
       "metric": "spell_damage_count",
       "spell": 505160,
       "target": "dummy",
+      "critical": true,
       "equals": 4
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING (#13716): Gear Grind deals positive damage (505160)",
+      "label": "DISCRIMINATING (#13716): Gear Grind 4-hit crit damage matches derived 2300-2650 window",
       "actor": "tinker",
       "metric": "spell_damage_total",
       "spell": 505160,
       "target": "dummy",
-      "min": 1000
+      "min": 2300,
+      "max": 2650
     },
     {
       "action": "assert",
