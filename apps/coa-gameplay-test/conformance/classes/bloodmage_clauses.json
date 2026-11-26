@@ -541,7 +541,9 @@
     "spell": 504088,
     "clause": "When Liquify ends, you now leech ${$806311m1+$806311ppl1+$SP*1} health from nearby enemies.",
     "labels": [
-      "504088 effect_value 806311e0 #0"
+      "504088 behaviour_metric_delta base_leech_damage",
+      "504088 behaviour_metric_delta sp_leech_damage",
+      "504088 behaviour_metric_delta leech_heal_sp"
     ],
     "kind": "claim"
   },
@@ -953,7 +955,7 @@
     "spell": 504627,
     "clause": "Bond yourself to an ally for $d,",
     "labels": [
-      "504627 aura_duration_ms #0"
+      "504627 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -961,7 +963,7 @@
     "spell": 504627,
     "clause": "causing direct damage taken by the ally to generate $/10;505325s1 Rage",
     "labels": [
-      "504627 effect_value 505325e0 #1"
+      "504627 behaviour_metric_delta ally_damage_rage"
     ],
     "kind": "claim"
   },
@@ -969,7 +971,7 @@
     "spell": 504627,
     "clause": "and ${$505325m2+$505325ppl2}% base health",
     "labels": [
-      "504627 effect_value 505325e1 #2"
+      "504627 behaviour_metric_delta ally_damage_health"
     ],
     "kind": "claim"
   },
@@ -985,7 +987,8 @@
     "spell": 504627,
     "clause": "In addition, while out of combat, you and your bonded ally have $505169s1% increased movement speed.",
     "labels": [
-      "504627 effect_value 505169e0 #4"
+      "504627 behaviour_metric_delta ooc_speed",
+      "504627 behaviour_metric_delta in_combat_speed_off"
     ],
     "kind": "claim"
   },
@@ -2140,14 +2143,13 @@
       {
         "claim": "Induce your blood into an enemy to shock their nervous system, reducing their attack power by ${($m1+0)*-1}",
         "labels": [
-          "572412 effect_value e0 #0",
-          "572412 aura_amount e0 #0"
+          "572412 behaviour_metric_delta ap_reduction"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "572412 aura_duration_ms #1"
+          "572412 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -2157,7 +2159,7 @@
     "spell": 572412,
     "clause": "and removing $652375s1 enrage effect.",
     "labels": [
-      "572412 effect_value 652375e0 #2"
+      "572412 behaviour_metric_delta enrage_dispel"
     ],
     "kind": "claim"
   },
@@ -2232,7 +2234,7 @@
     "spell": 572800,
     "clause": "You now generate $s1% increased Rage from damage dealt",
     "labels": [
-      "572800 effect_value e0 #0"
+      "572800 behaviour_metric_delta rage_from_damage"
     ],
     "kind": "claim"
   },
@@ -3105,7 +3107,9 @@
       {
         "claim": "increasing their chance to be critically struck from you by $707867s1%",
         "labels": [
-          "704624 effect_value 707867e0 #0"
+          "704624 behaviour_metric_delta crit_1_stack",
+          "704624 behaviour_metric_delta crit_10_stacks",
+          "704624 behaviour_metric_delta no_bleed_control"
         ]
       },
       {
@@ -3121,7 +3125,7 @@
     "spell": 704624,
     "clause": "stacking $707867u times.",
     "labels": [
-      "704624 max_stacks 707867 #2"
+      "704624 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -3534,13 +3538,13 @@
       {
         "claim": "within $707375a1 yds of you",
         "labels": [
-          "705731 effect_radius 707375e0 #0"
+          "705731 behaviour_metric_delta radius_edge"
         ]
       },
       {
         "claim": "Reduces the chance to hit for enemies by $707375s1%",
         "labels": [
-          "705731 effect_value 707375e0 #1"
+          "705731 behaviour_metric_delta enemy_hit_chance"
         ]
       }
     ],
@@ -3862,14 +3866,17 @@
   {
     "spell": 707623,
     "clause": "While below 75% health,",
-    "labels": [],
+    "labels": [
+      "707623 behaviour_metric_delta below_75_edge",
+      "707623 behaviour_metric_delta above_75_off"
+    ],
     "kind": "claim"
   },
   {
     "spell": 707623,
     "clause": "you now heal for $s1% of all damage you deal.",
     "labels": [
-      "707623 effect_value e0 #0"
+      "707623 behaviour_metric_delta heal_3pct"
     ],
     "kind": "claim"
   },
@@ -4142,7 +4149,7 @@
       {
         "claim": "over $704120d",
         "labels": [
-          "800776 spell_duration 704120 #1"
+          "800776 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -4155,12 +4162,15 @@
       {
         "claim": "and increasing the damage they take by $704120s1%",
         "labels": [
-          "800776 effect_value 704120e0 #2"
+          "800776 behaviour_hit_ratio damage_amp"
         ]
       },
       {
         "claim": "from your next 5 direct damage spells",
-        "labels": []
+        "labels": [
+          "800776 behaviour_metric_delta four_spells_keep",
+          "800776 behaviour_metric_delta fifth_spell_consumes"
+        ]
       }
     ],
     "kind": "claim"
@@ -4169,7 +4179,7 @@
     "spell": 800780,
     "clause": "You crave blood for $d,",
     "labels": [
-      "800780 aura_duration_ms #0"
+      "800780 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -4177,7 +4187,15 @@
     "spell": 800780,
     "clause": "for the duration you cannot be interrupted or silenced, and you regain $805985s1% of your maximum health",
     "labels": [
-      "800780 effect_value 805985e0 #1"
+      "800780 immunity silence 800780 cast",
+      "800780 immunity silence 800780 applied",
+      "800780 immunity silence 15487 without",
+      "800780 immunity silence 15487 with",
+      "800780 immunity silence 15487 control",
+      "800780 immunity silence 800780 expired",
+      "800780 behaviour_metric_delta no_interrupt",
+      "800780 behaviour_metric_delta cut_not_refused",
+      "800780 behaviour_metric_delta heal_5pct"
     ],
     "kind": "claim"
   },
@@ -4188,13 +4206,14 @@
       {
         "claim": "and $805985s2% of your missing Rage",
         "labels": [
-          "800780 effect_value 805985e1 #2"
+          "800780 behaviour_metric_delta missing_rage_0",
+          "800780 behaviour_metric_delta missing_rage_50"
         ]
       },
       {
         "claim": "every $t2 sec",
         "labels": [
-          "800780 aura_amplitude_ms #3"
+          "800780 behaviour_metric_delta tick_period"
         ]
       }
     ],
@@ -4706,14 +4725,18 @@
   {
     "spell": 803681,
     "clause": "Cut into an ally's vital essence, siphoning all curse effects from them.",
-    "labels": [],
+    "labels": [
+      "803681 behaviour_dispel_count siphon_curses no_cast curse",
+      "803681 behaviour_dispel_count siphon_curses cast curse"
+    ],
     "kind": "claim"
   },
   {
     "spell": 803681,
     "clause": "You may reactivate this ability again within $803734d to place these curse effects on an enemy.",
     "labels": [
-      "803681 spell_duration 803734 #0"
+      "803681 behaviour_metric_delta window_duration",
+      "803681 behaviour_metric_delta place_curse"
     ],
     "kind": "claim"
   },
@@ -5247,7 +5270,7 @@
     "spell": 806099,
     "clause": "Counter the enemy's spellcast, preventing any spell from that school of magic from being cast for $d.",
     "labels": [
-      "806099 aura_duration_ms #0"
+      "806099 behaviour_expiry lockout"
     ],
     "kind": "claim"
   },
@@ -5255,7 +5278,8 @@
     "spell": 806099,
     "clause": "Successfully interrupting an enemy heals you for $520860s1% of your maximum health.",
     "labels": [
-      "806099 effect_value 520860e0 #1"
+      "806099 behaviour_metric_delta interrupt_heal",
+      "806099 behaviour_metric_delta no_interrupt_no_heal"
     ],
     "kind": "claim"
   },

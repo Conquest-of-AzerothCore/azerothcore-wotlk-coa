@@ -11098,6 +11098,1721 @@
         }
       ],
       "observe_source": "Threshold boundary arm for 704662 Shadows In The Night (CasterAuraState 23 AURA_STATE_HEALTH_ABOVE_75_PERCENT, Unit.cpp:765 HealthAbovePct(75) strictly > 75%; Unit.cpp:8544-8555 unapplies aura effects when leaving state): caster enters 75% from 90% (caster_health_from_pct 90 -> caster_health_pct 75), proving reduction switches off at 75% (expected 1.00, +-2 pt band [-2%, +2%], excluding -5%). Paired with above_75_magic and above_75_physical at 76%. Reference search 2026-11-26: coa-history 704662: 0 events in 186 logs; coabuildhub 704662 matches."
+    },
+    {
+      "spell": 803681,
+      "name": "Hemal Excision (siphons all 3 curses from ally)",
+      "kind": "dispel_count",
+      "label_suffix": "siphon_curses",
+      "quote": "Cut into an ally's vital essence, siphoning all curse effects from them.",
+      "cast_spell": 803681,
+      "debuffs": [
+        [
+          2,
+          [
+            18267,
+            8282,
+            13583
+          ]
+        ]
+      ],
+      "trials": 1,
+      "wait_ms": 1600,
+      "arms": [
+        {
+          "name": "no_cast",
+          "cast": false,
+          "expected": [
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "name": "cast",
+          "expected": [
+            [
+              2,
+              3
+            ]
+          ]
+        }
+      ],
+      "expected_source": "803681 Effect[0] 38 SPELL_EFFECT_DISPEL, EffectMiscValue[0] 2 (DISPEL_CURSE), EffectBasePoints[0] 19 + EffectDieSides[0] 1 = 20 dispels, CastTime 1000 ms (wait_ms 1600), TARGET_UNIT_TARGET_ALLY (Spell.dbc). Ally carries 3 Dispel 2 curses (18267 Curse of Weakness, 8282 Curse of Blood, 13583 Curse of the Deadwood): no_cast control removes 0, real cast removes all 3. Reference search 2026-11-26: coa-history 803681: 0 events in 186 logs; bindmysoul talents.normalized.json 803681 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 803681,
+      "name": "Hemal Excision (reactivation window 803734 lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "window_duration",
+      "label_suffix": "window_duration",
+      "quote": "You may reactivate this ability again within $803734d to place these curse effects on an enemy.",
+      "trigger_spell": 803681,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "measure_actor": "caster",
+      "select_dummy": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_auras": [
+          [
+            18267,
+            1,
+            "ally",
+            "dummy"
+          ]
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 803734
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 10300,
+      "expiry_wait_ms": 1300,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          10100,
+          10850
+        ],
+        "expired": [
+          11100,
+          11900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$803734d = 10000 ms (Spell.dbc 803734 DurationIndex 1 = 10000 ms). spell_ascension_bloodmage_hemal_excision (AscensionBloodmageSecondary.cpp:627-672, rev_20260920_99_bloodmage_hemal_excision_reactivation.sql) snapshots dispelled curses from the ally and casts 803734 on caster after the 1000 ms cast completes. Uncast before phase reads 0 (control); after casting 803681 on the cursed ally (18267 from dummy), 803734 reads 1 at game_time [10100, 10850] ms (9100..9850 ms post-cast, > 9000 ms = -10%) and 0 at game_time [11100, 11900] ms (10100..10900 ms post-cast, < 11000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 803681/803734: 0 events in 186 logs; bindmysoul talents.normalized.json 803681 matches verbatim ('within 10 seconds')."
+    },
+    {
+      "spell": 803681,
+      "name": "Hemal Excision (reactivating Excision 803733 places siphoned curse on enemy)",
+      "kind": "metric_delta",
+      "variant": "place_curse",
+      "label_suffix": "place_curse",
+      "quote": "You may reactivate this ability again within $803734d to place these curse effects on an enemy.",
+      "trigger_spell": 803681,
+      "target": "ally",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "select_dummy": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_auras": [
+          [
+            18267,
+            1,
+            "ally",
+            "dummy"
+          ]
+        ]
+      },
+      "after_trigger_casts": [
+        {
+          "spell": 803733,
+          "target": "dummy",
+          "delay_ms": 1500
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 18267
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "aura_ascension_bloodmage_hemal_excision (AscensionBloodmageSecondary.cpp:674-708) temporarily learns 803733 Excision and maps 803681 -> 803733 while 803734 is active; spell_ascension_bloodmage_excision (lines 710-752) applies every siphoned curse to the enemy target and removes 803734. Ally holds 18267 Curse of Weakness from dummy; uncast control reads 0 on dummy, treatment casts 803681 at ally then 803733 at dummy 1500 ms later and reads 18267 present (1) on dummy. Reference search 2026-11-26: coa-history 803681/803733: 0 events in 186 logs; bindmysoul talents.normalized.json 803681 matches verbatim."
+    },
+    {
+      "spell": 800776,
+      "name": "Malediction (704120 Shadow DoT base damage at 0 SP)",
+      "kind": "metric_delta",
+      "variant": "dot_base_damage",
+      "label_suffix": "dot_base_damage",
+      "quote": "Condemn an enemy, dealing ${($704120d*1000/$704120t2)*($704120m2+$704120ppl2+$sps*0.193333)} Shadow damage over $704120d",
+      "trigger_spell": 800776,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 250,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 704120,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 248,
+      "after_at_least": 248,
+      "after_at_most": 252,
+      "wait_ms": 13000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "800776 Effect[0] TRIGGER_SPELL 704120 (Spell.dbc). 704120 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, DurationIndex 29 (12000 ms), Amplitude 3000 ms (4 ticks), BasePoints 49 + DieSides 2 (roll 50..51), RealPointsPerLevel 0.2000 (BaseLevel 0, MaxLevel 0 -> +12 at level 60): 62..63 per tick = 248..252 over 4 non-crit ticks at 0 SP with 823764 beeg spellpen and 16255 -100% crit. Uncast control reads 0. Reference search 2026-11-26: coa-history 800776: 2 casts, 704120: 6 periodic damage ticks (174..237) in 1 log; bindmysoul talents.normalized.json 800776 matches ('248 + 77.33% shadow SP over 12 seconds')."
+    },
+    {
+      "spell": 800776,
+      "name": "Malediction (704120 Shadow DoT SP scaling at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "dot_sp_damage",
+      "label_suffix": "dot_sp_damage",
+      "quote": "Condemn an enemy, dealing ${($704120d*1000/$704120t2)*($704120m2+$704120ppl2+$sps*0.193333)} Shadow damage over $704120d",
+      "trigger_spell": 800776,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 250,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 704120,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 15714,
+      "after_at_least": 15700,
+      "after_at_most": 15730,
+      "wait_ms": 13000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip states ${($704120d*1000/$704120t2)*($704120m2+$704120ppl2+$sps*0.193333)}: 4 ticks x (62..63 + 20000*0.193333 = 3928.66..3929.66) = 15714..15718 at +20000 SP (band [15700, 15730]) with 823764 beeg spellpen and 16255 -100% crit. Uncast control reads 0. Reference search 2026-11-26: coa-history 704120: 6 ticks in 1 log; bindmysoul talents.normalized.json 800776 states '248 + 77.33% shadow SP Shadow damage over 12 seconds'."
+    },
+    {
+      "spell": 800776,
+      "name": "Malediction (704120 debuff lasts 12 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Condemn an enemy, dealing ${($704120d*1000/$704120t2)*($704120m2+$704120ppl2+$sps*0.193333)} Shadow damage over $704120d",
+      "trigger_spell": 800776,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 250,
+      "metric": "aura",
+      "fields": {
+        "spell": 704120
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 11200,
+      "expiry_wait_ms": 1400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          11000,
+          11850
+        ],
+        "expired": [
+          12100,
+          13000
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$704120d = 12000 ms (Spell.dbc 704120 DurationIndex 29 = 12000 ms). Uncast control reads 0. After casting 800776 (instant), 704120 on dummy reads 1 at game_time [11000, 11850] ms (> 10800 ms = -10%) and 0 at game_time [12100, 13000] ms (< 13200 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 704120: 2 applied/removed in 1 log; bindmysoul talents.normalized.json 800776 states 'over 12 seconds'."
+    },
+    {
+      "spell": 800776,
+      "name": "Malediction (+20% damage taken from direct damage spells)",
+      "kind": "hit_ratio",
+      "variant": "damage_amp",
+      "label_suffix": "damage_amp",
+      "quote": "and increasing the damage they take from your next 5 direct damage spells by $704120s1%.",
+      "expected": 1.2,
+      "observe_spell": 578305,
+      "learn": [
+        578305,
+        800776
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 800776,
+            "target": "dummy",
+            "power": 250
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$704120s1 = 20 (Spell.dbc 704120 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 19 + DieSides 1 = +20%, EffectSpellClassMask (262144, 2826240, 0) covering Bloodbolt 578305). Bloodbolt 578305 at +20000 SP with 823764 beeg spellpen compares without Malediction (control) vs after casting 800776 (treatment): expected ratio 1.20 (+20%, G-19 band [18%, 22%], excluding 0% and +40%). Reference search 2026-11-26: coa-history 800776: 2 casts in 1 log; bindmysoul talents.normalized.json 800776 matches verbatim ('by 20%')."
+    },
+    {
+      "spell": 800776,
+      "name": "Malediction (4 direct spells keep 704120 aura)",
+      "kind": "metric_delta",
+      "variant": "four_spells_keep",
+      "label_suffix": "four_spells_keep",
+      "quote": "and increasing the damage they take from your next 5 direct damage spells by $704120s1%.",
+      "trigger_spell": 800776,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 250,
+      "learn": [
+        572907
+      ],
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "after_trigger_casts": [
+        {
+          "spell": 572907,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 572907,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 572907,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 572907,
+          "target": "dummy",
+          "delay_ms": 1600
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 704120
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          6500,
+          9500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "rev_20260920_98_bloodmage_malediction_charges.sql sets Charges 5 on 704120 spell_proc (SpellFamilyMask (262144, 2826240, 0), matching Sanguine Rupture 572907 -> 800775); aura_ascension_bloodmage_malediction (AscensionBloodmageProcs.cpp:80-94) checks caster GUID. After 4 instant Sanguine Rupture 572907 casts 1600 ms apart (game_time [6500, 9500] ms, well inside 12000 ms), 704120 remains present (1) on dummy; uncast control reads 0. Reference search 2026-11-26: coa-history 800776: 2 casts in 1 log; bindmysoul talents.normalized.json 800776 states 'next 5 direct damage spells'."
+    },
+    {
+      "spell": 800776,
+      "name": "Malediction (5th direct spell consumes 704120 aura before 12 sec expiry)",
+      "kind": "metric_delta",
+      "variant": "fifth_spell_consumes",
+      "label_suffix": "fifth_spell_consumes",
+      "quote": "and increasing the damage they take from your next 5 direct damage spells by $704120s1%.",
+      "trigger_spell": 800776,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": true,
+      "cast_power": 250,
+      "learn": [
+        572907
+      ],
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "after_trigger_casts": [
+        {
+          "spell": 572907,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 572907,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 572907,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 572907,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 572907,
+          "target": "dummy",
+          "delay_ms": 1600
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 704120
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 600,
+      "expire_ms": 13000,
+      "game_time": {
+        "after": [
+          8000,
+          10800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "rev_20260920_98_bloodmage_malediction_charges.sql sets Charges 5 on 704120 spell_proc. Before phase casts 800776 with no follow-up spells and reads 704120 present (1); after phase casts 800776 followed by 5 Sanguine Rupture 572907 casts 1600 ms apart and reads 704120 absent (0) at game_time [8000, 10800] ms (< 12000 ms natural expiry). Paired with four_spells_keep (1 after 4 casts), proves exactly 5 direct damage spells consume the aura. Reference search 2026-11-26: coa-history 800776: 2 casts in 1 log; bindmysoul talents.normalized.json 800776 states 'next 5 direct damage spells'."
+    },
+    {
+      "spell": 800780,
+      "name": "Blood Craving (buff lasts 12 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "You crave blood for $d,",
+      "trigger_spell": 800780,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 800780
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 11200,
+      "expiry_wait_ms": 1400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          11000,
+          11850
+        ],
+        "expired": [
+          12100,
+          13000
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 12000 ms (Spell.dbc 800780 DurationIndex 29 = 12000 ms). Uncast control reads 0. After casting 800780 (instant), aura 800780 reads 1 at game_time [11000, 11850] ms (> 10800 ms = -10%) and 0 at game_time [12100, 13000] ms (< 13200 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 800780: 0 events in 186 logs; bindmysoul talents.normalized.json 800780 matches ('for 12 seconds')."
+    },
+    {
+      "spell": 800780,
+      "name": "Blood Craving (silence immunity)",
+      "kind": "immunity",
+      "variant": "silence",
+      "target": "caster",
+      "quote": "for the duration you cannot be interrupted or silenced, and you regain $805985s1% of your maximum health",
+      "effects": [
+        {
+          "spell": 15487,
+          "words": "silenced"
+        }
+      ],
+      "observe_source": "800780 Effect[0] aura 77 SPELL_AURA_MECHANIC_IMMUNITY MiscValue 9 (MECHANIC_SILENCE), DurationIndex 29 = 12000 ms (Spell.dbc). Fixture: Silence 15487 (single aura effect SPELL_AURA_MOD_SILENCE, Mechanic 9): present when set before 800780, blocked on 3 dummy casts while 800780 is active, and lands after 800780 expires (control). Reference search 2026-11-26: coa-history 800780: 0 events in 186 logs; bindmysoul talents.normalized.json 800780 matches verbatim."
+    },
+    {
+      "spell": 800780,
+      "name": "Blood Craving (Counterspell does not interrupt Bloodmoon Blast)",
+      "kind": "metric_delta",
+      "variant": "no_interrupt",
+      "label_suffix": "no_interrupt",
+      "quote": "for the duration you cannot be interrupted or silenced, and you regain $805985s1% of your maximum health",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501614,
+      "target": "dummy",
+      "setup_casts": [
+        800780
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 2139,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100,
+        "after_trigger_ms": 800
+      },
+      "wait_ms": 2600,
+      "expire_ms": 1000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 501614,
+        "target": "dummy"
+      },
+      "observe_source": "800780 Effect[2] aura 77 SPELL_AURA_MECHANIC_IMMUNITY MiscValue 26 (MECHANIC_INTERRUPT), DurationIndex 29 = 12000 ms (Spell.dbc). Caster casts Bloodmoon Blast 501614 (2000 ms cast) while striker casts Counterspell 2139 (Effect[0] 68 INTERRUPT_CAST, Mechanic 26) at +800 ms: control without 800780 is interrupted (0 hits); with 800780 active, cast completes and lands 1 hit. Reference search 2026-11-26: coa-history 800780: 0 events in 186 logs; bindmysoul talents.normalized.json 800780 matches verbatim."
+    },
+    {
+      "spell": 800780,
+      "name": "Blood Craving (control cast is interrupted, not refused)",
+      "kind": "metric_delta",
+      "variant": "cut_not_refused",
+      "label_suffix": "cut_not_refused",
+      "quote": "for the duration you cannot be interrupted or silenced, and you regain $805985s1% of your maximum health",
+      "expected": 0,
+      "before_expected": 40,
+      "trigger_spell": 501614,
+      "target": "dummy",
+      "setup_casts": [
+        800780
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 2139,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100,
+        "after_trigger_ms": 800
+      },
+      "wait_ms": 2600,
+      "expire_ms": 1000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 501614
+      },
+      "observe_source": "Companion to no_interrupt (Necromancer 807813 shape): reads Bloodmoon Blast 501614 cast_failure under Counterspell 2139 at +800 ms. Control reads 40 (SPELL_FAILED_INTERRUPTED, proving the cast started and was interrupted, not refused); treatment with 800780 active reads 0. Reference search 2026-11-26: coa-history 800780: 0 events in 186 logs; bindmysoul talents.normalized.json 800780 matches verbatim."
+    },
+    {
+      "spell": 800780,
+      "name": "Blood Craving (heals 5% of maximum health per tick)",
+      "kind": "metric_delta",
+      "variant": "heal_5pct",
+      "label_suffix": "heal_5pct",
+      "quote": "for the duration you cannot be interrupted or silenced, and you regain $805985s1% of your maximum health",
+      "trigger_spell": 800780,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 805985
+      },
+      "before_expected": 0,
+      "expected": 500,
+      "tolerance": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$805985s1 = 5 (800780 Effect[1] aura 23 PERIODIC_TRIGGER_SPELL amp 2000 ms -> 805985 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 4 + DieSides 1 = 5% max HP; Spell.dbc). Caster health fixture 5000 / 10000 with regen off: uncast control heals 0; 2600 ms after casting 800780 (1st tick at 2000 ms, before 2nd at 4000 ms), 805985 heals exactly 500 (5% of 10000). Reference search 2026-11-26: coa-history 800780/805985: 0 events in 186 logs; bindmysoul talents.normalized.json 800780 matches ('5% of your maximum health')."
+    },
+    {
+      "spell": 800780,
+      "name": "Blood Craving (regains 15% of missing Rage from 0 Rage)",
+      "kind": "metric_delta",
+      "variant": "missing_rage_0",
+      "label_suffix": "missing_rage_0",
+      "quote": "and $805985s2% of your missing Rage every $t2 sec.",
+      "trigger_spell": 800780,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "phase_power_in_uncast_before": true,
+      "disable_regeneration": true,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 805985
+      },
+      "before_expected": 0,
+      "expected": 150,
+      "tolerance": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$805985s2 = 15 (Spell.dbc 805985 Effect[1] SPELL_EFFECT_ENERGIZE_PCT BasePoints 14 + DieSides 1 = 15%, MiscValue 1 POWER_RAGE; spell_ascension_bloodmage_blood_craving in AscensionBloodmageSecondary.cpp:551-579, rev_20260920_84_bloodmage_blood_craving_missing_rage.sql computes CalculatePct(max - current, 15)). Starting at 0 / 1000 raw Rage (missing = 1000): uncast control energizes 0; 1st tick at 2000 ms (read at 2600 ms) energizes exactly 150 raw Rage (15 displayed Rage). Reference search 2026-11-26: coa-history 805985: 0 events in 186 logs; bindmysoul talents.normalized.json 800780 matches ('15% of your missing Rage')."
+    },
+    {
+      "spell": 800780,
+      "name": "Blood Craving (regains 15% of missing Rage from 50 Rage)",
+      "kind": "metric_delta",
+      "variant": "missing_rage_50",
+      "label_suffix": "missing_rage_50",
+      "quote": "and $805985s2% of your missing Rage every $t2 sec.",
+      "trigger_spell": 800780,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "phase_power": [
+        1,
+        500,
+        500
+      ],
+      "phase_power_in_uncast_before": true,
+      "disable_regeneration": true,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 805985
+      },
+      "before_expected": 0,
+      "expected": 75,
+      "tolerance": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Starting at 500 / 1000 raw Rage (missing = 500): spell_ascension_bloodmage_blood_craving (AscensionBloodmageSecondary.cpp:570) computes CalculatePct(500, 15) = 75 raw Rage on the 1st tick at 2000 ms (read at 2600 ms), proving 15% of missing Rage rather than max Rage (which would energize 150). Uncast control reads 0. Reference search 2026-11-26: coa-history 805985: 0 events in 186 logs; bindmysoul talents.normalized.json 800780 matches ('15% of your missing Rage')."
+    },
+    {
+      "spell": 800780,
+      "name": "Blood Craving (ticks every 2 sec)",
+      "kind": "metric_delta",
+      "variant": "tick_period",
+      "label_suffix": "tick_period",
+      "quote": "and $805985s2% of your missing Rage every $t2 sec.",
+      "trigger_spell": 800780,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        1000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_heal",
+        "spell": 805985,
+        "target": "caster",
+        "since_spell": 800780
+      },
+      "before_expected": 2000,
+      "expected": 2000,
+      "tolerance": 100,
+      "wait_ms": 12600,
+      "expire_ms": 13000,
+      "void_on_cast_failure": true,
+      "observe_source": "$t2 = 2000 ms (Spell.dbc 800780 Effect[1] EffectAmplitude 2000 ms over DurationIndex 29 = 12000 ms, 6 ticks of 805985). Reads event_interval_median_ms of 805985 heal events since 800780 cast in both phases: 2000 +- 100 ms (5% band excludes 1800 and 2200 ms, 10% off on both sides; uncast control is heal_5pct). Reference search 2026-11-26: coa-history 800780/805985: 0 events in 186 logs; bindmysoul talents.normalized.json 800780 matches ('every 2 sec')."
+    },
+    {
+      "spell": 806099,
+      "name": "Aneurysm (4 sec school lockout)",
+      "kind": "school_lockout",
+      "variant": "lockout",
+      "label_suffix": "lockout",
+      "quote": "Counter the enemy's spellcast, preventing any spell from that school of magic from being cast for $d.",
+      "interrupt_spell": 806099,
+      "cast_spell": 806099,
+      "channel_spell": 12051,
+      "observe_source": "806099 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 35 = 4000 ms ($d), instant, Range 30 yd (Spell.dbc). Dummy channels Evocation 12051 (Arcane, PreventionType 1, ChannelInterruptFlags 31756, 8 s); Arcane is unlocked before 806099 (control = 0), locked before 4000 ms and free after 4000 ms (Creature::ProhibitSpellSchool). Reference search 2026-11-26: coa-history 806099: 6 casts and 6 SPELL_INTERRUPT events in 1 log; bindmysoul talents.normalized.json 806099 matches ('for 4 seconds')."
+    },
+    {
+      "spell": 806099,
+      "name": "Aneurysm (successful interrupt heals 5% of maximum health)",
+      "kind": "metric_delta",
+      "variant": "interrupt_heal",
+      "label_suffix": "interrupt_heal",
+      "quote": "Successfully interrupting an enemy heals you for $520860s1% of your maximum health.",
+      "trigger_spell": 806099,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "target_casts_before": [
+        12051
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520860
+      },
+      "before_expected": 0,
+      "expected": 500,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$520860s1 = 5 (520860 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 4 + DieSides 1 = 5% max HP; Spell.dbc). bloodmage_secondary_casts::OnSpellSuccessfulInterrupt (AscensionBloodmageSecondary.cpp:225-233) casts 520860 on caster upon interrupting with 806099. Dummy channels Evocation 12051; uncast control reads 0, interrupting cast heals exactly 500 (5% of 10000). Reference search 2026-11-26: coa-history 806099: 6 interrupts in 1 log, 520860: 0 events; bindmysoul talents.normalized.json 806099 matches ('heals you for 5% of your maximum health')."
+    },
+    {
+      "spell": 806099,
+      "name": "Aneurysm (casting on non-casting enemy does not heal)",
+      "kind": "metric_delta",
+      "variant": "no_interrupt_no_heal",
+      "label_suffix": "no_interrupt_no_heal",
+      "quote": "Successfully interrupting an enemy heals you for $520860s1% of your maximum health.",
+      "trigger_spell": 806099,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520860
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative gate control for interrupt_heal: casting 806099 on an idle dummy (not casting/channeling) does not fire OnSpellSuccessfulInterrupt (AscensionBloodmageSecondary.cpp:225-233), so 520860 heals 0. Reference search 2026-11-26: coa-history 806099: 6 casts in 1 log; bindmysoul talents.normalized.json 806099 states 'Successfully interrupting an enemy'."
+    },
+    {
+      "spell": 504627,
+      "name": "Blood Bond (lasts 30 min on bonded ally)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Bond yourself to an ally for $d,",
+      "trigger_spell": 504627,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "measure_actor": "ally",
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 504627
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 1750000,
+      "expiry_wait_ms": 100000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1740000,
+          1790000
+        ],
+        "expired": [
+          1810000,
+          1890000
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 1800000 ms (Spell.dbc 504627 DurationIndex 30 = 1800000 ms = 30 min, TargetA 57 raid/ally). Uncast control reads 0 on grouped ally. After casting 504627 at ally, aura 504627 reads 1 at game_time [1740000, 1790000] ms (> 1620000 ms = -10%) and 0 at game_time [1810000, 1890000] ms (< 1980000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 504627: 0 events in 186 logs; bindmysoul talents.normalized.json 504627 matches ('for 30 minutes')."
+    },
+    {
+      "spell": 504627,
+      "name": "Blood Bond (direct damage on bonded ally generates 1 Rage)",
+      "kind": "metric_delta",
+      "variant": "ally_damage_rage",
+      "label_suffix": "ally_damage_rage",
+      "quote": "causing direct damage taken by the ally to generate $/10;505325s1 Rage",
+      "trigger_spell": 504627,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "phase_power_in_uncast_before": true,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_strikes": true
+      },
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 505325
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$/10;505325s1 = 1 Rage = 10 raw Rage (Spell.dbc 505325 Effect[0] SPELL_EFFECT_ENERGIZE MiscValue 1 POWER_RAGE BasePoints 9 + DieSides 1 = 10; aura_ascension_bloodmage_blood_bond in AscensionBloodmageTalents.cpp:1029-1051, rev_20260920_52_bloodmage_scripted_procs.sql ProcFlags 139944 direct damage taken). Striker casts Light of the Naaru 41394 at grouped ally: uncast control energizes 0; with 504627 on ally, caster receives exactly 10 raw Rage from 505325. Reference search 2026-11-26: coa-history 504627/505325: 0 events in 186 logs; bindmysoul talents.normalized.json 504627 matches ('generate 1 Rage')."
+    },
+    {
+      "spell": 504627,
+      "name": "Blood Bond (direct damage on bonded ally restores 3% base health)",
+      "kind": "metric_delta",
+      "variant": "ally_damage_health",
+      "label_suffix": "ally_damage_health",
+      "quote": "and ${$505325m2+$505325ppl2}% base health",
+      "trigger_spell": 504627,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_strikes": true
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 505325
+      },
+      "before_expected": 0,
+      "expected": 45,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "${$505325m2+$505325ppl2} = 3% base health (Spell.dbc 505325 Effect[1] 181 SPELL_EFFECT_ASCENSION_RESTORE_BASE_HEALTH_PCT BasePoints 2 + DieSides 1 = 3%; SpellEffects.cpp:1031 CalculatePct(GetCreateHealth(), 3)). Class 20 uses fallback class 11 Druid progression offset to level-1 BaseHP 65 (data/sql/base/db_world/player_class_stats.sql:710,769 Druid L1=44 L60=1483; rev_20260903_01_live_class_baseline.sql:928 class 20 L1=65; rev_20260912_00_custom_class_stat_progression.sql:6-10 -> L60 BaseHP = 65 + 1483 - 44 = 1504): CalculatePct(1504, 3) = floor(45.12) = 45. Striker casts Light of the Naaru 41394 at grouped ally: uncast control heals 0; with 504627 on ally, 505325 heals caster for exactly 45. Reference search 2026-11-26: coa-history 504627/505325: 0 events in 186 logs; bindmysoul talents.normalized.json 504627 matches ('3% base health')."
+    },
+    {
+      "spell": 504627,
+      "name": "Blood Bond (out-of-combat +30% movement speed for caster and bonded ally)",
+      "kind": "metric_delta",
+      "variant": "ooc_speed",
+      "label_suffix": "ooc_speed",
+      "quote": "In addition, while out of combat, you and your bonded ally have $505169s1% increased movement speed.",
+      "trigger_spell": 504627,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "run_speed_rate",
+            "before_expected": 1.0,
+            "expected": 1.3,
+            "tolerance": 0.001,
+            "source": "505169 Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED BasePoints 29 + DieSides 1 = +30% on TargetA 57 (bonded ally) and TargetB 1 (caster), triggered every 1000 ms by 504627 Effect[1] while both are out of combat (AscensionBloodmageTalents.cpp:1053-1064)."
+          }
+        ]
+      },
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.3,
+      "tolerance": 0.001,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$505169s1 = 30 (504627 Effect[1] aura 23 amp 1000 ms -> 505169 Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED +30% on TargetA 57 ally and TargetB 1 caster; AscensionBloodmageTalents.cpp:1053-1064). Uncast control reads run_speed_rate 1.0 on both caster and ally; 1500 ms after casting 504627 out of combat, both caster and grouped ally read 1.3. Reference search 2026-11-26: coa-history 504627/505169: 0 events in 186 logs; bindmysoul talents.normalized.json 504627 matches ('30% increased movement speed')."
+    },
+    {
+      "spell": 504627,
+      "name": "Blood Bond (in-combat drops +30% movement speed on caster and bonded ally)",
+      "kind": "metric_delta",
+      "variant": "in_combat_speed_off",
+      "label_suffix": "in_combat_speed_off",
+      "quote": "In addition, while out of combat, you and your bonded ally have $505169s1% increased movement speed.",
+      "trigger_spell": 504627,
+      "target": "ally",
+      "measure_actor": "caster",
+      "select_dummy": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "setup_casts": [
+        572907
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "run_speed_rate",
+            "before_expected": 1.3,
+            "expected": 1.0,
+            "tolerance": 0.001,
+            "source": "AscensionBloodmageTalents.cpp:1053-1064 Speed() prevents 505169 re-application and removes 505169 from both bonded ally and caster while either is in combat (wait_ms 2200 > 1500 ms duration of 505169)."
+          }
+        ]
+      },
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.3,
+      "expected": 1.0,
+      "tolerance": 0.001,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "In-combat negative control for ooc_speed (AscensionBloodmageTalents.cpp:1053-1064, Spell.dbc 504627 Effect[1] amp 1000 ms -> 505169 duration 1500 ms). Before phase casts 504627 on grouped ally out of combat and reads run_speed_rate 1.3 +- 0.001 on both caster and ally after 2200 ms. After phase puts caster in combat with dummy via Sanguine Rupture 572907 (setup_only_after), recasts 504627, and waits 2200 ms (> 1500 ms 505169 duration and >= 2 ticks of Speed()): both caster and bonded ally drop to 1.0 +- 0.001. Reference search 2026-11-26: coa-history 504627/505169: 0 events in 186 logs; bindmysoul talents.normalized.json 504627 matches ('while out of combat')."
+    },
+    {
+      "spell": 504627,
+      "name": "Blood Bond (threat redirect from bonded ally to caster \u2014 ALERT probe)",
+      "kind": "metric_delta",
+      "variant": "threat_redirect",
+      "label_suffix": "threat_redirect",
+      "quote": "and redirect $s3% of their threat generated to you.",
+      "trigger_spell": 504627,
+      "target": "ally",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "select_dummy": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_attacks": [
+          {
+            "spell": 41394,
+            "power": 0,
+            "source": "Ally casts Light of the Naaru 41394 (1100 exact unmitigated Holy damage, 0 cost) at dummy."
+          },
+          {
+            "spell": 41394,
+            "power": 0,
+            "source": "Second Light of the Naaru 41394 brings ally damage to 2200 so 10% threat redirect (+220) stands far above the 58 flat threat from buffing an in-combat ally."
+          }
+        ]
+      },
+      "metric": "threat",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 220,
+      "after_at_least": 220,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s3 = 10 (504627 EffectBasePoints[2] -11 + DieSides 1, displayed 10%), but Spell.dbc 504627 Effect[2] = 0 with no SPELL_EFFECT_REDIRECT_THREAT or script handler (rev_20260920_52_bloodmage_scripted_procs.sql:42-43). Ally casts two Light of the Naaru 41394 hits (2200 exact Holy damage) at dummy in each phase; 10% threat redirect would add >= 220 caster threat on dummy (above the 58 flat buff threat from casting 504627 on an in-combat ally), so this check is expected to ALERT at 58 on current build. Reference search 2026-11-26: coa-history 504627: 0 events in 186 logs; bindmysoul talents.normalized.json 504627 states 'redirect their threat generated to you'."
+    },
+    {
+      "spell": 572412,
+      "name": "Hypovolemic Shock (reduces enemy attack power by 265)",
+      "kind": "metric_delta",
+      "variant": "ap_reduction",
+      "label_suffix": "ap_reduction",
+      "quote": "Induce your blood into an enemy to shock their nervous system, reducing their attack power by ${($m1+0)*-1} for $d",
+      "trigger_spell": 572412,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          56412,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 265,
+      "expected": 0,
+      "expected_gain": -265,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "${($m1+0)*-1} = 265 (Spell.dbc 572412 Effect[0] aura 344 SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT, BasePoints -266 + DieSides 1 = -265). AP Test 56412 lifts dummy AP above 265 so the floor cannot hide part of the drop (Necromancer 681529 pattern); uncast control vs cast of 572412 expects exact expected_gain -265. Reference search 2026-11-26: coa-history 572412: 72 casts in 4 logs; bindmysoul talents.normalized.json: base spell not listed (extra_spell)."
+    },
+    {
+      "spell": 572412,
+      "name": "Hypovolemic Shock (AP debuff lasts 15 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Induce your blood into an enemy to shock their nervous system, reducing their attack power by ${($m1+0)*-1} for $d",
+      "trigger_spell": 572412,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 572412
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 14100,
+      "expiry_wait_ms": 1500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13800,
+          14800
+        ],
+        "expired": [
+          15100,
+          16200
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 15000 ms (Spell.dbc 572412 DurationIndex 8 = 15000 ms). Uncast control reads 0. After casting 572412 (instant), aura 572412 on dummy reads 1 at game_time [13800, 14800] ms (> 13500 ms = -10%) and 0 at game_time [15100, 16200] ms (< 16500 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 572412: 72 casts, 2 applied/removed in 2 logs."
+    },
+    {
+      "spell": 572412,
+      "name": "Hypovolemic Shock (removes 1 of 2 enrage effects from enemy)",
+      "kind": "metric_delta",
+      "variant": "enrage_dispel",
+      "label_suffix": "enrage_dispel",
+      "quote": "and removing $652375s1 enrage effect.",
+      "trigger_spell": 572412,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          8599,
+          1,
+          "dummy",
+          "dummy"
+        ],
+        [
+          50420,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 8599
+      },
+      "fields_sum": {
+        "spell": 50420
+      },
+      "before_expected": 2,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$652375s1 = 1 (572412 Effect[1] TRIGGER_SPELL 652375 Effect[0] 38 SPELL_EFFECT_DISPEL MiscValue 9 DISPEL_ENRAGE BasePoints 0 + DieSides 1 = 1; Spell.dbc). Dummy carries 2 Dispel 9 enrage auras (8599 Enrage 120s and 50420 Enrage 300s); fields_sum reads their combined presence: 2 before casting 572412 (control) and exactly 1 after (proving 1 removed, not 0 or 2). Reference search 2026-11-26: coa-history 652375: 28 SPELL_DISPEL events in 2 logs."
+    },
+    {
+      "spell": 572800,
+      "name": "Bloody Claws (+20% Rage generated from damage dealt)",
+      "kind": "metric_delta",
+      "variant": "rage_from_damage",
+      "label_suffix": "rage_from_damage",
+      "quote": "You now generate $s1% increased Rage from damage dealt",
+      "trigger_spell": 572800,
+      "gate_spell": 572800,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "attack_swings": 1,
+      "force_crit": "melee",
+      "player_attack_power": 2500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0.2,
+      "expected": 0.24,
+      "expected_ratio": 1.2,
+      "tolerance": 0.02,
+      "wait_ms": 110000,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 20 (Spell.dbc 572800 Effect[0] aura 213 SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT, BasePoints 19 + DieSides 1 = +20%; Unit::RewardRage in Unit.cpp:17786-17805). Caster spawns at 1000 raw Rage (CoAGameplayTest.cpp:3223); with regeneration enabled, wait_ms 110000 (triggered by benign permanent phase aura 823764) drains Rage to 0 out of combat before the before phase, while combat with the stationary dummy keeps Rage undecayed between phases. With player_attack_power 2500 and force_crit melee, Eternal dual-wield daggers (2534, 1600 ms) have ~2% damage spread and land 3 crits per phase (~380 raw Rage before, ~456 added after -> ~836 total, below 1000 cap); ratio_to_metric (melee_damage_total, increments=true) divides each phase's Rage gain by its melee damage, yielding ratio 1.20 +- 0.02 (excluding 1.00 and 10% off on both sides). Reference search 2026-11-26: coa-history 572800: 0 events in 186 logs; bindmysoul talents.normalized.json 572800 matches verbatim ('20% increased Rage from damage dealt')."
+    },
+    {
+      "spell": 704624,
+      "name": "Infection (auto-attacking bleeding target grants +1% crit at 1 stack)",
+      "kind": "metric_delta",
+      "variant": "crit_1_stack",
+      "label_suffix": "crit_1_stack",
+      "quote": "Auto attacking a bleeding target will now infect the wound, increasing their chance to be critically struck from you by $707867s1% for $707867d, stacking $707867u times.",
+      "trigger_spell": 704624,
+      "gate_spell": 704624,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "attack_swings": 1,
+      "phase_auras": [
+        [
+          48676,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          18101,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          6146,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "melee_crit_chance_against",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0.01,
+      "wait_ms": 200,
+      "expire_ms": 7000,
+      "observe_source": "$707867s1 = 1 (704624 Effect[0] aura 42 -> 707867 Effect[0] aura 308 SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER BasePoints 0 + DieSides 1 = +1% per stack; rev_20260920_47_bloodmage_infection_proc.sql ProcFlags 4 auto-attack + aura_ascension_bloodmage_infection AscensionBloodmageProcs.cpp:19-33 requiring MECHANIC_BLEED). Garrote 48676 (Mechanic 15, 18s) provides the bleed precondition; Chilled 18101 (-100% melee haste) and Slow 6146 (-54% melee haste) slow the Eternal dual-wield daggers (1600 ms base) so exactly 1 main-hand auto-attack lands in the 1600 ms attack window, applying 1 stack of 707867 and raising live melee_crit_chance_against (Unit::GetUnitCriticalChance) by +1.0 point vs before-learn control. Reference search 2026-11-26: coa-history 704624/707867: 0 events in 186 logs; bindmysoul talents.normalized.json 704624 matches verbatim."
+    },
+    {
+      "spell": 704624,
+      "name": "Infection (10 stacks on bleeding target grant +10% crit)",
+      "kind": "metric_delta",
+      "variant": "crit_10_stacks",
+      "label_suffix": "crit_10_stacks",
+      "quote": "Auto attacking a bleeding target will now infect the wound, increasing their chance to be critically struck from you by $707867s1% for $707867d, stacking $707867u times.",
+      "trigger_spell": 704624,
+      "gate_spell": 704624,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "attack_swings": 4,
+      "phase_auras": [
+        [
+          48676,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          2116852,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          62531,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "melee_crit_chance_against",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 7000,
+      "observe_source": "With 2116852 Enrage and 62531 Molten haste fixtures on caster (Eternal dual-wield daggers 1600 ms base, 4x swing speed over 4x1600 ms = 6400 ms, inside Garrote 48676 18000 ms bleed), 707867 reaches its 10-stack cap and raises live melee_crit_chance_against dummy by +10.0 points (10 x +1%) vs before-learn control. Reference search 2026-11-26: coa-history 704624/707867: 0 events in 186 logs; bindmysoul talents.normalized.json 704624 matches verbatim ('by 1% for 6 seconds, stacking 10 times')."
+    },
+    {
+      "spell": 704624,
+      "name": "Infection (stacks cap at 10 on bleeding target)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $707867u times.",
+      "trigger_spell": 704624,
+      "gate_spell": 704624,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "attack_swings": 4,
+      "phase_auras": [
+        [
+          48676,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          2116852,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          62531,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 707867
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 7000,
+      "observe_source": "$707867u = 10 (Spell.dbc 707867 StackAmount 10). Under 2116852+62531 haste (Eternal dual-wield daggers over 4x1600 ms = 6400 ms on Garrote 48676 bleeding dummy), 707867 builds 0 stacks without 704624 (control) and caps at exactly 10 stacks with 704624 learned. Reference search 2026-11-26: coa-history 704624/707867: 0 events in 186 logs; bindmysoul talents.normalized.json 704624 matches ('stacking 10 times')."
+    },
+    {
+      "spell": 704624,
+      "name": "Infection (control: non-bleeding target gains 0 stacks)",
+      "kind": "metric_delta",
+      "variant": "no_bleed_control",
+      "label_suffix": "no_bleed_control",
+      "quote": "Auto attacking a bleeding target will now infect the wound, increasing their chance to be critically struck from you by $707867s1% for $707867d, stacking $707867u times.",
+      "trigger_spell": 704624,
+      "gate_spell": 704624,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "attack_swings": 2,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 707867
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Negative bleed-gate control: aura_ascension_bloodmage_infection (AscensionBloodmageProcs.cpp:19-33) requires victim->HasAuraWithMechanic(1ULL << MECHANIC_BLEED). Auto-attacking a non-bleeding dummy applies 0 stacks of 707867 both before and after learning 704624. Reference search 2026-11-26: coa-history 704624/707867: 0 events in 186 logs; bindmysoul talents.normalized.json 704624 matches ('Auto attacking a bleeding target')."
+    },
+    {
+      "spell": 705731,
+      "name": "Dark Mark (5 yd enemy area aura radius edge)",
+      "kind": "metric_delta",
+      "variant": "radius_edge",
+      "label_suffix": "radius_edge",
+      "quote": "Reduces the chance to hit for enemies within $707375a1 yds of you by $707375s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 705731,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "select_dummy": true,
+      "dummy_distance": 3,
+      "area_dummies": {
+        "placed": [
+          {
+            "dx": 5.85,
+            "dy": 0,
+            "before_expected": 0,
+            "expected": 1
+          },
+          {
+            "dx": 6.7,
+            "dy": 0,
+            "before_expected": 0,
+            "expected": 0
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 707375
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "observe_source": "$707375a1 = 5 yd (Spell.dbc 707375 Effect[0] 129 SPELL_EFFECT_APPLY_AREA_AURA_ENEMY, EffectRadiusIndex 8 = 5 yd; applied by AscensionBloodmageTalents.cpp:492-493 on learning 705731). SpellAuras.cpp:2960 AnyAoETargetUnitInObjectRangeCheck uses IsWithinDistInMap(u, 5.0f, true, false, true) (GridNotifiers.h:1132, Object.h:550: incOwnRadius=false, incTargetRadius=true adding dummy entry 36 combat reach 1.275 yd -> effective edge 6.275 yd). Placed dummies at dx=5.85 (inside) and dx=6.70 (outside) bracket the 5 yd edge within +-0.425 yd (<10% of 5 yd): 0 before learning 705731 (control), 1 inside and 0 outside after learning 705731. Reference search 2026-11-26: coa-history 707375/705731: 0 events in 186 logs; bindmysoul talents.normalized.json 705731 matches ('within 5 yds')."
+    },
+    {
+      "spell": 705731,
+      "name": "Dark Mark (reduces hostile enemy chance to hit by 3%)",
+      "kind": "metric_delta",
+      "variant": "enemy_hit_chance",
+      "label_suffix": "enemy_hit_chance",
+      "quote": "Reduces the chance to hit for enemies within $707375a1 yds of you by $707375s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 705731,
+      "target": "caster",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "metric": "melee_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": -3,
+      "expected_gain": -3,
+      "tolerance": 0.01,
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "observe_source": "$707375s1 = 3 (Spell.dbc 707375 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE BasePoints -4 + DieSides 1 = -3%; applied by AscensionBloodmageTalents.cpp:492-493 on learning 705731; SpellAuraEffects.cpp:4930-4947 updates m_modMeleeHitChance). PvP-flagged Orc enemy player within 5 yd reads live melee_hit_chance before learning 705731 (control) and after learning 705731: expected_gain -3.0 points. Reference search 2026-11-26: coa-history 705731/707375: 0 events in 186 logs; bindmysoul talents.normalized.json 705731 matches ('by -3%')."
+    },
+    {
+      "spell": 707624,
+      "name": "Blood Mark (applies 707625 area aura to nearby enemy \u2014 ALERT probe)",
+      "kind": "metric_delta",
+      "variant": "aura_applied",
+      "label_suffix": "aura_applied",
+      "quote": "Increases the Physical damage taken by enemies within $707375a1 yds of you by $707625s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 707624,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "select_dummy": true,
+      "dummy_distance": 3,
+      "metric": "aura",
+      "fields": {
+        "spell": 707625
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "observe_source": "$707375a1 = 5 yd, $707625s1 = 3% (Spell.dbc 707625 Effect[0] 129 SPELL_EFFECT_APPLY_AREA_AURA_ENEMY aura 87 Physical +3%, RadiusIndex 8 = 5 yd). Unlike Dark Mark 705731 (AscensionBloodmageTalents.cpp:492-493), Blood Mark 707624 carries only SPELL_AURA_DUMMY and has no C++/SQL handler casting 707625 (expected to ALERT at 0 on current build). Reference search 2026-11-26: coa-history 707624/707625: 0 events in 186 logs; bindmysoul talents.normalized.json 707624 matches verbatim."
+    },
+    {
+      "spell": 707623,
+      "name": "Blood Moon (below 75% HP heals for 3% of damage dealt)",
+      "kind": "metric_delta",
+      "variant": "heal_3pct",
+      "label_suffix": "heal_3pct",
+      "quote": "you now heal for $s1% of all damage you deal.",
+      "trigger_spell": 501614,
+      "gate_spell": 707623,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        7000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 572786
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 501614,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.03,
+      "tolerance": 0.001,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 3 (Spell.dbc 707623 Effect[0] aura 354 BasePoints 2 + DieSides 1 = 3%, TriggerSpell 572786; rev_20260920_86_bloodmage_blood_moon_proc.sql ProcFlags 332116 + aura_ascension_bloodmage_blood_moon AscensionBloodmageTalents.cpp:762-785). At 70% HP (<75%) and +20000 SP (823764 spellpen, 16255 -100% crit), Bloodmoon Blast 501614 heals 0 without 707623 (control) and 0.03 +- 0.001 of damage dealt via 572786 with 707623 learned (excluding 0% and 6%). Reference search 2026-11-26: coa-history 572786: 931 SPELL_HEAL events in 2 logs; bindmysoul talents.normalized.json 707623 matches verbatim."
+    },
+    {
+      "spell": 707623,
+      "name": "Blood Moon (74% HP triggers 3% heal)",
+      "kind": "metric_delta",
+      "variant": "below_75_edge",
+      "label_suffix": "below_75_edge",
+      "quote": "While below 75% health,",
+      "trigger_spell": 501614,
+      "gate_spell": 707623,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        7400,
+        10000
+      ],
+      "disable_regeneration": true,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 572786
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 501614,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.03,
+      "tolerance": 0.001,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Threshold lower edge (74% HP < 75.0f in AscensionBloodmageTalents.cpp:760,769): caster at 7400/10000 HP casts Bloodmoon Blast 501614 (which deducts 7% base HP = ~103 HP, staying at ~73% < 75%): heals 0 without 707623 and 0.03 +- 0.001 of damage dealt with 707623. Reference search 2026-11-26: coa-history 572786: 931 heals in 2 logs; bindmysoul talents.normalized.json 707623 matches ('While below 75% health')."
+    },
+    {
+      "spell": 707623,
+      "name": "Blood Moon (above 75% HP does not heal)",
+      "kind": "metric_delta",
+      "variant": "above_75_off",
+      "label_suffix": "above_75_off",
+      "quote": "While below 75% health,",
+      "trigger_spell": 501614,
+      "gate_spell": 707623,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        8000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 572786
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Threshold upper control (80% HP -> ~79% after 7% base HP cast cost of Bloodmoon Blast 501614, still >= 75.0f in AscensionBloodmageTalents.cpp:769): 572786 heals 0 both before and after learning 707623. Reference search 2026-11-26: coa-history 572786: 931 heals in 2 logs; bindmysoul talents.normalized.json 707623 matches ('While below 75% health')."
+    },
+    {
+      "spell": 504088,
+      "name": "Vampiric Pools (base leech damage at 0 SP when Liquify ends)",
+      "kind": "metric_delta",
+      "variant": "base_leech_damage",
+      "label_suffix": "base_leech_damage",
+      "quote": "When Liquify ends, you now leech ${$806311m1+$806311ppl1+$SP*1} health from nearby enemies.",
+      "trigger_spell": 806310,
+      "gate_spell": 504088,
+      "target": "caster",
+      "measure_actor": "caster",
+      "select_dummy": true,
+      "dummy_distance": 3,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806311,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 473,
+      "after_at_least": 473,
+      "after_at_most": 478,
+      "wait_ms": 6800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionBloodmageTalents.cpp:549-551 casts 806311 when Liquify 806310 (6000 ms) ends with 504088 learned. 806311 Effect[0] SPELL_EFFECT_HEALTH_LEECH BasePoints 95 + DieSides 6 (roll 96..101), RealPointsPerLevel 6.4 (BaseLevel 1, MaxLevel 0 -> floor(59*6.4) = 377 at level 60; Spell.dbc): 473..478 non-crit damage at 0 SP (823764 spellpen, 16255 -100% crit) on dummy at 3 yd (inside 5 yd RadiusIndex 8). Before learning 504088 reads 0. Reference search 2026-11-26: coa-history 806311: 3 damage + 3 heal events in 1 log; bindmysoul talents.normalized.json 504088 matches ('474 + 100% SP')."
+    },
+    {
+      "spell": 504088,
+      "name": "Vampiric Pools (100% SP leech damage at +20000 SP when Liquify ends)",
+      "kind": "metric_delta",
+      "variant": "sp_leech_damage",
+      "label_suffix": "sp_leech_damage",
+      "quote": "When Liquify ends, you now leech ${$806311m1+$806311ppl1+$SP*1} health from nearby enemies.",
+      "trigger_spell": 806310,
+      "gate_spell": 504088,
+      "target": "caster",
+      "measure_actor": "caster",
+      "select_dummy": true,
+      "dummy_distance": 3,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806311,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 20473,
+      "after_at_least": 20473,
+      "after_at_most": 20478,
+      "wait_ms": 6800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "rev_20260914_04_bloodmage_talents.sql sets spell_bonus_data direct_bonus = 1.0 (100% SP) for 806311. At +20000 SP (823764 spellpen, 16255 -100% crit), 806311 deals 473..478 + 20000 = 20473..20478 on dummy at 3 yd when Liquify 806310 ends (wait_ms 6800); before learning 504088 reads 0. Reference search 2026-11-26: coa-history 806311: 3 damage + 3 heal events in 1 log; bindmysoul talents.normalized.json 504088 matches ('474 + 100% SP')."
+    },
+    {
+      "spell": 504088,
+      "name": "Vampiric Pools (heals caster for 100% SP leech amount when Liquify ends)",
+      "kind": "metric_delta",
+      "variant": "leech_heal_sp",
+      "label_suffix": "leech_heal_sp",
+      "quote": "When Liquify ends, you now leech ${$806311m1+$806311ppl1+$SP*1} health from nearby enemies.",
+      "trigger_spell": 806310,
+      "gate_spell": 504088,
+      "target": "caster",
+      "measure_actor": "caster",
+      "select_dummy": true,
+      "dummy_distance": 3,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 806311
+      },
+      "before_expected": 0,
+      "expected": 20473,
+      "wait_ms": 6800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "806311 Effect[0] 9 SPELL_EFFECT_HEALTH_LEECH (EffectDamageMultiplier 1.0, Spell.dbc; rev_20260914_04_bloodmage_talents.sql direct_bonus 1.0) heals caster for 100% of damage dealt (20473..20478 at +20000 SP with 823764 spellpen, 16255 -100% crit, caster_health 50000/100000) when Liquify 806310 ends (AscensionBloodmageTalents.cpp:549-551). Before learning 504088 heals 0. Reference search 2026-11-26: coa-history 806311: 3 damage + 3 heal events in 1 log; bindmysoul talents.normalized.json 504088 matches ('474 + 100% SP').",
+      "after_at_least": 20473,
+      "after_at_most": 20478
+    },
+    {
+      "spell": 801961,
+      "name": "Bloodmoon Power (Liquify cleanses negative effect when used \u2014 ALERT probe)",
+      "kind": "metric_delta",
+      "variant": "cleanse_on_use",
+      "label_suffix": "cleanse_on_use",
+      "quote": "Your Liquify now cleanses all negative effects when used.",
+      "trigger_spell": 806310,
+      "gate_spell": 801961,
+      "target": "caster",
+      "measure_actor": "caster",
+      "select_dummy": true,
+      "phase_auras": [
+        [
+          18267,
+          1,
+          "caster",
+          "dummy"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 18267
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 800,
+      "expire_ms": 7000,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip states 'Your Liquify now cleanses all negative effects when used.' Caster carries dispellable negative Curse of Weakness 18267 from dummy; 800 ms after casting Liquify 806310 (while Liquify 6000 ms is active), 18267 should be cleansed (0) with 801961 learned vs kept (1) without 801961. AscensionBloodmageTalents.cpp:552-561 instead runs only in OnAuraRemove (when Liquify ends at 6000 ms), so this check is expected to ALERT at 1 on current build. Reference search 2026-11-26: coa-history 801961: 0 events in 186 logs; bindmysoul talents.normalized.json 801961 matches verbatim."
     }
   ],
   "player_observations": [],
