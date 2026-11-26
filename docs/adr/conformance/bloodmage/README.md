@@ -7,5 +7,5 @@ never renumbered once published. Decisions that bind every class stay in `docs/a
 
 | ADR | Title | Note |
 |---|---|---|
-| 0001 | Reference weapon sets per specialization | reserved |
+| [0001](0001-bloodmage-weapon-sets.md) | Bloodmage weapon sets | accepted (provisional number) |
 | [0002](0002-bloodmage-base-spells-in-extra-spells.md) | Bloodmage base spells in extra_spells | accepted (provisional number) |
