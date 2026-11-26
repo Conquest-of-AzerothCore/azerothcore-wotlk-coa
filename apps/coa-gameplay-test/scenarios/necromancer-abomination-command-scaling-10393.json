@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Abomination Command Zombie Plague scales once without double scaling (#10393)",
+  "contract": [
+    "Command: Abomination 504865 describes the Abomination's Command attack as dealing $504022m1+$505223m2+$505223ppl2+$504022ppl1+$SP*0.1 Plague damage (SchoolMask 40, Nature|Shadow) to nearby enemies.",
+    "At level 35 (AscensionScalingBase 0.424424), Zombie Plague 504022 base is int(79 * 0.424424) = 33 and Command: Expel Plague 505223 effect 1 is 40 + 3 * (35 - 10) = 115, giving 148 damage at 0 spell power and 348 damage at +2000 spell power (ratio 2.351, +0.10 SP coefficient).",
+    "Before the repair, DoAction passed Amount(504022) + Amount(505223) into Copy(..., 504022), re-running AscensionScalingBase and necromancer_scaling a second time: level 35 base damage was crushed to 63 instead of 148, and spell power was added twice (ratio 5.524 instead of 2.351)."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 35, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 35, "health": 1000000, "distance": 4, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 92123 },
+    { "action": "learn", "actor": "n", "spell": 680283 },
+    { "action": "learn", "actor": "n", "spell": 500335 },
+    { "action": "learn", "actor": "n", "spell": 504868 },
+    {
+      "action": "assert", "label": "SETUP: two Life Force passives raise the capacity to 4", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 4, "within_ms": 3000
+    },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 3000 },
+    { "action": "cast", "label": "Raise the Abomination", "actor": "n", "spell": 500335 },
+    {
+      "action": "assert", "label": "SETUP: one Abomination", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50068, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the Abomination take its formation place", "ms": 2000 },
+    {
+      "action": "set_aura", "label": "Fixture: remove partial resists on the Abomination (ADR 0154)",
+      "actor": "n", "owned_entry": 50068, "spell": 823764, "stacks": 1
+    },
+    {
+      "action": "set_aura", "label": "Fixture: remove spell critical strikes on the Abomination",
+      "actor": "n", "owned_entry": 50068, "spell": 984954, "stacks": 1
+    },
+    {
+      "action": "snapshot", "label": "Record baseline Shadow spell power", "actor": "n",
+      "metric": "spell_power", "school": 5, "save_as": "sp_before"
+    },
+    {
+      "action": "assert", "label": "SETUP: baseline Shadow spell power is 0", "actor": "n",
+      "metric": "spell_power", "school": 5, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: no Zombie Plague damage before the Command", "actor": "n",
+      "metric": "spell_damage_count", "spell": 504022, "entry": 50068, "target": "golem", "equals": 0
+    },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "cast", "label": "Command: Undead at 0 spell power", "actor": "n", "spell": 504868, "target": "golem" },
+    {
+      "action": "assert", "label": "CONTROL: first Command lands one Zombie Plague hit", "actor": "n",
+      "metric": "spell_damage_count", "spell": 504022, "entry": 50068, "target": "golem", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "snapshot", "label": "Record Zombie Plague hit at 0 spell power", "actor": "n",
+      "metric": "spell_damage_total", "spell": 504022, "entry": 50068, "target": "golem", "save_as": "hit_base"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: level 35 empowered Zombie Plague deals ~148 damage (pre-fix 63)",
+      "actor": "n", "metric": "spell_damage_total", "spell": 504022, "entry": 50068, "target": "golem",
+      "min": 144, "max": 152
+    },
+    {
+      "action": "set_aura", "label": "Fixture: add +2000 spell power to the Necromancer",
+      "actor": "n", "spell": 44505, "stacks": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Shadow spell power increased by 2000", "actor": "n",
+      "metric": "spell_power", "school": 5, "relative_to": "sp_before", "equals": 2000
+    },
+    { "action": "wait", "label": "Wait past Command: Undead global cooldown", "ms": 2500 },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "cast", "label": "Command: Undead at +2000 spell power", "actor": "n", "spell": 504868, "target": "golem" },
+    {
+      "action": "assert", "label": "CONTROL: second Command lands a second Zombie Plague hit", "actor": "n",
+      "metric": "spell_damage_count", "spell": 504022, "entry": 50068, "target": "golem", "equals": 2, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: +2000 SP yields ~348 damage (+0.10 SP coeff once)",
+      "actor": "n", "metric": "spell_damage_total", "spell": 504022, "entry": 50068, "target": "golem",
+      "relative_to": "hit_base", "min": 344, "max": 352
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: ratio of +2000 SP hit to 0 SP hit is ~2.35 (pre-fix 5.52)",
+      "actor": "n", "metric": "spell_damage_total", "spell": 504022, "entry": 50068, "target": "golem",
+      "relative_to": "hit_base", "ratio_to": "hit_base", "min": 2.30, "max": 2.40
+    }
+  ]
+}
