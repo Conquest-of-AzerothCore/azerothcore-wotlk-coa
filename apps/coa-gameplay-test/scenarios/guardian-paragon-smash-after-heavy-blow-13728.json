@@ -9,9 +9,10 @@
     "rank had a remaining cooldown, making Paragon Smash uncastable for the entire 10 s duration of 707138 whenever",
     "Heavy Blow triggered the 10th stack (and whenever blocks reached 10 stacks during Heavy Blow's 10 s cooldown).",
     "With 7 stacks of 706516, casting active Heavy Blow Rank 9 (503126) starts Heavy Blow's 10 s cooldown, adds 3",
-    "stacks to trigger 707138 and replaces 503126 with 802629; after the 1.5 s GCD, while 503126 still has >5 s",
-    "cooldown remaining, Paragon Smash 802629 must cast cleanly, damage both nearby enemies, consume 707138, set",
-    "Heavy Blow's cooldown, and return the replacement to 503126. Pre-existing on main: Synchronize() removes",
+    "stacks to trigger 707138 and replaces 503126 with 802629; after waiting 4.5 s so 503126 has 5000-6000 ms",
+    "cooldown remaining (negative control), Paragon Smash 802629 must cast cleanly, damage both nearby enemies,",
+    "consume 707138, reset Heavy Blow's cooldown to its 10 s recovery window (7000-10000 ms, positive control),",
+    "and return the replacement to 503126. Pre-existing on main: Synchronize() removes",
     "802629 via Player::removeSpell(..., true) once 707138 is consumed, which strips triggered aura 803432 on the",
     "next update; that behavior is unrelated to #13728 and is not asserted here."
   ],
@@ -164,16 +165,17 @@
     },
     {
       "action": "wait",
-      "label": "Wait past Heavy Blow's 1.5 s GCD while Heavy Blow's 10 s cooldown is still active",
-      "ms": 1700
+      "label": "Wait 4.5 s so Heavy Blow's 10 s cooldown decays to 5000-6000 ms while 707138 remains active",
+      "ms": 4500
     },
     {
       "action": "assert",
-      "label": "SETUP: Heavy Blow is still on cooldown (> 5000 ms remaining)",
+      "label": "CONTROL: Heavy Blow cooldown is between 5000 and 6000 ms before Paragon Smash",
       "actor": "guardian",
       "metric": "cooldown_ms",
       "spell": 503126,
-      "min": 5000
+      "min": 5000,
+      "max": 6000
     },
     {
       "action": "set_power",
@@ -227,11 +229,12 @@
     },
     {
       "action": "assert",
-      "label": "Heavy Blow cooldown is set to Paragon Smash recovery time after cast",
+      "label": "DISCRIMINATING: Heavy Blow cooldown is reset to Paragon Smash recovery time (7000-10000 ms)",
       "actor": "guardian",
       "metric": "cooldown_ms",
       "spell": 503126,
-      "min": 7000
+      "min": 7000,
+      "max": 10000
     },
     {
       "action": "assert",
