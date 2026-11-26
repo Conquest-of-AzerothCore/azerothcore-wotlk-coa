@@ -757,6 +757,17 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'quest_log_size'):
                 run.validate(scenario)
 
+    def test_max_player_level_accepts_the_level_range(self):
+        for value in (1, 60, 80, 255):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['max_player_level'] = value
+            self.assertIs(run.validate(scenario), scenario)
+        for value in (0, 256, '60', True):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['max_player_level'] = value
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'max_player_level'):
+                run.validate(scenario)
+
     def test_quest_abandon_takes_a_quest_and_an_optional_log_slot(self):
         for step in ({'action': 'quest_abandon', 'actor': 'caster', 'quest': 7},
                      {'action': 'quest_abandon', 'actor': 'caster', 'quest': 7, 'slot': 63}):

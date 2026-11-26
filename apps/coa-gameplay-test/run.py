@@ -616,7 +616,8 @@ def validate(scenario, clock=REAL_CLOCK):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
           'creature_scaling', 'ptr_character_copy', 'ptr_character_copy_interruption', 'vanity_ownership',
-          'two_side', 'quest_log_size', 'chat_log', 'chat_log_max_pending', 'battleground_kill_xp'},
+          'two_side', 'quest_log_size', 'max_player_level', 'chat_log', 'chat_log_max_pending',
+          'battleground_kill_xp'},
          'scenario')
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
@@ -651,6 +652,8 @@ def validate(scenario, clock=REAL_CLOCK):
             require(type(value) is bool, f'two_side.{name} must be boolean')
     if 'quest_log_size' in scenario:
         number(scenario['quest_log_size'], 'quest_log_size', NATIVE_QUEST_LOG_SIZE, MAX_QUEST_LOG_SIZE, True)
+    if 'max_player_level' in scenario:
+        number(scenario['max_player_level'], 'max_player_level', 1, 255, True)
     players = scenario['players']
     creatures = scenario.get('creatures', [])
     require(isinstance(players, list) and 1 <= len(players) <= MAX_PLAYERS[schema],
