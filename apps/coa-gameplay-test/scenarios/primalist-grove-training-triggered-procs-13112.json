@@ -97,7 +97,7 @@
     { "action": "assert", "actor": "primalist", "metric": "spell_damage_count", "spell": 800140, "target": "target", "relative_to": "wc_mh_before", "equals": 1, "within_ms": 2000 },
     { "action": "assert", "actor": "primalist", "metric": "spell_damage_count", "spell": 504240, "target": "target", "relative_to": "wc_oh_before", "equals": 1, "within_ms": 2000, "label": "SETUP: Wildclaw triggered its offhand strike 504240" },
     { "action": "assert", "actor": "primalist", "metric": "spell_heal_count", "spell": 806073, "relative_to": "hol_heals_before", "min": 4, "within_ms": 2000, "label": "SETUP: Hammer of Life triggered heals from MH and OH" },
-    { "action": "assert", "actor": "primalist", "metric": "spell_proc_count", "spell": 92150, "relative_to": "wc_procs_before", "min": 6, "within_ms": 2000, "label": "CONTRACT: Hammer of Life triggered heals add Grove Training procs on top of MH and OH melee procs" },
+    { "action": "assert", "actor": "primalist", "metric": "spell_proc_count", "spell": 92150, "relative_to": "wc_procs_before", "equals": 5, "within_ms": 2000, "label": "CONTRACT: Hammer of Life adds 3 triggered heal procs (MH self+ally and OH ally; OH self-heal suppressed by 504240 SetCantProc) on top of 2 melee procs" },
     { "action": "assert", "actor": "primalist", "metric": "aura", "spell": 301086, "equals": 1 },
 
     { "action": "wait", "ms": 1500 },
