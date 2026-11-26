@@ -349,7 +349,8 @@
     "spell": 501682,
     "clause": "Howl into the souls of nearby enemies, dealing ${$m1+0+$AP*0.285} Shadow damage",
     "labels": [
-      "501682 effect_value e0 #0"
+      "501682 behaviour_metric_delta damage_base",
+      "501682 behaviour_metric_delta damage_ap"
     ],
     "kind": "claim"
   },
@@ -360,13 +361,13 @@
       {
         "claim": "and slowing their movement speed by $s2%",
         "labels": [
-          "501682 effect_value e1 #1"
+          "501682 behaviour_metric_delta slow"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "501682 aura_duration_ms #2"
+          "501682 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -398,7 +399,9 @@
     "spell": 500126,
     "clause": "Leap behind an enemy, dealing ${$804866m2+$804866ppl2+$AP*0.2} Physical Damage,",
     "labels": [
-      "500126 effect_value 804866e1 #0"
+      "500126 behaviour_metric_delta leap",
+      "500126 behaviour_metric_delta damage_base",
+      "500126 behaviour_metric_delta damage_ap"
     ],
     "kind": "claim"
   },
@@ -406,7 +409,7 @@
     "spell": 500126,
     "clause": "dazing them for $/1000;s3 sec,",
     "labels": [
-      "500126 effect_value e2 #1"
+      "500126 behaviour_metric_delta daze_duration"
     ],
     "kind": "claim"
   },
@@ -414,7 +417,7 @@
     "spell": 500126,
     "clause": "and generating $/10;804864s1 Rage.",
     "labels": [
-      "500126 effect_value 804864e0 #2"
+      "500126 behaviour_metric_delta rage"
     ],
     "kind": "claim"
   },
@@ -2842,7 +2845,8 @@
     "spell": 704166,
     "clause": "Increases your Stamina while in Eternal Curse by an additional $s1%.",
     "labels": [
-      "704166 effect_value e0 #0"
+      "704166 behaviour_metric_delta stamina_in_form",
+      "704166 behaviour_metric_delta stamina_outside_form"
     ],
     "kind": "claim"
   },
@@ -3706,7 +3710,9 @@
     "spell": 572551,
     "clause": "Bite an enemy, dealing ${$m1+0+$AP*0.265+$SP*.265} Physical damage and creates a Bite Wound.",
     "labels": [
-      "572551 effect_value e0 #0"
+      "572551 behaviour_metric_delta damage_base",
+      "572551 behaviour_metric_delta damage_ap",
+      "572551 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim"
   },
@@ -3738,13 +3744,15 @@
       {
         "claim": "dealing $s2% Weapon Damage",
         "labels": [
-          "802469 effect_value e1 #0"
+          "802469 behaviour_metric_delta damage_base",
+          "802469 behaviour_metric_delta damage_ap"
         ]
       },
       {
         "claim": "plus ${$m1+0}",
         "labels": [
-          "802469 effect_value e0 #1"
+          "802469 behaviour_metric_delta damage_base",
+          "802469 behaviour_metric_delta damage_ap"
         ]
       }
     ],
@@ -3753,14 +3761,19 @@
   {
     "spell": 802469,
     "clause": "If the enemy is bleeding, below 35% health,",
-    "labels": [],
+    "labels": [
+      "802469 behaviour_metric_delta cond_no_bleed_no_exec",
+      "802469 behaviour_metric_delta cond_bleed",
+      "802469 behaviour_metric_delta cond_execute"
+    ],
     "kind": "claim"
   },
   {
     "spell": 802469,
     "clause": "or if you are behind them, deal $572280s1% additional Shadow damage for each condition met.",
     "labels": [
-      "802469 effect_value 572280e0 #2"
+      "802469 behaviour_metric_delta cond_behind",
+      "802469 behaviour_metric_delta cond_all_three"
     ],
     "kind": "claim"
   },
@@ -3955,7 +3968,10 @@
     "spell": 800782,
     "clause": "Taunts nearby enemies within $a1 yds,",
     "labels": [
-      "800782 effect_radius e0 #0"
+      "800782 aggro_redirect edge primary after",
+      "800782 aggro_redirect edge extra1 after",
+      "800782 aggro_redirect edge extra2 after",
+      "800782 aggro_redirect edge extra3 after"
     ],
     "kind": "claim"
   },
@@ -3963,7 +3979,8 @@
     "spell": 800782,
     "clause": "forcing them to attack you for $d.",
     "labels": [
-      "800782 aura_duration_ms #1"
+      "800782 aggro_redirect edge primary after",
+      "800782 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -4176,7 +4193,9 @@
     "spell": 801957,
     "clause": "Taunts an enemy to attack you for $d.",
     "labels": [
-      "801957 aura_duration_ms #0"
+      "801957 aggro_redirect primary after",
+      "801957 aggro_redirect extra1 after",
+      "801957 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -4240,7 +4259,7 @@
     "spell": 801962,
     "clause": "Activate your eternal resolve for $d,",
     "labels": [
-      "801962 aura_duration_ms #0"
+      "801962 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -4251,17 +4270,20 @@
       {
         "claim": "and healing received by $s3%",
         "labels": [
-          "801962 effect_value e2 #1",
-          "801962 aura_amount e2 #1"
+          "801962 behaviour_hit_ratio healing_received"
         ]
       },
       {
         "claim": "increasing your melee attack speed by $s3%",
-        "labels": []
+        "labels": [
+          "801962 behaviour_metric_delta attack_speed"
+        ]
       },
       {
         "claim": "maximum health by $s3%",
-        "labels": []
+        "labels": [
+          "801962 behaviour_metric_delta max_health"
+        ]
       }
     ],
     "kind": "claim"
@@ -4406,20 +4428,26 @@
   {
     "spell": 503484,
     "clause": "2 Charges,",
-    "labels": [],
+    "labels": [
+      "503484 behaviour_metric_delta charges_2"
+    ],
     "kind": "claim"
   },
   {
     "spell": 503484,
     "clause": "6 sec recharge",
-    "labels": [],
+    "labels": [
+      "503484 behaviour_metric_delta recharge_early",
+      "503484 behaviour_metric_delta recharge_late"
+    ],
     "kind": "claim"
   },
   {
     "spell": 503484,
     "clause": "Ravage all nearby enemies, dealing ${$m1+$AP*0.11} Shadow damage,",
     "labels": [
-      "503484 effect_value e0 #0"
+      "503484 behaviour_metric_delta direct_base",
+      "503484 behaviour_metric_delta direct_ap"
     ],
     "kind": "claim"
   },
@@ -4430,13 +4458,15 @@
       {
         "claim": "causing them to bleed for ${($d*1000/$t2)*($m2+$AP*0.04)} Shadow damage",
         "labels": [
-          "503484 effect_value #1"
+          "503484 behaviour_metric_delta bleed_base",
+          "503484 behaviour_metric_delta bleed_ap",
+          "503484 behaviour_metric_delta rage"
         ]
       },
       {
         "claim": "over $d",
         "labels": [
-          "503484 aura_duration_ms #2"
+          "503484 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -4495,14 +4525,13 @@
       {
         "claim": "increasing your maximum health by $s1%",
         "labels": [
-          "804207 effect_value e0 #0",
-          "804207 aura_amount e0 #0"
+          "804207 behaviour_metric_delta max_health"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "804207 aura_duration_ms #1"
+          "804207 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -4927,7 +4956,18 @@
     "spell": 806177,
     "clause": "Let loose a dark howl that inspires your allies, granting immunity to movement impairing effects to all allies for $d.",
     "labels": [
-      "806177 aura_duration_ms #0"
+      "806177 immunity 806177 cast",
+      "806177 immunity 806177 applied",
+      "806177 immunity 38767 without",
+      "806177 immunity 38767 with",
+      "806177 immunity 38767 control",
+      "806177 immunity 47021 without",
+      "806177 immunity 47021 with",
+      "806177 immunity 47021 control",
+      "806177 immunity 806177 expired",
+      "806177 behaviour_metric_delta ally_snare_immune",
+      "806177 behaviour_metric_delta ally_root_immune",
+      "806177 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
