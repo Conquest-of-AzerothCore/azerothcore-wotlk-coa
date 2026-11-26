@@ -14426,6 +14426,2175 @@
       "residual_target": 0.001,
       "min_detectable": 4,
       "observe_source": "$h = 40 (Spell.dbc 704659 ProcChance 40; AscensionBloodmageSecondary.cpp:245-251 OnSpellCast checks RankOf(info->Id, SPELL_VEINBURST) and roll_chance_i(40) -> player->RemoveSpellCooldown(info->Id, true) sending SMSG_CLEAR_COOLDOWN 0x1DE for 504819). roll_chance_i(40) ignores spell mods so forced_roll cannot force it; sized directly for residual_target 0.001 per pair and min_detectable 4 pts (G-20 +-2 pt band around 40%, needs 29078 trials). Veinburst 504819 (level 60 rank, 2000 ms cast, 1500 ms GCD, 15000 ms category CD, 300 Rage, cast_power 1000 absorbs out-of-combat decay, Mortal Form = default). reset_between_attempts sends 1 fixture SMSG_CLEAR_COOLDOWN per cast (verified 1:1 in control 50 x 19 = 950 casts, subtracted in treatment). Treatment: 1550 x 19 = 29450 completed casts (>= 29078). Reference search 2026-11-26: coa-history 704659/525030: 0 events; coabuildhub 704659 matches verbatim ('40% chance to not trigger a cooldown')."
+    },
+    {
+      "spell": 560254,
+      "name": "Blood Rush (20% chance on periodic damage dealt)",
+      "kind": "flat_chance_rate",
+      "variant": "proc_rate",
+      "label_suffix": "proc_rate",
+      "quote": "Periodic damage dealt now has a $h% chance to grant you Blood Rush.",
+      "chance_pct": 20,
+      "trigger_spell": 504134,
+      "trigger_target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "precondition fixture: caster aura 823764 (target resistance -9999 on magic schools) prevents full resists on Crimson Tide 504134 periodic Shadow ticks so every tick deals damage and enters the proc check"
+        }
+      ],
+      "stop_trigger_aura": true,
+      "layout": [
+        {
+          "do": "trigger",
+          "wait_ms": 3300
+        },
+        {
+          "do": "wait",
+          "wait_ms": 2100
+        }
+      ],
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 504134,
+        "target": "dummy",
+        "periodic": true
+      },
+      "event": {
+        "metric": "spell_cast_count",
+        "spell": 504551
+      },
+      "cycles": 325,
+      "unlearned_cycles": 2,
+      "trials_per_cycle": 1,
+      "parts": 10,
+      "streams": 6,
+      "isolation": {
+        "reach_yd": 10.0,
+        "source": "Crimson Tide 504134 Effect[0] has EffectRadiusIndex 13 (10 yd, TargetA 22 + TargetB 15); 6 streams stand 100/5 = 20 yd apart (> 10 + 2*2 = 14 yd); Blood Rush 504551 is caster-only TargetA 1; streams are ungrouped."
+      },
+      "observe_source": "560254 Blood Rush (Spell.dbc ProcChance 20 = $h, Effect[0] aura 42 PROC_TRIGGER_SPELL -> 504551; pending_db_world/rev_20260917_80_bloodmage_blood_rush_proc.sql sets ProcFlags 262144 DONE_PERIODIC, SpellTypeMask 1 DAMAGE, SpellPhaseMask 2 HIT, Chance 20, Cooldown 5000). Each cycle casts Crimson Tide 504134 (400 Rage, instant, 3000 ms amplitude), waits 3300 ms for exactly 1 periodic tick, removes 504134, and waits 2100 ms (5400 ms total spacing > 5000 ms ICD so the ICD never blocks the next cycle's tick). Control: 2 x 1 x 10 x 6 = 120 trials (>= 50), expects 0 procs. Treatment: 325 x 1 x 10 x 6 = 19500 trials (>= 19426 flip-proof trials for 20% with G-19 +-2 pt band over 10 parts, residual <= 0.1% per pair). Reference search 2026-11-26: coa-history 504551: 0 events in 186 logs; bindmysoul talents.normalized.json 560254 matches verbatim ('20% chance to grant you Blood Rush. Can only occur once every 5 sec.')."
+    },
+    {
+      "spell": 560254,
+      "name": "Blood Rush (5s ICD blocks second proc at 4600 ms)",
+      "kind": "metric_delta",
+      "variant": "icd_blocked",
+      "label_suffix": "icd_blocked",
+      "quote": "Can only occur once every 5 sec.",
+      "trigger_spell": 802580,
+      "gate_spell": 560254,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        504134
+      ],
+      "setup_wait_ms": 4600,
+      "target": "dummy",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "forced_roll": 560254,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 504551
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3300,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3100,
+          3550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 504134,
+              "target": "dummy",
+              "periodic": true
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Crimson Tide 504134 ticks 2 times in treatment before the read at t=7900 ms (3000, 6000 ms; 0 in uncast control)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802580,
+              "target": "dummy",
+              "periodic": true
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Taldaram's Torment 802580 cast at +4600 ms ticks once at +7600 ms (+4600 ms after 504134 tick 1, inside 5000 ms ICD and > 4500 ms = -10%)"
+          }
+        ]
+      },
+      "observe_source": "560254 Blood Rush ICD lower-bound proof (rev_20260917_80_bloodmage_blood_rush_proc.sql Cooldown = 5000 ms; forced_roll 560254 removes RNG; unlearned control proved separately by proc_rate and haste). Uncast before phase reads 0. In treatment, Crimson Tide 504134 cast at t=0 ticks at 3000 ms (procs 504551 -> 1, starts 5000 ms ICD until 8000 ms) and 6000 ms (+3000 ms, blocked). Taldaram's Torment 802580 cast at t=4600 ms ticks at 7600 ms (+4600 ms after tick 1, inside 5000 ms ICD and above 4500 ms = -10%). Read at +3300 ms (game_time [3100, 3550] after 802580 cast, t=7900 ms): 1 proc total (excludes ICD <= 4500 ms). Reference search 2026-11-26: coa-history 504551: 0 events; bindmysoul 560254 matches verbatim."
+    },
+    {
+      "spell": 560254,
+      "name": "Blood Rush (5s ICD allows second proc at 5400 ms)",
+      "kind": "metric_delta",
+      "variant": "icd_ready",
+      "label_suffix": "icd_ready",
+      "quote": "Can only occur once every 5 sec.",
+      "trigger_spell": 802580,
+      "gate_spell": 560254,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        504134
+      ],
+      "setup_wait_ms": 5400,
+      "target": "dummy",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "forced_roll": 560254,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 504551
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 3300,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3100,
+          3550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 504134,
+              "target": "dummy",
+              "periodic": true
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Crimson Tide 504134 ticks 2 times in treatment before the read at t=8700 ms (3000, 6000 ms; tick 3 is at 9000 ms; 0 in uncast control)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802580,
+              "target": "dummy",
+              "periodic": true
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Taldaram's Torment 802580 cast at +5400 ms ticks once at +8400 ms (+5400 ms after 504134 tick 1, above 5000 ms ICD and < 5500 ms = +10%)"
+          }
+        ]
+      },
+      "observe_source": "560254 Blood Rush ICD upper-bound proof (rev_20260917_80_bloodmage_blood_rush_proc.sql Cooldown = 5000 ms; forced_roll 560254; unlearned control proved separately by proc_rate and haste). Uncast before phase reads 0. In treatment, Crimson Tide 504134 cast at t=0 ticks at 3000 ms (procs 504551 -> 1) and 6000 ms (+3000 ms, blocked). Taldaram's Torment 802580 cast at t=5400 ms ticks at 8400 ms (+5400 ms after tick 1, above 5000 ms ICD and below 5500 ms = +10%). Read at +3300 ms (game_time [3100, 3550] after 802580 cast, t=8700 ms, before 504134 tick 3 at 9000 ms): 2 procs total (excludes ICD >= 5500 ms). Paired with icd_blocked, brackets the ICD to (4600, 5400] ms. Reference search 2026-11-26: coa-history 504551: 0 events; bindmysoul 560254 matches verbatim."
+    },
+    {
+      "spell": 560254,
+      "name": "Blood Rush (504551 increases melee and spell haste by 20%)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "Periodic damage dealt now has a $h% chance to grant you Blood Rush.",
+      "trigger_spell": 504134,
+      "gate_spell": 560254,
+      "target": "dummy",
+      "cast_power": 1000,
+      "forced_roll": 560254,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 3300,
+      "expected": 2750,
+      "tolerance": 0.01,
+      "wait_ms": 3500,
+      "expire_ms": 17000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_speed_multiplier",
+            "before_expected": 1.0,
+            "expected": 0.8333333,
+            "tolerance": 0.0005,
+            "source": "Blood Rush 504551 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS BasePoints 19 + 1 = +20% spell haste -> cast_speed_multiplier 1 / 1.2 = 0.8333333"
+          }
+        ]
+      },
+      "observe_source": "504551 Blood Rush (embedded by 560254 @s:504551:0@, 'Increases your haste by $s1% for $d.', $s1 = 20): Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS BasePoints 19 + 1 = +20% (cast_speed_multiplier 1.0 -> 0.8333333), Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints 19 + 1 = +20% (War Staff 2535 speed 3300 ms -> 3300 / 1.20 = 2750 ms). Crimson Tide 504134 ticks at 3000 ms with forced_roll 560254; read at 3500 ms before and after learning 560254. Reference search 2026-11-26: coa-history 504551: 0 events; bindmysoul 560254 says 'Increases your haste by 20% for 5 seconds.'."
+    },
+    {
+      "spell": 560254,
+      "name": "Blood Rush (504551 lasts 5000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Periodic damage dealt now has a $h% chance to grant you Blood Rush.",
+      "trigger_spell": 504134,
+      "gate_spell": 560254,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "cast_power": 1000,
+      "forced_roll": 560254,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 504551
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 19600,
+      "expiry_wait_ms": 800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19400,
+          19850
+        ],
+        "expired": [
+          20200,
+          20650
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504551 Blood Rush DurationIndex 28 = 5000 ms ($d in @s:504551:0@). With forced_roll 560254 and 5000 ms ICD, Crimson Tide 504134 (15000 ms, 3000 ms ticks) procs 504551 on ticks 1 (3000 ms), 3 (9000 ms), and 5 (15000 ms). At 19600 ms (4600 ms after tick 5, game_time [19400, 19850], > 4500 ms = -10%), 504551 reads present (1); at 20400 ms (5400 ms after tick 5, game_time [20200, 20650], < 5500 ms = +10%), 504551 reads expired (0). Control before learn reads 0. Reference search 2026-11-26: coa-history 504551: 0 events; bindmysoul 560254 says 'for 5 seconds.'."
+    },
+    {
+      "spell": 504098,
+      "name": "Saturating Sutures (15% chance on periodic damage)",
+      "kind": "flat_chance_rate",
+      "variant": "proc_rate",
+      "label_suffix": "proc_rate",
+      "quote": "Your periodic damage and healing has a $h% chance to reduce the cost your next Sanguine Mend by $504137s1% for $504137d.",
+      "chance_pct": 15,
+      "trigger_spell": 504134,
+      "trigger_target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "precondition fixture: caster aura 823764 prevents full resists on Crimson Tide 504134 periodic Shadow ticks so every tick deals damage and enters the proc check"
+        }
+      ],
+      "stop_trigger_aura": true,
+      "cast_wait_ms": 15500,
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 504134,
+        "target": "dummy",
+        "periodic": true
+      },
+      "event": {
+        "metric": "spell_cast_count",
+        "spell": 504137
+      },
+      "cycles": 85,
+      "unlearned_cycles": 2,
+      "trials_per_cycle": 5,
+      "parts": 5,
+      "streams": 6,
+      "isolation": {
+        "reach_yd": 10.0,
+        "source": "Crimson Tide 504134 Effect[0] radius is 10 yd; 6 streams stand 100/5 = 20 yd apart (> 10 + 2*2 = 14 yd); Saturating Sutures 504137 is caster-only TargetA 1; streams are ungrouped."
+      },
+      "observe_source": "504098 Saturating Sutures (Spell.dbc ProcChance 15 = $h, Effect[0] aura 42 -> 504137; pending_db_world/rev_20260920_54_bloodmage_periodic_procs.sql sets ProcFlags 262144 DONE_PERIODIC, SpellTypeMask 3 DAMAGE|HEAL, SpellPhaseMask 2 HIT, Chance 0 deferring to DBC 15, Cooldown 0). Trigger: Crimson Tide 504134 (5 periodic ticks per 15500 ms cast). Control: 2 x 5 x 5 x 6 = 300 trials (>= 50), expects 0 procs. Treatment: 85 x 5 x 5 x 6 = 12750 trials (>= 12632 flip-proof trials for 15% with G-19 +-2 pt band over 5 parts, residual <= 0.1% per pair). Reference search 2026-11-26: coa-history 504137: 0 events; bindmysoul 504098 matches verbatim ('15% chance to reduce the cost your next Sanguine Mend by -100% for 8 seconds.')."
+    },
+    {
+      "spell": 504098,
+      "name": "Saturating Sutures (reduces next Sanguine Mend Rage cost by 100% and consumes on cast)",
+      "kind": "cost_gate",
+      "variant": "cost",
+      "label_suffix": "cost",
+      "quote": "to reduce the cost your next Sanguine Mend by $504137s1%",
+      "gated_spell": 802310,
+      "resource": "power",
+      "reduction": 200,
+      "target": "caster",
+      "forced_roll": 504098,
+      "setup_casts": [
+        [
+          504134,
+          "dummy"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ]
+      ],
+      "cast_auras": [
+        {
+          "spell": 504134,
+          "auras": [
+            823764
+          ],
+          "reason": "precondition fixture: 823764 prevents full resist on Crimson Tide 504134 ticks so 504098 procs 504137 reliably"
+        }
+      ],
+      "next_arm": true,
+      "observe_source": "504137 Saturating Sutures Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 14 SPELLMOD_COST BasePoints -101 + 1 = -100% ($504137s1 = 100) on EffectSpellClassMask (524288, 0, 0) = Sanguine Mend 802310 (PowerType 1 Rage, ManaCost 200 -> reduced by 200 to 0). AscensionBloodmageTalents.cpp:1767-1771 removes 504137 in spell_ascension_bloodmage_sanguine_mend::AfterCast. Setup casts Crimson Tide 504134 then 9 zero-cost Sanguinary Offering 707339 GCD spacers (10 x 1600 = 16000 ms), so 504134 finishes all 5 ticks at 15000 ms (leaving 504137 with ~7000 ms remaining and no further ticks). Without 504098: 802310 refused at 0 Rage (SPELL_FAILED_NO_POWER); with 504098: succeeds at 0 Rage; next_arm: second 802310 refused at 0 Rage (504137 consumed). Reference search 2026-11-26: coa-history 504137: 0 events; bindmysoul 504098 matches verbatim."
+    },
+    {
+      "spell": 504098,
+      "name": "Saturating Sutures (504137 lasts 8000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $504137d.",
+      "trigger_spell": 504134,
+      "gate_spell": 504098,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "cast_power": 1000,
+      "forced_roll": 504098,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 504137
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 22400,
+      "expiry_wait_ms": 1200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          22200,
+          22700
+        ],
+        "expired": [
+          23400,
+          23900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504137 Saturating Sutures DurationIndex 31 = 8000 ms ($504137d, SpellDuration.dbc). With forced_roll 504098, Crimson Tide 504134 (15000 ms, 3000 ms ticks) last refreshes 504137 on tick 5 at 15000 ms, expiring at 23000 ms. Reads present (1) at 22400 ms (7400 ms after tick 5, game_time [22200, 22700], > 7200 ms = -10%) and expired (0) at 23600 ms (8600 ms after tick 5, game_time [23400, 23900], < 8800 ms = +10%). Control before learn reads 0. Reference search 2026-11-26: coa-history 504137: 0 events; bindmysoul 504098 says 'for 8 seconds.'."
+    },
+    {
+      "spell": 680695,
+      "name": "Lingering Essence (50% chance on periodic damage)",
+      "kind": "flat_chance_rate",
+      "variant": "proc_rate",
+      "label_suffix": "proc_rate",
+      "quote": "Periodic damage and healing done now has a $h% chance to reduce the cooldown of Vampyr's Kiss by $/1000;680824s1 sec.",
+      "chance_pct": 50,
+      "trigger_spell": 504134,
+      "trigger_target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "precondition fixture: caster aura 823764 prevents full resists on Crimson Tide 504134 periodic Shadow ticks so every tick deals damage and enters the proc check"
+        }
+      ],
+      "stop_trigger_aura": true,
+      "cast_wait_ms": 15500,
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 504134,
+        "target": "dummy",
+        "periodic": true
+      },
+      "event": {
+        "metric": "spell_cast_count",
+        "spell": 680824
+      },
+      "cycles": 106,
+      "unlearned_cycles": 2,
+      "trials_per_cycle": 5,
+      "parts": 5,
+      "streams": 6,
+      "isolation": {
+        "reach_yd": 10.0,
+        "source": "Crimson Tide 504134 Effect[0] radius is 10 yd; 6 streams stand 100/5 = 20 yd apart (> 10 + 2*2 = 14 yd); Lingering Essence 680824 is caster-only TargetA 1; streams are ungrouped."
+      },
+      "observe_source": "680695 Lingering Essence (Spell.dbc ProcChance 50 = $h, Effect[0] aura 42 -> 680824; pending_db_world/rev_20260920_54_bloodmage_periodic_procs.sql sets ProcFlags 262144 DONE_PERIODIC, SpellTypeMask 3 DAMAGE|HEAL, SpellPhaseMask 2 HIT, Chance 0 deferring to DBC 50, Cooldown 0). Trigger: Crimson Tide 504134 (5 periodic ticks per 15500 ms cast). Control: 2 x 5 x 5 x 6 = 300 trials (>= 50), expects 0 procs. Treatment: 106 x 5 x 5 x 6 = 15900 trials (>= 15851 flip-proof trials for 50% with G-19 +-2 pt band over 5 parts, residual <= 0.1% per pair). Reference search 2026-11-26: coa-history 680824: 0 events; bindmysoul 680695 matches verbatim ('50% chance to reduce the cooldown of Vampyr's Kiss by -1 sec.')."
+    },
+    {
+      "spell": 680695,
+      "name": "Lingering Essence (reduces Vampyr's Kiss cooldown by 1000 ms per periodic tick: 6 ticks = 6000 ms)",
+      "kind": "cost_gate",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "to reduce the cooldown of Vampyr's Kiss by $/1000;680824s1 sec.",
+      "gated_spell": 504281,
+      "resource": "cooldown",
+      "reduction": 6000,
+      "margin_ms": 300,
+      "forced_roll": 680695,
+      "target": "dummy",
+      "cast_auras": [
+        {
+          "spell": 504281,
+          "auras": [
+            823764
+          ],
+          "reason": "precondition fixture: 823764 prevents full resist on Vampyr's Kiss 504281 periodic Shadow ticks"
+        }
+      ],
+      "observe_source": "680824 Lingering Essence Effect[0] 165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN BasePoints -1001 + 1 = -1000 ms ($/1000;680824s1 = 1 sec) on MiscValue 504275 (Vampyr's Kiss rank 1; SpellEffects.cpp:395-398 ModifyAscensionCooldown walks the rank chain to level-60 rank 504281, CategoryRecoveryTime 60000 ms). Priming Vampyr's Kiss 504281 (DurationIndex 9 = 30000 ms, EffectAmplitude 5000 ms) delivers 6 periodic ticks at 5..30 s; with forced_roll 680695 all 6 ticks proc 680824 (confirmed by companion proc_count_per_kiss), cutting the 60000 ms cooldown by 6 x 1000 = 6000 ms to 54000 ms. Margin 300 ms (53700 refused / 54300 accepted) excludes 10% off on both sides (54600 / 53400 ms). Control without 680695 refused at 54300 ms. Reference search 2026-11-26: coa-history 680824: 0 events; bindmysoul 680695 matches verbatim."
+    },
+    {
+      "spell": 680695,
+      "name": "Lingering Essence (Vampyr's Kiss triggers 680824 once per tick = 6 times)",
+      "kind": "metric_delta",
+      "variant": "proc_count_per_kiss",
+      "label_suffix": "proc_count_per_kiss",
+      "quote": "to reduce the cooldown of Vampyr's Kiss by $/1000;680824s1 sec.",
+      "trigger_spell": 504281,
+      "gate_spell": 680695,
+      "target": "dummy",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "forced_roll": 680695,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 680824
+      },
+      "before_expected": 0,
+      "expected": 6,
+      "wait_ms": 30500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Companion of 680695 cooldown: proves Vampyr's Kiss 504281 (30000 ms, 5000 ms amplitude -> 6 ticks) casts 680824 exactly 0 times without 680695 and 6 times with 680695 under forced_roll, grounding the 6 x 1000 = 6000 ms cut in the cooldown cost_gate entry. Reference search 2026-11-26: coa-history 680824: 0 events; bindmysoul 680695 matches verbatim."
+    },
+    {
+      "spell": 805035,
+      "name": "Infected Blood (periodic damage slows enemy movement speed by 30%)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "Periodic damage dealt now reduces the enemy's movement speed by $800983s1%.",
+      "trigger_spell": 504134,
+      "gate_spell": 805035,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.85714,
+      "expected": 0.599998,
+      "tolerance": 0.001,
+      "wait_ms": 3500,
+      "expire_ms": 17000,
+      "void_on_cast_failure": true,
+      "observe_source": "805035 Infected Blood (Spell.dbc ProcChance 100, Effect[0] aura 42 -> 800983 Infection; pending_db_world/rev_20260920_54_bloodmage_periodic_procs.sql sets ProcFlags 262144 DONE_PERIODIC, SpellTypeMask 1 DAMAGE, SpellPhaseMask 2 HIT). 800983 Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -31 + 1 = -30% ($800983s1 = 30), DurationIndex 32 = 6000 ms, Mechanic 11 SNARE. Target: Kobold Vermin (entry 6, Humanoid, snare-susceptible, creature_template.speed_run 0.85714 -> 0.85714 * 0.7 = 0.599998). After Crimson Tide 504134 tick 1 at 3000 ms, read at 3500 ms: 0.85714 without 805035 (control), 0.599998 with 805035. Reference search 2026-11-26: coa-history 800983: 4524 SPELL_AURA_REFRESH across 15 logs; bindmysoul 805035 matches verbatim ('reduces the enemy's movement speed by -30%.')."
+    },
+    {
+      "spell": 806049,
+      "name": "Sovereignty (Crimson Tide periodic damage grants Sovereignty 504272)",
+      "kind": "metric_delta",
+      "variant": "grant",
+      "label_suffix": "grant",
+      "quote": "Damage dealt by Crimson Tide now grants you Sovereignty.",
+      "trigger_spell": 504134,
+      "gate_spell": 806049,
+      "target": "dummy",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 504272
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3500,
+      "expire_ms": 17000,
+      "void_on_cast_failure": true,
+      "observe_source": "806049 Sovereignty (Spell.dbc ProcChance 100, Effect[0] aura 42 -> 504272; pending_db_world/rev_20260920_54_bloodmage_periodic_procs.sql sets SpellFamilyName 26, SpellFamilyMask0 16384 Crimson Tide, ProcFlags 262144 DONE_PERIODIC, SpellTypeMask 1, SpellPhaseMask 2). After Crimson Tide 504134 tick 1 at 3000 ms, 504272 reads 0 without 806049 (control) and 1 with 806049. Reference search 2026-11-26: coa-history 504272: 914 SPELL_AURA_APPLIED / 517 SPELL_AURA_APPLIED_DOSE / 915 SPELL_AURA_REMOVED across 8 logs; bindmysoul 806049 matches verbatim."
+    },
+    {
+      "spell": 806049,
+      "name": "Sovereignty (504272 lasts 12000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Damage dealt by Crimson Tide now grants you Sovereignty.",
+      "trigger_spell": 504134,
+      "gate_spell": 806049,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 504272
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 26100,
+      "expiry_wait_ms": 1800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          25900,
+          26400
+        ],
+        "expired": [
+          27700,
+          28200
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504272 Sovereignty DurationIndex 29 = 12000 ms ($504272d in @s:504272:0@). Crimson Tide 504134 (15000 ms, 3000 ms ticks) last refreshes 504272 on tick 5 at 15000 ms, expiring at 27000 ms. Reads present (1) at 26100 ms (11100 ms after tick 5, game_time [25900, 26400], > 10800 ms = -10%) and expired (0) at 27900 ms (12900 ms after tick 5, game_time [27700, 28200], < 13200 ms = +10%). Control before learn reads 0. Reference search 2026-11-26: coa-history 504272: 914 applied / 915 removed; bindmysoul 806049 says 'within 12 seconds'."
+    },
+    {
+      "spell": 806049,
+      "name": "Sovereignty (5 stacks reduce Bloodbolt Rage cost by 50% = 150 Rage and consume on next cast)",
+      "kind": "cost_gate",
+      "variant": "cost",
+      "label_suffix": "cost",
+      "quote": "Damage dealt by Crimson Tide now grants you Sovereignty.",
+      "gated_spell": 578305,
+      "resource": "power",
+      "reduction": 150,
+      "target": "dummy",
+      "setup_casts": [
+        [
+          504134,
+          "dummy"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ],
+        [
+          707339,
+          "caster"
+        ]
+      ],
+      "cast_auras": [
+        {
+          "spell": 504134,
+          "auras": [
+            823764
+          ],
+          "reason": "precondition fixture: 823764 prevents full resist on Crimson Tide 504134 ticks so all 5 ticks stack Sovereignty 504272 to 5"
+        }
+      ],
+      "next_arm": true,
+      "observe_source": "504272 Sovereignty Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 14 SPELLMOD_COST BasePoints -11 + 1 = -10% per stack on EffectSpellClassMask (0, 131072, 0) = Bloodbolt 578305 (300 Rage). Setup casts Crimson Tide 504134 then 9 zero-cost Sanguinary Offering 707339 GCD spacers (10 x 1600 = 16000 ms), so 504134 finishes all 5 ticks at 15000 ms (building 5 stacks = -50% = -150 Rage -> 150 Rage, with ~11000 ms remaining and no further ticks). Without 806049: refused at 150 Rage; with 806049: accepted at 150 Rage, refused at 149 Rage (beyond); next_arm tests tooltip 'your next Bloodbolt' consumption (DBC ProcCharges is 0). Reference search 2026-11-26: coa-history 504272: 914 applied / 517 dose; bindmysoul 806049 matches verbatim."
+    },
+    {
+      "spell": 806049,
+      "name": "Sovereignty (1 stack causes Bloodbolt to strike 1 additional nearby enemy, not 2)",
+      "kind": "metric_delta",
+      "variant": "extra_target",
+      "label_suffix": "extra_target",
+      "quote": "Damage dealt by Crimson Tide now grants you Sovereignty.",
+      "trigger_spell": 578305,
+      "gate_spell": 806049,
+      "setup_casts": [
+        504134
+      ],
+      "setup_wait_ms": 3500,
+      "target": "dummy",
+      "dummy_distance": 8.0,
+      "area_dummies": [
+        15.5,
+        16.5
+      ],
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 578305,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 26000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 578305,
+              "target": "area2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Headroom dummy area2 at 16.5 yd (8.5 yd from dummy at 8 yd, inside Bloodbolt's 10 yd magic chain jump radius Spell.cpp:2228-2231) must stay unstruck at 1 stack (+1 extra target only)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 504272
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Crimson Tide 504134 hit only dummy (at 8 yd, inside 10 yd radius) and not area1/area2 (at 15.5/16.5 yd, outside 10 + 1.275 + 2.66 = 13.935 yd edge), granting exactly 1 stack of 504272 before the Bloodbolt read"
+          }
+        ]
+      },
+      "observe_source": "504272 Sovereignty Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 17 SPELLMOD_JUMP_TARGETS BasePoints 0 + DieSides 1 = +1 per stack on Bloodbolt 578305 (EffectChainTarget 1, DmgClass MAGIC -> 10 yd jump radius Spell.cpp:2228-2231). dummy at 8 yd is inside Crimson Tide 504134's 10 yd radius while area1 (15.5 yd, 7.5 yd from dummy) and area2 (16.5 yd, 8.5 yd from dummy) are outside 504134's 13.935 yd edge (10 + 1.275 reach + 2.66 leeway) yet inside Bloodbolt's 10 yd chain radius. After 1 Crimson Tide tick on dummy (3500 ms -> 1 stack of 504272), Bloodbolt at dummy hits area1 0 times before 806049 (control) and 1 time after 806049, while headroom area2 stays at 0. Reference search 2026-11-26: coa-history 504272: 914 applied; bindmysoul 806049 matches verbatim."
+    },
+    {
+      "spell": 806049,
+      "name": "Sovereignty (stacks up to 5 times)",
+      "kind": "metric_delta",
+      "variant": "max_stacks",
+      "label_suffix": "max_stacks",
+      "quote": "Damage dealt by Crimson Tide now grants you Sovereignty.",
+      "trigger_spell": 504134,
+      "gate_spell": 806049,
+      "target": "dummy",
+      "area_dummies": [
+        5.0
+      ],
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 504272
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 9500,
+      "expire_ms": 17000,
+      "void_on_cast_failure": true,
+      "observe_source": "504272 Sovereignty StackAmount 5 ($u in @s:504272:0@, 'stacking up to $u times.'). Crimson Tide 504134 hits 2 enemies (dummy at 3 yd, area1 at 5 yd) for 3 periodic ticks each by 9500 ms (6 tick events > 5): 504272 stacks read 0 before learn (control) and cap at exactly 5 after learn. Reference search 2026-11-26: coa-history 504272: 517 SPELL_AURA_APPLIED_DOSE; bindmysoul 806049 says 'stacking up to 5 times.'."
+    },
+    {
+      "spell": 805591,
+      "name": "Bloodsores (20% chance on periodic damage)",
+      "kind": "flat_chance_rate",
+      "variant": "proc_rate",
+      "label_suffix": "proc_rate",
+      "quote": "Periodic damage dealt now has a $h% chance to apply a Bloodsore to your target for $805592d, stacking $805592u times.",
+      "chance_pct": 20,
+      "trigger_spell": 504134,
+      "trigger_target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "precondition fixture: caster aura 823764 prevents full resists on Crimson Tide 504134 periodic Shadow ticks so every tick deals damage and enters the proc check"
+        }
+      ],
+      "stop_trigger_aura": true,
+      "cast_wait_ms": 15500,
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 504134,
+        "target": "dummy",
+        "periodic": true
+      },
+      "event": {
+        "metric": "spell_cast_count",
+        "spell": 805592
+      },
+      "cycles": 106,
+      "unlearned_cycles": 2,
+      "trials_per_cycle": 5,
+      "parts": 5,
+      "streams": 6,
+      "isolation": {
+        "reach_yd": 10.0,
+        "source": "Crimson Tide 504134 Effect[0] radius is 10 yd; 6 streams stand 100/5 = 20 yd apart (> 10 + 2*2 = 14 yd); Bloodsore 805592 is single-target TargetA 6; streams are ungrouped."
+      },
+      "observe_source": "805591 Bloodsores (Spell.dbc ProcChance 20 = $h, Effect[0] aura 42 -> 805592; pending_db_world/rev_20260920_60_bloodmage_bloodsores_proc.sql sets ProcFlags 262144 DONE_PERIODIC, SpellTypeMask 1 DAMAGE, SpellPhaseMask 2 HIT, Chance 0 deferring to DBC 20, Cooldown 0). Trigger: Crimson Tide 504134 (5 periodic ticks per 15500 ms cast). Control: 2 x 5 x 5 x 6 = 300 trials (>= 50), expects 0 procs. Treatment: 106 x 5 x 5 x 6 = 15900 trials (>= 15851 flip-proof trials for 20% with G-19 +-2 pt band over 5 parts, residual <= 0.1% per pair). Reference search 2026-11-26: coa-history 805592: 535 SPELL_AURA_APPLIED / 214 DOSE / 535 REMOVED across 4 logs; bindmysoul 805591 matches verbatim."
+    },
+    {
+      "spell": 805591,
+      "name": "Bloodsores (805592 lasts 8000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $805592d,",
+      "trigger_spell": 504134,
+      "gate_spell": 805591,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "forced_roll": 805591,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 805592,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 22400,
+      "expiry_wait_ms": 1200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          22200,
+          22700
+        ],
+        "expired": [
+          23400,
+          23900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "805592 Bloodsore DurationIndex 31 = 8000 ms ($805592d / $d in @s:805592:0@). With forced_roll 805591, Crimson Tide 504134 (15000 ms, 3000 ms ticks) last refreshes 805592 on tick 5 at 15000 ms, expiring at 23000 ms. Reads present (1) at 22400 ms (7400 ms after tick 5, game_time [22200, 22700], > 7200 ms = -10%) and expired (0) at 23600 ms (8600 ms after tick 5, game_time [23400, 23900], < 8800 ms = +10%). Control before learn reads 0. Reference search 2026-11-26: coa-history 805592: 535 applied / 535 removed; bindmysoul 805591 says 'for 8 seconds'."
+    },
+    {
+      "spell": 805591,
+      "name": "Bloodsores (805592 stacks up to 5 times)",
+      "kind": "metric_delta",
+      "variant": "max_stacks",
+      "label_suffix": "max_stacks",
+      "quote": "stacking $805592u times.",
+      "trigger_spell": 802580,
+      "gate_spell": 805591,
+      "setup_casts": [
+        504134
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "forced_roll": 805591,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 805592,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 10000,
+      "expire_ms": 17000,
+      "void_on_cast_failure": true,
+      "observe_source": "805592 Bloodsore StackAmount 5 ($805592u / $u in @s:805592:0@). With forced_roll 805591, Crimson Tide 504134 (t=0) and Taldaram's Torment 802580 (t=1600 ms) together deal 6 periodic ticks to dummy before t=11600 ms (3 ticks of 504134 + 3 ticks of 802580 = 6 > 5): 805592 stacks on dummy read 0 before learn (control) and cap at exactly 5 after learn. Reference search 2026-11-26: coa-history 805592: 214 SPELL_AURA_APPLIED_DOSE; bindmysoul 805591 says 'stacking 5 times.'."
+    },
+    {
+      "spell": 805591,
+      "name": "Bloodsores (5 stacks of 805592 increase Sanguine Rupture damage by 50% = 5 x 10%)",
+      "kind": "hit_ratio",
+      "variant": "sanguine_rupture",
+      "label_suffix": "sanguine_rupture",
+      "quote": "Periodic damage dealt now has a $h% chance to apply a Bloodsore to your target for $805592d, stacking $805592u times.",
+      "observe_spell": 800775,
+      "cast_spell": 572907,
+      "expected": 1.5,
+      "trials": 25,
+      "parts": 8,
+      "void_on_cast_failure": true,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ],
+        "casts": [
+          578305
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ],
+        "learn": [
+          805592
+        ],
+        "casts": [
+          805592,
+          805592,
+          805592,
+          805592,
+          805592,
+          578305
+        ]
+      },
+      "observe_source": "805592 Bloodsore Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER BasePoints 9 + 1 = +10% per stack ($s1 in @s:805592:0@), StackAmount 5 -> +50% at 5 stacks on EffectSpellClassMask (0, 2105344, 0) covering Sanguine Rupture damage spell 800775 (flags[1] 2097152) and Bloodmoon Blast 501614 (flags[1] 8192). Application/rate/duration/stacking of 805592 from 805591 are proved separately by proc_rate, duration, and max_stacks; here treatment casts 805592 5 times to pin exactly 5 stacks (+50%) on every trial (25 trials x 8 parts = 200 hits/arm > 184 sized trials; G-19 band +-2.5%, power limit 1.25%; Bloodbolt 578305 heals health cost; 16255 -100% crit; 823764 no resist). Reference search 2026-11-26: coa-history 805592: 535 applied; bindmysoul 805591 matches verbatim."
+    },
+    {
+      "spell": 805591,
+      "name": "Bloodsores (5 stacks of 805592 increase Bloodmoon Blast damage by 50% = 5 x 10%)",
+      "kind": "hit_ratio",
+      "variant": "bloodmoon_blast",
+      "label_suffix": "bloodmoon_blast",
+      "quote": "Periodic damage dealt now has a $h% chance to apply a Bloodsore to your target for $805592d, stacking $805592u times.",
+      "observe_spell": 501614,
+      "expected": 1.5,
+      "trials": 25,
+      "parts": 12,
+      "void_on_cast_failure": true,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ],
+        "casts": [
+          578305
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ],
+        "learn": [
+          805592
+        ],
+        "casts": [
+          805592,
+          805592,
+          805592,
+          805592,
+          805592,
+          578305
+        ]
+      },
+      "observe_source": "805592 Bloodsore Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER BasePoints 9 + 1 = +10% per stack ($s1 in @s:805592:0@), StackAmount 5 -> +50% at 5 stacks on EffectSpellClassMask (0, 2105344, 0) covering Bloodmoon Blast 501614 (flags[1] 8192). Application/rate/duration/stacking of 805592 from 805591 are proved separately by proc_rate, duration, and max_stacks; here treatment casts 805592 5 times to pin exactly 5 stacks (+50%) on every trial (25 trials x 12 parts = 300 hits/arm > 297 sized trials; G-19 band +-2.5%, power limit 1.25%; Bloodbolt 578305 heals health cost; 16255 -100% crit; 823764 no resist). Reference search 2026-11-26: coa-history 805592: 535 applied; bindmysoul 805591 matches verbatim."
+    },
+    {
+      "spell": 805591,
+      "name": "Bloodsores (Bloodmoon Blast consumes Bloodsore 805592 on hit)",
+      "kind": "metric_delta",
+      "variant": "consume_on_blast",
+      "label_suffix": "consume_on_blast",
+      "quote": "Periodic damage dealt now has a $h% chance to apply a Bloodsore to your target for $805592d, stacking $805592u times.",
+      "trigger_spell": 501614,
+      "gate_spell": 501614,
+      "learn": [
+        805591
+      ],
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        504134,
+        707339,
+        707339,
+        707339,
+        707339,
+        707339,
+        707339,
+        707339,
+        707339,
+        707339
+      ],
+      "setup_cast_targets": [
+        "dummy",
+        "caster",
+        "caster",
+        "caster",
+        "caster",
+        "caster",
+        "caster",
+        "caster",
+        "caster",
+        "caster"
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "forced_roll": 805591,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 805592,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tests tooltip 'your next Sanguine Rupture and Bloodmoon Blast' consumption on Bloodsore 805592 (Spell.dbc ProcCharges 0, no removal script found in src/server/coa/). Setup casts Crimson Tide 504134 + 9 Sanguinary Offering 707339 spacers (16000 ms) so 504134 expires at 15000 ms leaving 805592 active with ~7000 ms remaining (before phase reads 1). Treatment casts Bloodmoon Blast 501614 (2000 ms cast + flight -> lands ~2100 ms, while 805592 still has ~4900 ms left): reads 0 if consumed on next cast, 1 (alert) if not consumed. Reference search 2026-11-26: coa-history 805592: 535 applied / 535 removed; bindmysoul 805591 says 'your next Sanguine Rupture and Bloodmoon Blast'."
+    },
+    {
+      "spell": 704646,
+      "name": "Swarm of Flies (Bloodbolt refreshes level-60 Taldaram's Torment 802580)",
+      "kind": "metric_delta",
+      "variant": "refresh",
+      "label_suffix": "refresh",
+      "quote": "Your Bloodbolt now refreshes the duration of Taldaram's Torment.",
+      "trigger_spell": 578305,
+      "gate_spell": 704646,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        802580
+      ],
+      "setup_wait_ms": 8000,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 802580,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 14100,
+      "expiry_wait_ms": 1800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13900,
+          14400
+        ],
+        "expired": [
+          15700,
+          16200
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "704646 Swarm of Flies (Spell.dbc Effect[0] aura 42 -> 704647 Spread Taldarams; pending_db_world/rev_20260918_33_bloodmage_swarm_of_flies_proc.sql sets SpellFamilyName 26, SpellFamilyMask1 131072 Bloodbolt, ProcFlags 69972, SpellTypeMask 1, SpellPhaseMask 2, Chance 100). 704647 Effect[1] 173 SPELL_EFFECT_ASCENSION_REFRESH_AURA BasePoints 14999 + 1 = 15000 ms, MiscValue 800772 (Taldaram's Torment rank 1; level-60 rank is 802580, DurationIndex 8 = 15000 ms). Baseline before phase (trigger_only_after true) reads 0. Treatment casts 802580 at t=0, waits 8000 ms, casts Bloodbolt 578305 at t=8000 ms: at +14100 ms after Bloodbolt (t=22100 ms, 7.1 s past unrefreshed 15000 ms expiry, game_time.after [13900, 14400]), refreshed 802580 must still be present (1, > 13500 ms = -10% of 15000 ms), then expired (0) 1800 ms later at +15900 ms (game_time.expired [15700, 16200], < 16500 ms = +10%). Note: SpellEffects.cpp:855 EffectAscensionRefreshAura calls target->GetAura(effect.MiscValue) without walking ranks, so rank 8 802580 is expected to alert unless fixed. Reference search 2026-11-26: coa-history 704647: 0 events; bindmysoul 704646 matches verbatim."
+    },
+    {
+      "spell": 802315,
+      "name": "Blood Parasites (Taldaram's Torment generates 3 additional Rage per tick)",
+      "kind": "metric_delta",
+      "variant": "rage_per_tick",
+      "label_suffix": "rage_per_tick",
+      "quote": "Your Taldaram's Torment now generates $/10;s1 additional Rage per tick",
+      "trigger_spell": 802580,
+      "gate_spell": 802315,
+      "target": "dummy",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 802580
+      },
+      "before_expected": 150,
+      "expected": 450,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_energize_count",
+            "fields": {
+              "spell": 802580
+            },
+            "before_expected": 5,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "Taldaram's Torment 802580 ticks 5 times per 15000 ms cast (3000 ms amplitude): 5 energize events in before (30 each = 150) and 5 more in treatment (60 each = +300 -> 450 total)"
+          }
+        ]
+      },
+      "observe_source": "802315 Blood Parasites Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 SPELLMOD_EFFECT1 BasePoints 29 + 1 = +30 internal Rage (+3 displayed Rage, $/10;s1 = 3) on EffectSpellClassMask (0, 128, 0) = 582765 Energize Rage (base 30 internal Rage). AscensionBloodmageTalents.cpp:973-975 calculates 582765 EFFECT_0 on every 802580 tick and calls EnergizeBySpell(caster, 802580, rage, POWER_RAGE). Over all 5 ticks of one 802580 cast (15500 ms): before learn = 5 x 30 = 150 internal Rage (15 displayed); after learn = +5 x 60 = +300 -> 450 cumulative internal Rage (+30 internal / +3 displayed Rage per tick). Reference search 2026-11-26: coa-history 800988: 37 applied / 37 removed; bindmysoul 802315 matches verbatim."
+    },
+    {
+      "spell": 802315,
+      "name": "Blood Parasites (800988 increases spell critical strike chance against target by 3%)",
+      "kind": "metric_delta",
+      "variant": "crit_taken",
+      "label_suffix": "crit_taken",
+      "quote": "and increases spell critical strike chance against the target by $800988s1% for $800988d.",
+      "trigger_spell": 802580,
+      "gate_spell": 802315,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_taken_crit_chance",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0.0001,
+      "wait_ms": 1000,
+      "expire_ms": 17000,
+      "void_on_cast_failure": true,
+      "observe_source": "802315 Blood Parasites Effect[1] aura 42 -> 800988 (pending_db_world/rev_20260920_41_bloodmage_damage_proc_triggers.sql: ProcFlags 65536 DONE_SPELL_MAGIC_DMG_CLASS_NEG, SpellFamilyMask2 2097152 Taldaram's Torment, SpellPhaseMask 2 HIT, Chance 100). 800988 Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE BasePoints 2 + 1 = +3% ($800988s1 = 3). Measures spell_taken_crit_chance of Bloodbolt 578305 against dummy 1000 ms after casting 802580, before and after learning 802315 (expected_gain = +3 points via LEARNED_CONTRAST; before_expected = 0 floor, expected = 3, raw baseline is positive ~3.7538 -> ~6.7538). Reference search 2026-11-26: coa-history 800988: 37 applied / 37 removed; bindmysoul 802315 matches verbatim."
+    },
+    {
+      "spell": 802315,
+      "name": "Blood Parasites (800988 lasts 15000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $800988d.",
+      "trigger_spell": 802580,
+      "gate_spell": 802315,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 800988,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 14100,
+      "expiry_wait_ms": 1800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13900,
+          14400
+        ],
+        "expired": [
+          15700,
+          16200
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "800988 Blood Parasites DurationIndex 8 = 15000 ms ($800988d, SpellDuration.dbc). Applied on 802580 initial cast hit (ProcFlags 65536). Reads present (1) at 14100 ms (game_time [13900, 14400], > 13500 ms = -10%) and expired (0) at 15900 ms (game_time [15700, 16200], < 16500 ms = +10%). Control before learn reads 0. Reference search 2026-11-26: coa-history 800988: 37 applied / 37 removed; bindmysoul 802315 says 'for 15 seconds.'."
+    },
+    {
+      "spell": 704692,
+      "name": "Corrupted Blood (Veinburst damage +10% on Humanoid after Taldaram's Torment)",
+      "kind": "hit_ratio",
+      "variant": "humanoid_veinburst",
+      "label_suffix": "humanoid_veinburst",
+      "quote": "When you use Taldaram's Torment on a Humanoid or Beast it now corrupts their blood, increasing your damage dealt against them by $532623s1%.",
+      "observe_spell": 504819,
+      "target_entry": 6,
+      "warmup": [
+        802580,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305
+      ],
+      "cast_power": 300,
+      "expected": 1.1,
+      "trials": 60,
+      "parts": 8,
+      "void_on_cast_failure": true,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ],
+        "learn": [
+          704692
+        ]
+      },
+      "observe_source": "704692 Corrupted Blood (Spell.dbc Effect[0] aura 42 -> 532623; pending_db_world/rev_20260920_41_bloodmage_damage_proc_triggers.sql: ProcFlags 65536 on Taldaram's Torment + conditions SourceType 24 CreatureType 7 Humanoid OR 1 Beast). 532623 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER BasePoints 9 + 1 = +10% ($532623s1 = 10) on EffectSpellClassMask (6291456, 0, 0) = Veinburst 504819 + Reave 802469, DurationIndex 21 permanent. Target: Kobold Vermin (entry 6, Humanoid). Warmup casts 802580 then 10 Bloodbolts (17.6 s > 15 s) so 802580 expires before trial 1 (eliminating bleed-bonus variance) while permanent 532623 stays active in treatment across all 60 trials x 8 parts = 480 hits/arm (> 438 sized trials). Reference search 2026-11-26: coa-history 532623: 0 events; bindmysoul 704692 matches verbatim."
+    },
+    {
+      "spell": 704692,
+      "name": "Corrupted Blood (Veinburst damage +10% on Beast after Taldaram's Torment)",
+      "kind": "hit_ratio",
+      "variant": "beast_veinburst",
+      "label_suffix": "beast_veinburst",
+      "quote": "When you use Taldaram's Torment on a Humanoid or Beast it now corrupts their blood, increasing your damage dealt against them by $532623s1%.",
+      "observe_spell": 504819,
+      "target_entry": 299,
+      "warmup": [
+        802580,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305,
+        578305
+      ],
+      "cast_power": 300,
+      "expected": 1.1,
+      "trials": 60,
+      "parts": 8,
+      "void_on_cast_failure": true,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ],
+        "learn": [
+          704692
+        ]
+      },
+      "observe_source": "704692 Corrupted Blood Beast leg (conditions ElseGroup 1 CreatureType 1 Beast). Target: Young Wolf (entry 299, Beast). Warmup casts 802580 then 10 Bloodbolts (17.6 s > 15 s) so 802580 expires before trial 1 while permanent 532623 stays active in treatment across 60 trials x 8 parts = 480 hits/arm (> 475 sized trials). Reference search 2026-11-26: coa-history 532623: 0 events; bindmysoul 704692 matches verbatim."
+    },
+    {
+      "spell": 704692,
+      "name": "Corrupted Blood (control: does not apply 532623 on Mechanical target)",
+      "kind": "metric_delta",
+      "variant": "mechanical_control",
+      "label_suffix": "mechanical_control",
+      "quote": "on a Humanoid or Beast",
+      "trigger_spell": 802580,
+      "gate_spell": 704692,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 532623,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 17000,
+      "void_on_cast_failure": true,
+      "observe_source": "704692 Corrupted Blood negative creature-type control: stock Training Dummy (entry 36, Mechanical, neither Humanoid nor Beast) must NOT receive 532623 when 802580 is cast with 704692 learned (0 before, 0 after). Reference search 2026-11-26: coa-history 532623: 0 events; bindmysoul 704692 matches verbatim."
+    },
+    {
+      "spell": 704692,
+      "name": "Corrupted Blood (scope check: Bloodbolt damage on Humanoid after Taldaram's Torment)",
+      "kind": "hit_ratio",
+      "variant": "humanoid_bloodbolt",
+      "label_suffix": "humanoid_bloodbolt",
+      "quote": "increasing your damage dealt against them by $532623s1%.",
+      "observe_spell": 578305,
+      "target_entry": 6,
+      "warmup": [
+        802580
+      ],
+      "cast_power": 300,
+      "expected": 1.1,
+      "trials": 10,
+      "parts": 3,
+      "void_on_cast_failure": true,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ],
+        "learn": [
+          704692
+        ]
+      },
+      "observe_source": "Scope check for 704692 Corrupted Blood: tooltip states unqualified 'increasing your damage dealt against them by $532623s1%' (10%), whereas Spell.dbc 532623 Effect[0] EffectSpellClassMask (6291456, 0, 0) restricts the +10% bonus to Veinburst and Reave only. Testing Bloodbolt 578305 on Humanoid (entry 6) after Taldaram's Torment 802580 measures whether general Bloodmage damage receives +10% or +0%. Reference search 2026-11-26: coa-history 532623: 0 events; bindmysoul 704692 says 'increasing your damage dealt against them by 10%.'."
+    },
+    {
+      "spell": 707435,
+      "name": "Cursed Blood (rupture deals 100% of Taldaram's Torment tick damage to nearby enemies within 5 yd)",
+      "kind": "metric_delta",
+      "variant": "rupture_aoe",
+      "label_suffix": "rupture_aoe",
+      "quote": "causing it to deal its damage an additional time to all enemies near the target.",
+      "trigger_spell": 802580,
+      "gate_spell": 707435,
+      "target": "dummy",
+      "area_dummies": [
+        5.5,
+        12.0
+      ],
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "forced_roll": 707435,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 707708,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 707708,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "Primary target dummy is struck 5 times by Cursed Blood 707708 across all 5 periodic ticks of 802580 (15500 ms)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 707708,
+              "target": "area2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Outside dummy area2 at 12.0 yd (9.0 yd from dummy at 3.0 yd, outside 707708 EffectRadiusIndex 8 = 5 yd + 1.275 yd reach = 6.275 yd) must remain unstruck"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 707708,
+              "target": "dummy"
+            },
+            "source": "707708 rupture damage dealt on dummy across all 5 ticks"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802580,
+              "target": "dummy",
+              "periodic": true
+            },
+            "source": "802580 Taldaram's Torment periodic damage on dummy across all 5 ticks"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 2,
+            "denominator": 3,
+            "expected": 1.0,
+            "tolerance": 0.05,
+            "source": "707435 Effect[0] aura 354 BasePoints 99 + 1 = 100% (AscensionBloodmageTalents.cpp:655-659,875-877): 707708 rupture deals 100% of Taldaram's Torment tick damage ('deal its damage an additional time')"
+          }
+        ]
+      },
+      "observe_source": "707435 Cursed Blood (Effect[0] aura 354 BasePoints 99 + 1 = 100%, TriggerSpell 707708 Effect[0] SCHOOL_DAMAGE TargetA 6 + TargetB 16 EffectRadiusIndex 8 = 5 yd; pending_db_world/rev_20260920_87_bloodmage_cursed_blood_proc.sql; AscensionBloodmageTalents.cpp:863-885). With forced_roll 707435, 16255 -100% crit, and 823764 no resist, Taldaram's Torment 802580 ticks 5 times over 15500 ms (before: 5 ticks of 802580, 0 of 707708; expire_ms 500 cleanly separates phases; after: 5 ticks of 802580 and 5 ruptures of 707708 onto dummy at 3 yd and area1 at 5.5 yd, 0 on area2 at 12.0 yd outside 6.275 yd edge, and ratio 707708/802580 damage on dummy == 1.0 +- 0.05). Reference search 2026-11-26: coa-history 707708: 929 SPELL_DAMAGE across 8 logs; bindmysoul 707435 matches verbatim."
+    },
+    {
+      "spell": 680731,
+      "name": "Black Heart (Vampyr's Kiss instantly regenerates 20% of maximum Rage on cast)",
+      "kind": "metric_delta",
+      "variant": "rage_on_cast",
+      "label_suffix": "rage_on_cast",
+      "quote": "Your Vampyr's Kiss now regenerates $681031s1% of your maximum Rage.",
+      "trigger_spell": 504281,
+      "gate_spell": 680731,
+      "setup_casts": [
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 200,
+      "wait_ms": 1000,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "680731 Black Heart ($681031s1 = 20% of 1000 max Rage = 200 internal Rage). Vampyr's Kiss 504281 tooltip explicitly states '$?s680731[ and instantly regenerate $805912s1% of your maximum Rage][]', and live Ascension combat logs (coa-history 2026-11-26) confirm exact 1:1 SPELL_ENERGIZE (681031) per 504281 SPELL_CAST_SUCCESS (log 88: 3/3 vs 13 ticks; log 149: 18/18 vs 55 ticks; log 150: 109/109 vs 452 ticks; mean 20.0 Rage). Setup casts Bloodbolt 578305 (sets Rage to 300 and spends 300 -> leaves 0 Rage) with disable_regeneration true, then casts 504281 Vampyr's Kiss. Reads caster Rage 1000 ms after casting 504281 (before the first 5000 ms periodic tick): expects 0 without 680731 and 200 with 680731. Note: AscensionBloodmageSecondary.cpp:404-405 instead grants MaxPower/5 inside OnPeriodicDamageResult (0 on cast, +200 per periodic tick) and is expected to alert. Reference search 2026-11-26: coa-history 681031: 152 SPELL_ENERGIZE across 10 logs; bindmysoul 680731 matches verbatim."
+    },
+    {
+      "spell": 804686,
+      "name": "Everlasting Hunt (1 Blood Shard hit opens Veinburst cooldown at 13600 ms after cast finish)",
+      "kind": "metric_delta",
+      "variant": "veinburst_cd_open",
+      "label_suffix": "veinburst_cd_open",
+      "quote": "Damage dealt by Blood Shards now reduces the cooldown of Veinburst and Reave by $/1000;802497S2 sec.",
+      "trigger_spell": 501614,
+      "gate_spell": 804686,
+      "learn": [
+        804849,
+        504819
+      ],
+      "target": "dummy",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 504819,
+          "target": "dummy",
+          "delay_ms": 2500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 504819,
+          "target": "dummy",
+          "delay_ms": 15600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504819
+      },
+      "before_expected": 67,
+      "expected": 0,
+      "wait_ms": 250,
+      "expire_ms": 3000,
+      "game_time": {
+        "after": [
+          18200,
+          18700
+        ]
+      },
+      "observe_source": "804686 Everlasting Hunt Veinburst leg (802497 Effect[0] 165 MODIFY_COOLDOWN BasePoints -1501 + 1 = -1500 ms on MiscValue 504260 -> walks rank chain to 504819, 2000 ms cast time + 15000 ms CategoryRecoveryTime = 17000 ms from cast start without 804686, 15500 ms with 1 Blood Shard hit). Trigger casts 1 non-crit Bloodmoon Blast 501614 (Health cost, leaves starting 1000 Rage untouched with disable_regeneration true; 984954 -1000% spell crit, 823764 no resist, 804849 learned) building 1 Blood Shard; priming Veinburst 504819 at +2500 ms spends 300 Rage and expends it launching 1 Blood Shard 504115 (700 -> 400 -> 100 Rage across both phases). Second Veinburst attempt at +15600 ms (13600 ms after 2000 ms cast finish, before 13650 ms = -10% cut): refused SPELL_FAILED_NOT_READY (67) without 804686, accepted (0) with 804686 (game_time [18200, 18700] ms after trigger cast). Reference search 2026-11-26: coa-history 802497: 0 events; bindmysoul 804686 matches verbatim."
+    },
+    {
+      "spell": 804686,
+      "name": "Everlasting Hunt (1 Blood Shard hit still locks Veinburst cooldown at 13400 ms after cast finish)",
+      "kind": "metric_delta",
+      "variant": "veinburst_cd_early",
+      "label_suffix": "veinburst_cd_early",
+      "quote": "Damage dealt by Blood Shards now reduces the cooldown of Veinburst and Reave by $/1000;802497S2 sec.",
+      "trigger_spell": 501614,
+      "gate_spell": 804686,
+      "learn": [
+        804849,
+        504819
+      ],
+      "target": "dummy",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 504819,
+          "target": "dummy",
+          "delay_ms": 2500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 504819,
+          "target": "dummy",
+          "delay_ms": 15400,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504819
+      },
+      "before_expected": 67,
+      "expected": 67,
+      "wait_ms": 250,
+      "expire_ms": 3000,
+      "game_time": {
+        "after": [
+          18000,
+          18500
+        ]
+      },
+      "observe_source": "Companion of 804686 veinburst_cd_open: second Veinburst 504819 attempt at +15400 ms (13400 ms after 2000 ms cast finish, after 13350 ms = +10% cut) must still be refused SPELL_FAILED_NOT_READY (67) in both phases, excluding cuts >= 1650 ms (+10%; game_time [18000, 18500] ms after trigger cast). Paired with veinburst_cd_open, brackets Veinburst's cut to (1400, 1600] ms. Reference search 2026-11-26: coa-history 802497: 0 events; bindmysoul 804686 matches verbatim."
+    },
+    {
+      "spell": 804686,
+      "name": "Everlasting Hunt (1 Blood Shard hit reduces Reave cooldown by 1500 ms)",
+      "kind": "cost_gate",
+      "variant": "reave_cd",
+      "label_suffix": "reave_cd",
+      "quote": "Damage dealt by Blood Shards now reduces the cooldown of Veinburst and Reave by $/1000;802497S2 sec.",
+      "gated_spell": 802469,
+      "resource": "cooldown",
+      "reduction": 1500,
+      "margin_ms": 100,
+      "learn": [
+        804849
+      ],
+      "setup_casts": [
+        [
+          578305,
+          "dummy"
+        ]
+      ],
+      "after_casts": [
+        [
+          504819,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "cast_auras": [
+        {
+          "spell": 578305,
+          "auras": [
+            823764,
+            984954
+          ],
+          "reason": "precondition fixture: 823764 prevents resists and 984954 (-1000% spell crit) guarantees non-crit Bloodbolt generates exactly 1 Blood Shard"
+        },
+        {
+          "spell": 504819,
+          "auras": [
+            823764
+          ],
+          "reason": "precondition fixture: 823764 prevents full resist on Veinburst 504819 and launched Blood Shard 504115"
+        }
+      ],
+      "target": "dummy",
+      "observe_source": "804686 Everlasting Hunt Reave leg (802497 Effect[1] 165 MODIFY_COOLDOWN BasePoints -1501 + 1 = -1500 ms on MiscValue 800490 Reave rank 1 -> walks rank chain to 802469, CategoryRecoveryTime 15000 ms, CasterAuraSpell 524861 set automatically by cost_gate; Veinburst 504819 only excludes 802877 so it casts cleanly). Setup builds 1 Blood Shard via non-crit Bloodbolt; primes Reave 802469; at +2000 ms casts Veinburst 504819 launching 1 Blood Shard 504115 -> cuts Reave cooldown by 1500 ms to 13500 ms. Margin 100 ms (13400 refused / 13600 accepted) excludes 10% off on both sides. Reference search 2026-11-26: coa-history 802497: 0 events; bindmysoul 804686 matches verbatim."
+    },
+    {
+      "spell": 572279,
+      "name": "Blood Veil (absorbs 50% of incoming damage on an ally)",
+      "kind": "taken_hit",
+      "variant": "half_absorb",
+      "label_suffix": "half_absorb",
+      "judge": "damage_ratio",
+      "quote": "Create a magical veil around an ally, absorbing $s1% of incoming damage,",
+      "strike_spell": 41394,
+      "struck": "ally",
+      "strikes": 1,
+      "trials": 5,
+      "expected": 0.5,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            572279
+          ],
+          "casts": [
+            [
+              572279,
+              "ally"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "572279 Blood Veil Effect[0] (converted to SPELL_AURA_DUMMY by bloodmage_talent_contracts, AscensionBloodmageTalents.cpp:1709-1711; BasePoints 49 + 1 = 50% = $s1) caps each hit's absorption in aura_ascension_blood_veil::Absorb (:1596-1600) to damage * 50 / 100. Striker casts Light of the Naaru 41394 (1100 Holy, below 2 x 1432 = 2864 cap) at grouped ally: control takes 1100, veil arm absorbs 50% (550) and takes 550 (damage_ratio 0.50). Reference search 2026-11-26: coa-history 572279: 1437 SPELL_AURA_APPLIED / 2419 REFRESH across 11 logs; Spell.dbc matches verbatim."
+    },
+    {
+      "spell": 572279,
+      "name": "Blood Veil (maximum absorb 1094.48 + 1.5*SPI + 0.75*AP with Spirit and AP scaling)",
+      "kind": "taken_hit",
+      "variant": "cap_and_scaling",
+      "label_suffix": "cap_and_scaling",
+      "judge": "absorb",
+      "quote": "up to a maximum of ${$m2+0+$SPI*1.5+$AP*.75} for $d.",
+      "strike_spell": 41394,
+      "struck": "ally",
+      "striker_spell_hit": true,
+      "strikes": 4,
+      "trials": 10,
+      "absorb_constant": 1094.48,
+      "absorb_terms": [
+        {
+          "coefficient": 1.5,
+          "reads": [
+            {
+              "metric": "stat",
+              "stat": 4
+            }
+          ]
+        },
+        {
+          "coefficient": 0.75,
+          "reads": [
+            {
+              "metric": "attack_power"
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "strikes": 1
+        },
+        {
+          "name": "base",
+          "learn": [
+            572279
+          ],
+          "casts": [
+            [
+              572279,
+              "ally"
+            ]
+          ],
+          "after_casts": [
+            [
+              802310,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        },
+        {
+          "name": "spirit",
+          "learn": [
+            572279
+          ],
+          "auras": [
+            [
+              48073,
+              1
+            ]
+          ],
+          "casts": [
+            [
+              572279,
+              "ally"
+            ]
+          ],
+          "after_casts": [
+            [
+              802310,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        },
+        {
+          "name": "ap",
+          "learn": [
+            572279
+          ],
+          "auras": [
+            [
+              56412,
+              1
+            ]
+          ],
+          "casts": [
+            [
+              572279,
+              "ally"
+            ]
+          ],
+          "after_casts": [
+            [
+              802310,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        }
+      ],
+      "observe_source": "572279 Blood Veil Effect[1] SPELL_AURA_SCHOOL_ABSORB: BasePoints 1078 + DieSides 1 = 1079, RealPointsPerLevel 3.87 from rank level 56 (AscensionSpellProgressionData.h:1001) to level 60 = 1079 + 4 * 3.87 = 1094.48, plus SPI * 1.5 + AP * 0.75 (AscensionBloodmageTalents.cpp:156-157,1586-1594). At ref stats (SPI 114, AP 223): 1432.73 (1432 absorbed); Divine Spirit 48073 (+80 base SPI, scaled by Human +3% Spirit racial to 114 -> 196 SPI, +82 SPI = +123 cap): 1555.73 (1555 absorbed); AP Test 56412 (+801 AP = +600.75 cap): 2033.48 (2033 absorbed). Four strikes of Light of the Naaru 41394 (4 x 1100 = 4400; 50% = 2200 > 2033) fully drain the cap in every shield arm; after_casts Sanguine Mend 802310 (pure heal, no auras) refills caster health after each trial so 572279's 8% base-health cost never exhausts caster health across 30 shield casts; striker_spell_hit true grants spell_hit_bonus 100 to eliminate creature spell misses, and trials 10 keeps paired unmeasured risk < 0.1% even without the hit bonus (at 4% miss: p_fail_pair = 3.57e-8; at 10% miss: p_miss_trial = 1 - 0.9^4 = 0.3439, p_fail_pair = 1 - (1 - 0.1^10)^2 * (1 - 0.3439^10)^6 = 0.000139 = 0.0139% < 0.1%). Control absorbs 0. Reference search 2026-11-26: coa-history 572279: 1437 applied across 11 logs; Spell.dbc matches verbatim."
+    },
+    {
+      "spell": 572279,
+      "name": "Blood Veil (lasts 15000 ms on an ally)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $d.",
+      "trigger_spell": 572279,
+      "gate_spell": 572279,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "measure_actor": "ally",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 572279,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 14100,
+      "expiry_wait_ms": 1800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13900,
+          14400
+        ],
+        "expired": [
+          15700,
+          16200
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "572279 Blood Veil DurationIndex 8 = 15000 ms ($d, SpellDuration.dbc). Uncast before phase reads 0 on grouped ally (control). After casting 572279 at ally, reads present (1) at 14100 ms (game_time [13900, 14400], > 13500 ms = -10%) and expired (0) at 15900 ms (game_time [15700, 16200], < 16500 ms = +10%). Reference search 2026-11-26: coa-history 572279: 1437 applied across 11 logs; Spell.dbc matches verbatim."
+    },
+    {
+      "spell": 806274,
+      "name": "Aortic Aegis (casting Blood Veil on an ally applies Blood Veil 504263 to caster's party)",
+      "kind": "metric_delta",
+      "variant": "caster_party",
+      "label_suffix": "caster_party",
+      "quote": "Your Blood Veil now applies to the party members of the target.",
+      "trigger_spell": 572279,
+      "gate_spell": 806274,
+      "target": "ally",
+      "measure_actor": "ally2",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "ally_arm": {
+        "allies": 2
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 504263,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "806274 Aortic Aegis (Spell.dbc Effect[0] aura 42 -> 806275 Effect[0] 64 TRIGGER_SPELL 504263 Blood Veil rank 1, TargetA 33 TARGET_UNIT_SRC_AREA_PARTY, EffectRadiusIndex 11 = 45 yd; pending_db_world/rev_20260920_58_bloodmage_aortic_aegis_proc.sql sets ProcFlags 16384 DONE_SPELL_MAGIC_DMG_CLASS_POS, SpellFamilyMask1 536870912). Casting Blood Veil 572279 on grouped ally in caster's party leaves ally2 without 504263 before learn (control = 0) and applies 504263 to ally2 after learn (= 1). Note: see target_party_raid_sub2 and rank divergence note in report. Reference search 2026-11-26: coa-history 504263: 13 casts / 22 refreshes, 806275: 0 events; bindmysoul 806274 matches verbatim."
+    },
+    {
+      "spell": 806274,
+      "name": "Aortic Aegis (target in raid subgroup 2: party member of target receives Blood Veil)",
+      "kind": "metric_delta",
+      "variant": "target_party_raid_sub2",
+      "label_suffix": "target_party_raid_sub2",
+      "quote": "Your Blood Veil now applies to the party members of the target.",
+      "trigger_spell": 572279,
+      "gate_spell": 806274,
+      "target": "ally5",
+      "measure_actor": "ally6",
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "ally_arm": {
+        "allies": 6,
+        "reach_source": "Blood Veil 572279 TargetA 21 TARGET_UNIT_TARGET_ALLY reaches any raid member (ally5 in raid subgroup 2); Aortic Aegis tooltip claims 'applies to the party members of the target' (ally6 in subgroup 2 with ally5), whereas 806275 DBC TargetA 33 TARGET_UNIT_SRC_AREA_PARTY reaches only the caster's own party (rev_20260920_58_bloodmage_aortic_aegis_proc.sql:25-27)."
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 504263,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "Tests tooltip 'party members of the target' when target is outside caster's own party: caster + ally..ally4 stand in raid subgroup 1, ally5 + ally6 stand in raid subgroup 2. Casting 572279 on ally5 should apply Blood Veil to ally6 (party member of ally5), expecting 0 -> 1. Known divergence recorded in rev_20260920_58_bloodmage_aortic_aegis_proc.sql:25-27 (806275 TargetA 33 TARGET_UNIT_SRC_AREA_PARTY targets caster's party, not target's party), so this entry is expected to alert (reads 0 -> 0). Reference search 2026-11-26: coa-history 806275: 0 events; bindmysoul 806274 matches verbatim."
     }
   ],
   "player_observations": [],
