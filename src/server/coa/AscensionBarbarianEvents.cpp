@@ -133,20 +133,6 @@ class aura_ascension_barbarian_event : public AuraScript
         aura->SetDuration(duration);
     }
 
-    void ExtendBudget(int32 amount, int32 budget)
-    {
-        Aura* aura = GetAura();
-        if (!aura || aura->GetDuration() <= 0)
-            return;
-        int32 granted = std::min(amount, std::max(0, budget - _extensionUsed));
-        if (granted <= 0)
-            return;
-        _extensionUsed += granted;
-        int32 duration = aura->GetDuration() + granted;
-        aura->SetMaxDuration(std::max(aura->GetMaxDuration(), duration));
-        aura->SetDuration(duration);
-    }
-
     void ResetExtension(AuraEffect const* effect, AuraEffectHandleModes)
     {
         if (effect->GetEffIndex() == EFFECT_0)
@@ -326,7 +312,7 @@ class aura_ascension_barbarian_event : public AuraScript
                         int32(uint64(event.GetHealInfo()->GetEffectiveHeal()) * 30 / 100), pet, TRIGGERED_FULL_MASK);
                 break;
             case 801759:
-            case 803499: ExtendBudget(OutrageExtension(player), owner->HasAura(300497) ? 20000 : 10000); break;
+            case 803499: ExtendLimited(OutrageExtension(player), owner->HasAura(300497) ? 20000 : 10000); break;
             case 804141:
             {
                 float chance = 20.0f;
