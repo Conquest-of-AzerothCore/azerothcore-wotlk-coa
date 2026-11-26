@@ -1129,6 +1129,1688 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "$s2 = 3 (704642 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 2 + DieSides 1 = 3; Spell.dbc). StatSystem.cpp:1043 adds aura 333 into Player::m_modSpellHitChance. Reads live spell_hit_chance before and after a real learn of 704642 (expected gain +3.0 points, control is before learn). Reference search 2026-11-26: coa-history 704642: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 704642 matches verbatim."
+    },
+    {
+      "spell": 572403,
+      "name": "Bloodsoaked Offering (Spirit +40 on ally)",
+      "kind": "metric_delta",
+      "variant": "spirit_ally",
+      "label_suffix": "spirit_ally",
+      "quote": "Blood magic infuses the target ally, increasing their Spirit by $s1",
+      "trigger_spell": 572403,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 4
+      },
+      "before_expected": 114.33,
+      "expected": 155.53,
+      "expected_gain": 41.2,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 40 (572403 Effect[0] aura 29 SPELL_AURA_MOD_STAT MiscValue 4 Spirit, BasePoints 39 + DieSides 1 = 40, TARGET_UNIT_TARGET_ALLY; Spell.dbc). On race 1 (Human), The Human Spirit 20598 (aura 137 +3% Spirit) scales base 111 -> 114.33 and +40 flat Spirit -> +40 * 1.03 = +41.20 (155.53, stat_exact +- 0.05; control: uncast before phase). Reference search 2026-11-26: coa-history 572403: 1 SPELL_CAST_SUCCESS / 1 SPELL_AURA_APPLIED in 1 log; sidekick data.js & skill_line_ability.csv list Bloodsoaked Offering; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 572403,
+      "name": "Bloodsoaked Offering (duration 30 min on ally)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "for $d.",
+      "expected_ms": 1800000,
+      "applied_aura": 572403,
+      "target": "ally",
+      "cast_spell": 572403,
+      "cast_target": "ally",
+      "observe_source": "572403 DurationIndex 30 = 1800000 ms ($d; Spell.dbc). Real cast of 572403 on grouped ally: absent before cast, present right after, and expiry pair brackets 1800000 ms on accelerated clock. Reference search 2026-11-26: coa-history 572403: 1 cast in 1 log; sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 572404,
+      "name": "Greater Bloodsoaked Offering (Spirit +40 on party and raid)",
+      "kind": "metric_delta",
+      "variant": "spirit_raid",
+      "label_suffix": "spirit_raid",
+      "quote": "Blood magic infuses all party and raid members, increasing their Spirit by $s1",
+      "trigger_spell": 572404,
+      "target": "caster",
+      "measure_actor": "ally5",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 5,
+        "reach_source": "Spell.dbc 572404 Effect[0] ImplicitTargetA=56 (TARGET_UNIT_CASTER_AREA_RAID, Spell.cpp TARGET_CHECK_RAID), RadiusIndex=23 (40 yd) reaches raid subgroup 2 (ally5) as well as party subgroup 1 (ally).",
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "stat_exact",
+            "fields": {
+              "stat": 4
+            },
+            "before_expected": 114.33,
+            "expected": 155.53,
+            "tolerance": 0.05,
+            "source": "572404 Effect[0] aura 29 MiscValue 4 +40 Spirit scaled by Human racial 20598 (+3% Spirit) on party member ally: 114.33 -> 155.53 (+41.20)"
+          }
+        ]
+      },
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 4
+      },
+      "before_expected": 114.33,
+      "expected": 155.53,
+      "expected_gain": 41.2,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 40 (572404 Effect[0] aura 29 SPELL_AURA_MOD_STAT MiscValue 4 Spirit, BasePoints 39 + DieSides 1 = 40, TARGET_UNIT_CASTER_AREA_RAID, RadiusIndex 23 = 40 yd; Spell.dbc). On race 1 (Human, 20598 The Human Spirit +3% Spirit), real cast of 572404 raises stat_exact Spirit by +40 * 1.03 = +41.20 (114.33 -> 155.53) on both party ally (ally) and raid subgroup 2 member (ally5) vs uncast control. Reference search 2026-11-26: coa-history 572404: 0 events in 186 logs (positive control 680299: 110 casts); sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 572404,
+      "name": "Greater Bloodsoaked Offering (duration 30 min on ally)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "for $d.",
+      "expected_ms": 1800000,
+      "applied_aura": 572404,
+      "target": "ally",
+      "cast_spell": 572404,
+      "cast_target": "ally",
+      "observe_source": "572404 DurationIndex 30 = 1800000 ms ($d; Spell.dbc). Real cast of 572404 with grouped ally: absent before cast, present right after, and expiry pair brackets 1800000 ms on accelerated clock. Reference search 2026-11-26: coa-history 572404: 0 events in 186 logs; sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 707339,
+      "name": "Sanguinary Offering (Stamina +54 on ally)",
+      "kind": "metric_delta",
+      "variant": "stamina_ally",
+      "label_suffix": "stamina_ally",
+      "quote": "Enact a sanguinary ritual with an ally, increasing their Stamina by $s1.",
+      "trigger_spell": 707339,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "stat",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 78,
+      "expected": 132,
+      "expected_gain": 54,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 54 (707339 Effect[0] aura 29 SPELL_AURA_MOD_STAT MiscValue 2 Stamina, BasePoints 53 + DieSides 1 = 54, TARGET_UNIT_TARGET_ALLY; Spell.dbc). Real cast of 707339 on grouped ally increases live Stamina by +54 (control: uncast before phase). Reference search 2026-11-26: coa-history 707339: 0 events in 186 logs (lower ranks 706630 chain: 40 casts, 680299: 110 casts); sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 707339,
+      "name": "Sanguinary Offering (duration 30 min on ally)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Lasts $d.",
+      "expected_ms": 1800000,
+      "applied_aura": 707339,
+      "target": "ally",
+      "cast_spell": 707339,
+      "cast_target": "ally",
+      "observe_source": "707339 DurationIndex 30 = 1800000 ms ($d; Spell.dbc). Real cast of 707339 on grouped ally: absent before cast, present right after, and expiry pair brackets 1800000 ms on accelerated clock. Reference search 2026-11-26: coa-history 707339: 0 events in 186 logs (680299: 110 casts); sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 680299,
+      "name": "Greater Sanguinary Offering (Stamina +54 on nearby allies)",
+      "kind": "metric_delta",
+      "variant": "stamina_allies",
+      "label_suffix": "stamina_allies",
+      "quote": "Establish a sanguine pact with all nearby allies, increasing their Stamina by $s1.",
+      "trigger_spell": 680299,
+      "target": "caster",
+      "measure_actor": "ally5",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 5,
+        "reach_source": "Spell.dbc 680299 Effect[0] ImplicitTargetA=22 (TARGET_SRC_CASTER) + ImplicitTargetB=30 (TARGET_UNIT_SRC_AREA_ALLY, Spell.cpp TARGET_CHECK_ALLY), RadiusIndex=227 (40 yd), MaxAffectedTargets=25 reaches nearby allies across raid subgroups.",
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "stat",
+            "fields": {
+              "stat": 2
+            },
+            "before_expected": 78,
+            "expected": 132,
+            "tolerance": 0.01,
+            "source": "680299 Effect[0] aura 29 MiscValue 2 +54 Stamina on ally (78 -> 132)"
+          }
+        ]
+      },
+      "metric": "stat",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 78,
+      "expected": 132,
+      "expected_gain": 54,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 54 (680299 Effect[0] aura 29 SPELL_AURA_MOD_STAT MiscValue 2 Stamina, BasePoints 53 + DieSides 1 = 54, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ALLY, RadiusIndex 227 = 40 yd; Spell.dbc). Real cast of 680299 increases Stamina by +54 on both party ally (ally) and raid subgroup 2 ally (ally5) vs uncast control. Reference search 2026-11-26: coa-history 680299: 110 casts, 421 applies, 955 refreshes in 19 logs; sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 680299,
+      "name": "Greater Sanguinary Offering (duration 30 min on ally)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Lasts $d.",
+      "expected_ms": 1800000,
+      "applied_aura": 680299,
+      "target": "ally",
+      "cast_spell": 680299,
+      "cast_target": "ally",
+      "observe_source": "680299 DurationIndex 30 = 1800000 ms ($d; Spell.dbc). Real cast of 680299 with grouped ally: absent before cast, present right after, and expiry pair brackets 1800000 ms on accelerated clock. Reference search 2026-11-26: coa-history 680299: 110 casts in 19 logs; sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 1108493,
+      "name": "Slaughterhouse Offering (increases spell damage taken by ally by +75)",
+      "kind": "metric_delta",
+      "variant": "spell_damage_taken",
+      "label_suffix": "spell_damage_taken",
+      "quote": "Empowers magic used against the targeted party member, increasing damage taken from spells by up to $s1",
+      "trigger_spell": 1108493,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 41394,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 500,
+        "after_trigger_ms": 500
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_strikes": true,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 1108493,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Slaughterhouse Offering 1108493 is absent in control and active on ally in treatment."
+          }
+        ]
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 8900,
+      "expected": 8825,
+      "tolerance": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 75 (1108493 Effect[0] aura 14 SPELL_AURA_MOD_DAMAGE_TAKEN MiscValue 126 magic schools, BasePoints 74 + DieSides 1 = 75, TARGET_UNIT_TARGET_RAID; Spell.dbc; AscensionBloodmageTalents.cpp:1672-1673 clears SPELL_ATTR0_CU_NEGATIVE). Striker casts Light of the Naaru 41394 (Holy, flat 1100, creature instant GetCastingTimeForBonus=3500 -> coeff 1.0 in Unit.cpp:15051) at grouped ally held at 10000 health: 8900 left without 1108493 (control, 1100 taken) vs 8825 left after real cast of 1108493 on ally (1175 taken, exact +75 +- 1, excluding 0 [8900] and 2x [8750]). Reference search 2026-11-26: coa-history 1108493: 0 events in 186 logs (rank 1 1108459: 2 casts); sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 1108493,
+      "name": "Slaughterhouse Offering (increases healing received by ally by up to +80)",
+      "kind": "metric_delta",
+      "variant": "healing_taken",
+      "label_suffix": "healing_taken",
+      "quote": "and healing spells by up to $s2.",
+      "trigger_spell": 25299,
+      "target": "ally",
+      "measure_actor": "ally",
+      "setup_casts": [
+        1108493
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 1108493,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Slaughterhouse Offering 1108493 is absent in control and active on ally in treatment."
+          }
+        ]
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 1087,
+      "expected": 1117,
+      "tolerance": 1,
+      "wait_ms": 3500,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 80 (1108493 Effect[1] aura 115 SPELL_AURA_MOD_HEALING MiscValue 126 magic schools, BasePoints 79 + DieSides 1 = 80, TARGET_UNIT_TARGET_RAID; Spell.dbc). Rejuvenation 25299 (level 60, SchoolMask 8 Nature, bp=86 ds=1 -> flat 87/tick, amp 3000 ms, spell_bonus_data row 25299 dot_bonus 0.376) heals grouped ally (reset to 1000/10000 HP each phase after 16000 ms expiry) for 1 tick in 3500 ms: 1087 without 1108493 (control, +87), 1000 + 87 + int(80 * 0.376) = 1117 after real cast of 1108493 on ally (+30 exact +- 1, excluding 1087 [0%] and 1147 [2x]). Reference search 2026-11-26: coa-history 1108493: 0 events in 186 logs (rank 1 1108459: 2 casts); sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 1108493,
+      "name": "Slaughterhouse Offering (duration 10 min on ally)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Lasts $d.",
+      "expected_ms": 600000,
+      "applied_aura": 1108493,
+      "target": "ally",
+      "cast_spell": 1108493,
+      "cast_target": "ally",
+      "observe_source": "1108493 DurationIndex 6 = 600000 ms ($d; Spell.dbc). Real cast of 1108493 on grouped ally: absent before cast, present right after, and expiry pair brackets 600000 ms on accelerated clock. Reference search 2026-11-26: coa-history 1108493: 0 events in 186 logs (1108459: 2 casts); sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 501667,
+      "name": "Bloodthorns (duration 30 min on ally)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Bloodthorns sprout from an ally for $d,",
+      "expected_ms": 1800000,
+      "applied_aura": 501667,
+      "target": "ally",
+      "cast_spell": 501667,
+      "cast_target": "ally",
+      "observe_source": "501667 DurationIndex 30 = 1800000 ms ($d; Spell.dbc). Real cast of 501667 on grouped ally: absent before cast, present right after, and expiry pair brackets 1800000 ms on accelerated clock. Reference search 2026-11-26: coa-history 501667: 0 events in 186 logs (rank 1 802313: 34 casts, Greater 572116: 101 casts / 5932 DAMAGE_SHIELD); sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 501667,
+      "name": "Bloodthorns (damage shield hits)",
+      "kind": "metric_delta",
+      "variant": "shield_hits",
+      "label_suffix": "shield_hits",
+      "quote": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        501667
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 8,
+        "wait_ms": 300
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "after_at_most": 1000,
+      "metric": "server_packets",
+      "fields": {
+        "opcode": 591
+      },
+      "observe_source": "501667 Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD, BasePoints 21 + DieSides 1 = 22 ($m1), SchoolMask 32 Shadow (Spell.dbc); Unit::DealDamageShieldDamage (Unit.cpp:2341-2393) sends SMSG_SPELLDAMAGESHIELD (opcode 591, spell at u32 index 4, damage at index 5; Necromancer Razorice 501965 precedent). Hostile striker casts Strike 11976 8 times 300 ms apart in both phases, 823764 prevents partial resist: 0 packets before (control), >= 1 after real cast of 501667. Reference search 2026-11-26: coa-history 501667: 0 events (572116: 5932 DAMAGE_SHIELD, mean 46.0); sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 501667,
+      "name": "Bloodthorns (damage shield base amount at 0 SP)",
+      "kind": "metric_delta",
+      "variant": "shield_damage",
+      "label_suffix": "shield_damage",
+      "quote": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        501667
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 8,
+        "wait_ms": 300
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "before_expected": -1,
+      "expected": 22,
+      "metric": "server_packet_u32",
+      "fields": {
+        "opcode": 591,
+        "index": 5
+      },
+      "observe_source": "501667 Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD BasePoints 21 + DieSides 1 = 22 ($m1 at 0 Shadow SP; Spell.dbc). SMSG_SPELLDAMAGESHIELD (opcode 591) damage word (index 5): -1 before (no packet), 22 after real cast of 501667 with 823764 preventing partial resist. Reference search 2026-11-26: see shield_hits."
+    },
+    {
+      "spell": 501667,
+      "name": "Bloodthorns (damage shield spell id)",
+      "kind": "metric_delta",
+      "variant": "shield_spell",
+      "label_suffix": "shield_spell",
+      "quote": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        501667
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 8,
+        "wait_ms": 300
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "before_expected": -1,
+      "expected": 501667,
+      "metric": "server_packet_u32",
+      "fields": {
+        "opcode": 591,
+        "index": 4
+      },
+      "observe_source": "501667 SMSG_SPELLDAMAGESHIELD (opcode 591) spell word (index 4): -1 before (no packet), 501667 after real cast of 501667. Reference search 2026-11-26: see shield_hits."
+    },
+    {
+      "spell": 501667,
+      "name": "Bloodthorns (damage shield Shadow SP scaling 0.035 at 1000 SP)",
+      "kind": "metric_delta",
+      "variant": "shield_sp",
+      "label_suffix": "shield_sp",
+      "quote": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        501667
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "player_spell_power": 1000,
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 8,
+        "wait_ms": 300
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "before_expected": -1,
+      "expected": 57,
+      "after_at_least": 55,
+      "after_at_most": 59,
+      "metric": "server_packet_u32",
+      "fields": {
+        "opcode": 591,
+        "index": 5
+      },
+      "observe_source": "Tooltip formula ${$m1+0+$sps*0.035} at Shadow SP = 1000 expects 22 + 35 = 57 Shadow damage (band [55, 59], excluding 22 [0% SP scaling] and 92 [2x]). Spell.dbc EffectBonusMultiplier[0]=0.0 and no spell_bonus_data row exists for 802313/501667. Reference search 2026-11-26: see shield_hits."
+    },
+    {
+      "spell": 501667,
+      "name": "Bloodthorns (0.5 sec internal cooldown gate)",
+      "kind": "metric_delta",
+      "variant": "icd_gate",
+      "label_suffix": "icd_gate",
+      "quote": "Can occur only once every half a second.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        501667
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 6,
+        "wait_ms": 60
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 100,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "after_at_most": 2,
+      "metric": "server_packets",
+      "fields": {
+        "opcode": 591
+      },
+      "observe_source": "Tooltip states Can occur only once every half a second (500 ms ICD). Striker casts 6 Strikes 11976 spaced 60 ms apart (total 300 ms span + 100 ms read = 400 ms < 500 ms) in both phases: 0 packets in control, at most 1-2 packets if a 500 ms ICD is enforced (alerts if DealDamageShieldDamage fires on every landed strike with no ICD). Reference search 2026-11-26: see shield_hits."
+    },
+    {
+      "spell": 572116,
+      "name": "Greater Bloodthorns (duration 30 min on ally)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Bloodthorns sprout from all party and raid members for $d,",
+      "expected_ms": 1800000,
+      "applied_aura": 572116,
+      "target": "ally",
+      "cast_spell": 572116,
+      "cast_target": "ally",
+      "observe_source": "572116 DurationIndex 30 = 1800000 ms ($d; Spell.dbc). Real cast of 572116 with grouped ally: absent before cast, present right after, and expiry pair brackets 1800000 ms on accelerated clock. Reference search 2026-11-26: coa-history 572116: 101 casts, 834 applies, 5932 DAMAGE_SHIELD (mean 46.0) in 17 logs; sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 572116,
+      "name": "Greater Bloodthorns (reaches party and raid subgroup 2)",
+      "kind": "metric_delta",
+      "variant": "raid_reach",
+      "label_suffix": "raid_reach",
+      "quote": "Bloodthorns sprout from all party and raid members for $d,",
+      "trigger_spell": 572116,
+      "target": "caster",
+      "measure_actor": "ally5",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 5,
+        "reach_source": "Spell.dbc 572116 Effect[0] ImplicitTargetA=56 (TARGET_UNIT_CASTER_AREA_RAID), RadiusIndex=12 (100 yd) reaches raid subgroup 2 (ally5) and party subgroup 1 (ally).",
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 572116
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "572116 applies to party subgroup 1 ally"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 572116
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572116 Effect[0] TARGET_UNIT_CASTER_AREA_RAID (56) RadiusIndex 12 (100 yd): real cast applies 572116 to both party ally (ally) and raid subgroup 2 member (ally5) vs uncast control. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 572116,
+      "name": "Greater Bloodthorns (damage shield hits)",
+      "kind": "metric_delta",
+      "variant": "shield_hits",
+      "label_suffix": "shield_hits",
+      "quote": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        572116
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 8,
+        "wait_ms": 300
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "after_at_most": 1000,
+      "metric": "server_packets",
+      "fields": {
+        "opcode": 591
+      },
+      "observe_source": "572116 Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD, BasePoints 21 + DieSides 1 = 22 ($m1), SchoolMask 32 Shadow (Spell.dbc); Necromancer Greater Razorice 572214 precedent. 8 Strikes 11976 300 ms apart with 823764 preventing partial resist: 0 SMSG_SPELLDAMAGESHIELD packets before (control), >= 1 after real cast of 572116. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 572116,
+      "name": "Greater Bloodthorns (damage shield base amount at 0 SP)",
+      "kind": "metric_delta",
+      "variant": "shield_damage",
+      "label_suffix": "shield_damage",
+      "quote": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        572116
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 8,
+        "wait_ms": 300
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "before_expected": -1,
+      "expected": 22,
+      "metric": "server_packet_u32",
+      "fields": {
+        "opcode": 591,
+        "index": 5
+      },
+      "observe_source": "572116 Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD BasePoints 21 + DieSides 1 = 22 ($m1 at 0 Shadow SP; Spell.dbc). SMSG_SPELLDAMAGESHIELD (opcode 591) damage word (index 5): -1 before, 22 after real cast of 572116 with 823764. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 572116,
+      "name": "Greater Bloodthorns (damage shield spell id)",
+      "kind": "metric_delta",
+      "variant": "shield_spell",
+      "label_suffix": "shield_spell",
+      "quote": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        572116
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 8,
+        "wait_ms": 300
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "before_expected": -1,
+      "expected": 572116,
+      "metric": "server_packet_u32",
+      "fields": {
+        "opcode": 591,
+        "index": 4
+      },
+      "observe_source": "572116 SMSG_SPELLDAMAGESHIELD (opcode 591) spell word (index 4): -1 before, 572116 after real cast of 572116. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 572116,
+      "name": "Greater Bloodthorns (damage shield Shadow SP scaling 0.035 at 1000 SP)",
+      "kind": "metric_delta",
+      "variant": "shield_sp",
+      "label_suffix": "shield_sp",
+      "quote": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        572116
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "player_spell_power": 1000,
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 8,
+        "wait_ms": 300
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "before_expected": -1,
+      "expected": 57,
+      "after_at_least": 55,
+      "after_at_most": 59,
+      "metric": "server_packet_u32",
+      "fields": {
+        "opcode": 591,
+        "index": 5
+      },
+      "observe_source": "Tooltip formula ${$m1+0+$sps*0.035} at Shadow SP = 1000 expects 22 + 35 = 57 Shadow damage (band [55, 59], excluding 22 [0% SP scaling] and 92 [2x]). Spell.dbc EffectBonusMultiplier[0]=0.0 and no spell_bonus_data row exists for 572116. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 572116,
+      "name": "Greater Bloodthorns (0.5 sec internal cooldown gate)",
+      "kind": "metric_delta",
+      "variant": "icd_gate",
+      "label_suffix": "icd_gate",
+      "quote": "Can occur only once every half a second.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        572116
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 6,
+        "wait_ms": 60
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 100,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "after_at_most": 2,
+      "metric": "server_packets",
+      "fields": {
+        "opcode": 591
+      },
+      "observe_source": "Tooltip states Can occur only once every half a second (500 ms ICD). Striker casts 6 Strikes 11976 spaced 60 ms apart (total 300 ms span + 100 ms read = 400 ms < 500 ms) in both phases: 0 packets in control, at most 1-2 packets if a 500 ms ICD is enforced (alerts if DealDamageShieldDamage fires on every landed strike with no ICD). Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 806182,
+      "name": "Shadow Vigil (duration 8 sec on ally)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Envelop an ally in darkness, temporarily reducing all threat for $d.",
+      "expected_ms": 8000,
+      "applied_aura": 806182,
+      "target": "ally",
+      "cast_spell": 806182,
+      "cast_target": "ally",
+      "observe_source": "806182 DurationIndex 31 = 8000 ms ($d; Spell.dbc). Real cast of 806182 on grouped ally: absent before cast, present right after, and expiry pair brackets 8000 ms on accelerated clock. Reference search 2026-11-26: coa-history 806182: 26 casts / 26 applies / 26 removes in 5 logs; sidekick data.js, coabuildhub spells_master_index.json & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 806182,
+      "name": "Shadow Vigil (temporarily reduces ally threat on dummy)",
+      "kind": "metric_delta",
+      "variant": "ally_threat",
+      "label_suffix": "ally_threat",
+      "quote": "Envelop an ally in darkness, temporarily reducing all threat for $d.",
+      "trigger_spell": 806182,
+      "target": "ally",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "select_dummy": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_attacks": [
+          {
+            "spell": 66903,
+            "power": 0,
+            "source": "Hammer of the Righteous 66903 (flat 16000 Holy, 0 cost) establishes deterministic threat for ally on dummy."
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806182,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Shadow Vigil 806182 is absent on ally in control and active in treatment."
+          }
+        ]
+      },
+      "metric": "threat",
+      "fields": {
+        "target": "ally"
+      },
+      "before_expected": 16000,
+      "expected": 0,
+      "after_at_least": 0,
+      "after_at_most": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "806182 Effect[0] aura 103 SPELL_AURA_MOD_TOTAL_THREAT BasePoints -90000001 + DieSides 1 = -90000000, TARGET_UNIT_TARGET_ALLY, DurationIndex 31 = 8000 ms (Spell.dbc). Grouped ally builds threat on dummy with 66903 (flat 16000 Holy): before 806182 threat on dummy = 16000; after real cast of 806182 on ally threat must temporarily drop to 0 while 806182 is active (note SpellAuraEffects.cpp:3777-3779 calls caster->GetThreatMgr().UpdateMyTempModifiers() instead of target->..., so ally threat may alert). Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 806182,
+      "name": "Shadow Vigil (increases ally stealth detection while active)",
+      "kind": "metric_delta",
+      "variant": "ally_stealth_detect",
+      "label_suffix": "ally_stealth_detect",
+      "quote": "While active, the target's stealth detection is significantly increased.",
+      "trigger_spell": 806182,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 1,
+        "control_wait": true
+      },
+      "dummy_distance": 15,
+      "phase_auras": [
+        [
+          1787,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "metric": "can_detect",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "806182 Effect[1] aura 17 SPELL_AURA_MOD_STEALTH_DETECT BasePoints 299 + DieSides 1 = 300 + 15/lvl (BaseLevel 28, MaxLevel 60 -> +780 at level 60), TARGET_UNIT_TARGET_ALLY, DurationIndex 31 = 8000 ms (Spell.dbc). Enemy dummy at 15 yd holds Stealth 1787 (300 stealth, precondition fixture): after 1500 ms settle (control_wait), level-60 grouped ally cannot detect it before 806182 (can_detect 0) and detects it after real cast of 806182 on ally (can_detect 1). Paired with ally_stealth_detect_gone at 8600 ms. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 806182,
+      "name": "Shadow Vigil (ally stealth detection ends after 8 sec expiry)",
+      "kind": "metric_delta",
+      "variant": "ally_stealth_detect_gone",
+      "label_suffix": "ally_stealth_detect_gone",
+      "quote": "While active, the target's stealth detection is significantly increased.",
+      "trigger_spell": 806182,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 1,
+        "control_wait": true
+      },
+      "dummy_distance": 15,
+      "phase_auras": [
+        [
+          1787,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "metric": "can_detect",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 8600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          8450,
+          8750
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Expiry check for 806182 Shadow Vigil stealth detection on grouped ally (DurationIndex 31 = 8000 ms): same setup as ally_stealth_detect, read at 8600 ms game time (window [8450, 8750] < 8800 ms = 1.1 * 8000): can_detect returns to 0 once 806182 expires. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 562228,
+      "name": "Detect Life (tracks Humanoids, Giants, and Beasts)",
+      "kind": "metric_delta",
+      "variant": "track_life",
+      "label_suffix": "track_life",
+      "quote": "Shows the location of all nearby Humanoids, Giants, and Beasts on the minimap.",
+      "trigger_spell": 562228,
+      "target": "caster",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "track_creature_type",
+            "fields": {
+              "id": 1
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "562228 Effect[1] aura 44 MiscValue 1 tracks Beasts (PLAYER_TRACK_CREATURES bit 0)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "track_creature_type",
+            "fields": {
+              "id": 5
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "562228 Effect[2] aura 44 MiscValue 5 tracks Giants (PLAYER_TRACK_CREATURES bit 4)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "track_creature_type",
+            "fields": {
+              "id": 6
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Negative contrast: Undead (type 6) stays untracked (0 before and after)"
+          }
+        ]
+      },
+      "metric": "track_creature_type",
+      "fields": {
+        "id": 7
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "562228 Effect[0..2] aura 44 SPELL_AURA_TRACK_CREATURES MiscValue 7 (Humanoid), 1 (Beast), 5 (Giant), DurationIndex 21 (until cancelled; Spell.dbc). AuraEffect::HandleAuraTrackCreatures sets PLAYER_TRACK_CREATURES bits (Necromancer Sense Undead 562028 precedent, ADR 0445). Real cast of 562228 sets Humanoid (7), Beast (1), and Giant (5) from 0 to 1 while Undead (6) stays 0; minimap blip rendering is client-side from PLAYER_TRACK_CREATURES. Reference search 2026-11-26: coa-history 562228: 0 events in 186 logs; sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 800175,
+      "name": "Running Wild (increases movement speed by 60% at Apprentice Riding)",
+      "kind": "metric_delta",
+      "variant": "run_speed",
+      "label_suffix": "run_speed",
+      "quote": "Increases your movement speed by $s1%.",
+      "trigger_spell": 800175,
+      "target": "caster",
+      "cast_in_before": false,
+      "skill_line": {
+        "skill": 762,
+        "value": 75,
+        "maximum": 75
+      },
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.6,
+      "wait_ms": 1600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 60 (800175 Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED, BasePoints 59 + DieSides 1 = 60, CastingTimeIndex 4 = 1000 ms; Spell.dbc; AscensionMountSpeed.cpp:125-148). With Apprentice Riding (skill 762 = 75, < 150 Journeyman threshold), real outdoor cast of 800175 raises run_speed_rate from 1.0 (uncast control) to 1.6 (+60%, waited 1600 ms = 1000 ms cast + 600 ms margin). Reference search 2026-11-26: coa-history 800175: 0 events in 186 logs; sidekick data.js, coabuildhub spells_master_index.json & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 800175,
+      "name": "Running Wild (outdoors only like a mount)",
+      "kind": "cast_condition",
+      "quote": "Acts like a mount.",
+      "condition": "outdoors",
+      "blocked_result": 93,
+      "observe_source": "800175 carries SPELL_ATTR0_ONLY_OUTDOORS (0x8000; Spell.dbc): refused indoors with SPELL_FAILED_ONLY_OUTDOORS (93) and allowed outdoors (0), matching mount restriction. Reference search 2026-11-26: see run_speed."
+    },
+    {
+      "spell": 800175,
+      "name": "Running Wild (scales with Journeyman Riding and mount speed buffs apply)",
+      "kind": "metric_delta",
+      "variant": "mount_buffs",
+      "label_suffix": "mount_buffs",
+      "quote": "Acts like a mount.",
+      "trigger_spell": 800175,
+      "target": "caster",
+      "cast_in_before": false,
+      "skill_line": {
+        "skill": 762,
+        "value": 150,
+        "maximum": 150
+      },
+      "phase_auras": [
+        [
+          32223,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 2.4,
+      "wait_ms": 1600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionMountSpeed.cpp:125-148 & 212-231: at Journeyman Riding (skill 762 = 150), Running Wild grants +100% ground mount speed (2.0) and RunningWildMountRules applies mounted-speed buffs: with Crusader Aura 32223 (aura 172 MOD_MOUNTED_SPEED_NOT_STACK +20%, precondition fixture), unmounted control reads 1.0 while real cast of 800175 reads 2.0 * 1.2 = 2.4 (bloodmage-running-wild-mount-buffs-9356.json precedent). Reference search 2026-11-26: see run_speed."
+    },
+    {
+      "spell": 800175,
+      "name": "Running Wild (plain run speed Sprint does not stack)",
+      "kind": "metric_delta",
+      "variant": "mount_ignores_sprint",
+      "label_suffix": "mount_ignores_sprint",
+      "quote": "Acts like a mount.",
+      "trigger_spell": 800175,
+      "target": "caster",
+      "cast_in_before": false,
+      "skill_line": {
+        "skill": 762,
+        "value": 150,
+        "maximum": 150
+      },
+      "phase_auras": [
+        [
+          2983,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.5,
+      "expected": 2.0,
+      "wait_ms": 1600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionMountSpeed.cpp:212-231 RunningWildMountRules: with Sprint 2983 (aura 31 +50% plain run speed, precondition fixture) at Journeyman Riding (skill 762 = 150), unmounted control reads 1.5 while real cast of 800175 reads 2.0 (Sprint does not stack with mount-like Running Wild). Reference search 2026-11-26: see run_speed."
+    },
+    {
+      "spell": 520493,
+      "name": "Red Thirst (40 yd radius on allies)",
+      "kind": "metric_delta",
+      "variant": "radius",
+      "label_suffix": "radius",
+      "quote": "Enrage allies within $a1 yds,",
+      "trigger_spell": 520493,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 2,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 38,
+            "expected": 38,
+            "tolerance": 0.2,
+            "precondition": true,
+            "source": "Precondition: ally stands at 38 yd (inside 40 yd radius, dz 0)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 45,
+            "expected": 45,
+            "tolerance": 0.2,
+            "precondition": true,
+            "source": "Precondition: ally2 stands at 45 yd (outside 40 yd + 2.66 yd leeway = 42.66 yd, dz 0)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520493
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Tooltip states within 40 yds: ally2 at 45 yd must NOT receive 520493 (alerts if Effect[1] RadiusIndex=12 100 yd applies 520493 at 45 yd)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804457
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Tooltip states within 40 yds: ally2 at 45 yd must NOT receive Worn Out 804457 (alerts if Effect[2] RadiusIndex=12 100 yd applies 804457 at 45 yd)"
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 38,
+        "ally2": 45
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 520493
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$a1 = 40 yd (520493 Effect[0] RadiusIndex 23 = 40 yd; note Effect[1] melee/ranged haste and Effect[2] Worn Out 804457 carry RadiusIndex 12 = 100 yd in Spell.dbc). Grouped ally at 38 yd (inside 40 yd, dz=0) receives 520493; ally2 at 45 yd (outside 40 + 2.66 leeway = 42.66 yd) must not receive 520493 or 804457. Reference search 2026-11-26: coa-history 520493: 15 casts, 201 applies in 2 logs; bindmysoul, sidekick, coabuildhub, skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 520493,
+      "name": "Red Thirst (increases ally haste by 30%)",
+      "kind": "metric_delta",
+      "variant": "haste_ally",
+      "label_suffix": "haste_ally",
+      "quote": "increasing haste by $s1%",
+      "trigger_spell": 520493,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "cast_speed_multiplier",
+            "before_expected": 1.0,
+            "expected": 0.769231,
+            "tolerance": 0.002,
+            "source": "520493 Effect[0] aura 65 SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK +30%: 1 / 1.3 = 0.769231 (excludes 1.0 and 0.625)"
+          }
+        ]
+      },
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 1000,
+      "expected": 769,
+      "expected_ratio": 0.769231,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 30 (520493 Effect[0] aura 65 casting speed +30% and Effect[1] aura 192 melee/ranged haste +30%, BasePoints 29 + DieSides 1 = 30; Spell.dbc). Real cast of 520493 scales grouped ally attack_time_ms (hand 0) and cast_speed_multiplier by 1 / 1.3 = 0.769231 vs uncast control (band excludes 1.0 [0%] and 0.625 [+60%]). Reference search 2026-11-26: see radius."
+    },
+    {
+      "spell": 520493,
+      "name": "Red Thirst (duration 20 sec on ally)",
+      "kind": "cast_applies_aura",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $d",
+      "expected_ms": 20000,
+      "applied_aura": 520493,
+      "target": "ally",
+      "cast_spell": 520493,
+      "cast_target": "ally",
+      "observe_source": "520493 DurationIndex 18 = 20000 ms ($d; Spell.dbc). Real cast of 520493 with grouped ally: absent before cast, present right after, and expiry pair brackets 20000 ms on accelerated clock. Reference search 2026-11-26: see radius."
+    },
+    {
+      "spell": 520493,
+      "name": "Red Thirst (Worn Out duration 5 min on ally)",
+      "kind": "cast_applies_aura",
+      "variant": "worn_out_duration",
+      "label_suffix": "worn_out_duration",
+      "quote": "After being affected by this spell, allies cannot benefit from similar effects for $804457d.",
+      "expected_ms": 300000,
+      "applied_aura": 804457,
+      "target": "ally",
+      "cast_spell": 520493,
+      "cast_target": "ally",
+      "observe_source": "804457 Worn Out DurationIndex 5 = 300000 ms ($804457d; triggered by 520493 Effect[2]; Spell.dbc). Real cast of 520493 with grouped ally: 804457 absent before cast, present right after, and expiry pair brackets 300000 ms on accelerated clock. Reference search 2026-11-26: see radius."
+    },
+    {
+      "spell": 520493,
+      "name": "Red Thirst (Worn Out blocks subsequent similar haste effect on ally)",
+      "kind": "metric_delta",
+      "variant": "worn_out_blocks",
+      "label_suffix": "worn_out_blocks",
+      "quote": "After being affected by this spell, allies cannot benefit from similar effects for $804457d.",
+      "trigger_spell": 520493,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_in_before": true,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804457
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Worn Out 804457 applied by first real cast of 520493 remains active at 21s"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 520493
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 21000,
+      "observe_source": "520493 ExcludeTargetAuraSpell = 804457 (Spell.dbc; shared by 520492 Frenzy, 520835, 804456). Before phase casts 520493 (ally receives 520493 and Worn Out 804457); after 21000 ms wait 520493 (20s) has expired naturally while 804457 (300s) remains; second real cast of 520493 in after phase is blocked on ally by Worn Out (520493 aura reads 0, 804457 reads 1; zero set_aura fixtures). Reference search 2026-11-26: see radius."
+    },
+    {
+      "spell": 680679,
+      "name": "Purify Blood (aura 520839 duration 15 sec on ally)",
+      "kind": "cast_applies_aura",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Emanate an aura for $537250d,",
+      "expected_ms": 15000,
+      "applied_aura": 520839,
+      "target": "ally",
+      "cast_spell": 680679,
+      "cast_target": "ally",
+      "observe_source": "$537250d = 15000 ms; 680679 Effect[0] triggers 520839 DurationIndex 8 = 15000 ms on raid (Spell.dbc). Real cast of 680679 with grouped ally: 520839 absent before cast, present right after, and expiry pair brackets 15000 ms on accelerated clock. Reference search 2026-11-26: coa-history 680679: 27 casts in 3 logs; bindmysoul, sidekick, coabuildhub & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 680679,
+      "name": "Purify Blood (60% Shadow SP additional Shadow damage on direct hit)",
+      "kind": "metric_delta",
+      "variant": "shadow_damage",
+      "label_suffix": "shadow_damage",
+      "quote": "causing allied players to deal ${$sps*.6} additional damage as Shadow damage when they deal direct damage.",
+      "trigger_spell": 578305,
+      "target": "dummy",
+      "setup_casts": [
+        680679
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 300,
+      "player_spell_power": {
+        "amount": 1000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 573273,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 600,
+      "after_at_least": 570,
+      "after_at_most": 630,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "680679 -> 520839 (AscensionRaidDamageAuras.cpp:39, rev_20260930_90: 0.6 * Shadow SP -> 573273 Shadow damage on direct hit). At Shadow SP = 1000 (hit_arm records spell_power), non-crit Bloodbolt 578305 on dummy (823764 no resist, 16255=-100 no crit) triggers 0 damage of 573273 in control (no 680679) and 600 Shadow damage (school_mask 32, band [570, 630] = +-5%, excluding 0 and 1200) after real cast of 680679. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 680679,
+      "name": "Purify Blood (grouped ally deals 600 additional damage on direct hit)",
+      "kind": "metric_delta",
+      "variant": "ally_shadow_damage",
+      "label_suffix": "ally_shadow_damage",
+      "quote": "causing allied players to deal ${$sps*.6} additional damage as Shadow damage when they deal direct damage.",
+      "trigger_spell": 680679,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "select_dummy": true,
+      "player_spell_power": 1000,
+      "phase_auras": [
+        [
+          33143,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_auras": [
+          [
+            823764,
+            1,
+            "ally",
+            "ally"
+          ]
+        ],
+        "ally_attacks": [
+          {
+            "spell": 66903,
+            "power": 0,
+            "source": "Hammer of the Righteous 66903 (flat 16000 Holy direct hit, 0 cost) triggers Purify Blood 520839 -> 573273 on grouped ally"
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520839,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms grouped ally receives Purify Blood aura 520839 in treatment only"
+          }
+        ]
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 49984000,
+      "expected": 49967400,
+      "tolerance": 30,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Grouped ally arm for 680679 Purify Blood at caster Shadow SP = 1000: ally casts flat 16000 direct hit 66903 at 50000000-HP dummy in both phases (823764 no resist on ally, 33143 no crit on dummy). Before 680679 dummy health drops by 16000 to 49984000; after real cast of 680679 on raid (ally carries 520839), ally direct hit drops dummy health by 16000 + 600 = 16600 to 49967400 (+-30, excluding 49968000 [0 extra] and 49966800 [2x]). Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 680679,
+      "name": "Purify Blood (Exhaustion duration 60 sec on ally)",
+      "kind": "cast_applies_aura",
+      "variant": "exhaustion_duration",
+      "label_suffix": "exhaustion_duration",
+      "quote": "Applies Exhaustion, preventing you from benefiting from similar effects for $573255d.",
+      "expected_ms": 60000,
+      "applied_aura": 573255,
+      "target": "ally",
+      "cast_spell": 680679,
+      "cast_target": "ally",
+      "observe_source": "573255 Exhaustion DurationIndex 3 = 60000 ms ($573255d; triggered by 520839 Effect[1]; Spell.dbc). Real cast of 680679 with grouped ally: 573255 absent before cast, present right after, and expiry pair brackets 60000 ms on accelerated clock. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 680679,
+      "name": "Purify Blood (Exhaustion prevents subsequent Purify Blood)",
+      "kind": "metric_delta",
+      "variant": "exhaustion_blocks",
+      "label_suffix": "exhaustion_blocks",
+      "quote": "Applies Exhaustion, preventing you from benefiting from similar effects for $573255d.",
+      "trigger_spell": 680679,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_in_before": true,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 573255
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exhaustion 573255 applied by first real cast of 680679 remains active at 16s"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 520839
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 16000,
+      "observe_source": "680679 ExcludeCasterAuraSpell = 573255 and spell_ascension_raid_damage_aura::SkipExhausted skips allies with 573255 (AscensionRaidDamageAuras.cpp:66-73). Before casts 680679 (ally gets 520839 and 573255); after 16000 ms wait 520839 (15s) expires naturally while 573255 (60s) remains; recast attempt in after phase fails to grant 520839 (0) while 573255 stays 1 (zero set_aura fixtures). Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 706258,
+      "name": "Coagulation (no dispel without Blood Shield)",
+      "kind": "metric_delta",
+      "variant": "no_shield_control",
+      "label_suffix": "no_shield_control",
+      "quote": "Your Blood Shield now also dispels 1 bleed effect from you every $t1 sec.",
+      "trigger_spell": 60235,
+      "gate_spell": 706258,
+      "gate_timing": "start",
+      "target": "caster",
+      "phase_auras": [
+        [
+          10044,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          13318,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 13318
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Second bleed fixture 13318 also survives without Blood Shield"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 504296
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Blood Shield 504296 is absent in both phases"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 10044
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "706258 aura_ascension_bloodmage_coagulation (AscensionBloodmageTalents.cpp:937-953, rev_20260920_81) prevents periodic dispel 504102 unless Blood Shield 504296 is active. With 706258 learned and no Blood Shield, both bleed fixtures (10044, 13318, Mechanic 15) survive 6000 ms (>5000 ms period). Reference search 2026-11-26: coa-history 706258: 0 events in 186 logs (passive); bindmysoul, sidekick, coabuildhub & skill_line_ability.csv checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 706258,
+      "name": "Coagulation (no dispel before 5 sec tick at 4650 ms)",
+      "kind": "metric_delta",
+      "variant": "before_tick",
+      "label_suffix": "before_tick",
+      "quote": "every $t1 sec",
+      "trigger_spell": 504296,
+      "gate_spell": 706258,
+      "target": "caster",
+      "phase_auras": [
+        [
+          10044,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          13318,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 13318
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Second bleed 13318 still present before 5000 ms tick"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 504296
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Blood Shield 504296 active in both phases"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 10044
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 4550,
+      "expire_ms": 100,
+      "game_time": {
+        "after": [
+          4450,
+          4800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$t1 = 5000 ms (706258 Effect[0] aura 23 EffectAmplitude 5000 ms; Spell.dbc). Lower period bracket: after learning 706258 (expire_ms 100) and casting Blood Shield 504296 (instant), read at 4550 ms game time after cast (window [4450, 4800] -> ~4650 ms after learn, > 4500 ms = 0.9 * 5000): neither bleed (10044, 13318) has been dispelled yet. Reference search 2026-11-26: see no_shield_control."
+    },
+    {
+      "spell": 706258,
+      "name": "Coagulation (dispels exactly 1 of 2 bleeds at 5 sec tick)",
+      "kind": "metric_delta",
+      "variant": "dispels_one",
+      "label_suffix": "dispels_one",
+      "quote": "dispels 1 bleed effect from you",
+      "trigger_spell": 504296,
+      "gate_spell": 706258,
+      "target": "caster",
+      "phase_auras": [
+        [
+          10044,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          13318,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 13318
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Only 1 bleed is dispelled per tick: higher-id bleed 13318 remains present after tick 1 (AscensionBloodmageTalents.cpp:1731-1734 sets 504102 BasePoints=1)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 504296
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Blood Shield 504296 active in both phases"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 10044
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 5150,
+      "expire_ms": 100,
+      "game_time": {
+        "after": [
+          5050,
+          5350
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper period bracket & single-bleed count for 706258 Coagulation (5000 ms period, 504102 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 15 BasePoints=1 via AscensionBloodmageTalents.cpp:1731-1734). Before learning 706258 (control: Blood Shield 504296 alone): both bleeds 10044 and 13318 survive. After learning 706258 (expire_ms 100) and casting 504296, read at 5150 ms after cast (window [5050, 5350] -> ~5250 ms after learn, < 5500 ms = 1.1 * 5000): lowest-id bleed 10044 is dispelled (0) while second bleed 13318 survives (1). Reference search 2026-11-26: see no_shield_control."
     }
   ],
   "player_observations": [],
