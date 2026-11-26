@@ -1,0 +1,365 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric Vow of the Eclipse: effective healing applies a 5% heal over time to the healed ally (#13312)",
+  "contract": [
+    "Vow of the Eclipse 807435 reads 'Direct ability damage or effective healing ... burns for 5% of the damage",
+    "or healing done every 3 sec for 18 sec. Each trigger increases the damage of this effect. Additional",
+    "applications do not refresh the duration', its buff reads 'replicates its effect over time', and its",
+    "Fulfillment reads 'Direct ability damage or healing done by you is increased by 10% on targets affected by",
+    "Vow of the Eclipse'. Spell.dbc holds the friendly half: 807437 effect 0 points at 505370 (Vow of the",
+    "Eclipse, rank Heal) with 5, and 505370 is a SPELL_AURA_PERIODIC_HEAL on TARGET_UNIT_TARGET_ALLY with",
+    "amplitude 3000 ms and DurationIndex 85 (18000 ms). The PR author ruled on #13312 that damage replicates as",
+    "the burn 505340 and healing as the heal 505370. The server sent 5% of a heal to the cleric's attack victim",
+    "as the burn, so with no victim nothing ticked and no ally could carry the Vow for Fulfillment. The cleric",
+    "attacks nothing here. A heal must put 505370 on the ally at 5% of its effective healing per tick, and a",
+    "second heal adds its 5% to the same single aura without refreshing the duration. Under Dawn 807440 a heal on",
+    "the marked ally adds 803816 for 10% (Dawn 807444 effect 1). Spell power 3000 keeps the heals large enough",
+    "that truncating each percentage to whole points stays below 0.1% of the ratio. Gift of C'Thun 706189 (effect",
+    "1 aura 136, +4% healing done) is on the cleric: the copy already holds the outgoing modifiers, so a tick",
+    "must heal for exactly its aura amount, not 4% more (the native tick-time multiplier exemption)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 80,
+      "spell_power": 3000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 807435
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 500143
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 804584
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 706189
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gift of C'Thun's +4% healing done is on the cleric",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 706189,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Take Vow of the Eclipse",
+      "actor": "cleric",
+      "spell": 807435
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Vow of the Eclipse is active",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 807435,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Vow's global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "label": "Leave room for the whole heal",
+      "actor": "ally",
+      "maximum": 500000,
+      "value": 10
+    },
+    {
+      "action": "cast",
+      "label": "Heal the ally with no attack victim",
+      "actor": "cleric",
+      "spell": 500143,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the first heal lands",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 500143,
+      "target": "ally",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Vow resolve",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "spell": 500143,
+      "target": "ally",
+      "save_as": "first_heal"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the healed ally carries the cleric's heal over time 505370",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 505370,
+      "caster": "cleric",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Each tick heals for 5% of the effective healing",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 505370,
+      "caster": "cleric",
+      "ratio_to": "first_heal",
+      "min": 0.049,
+      "max": 0.0501
+    },
+    {
+      "action": "assert",
+      "label": "It lasts 18 sec",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 505370,
+      "caster": "cleric",
+      "min": 16500,
+      "max": 18000
+    },
+    {
+      "action": "assert",
+      "label": "It ticks every 3 sec",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 505370,
+      "target": "ally",
+      "within_ms": 3500,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 505370,
+      "caster": "cleric",
+      "save_as": "tick_amount"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tick heals its aura amount, healing done is not applied twice",
+      "actor": "cleric",
+      "metric": "spell_heal_total",
+      "spell": 505370,
+      "target": "ally",
+      "ratio_to": "tick_amount",
+      "min": 0.995,
+      "max": 1.005
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 500000,
+      "value": 10
+    },
+    {
+      "action": "cast",
+      "label": "Heal the ally again mid-duration",
+      "actor": "cleric",
+      "spell": 500143,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second heal lands",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 500143,
+      "target": "ally",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Vow resolve",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "spell": 500143,
+      "target": "ally",
+      "save_as": "both_heals"
+    },
+    {
+      "action": "assert",
+      "label": "Each trigger increases the effect: the tick is 5% of both heals",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 505370,
+      "caster": "cleric",
+      "ratio_to": "both_heals",
+      "min": 0.049,
+      "max": 0.0501
+    },
+    {
+      "action": "assert",
+      "label": "One aura, not a second stack",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 505370,
+      "caster": "cleric",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Additional applications do not refresh the duration",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 505370,
+      "caster": "cleric",
+      "min": 1,
+      "max": 15000
+    },
+    {
+      "action": "set_aura",
+      "label": "FIXTURE: Dawn requires 20 Solar Power",
+      "actor": "cleric",
+      "spell": 500149,
+      "stacks": 20
+    },
+    {
+      "action": "set_aura",
+      "label": "FIXTURE: Dawn's caster aura readiness marker",
+      "actor": "cleric",
+      "spell": 704396,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Enter Dawn",
+      "actor": "cleric",
+      "spell": 804584
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Dawn is active",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally still carries the cleric's 505370",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 505370,
+      "caster": "cleric",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_heal_total",
+      "spell": 803816,
+      "target": "ally",
+      "save_as": "copy_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 500000,
+      "value": 10
+    },
+    {
+      "action": "cast",
+      "label": "Heal the marked ally under Dawn",
+      "actor": "cleric",
+      "spell": 500143,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fulfilling heal lands",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 500143,
+      "target": "ally",
+      "equals": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Vow copy resolve",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "spell": 500143,
+      "target": "ally",
+      "relative_to": "both_heals",
+      "save_as": "dawn_heal"
+    },
+    {
+      "action": "assert",
+      "label": "Fulfillment: healing on an ally affected by the Vow is increased by 10%",
+      "actor": "cleric",
+      "metric": "spell_heal_total",
+      "spell": 803816,
+      "target": "ally",
+      "relative_to": "copy_before",
+      "ratio_to": "dawn_heal",
+      "min": 0.098,
+      "max": 0.1001
+    }
+  ]
+}

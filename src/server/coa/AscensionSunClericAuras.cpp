@@ -117,7 +117,7 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
             amount = 1;
             recalculate = false;
         }
-        if ((id == 680624 && slot == 0) || id == 301005 || id == 505340)
+        if ((id == 680624 && slot == 0) || id == 301005 || id == 505340 || id == 505370)
             recalculate = false;
         if (id == 561023 && slot == 2)
             amount = int32(player->GetItemArmorBySubclass(ITEM_SUBCLASS_ARMOR_SHIELD));
