@@ -68,6 +68,7 @@ namespace CoAPetBattles::Battle
         virtual uint32_t Follower(uint64_t character) = 0;
         virtual void Suppress(uint64_t character, bool on) = 0;
         virtual uint32_t SweepStandIns(uint64_t character, float yards) = 0;
+        virtual void Refused(uint64_t, std::string const&) { }
     };
 
     struct EnemySpec

@@ -4,6 +4,7 @@
 #include "Protocol/AddonMessage.h"
 #include <gtest/gtest.h>
 #include <algorithm>
+#include <set>
 #include <sstream>
 
 using namespace CoAPetBattles;
@@ -181,10 +182,20 @@ namespace
         std::map<uint64_t, std::map<uint32_t, uint32_t>> items;
         std::map<uint32_t, std::unique_ptr<Store::Journal>> journals;
         std::vector<std::string> produced;
+        std::map<uint64_t, std::string> lastTurn;
+        std::set<uint64_t> refusedPending;
+
+        void Refused(uint64_t character, std::string const&) override { refusedPending.insert(character); }
 
         void Send(uint64_t character, std::string_view module, std::string_view action,
             std::string const& payload) override
         {
+            if (module == "pbt" && action == "turn")
+            {
+                if (refusedPending.erase(character) && lastTurn[character] == payload)
+                    return;
+                lastTurn[character] = payload;
+            }
             produced.push_back("OUT " + std::to_string(_scheduler.Now()) + " p" + std::to_string(character) + " " +
                 std::string(module) + "|" + std::string(action) + "|" + payload);
         }
