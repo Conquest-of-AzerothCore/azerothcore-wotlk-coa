@@ -1,0 +1,160 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Charge grants 30% haste for the next casted spell only (#13376)",
+  "contract": [
+    "Charge 804826 reads 'Charge yourself with electricity, generating 100 Static and increasing your spell",
+    "haste by 30% for your next cast. Lasts 10 sec.' and carries no GCD (StartRecoveryCategory 0,",
+    "StartRecoveryTime 0, CastingTimeIndex 1). Previously 804826 had no proc or cast-consumption hook, so",
+    "its +30% SPELL_AURA_HASTE_SPELLS buff stayed active for the entire 10-second duration across multiple",
+    "casted spells instead of dropping after the next casted spell completes.",
+    "Live CoA logs (518 casts across 30 logs) confirm instant spells (Volt, Cloudburst, Conjure Storm,",
+    "Storm Ascendance) do not consume Charge, while the next completed cast-time spell removes it.",
+    "A level-80 Stormbringer casts Charge, immediately casts instant Volt 500928 (proving Charge",
+    "triggers no GCD and instant casts keep Charge active), then casts Brine 807105 (base cast time 2000 ms,",
+    "hasted to 1538 ms by Charge). Once Brine completes (well inside the 10-second duration), Charge must",
+    "be removed and Brine's cast time must return to its unhasted baseline."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "storm",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "storm",
+      "entry": 28168,
+      "level": 80,
+      "health": 500000,
+      "distance": 10
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 804826
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 500928
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 807105
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Brine base cast time is 2000 ms before Charge",
+      "actor": "storm",
+      "metric": "spell_cast_time_ms",
+      "spell": 807105,
+      "equals": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Cast off-GCD Charge 804826",
+      "actor": "storm",
+      "spell": 804826
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Charge buff is active",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 804826,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Charge reduces Brine cast time by 30% haste (2000 -> 1538 ms)",
+      "actor": "storm",
+      "metric": "spell_cast_time_ms",
+      "spell": 807105,
+      "min": 1500,
+      "max": 1560
+    },
+    {
+      "action": "cast",
+      "label": "Immediately cast instant Volt 500928 with no GCD wait",
+      "actor": "storm",
+      "spell": 500928,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Volt cast succeeded immediately after off-GCD Charge",
+      "actor": "storm",
+      "metric": "spell_cast_count",
+      "spell": 500928,
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Instant Volt does not consume Charge",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 804826,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Wait for Volt GCD to clear",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Cast hasted Brine 807105 (1538 ms cast time)",
+      "actor": "storm",
+      "spell": 807105,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Brine cast completed well within Charge's 10-second duration",
+      "actor": "storm",
+      "metric": "spell_cast_count",
+      "spell": 807105,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Completing Brine consumes Charge before its 10-second timer expires",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 804826,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Brine cast time returns to 2000 ms for subsequent casts",
+      "actor": "storm",
+      "metric": "spell_cast_time_ms",
+      "spell": 807105,
+      "equals": 2000
+    }
+  ]
+}
