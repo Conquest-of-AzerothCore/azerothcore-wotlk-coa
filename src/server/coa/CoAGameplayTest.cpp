@@ -73,6 +73,7 @@
 #include "Player.h"
 #include "ReputationMgr.h"
 #include "QuestDef.h"
+#include "QuestLogExtended.h"
 #include "QueryCallback.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
@@ -1300,6 +1301,7 @@ struct Actor
     uint32 challengeStartResponses = 0;
     uint32 challengeStartLastCode = 0;
     std::map<uint64, std::map<uint16, uint32>> unitValues;
+    std::map<uint16, uint32> questLogSentAtExtendedState;
     std::map<uint32, uint32> creatureQueryRank;
     std::map<uint32, std::vector<uint32>> creatureQueryQuestItems;
     std::map<uint32, uint32> clientCastTimeMs;
@@ -1699,6 +1701,18 @@ std::unordered_map<uint32, uint32> const& NativeCustomAttrRowIds()
 void ObservePacket(Actor& actor, WorldPacket const& packet)
 {
     ObserveExtensionPacket(actor, packet);
+    if (packet.GetOpcode() == QuestLogExtended::StateOpcode)
+    {
+        actor.questLogSentAtExtendedState.clear();
+        auto const self = actor.unitValues.find(actor.guid.GetRawValue());
+        if (self != actor.unitValues.end())
+            for (uint16 slot = 0; slot < NATIVE_QUEST_LOG_SIZE; ++slot)
+            {
+                auto const value = self->second.find(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_ID_OFFSET);
+                if (value != self->second.end())
+                    actor.questLogSentAtExtendedState[slot] = value->second;
+            }
+    }
     if (packet.GetOpcode() == SMSG_CHAR_CREATE && packet.size() == sizeof(uint8))
         actor.charCreateResult = packet.read<uint8>(0);
     if (packet.GetOpcode() == SMSG_STABLE_RESULT && packet.size() == sizeof(uint8))
@@ -7270,6 +7284,12 @@ private:
                 return double(uint16(player->GetUInt64Value(field + QUEST_COUNTS_OFFSET) >> (index * 16)));
             }
             return -1.0;
+        }
+        if (metric == "quest_log_sent_slot_at_extended_state")
+        {
+            auto const& sent = _actors.at(step.get<std::string>("actor")).questLogSentAtExtendedState;
+            auto const found = sent.find(uint16(step.get<uint32>("slot")));
+            return found == sent.end() ? -1.0 : double(found->second);
         }
         if (metric == "quest_poi_count")
             return QuestPoiCount(_actors.at(step.get<std::string>("actor")), step.get<uint32>("quest"));

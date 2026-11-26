@@ -179,6 +179,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'stealth_detection', 'can_detect',
     'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
     'quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count', 'quest_log_has_room', 'quest_poi_count',
+    'quest_log_sent_slot_at_extended_state',
     'ball_offer_count', 'ball_offers_quest',
     'ball_carried_count', 'ball_carried_quest', 'ball_turn_in_count', 'ball_turn_in_quest',
     'gossip_text',
@@ -870,7 +871,8 @@ def validate(scenario, clock=REAL_CLOCK):
                 number(step[key], f'{where}.{key}', 1, 2**31 - 1, True)
         for key, maximum in (('rank', 4), ('effect', 2), ('slot', 22),('power', 6), ('choice', 5),
                              ('reward', 5), ('option', 2**32 - 1)):
-            if key in step and not (key == 'slot' and action == 'quest_abandon'):
+            if key in step and not (key == 'slot' and (action == 'quest_abandon' or step.get('metric')
+                                                        == 'quest_log_sent_slot_at_extended_state')):
                 number(step[key], f'{where}.{key}', 0, maximum, True)
         if 'stacks' in step:
             number(step['stacks'], f'{where}.stacks', 0, 255, True)
@@ -1719,6 +1721,8 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric in {'quest_status', 'quest_takeable', 'quest_objective_count', 'quest_log_slot',
                           'quest_log_client_slot', 'quest_log_client_count', 'quest_poi_count'}:
                 require('quest' in step, f'{where}: metric needs quest')
+            if metric == 'quest_log_sent_slot_at_extended_state':
+                number(step.get('slot'), f'{where}.slot', 0, NATIVE_QUEST_LOG_SIZE - 1, True)
             if metric == 'dialog_status':
                 require('entry' in step, f'{where}: metric needs creature entry')
             if metric == 'item_loot_item_rate':
@@ -1851,7 +1855,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'has_title',
                           'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
                           'quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count', 'quest_log_has_room',
-                          'quest_poi_count',
+                          'quest_poi_count', 'quest_log_sent_slot_at_extended_state',
                           'ball_offer_count', 'ball_offers_quest',
                           'ball_carried_count', 'ball_carried_quest',
                           'ball_turn_in_count', 'ball_turn_in_quest',

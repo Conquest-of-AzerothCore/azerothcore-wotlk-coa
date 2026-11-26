@@ -141,10 +141,10 @@ void Player::Update(uint32 p_time)
         LoginDatabase.Execute(stmt);
     }
 
+    FlushQuestLogExtended();
+
     if (m_questLogPromotionPending && IsInWorld())
         PromoteOverflowQuests();
-
-    FlushQuestLogExtended();
 
     if (!m_timedquests.empty())
     {

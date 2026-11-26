@@ -418,7 +418,7 @@ void WorldSession::HandleCorpseMapPositionQuery(WorldPackets::Query::CorpseMapPo
 void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
 {
     uint32 count;
-    recvData >> count; // quest count, max=25
+    recvData >> count;
 
     if (count > _player->GetClientQuestLogSlots())
     {
