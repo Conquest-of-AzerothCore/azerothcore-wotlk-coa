@@ -5237,7 +5237,8 @@
     "clause": "Reduces the cost of spells that cost health and Animated Blood by $s1%.",
     "labels": [
       "807345 behaviour_metric_delta animated_blood_cost",
-      "807345 behaviour_metric_delta health_cost_shield"
+      "807345 behaviour_metric_delta health_cost_shield",
+      "807345 behaviour_metric_delta health_cost_blood_howl"
     ],
     "kind": "claim"
   },
