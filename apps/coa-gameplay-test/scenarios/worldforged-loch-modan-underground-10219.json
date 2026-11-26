@@ -1,0 +1,242 @@
+{
+  "schema": 1,
+  "name": "Worldforged Loch Modan pickups sit at or above ground and open (#10219)",
+  "contract": [
+    "#10219 reported Loch Modan Worldforged items spawning underground. An audit of all Loch Modan spawns from the 2026_09_23_05 realm-map pass against calibrated Eastern Kingdoms terrain heights and VMaps found six active pickups still 0.515 to 1.638 yd under terrain: 6940384 (Muck Coated Pendant, 97118, -1.638 yd), 6940402 (Stolen Shipment, 97121, -1.621 yd), 6940507 (Tattered Cloth Roll, 95533, -1.261 yd), 6941158 (Special Brewing Gear, 518319, -1.261 yd), 6941035 (Wreckage Piece, 95531, -0.692 yd), and 6940726 (Open Wound, 95532, -0.515 yd).",
+    "rev_20261126_10219_worldforged_loch_modan_underground.sql restores the five realm-dump spots (6901492, 6901495 inside Animalden.wmo, 6903342, 6901047 on Gyrocopter.m2, 6901048) and applies the Loch Modan LootCollector coordinate (-5268.45, -4132.88, 335.382) to 6941158. Expected: all six stand at their restored coordinates with spawn_ground_gap >= -0.3 yd (all six fail pre-fix), the five dry pickups are not submerged (6940384 Drowned Pendant rests on the Loch bed), and a player at 6941158 opens it for loot."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -5267.5,
+    "y": -4132.88,
+    "z": 336.0,
+    "o": 3.14
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 20
+    }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "SETUP: Special Brewing Gear pickup is present at its restored Loch Modan spot",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 518319,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Muck Coated Pendant 6940384 stands at its realm-dump spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6940384,
+      "spawn_type": "gameobject",
+      "x": -5017.87,
+      "y": -3586.46,
+      "z": 295.326,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Muck Coated Pendant 6940384 rests on the bed instead of -1.64 yd underground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940384,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Stolen Shipment 6940402 stands at its realm-dump spot in Animalden",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6940402,
+      "spawn_type": "gameobject",
+      "x": -5541.41,
+      "y": -2718.69,
+      "z": 367.091,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Stolen Shipment 6940402 sits above ground instead of -1.62 yd underground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940402,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.8
+    },
+    {
+      "action": "assert",
+      "label": "Stolen Shipment 6940402 is not submerged",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "guid": 6940402,
+      "spawn_type": "gameobject",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Tattered Cloth Roll 6940507 stands at its realm-dump spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6940507,
+      "spawn_type": "gameobject",
+      "x": -5288.869,
+      "y": -2691.869,
+      "z": 345.7341,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Tattered Cloth Roll 6940507 rests on ground instead of -1.26 yd underground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940507,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "Tattered Cloth Roll 6940507 is not submerged",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "guid": 6940507,
+      "spawn_type": "gameobject",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Special Brewing Gear 6941158 stands at its LootCollector spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6941158,
+      "spawn_type": "gameobject",
+      "x": -5268.45,
+      "y": -4132.88,
+      "z": 335.382,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Special Brewing Gear 6941158 rests on ground instead of -1.26 yd underground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941158,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "Special Brewing Gear 6941158 is grounded",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 6941158,
+      "spawn_type": "gameobject",
+      "tolerance": 0.8,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Special Brewing Gear 6941158 is not submerged",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "guid": 6941158,
+      "spawn_type": "gameobject",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wreckage Piece 6941035 stands at its realm-dump spot on the gyrocopter",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6941035,
+      "spawn_type": "gameobject",
+      "x": -5375.25,
+      "y": -3727.24,
+      "z": 299.837,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wreckage Piece 6941035 sits at or above surface instead of -0.69 yd underground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941035,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 2.0
+    },
+    {
+      "action": "assert",
+      "label": "Wreckage Piece 6941035 is not submerged",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "guid": 6941035,
+      "spawn_type": "gameobject",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Open Wound 6940726 stands at its realm-dump spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6940726,
+      "spawn_type": "gameobject",
+      "x": -5478.07,
+      "y": -3488.3,
+      "z": 298.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Open Wound 6940726 sits above ground instead of -0.52 yd underground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940726,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.6
+    },
+    {
+      "action": "assert",
+      "label": "Open Wound 6940726 is not submerged",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "guid": 6940726,
+      "spawn_type": "gameobject",
+      "equals": 0
+    },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 518319 },
+    { "action": "wait", "ms": 5500 },
+    {
+      "action": "assert",
+      "label": "Special Brewing Gear opens without cast failure",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Special Brewing Gear yields its Worldforged loot",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
