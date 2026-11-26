@@ -143,14 +143,18 @@
       "equals": 0
     },
     {
+      "action": "wait",
+      "label": "Wait past the 1500 ms channel, 200 ms projectile travel at 10 yd, and one world-step margin",
+      "ms": 2500
+    },
+    {
       "action": "assert",
-      "label": "DISCRIMINATING (#13716): Gear Grind lands all 4 damage hits (505160) without a 1H melee weapon",
+      "label": "DISCRIMINATING (#13716): Gear Grind lands exactly 4 damage hits (505160) after channel completes",
       "actor": "tinker",
       "metric": "spell_damage_count",
       "spell": 505160,
       "target": "dummy",
-      "equals": 4,
-      "within_ms": 4000
+      "equals": 4
     },
     {
       "action": "assert",
@@ -163,12 +167,11 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING (#13716): Gear Grind generates 1 Scrap per hit (4 total)",
+      "label": "DISCRIMINATING (#13716): Gear Grind generates 1 Scrap per hit (4 total) after channel completes",
       "actor": "tinker",
       "metric": "aura_stacks",
       "spell": 801816,
-      "equals": 4,
-      "within_ms": 2000
+      "equals": 4
     },
     {
       "action": "assert",
@@ -176,8 +179,7 @@
       "actor": "tinker",
       "metric": "aura",
       "spell": 681245,
-      "equals": 0,
-      "within_ms": 2000
+      "equals": 0
     }
   ]
 }
