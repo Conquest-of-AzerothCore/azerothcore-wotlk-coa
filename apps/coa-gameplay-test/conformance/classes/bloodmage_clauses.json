@@ -309,7 +309,10 @@
     "spell": 301363,
     "clause": "Increases the duration of Rotclaw and Hypovolemic Shock by $s1%.",
     "labels": [
-      "301363 effect_value e0 #0"
+      "301363 behaviour_metric_delta rotclaw_contrast",
+      "301363 behaviour_metric_delta rotclaw_duration",
+      "301363 behaviour_metric_delta hypovolemic_shock_contrast",
+      "301363 behaviour_metric_delta hypovolemic_shock_duration"
     ],
     "kind": "claim"
   },
@@ -2639,7 +2642,7 @@
     "spell": 681304,
     "clause": "Trap an enemy in a blood orb, horrifying them in place for $d.",
     "labels": [
-      "681304 aura_duration_ms #0"
+      "681304 behaviour_metric_delta horrify_duration"
     ],
     "kind": "claim"
   },
@@ -2647,7 +2650,7 @@
     "spell": 681304,
     "clause": "Reactivating this ability within $302895d,",
     "labels": [
-      "681304 spell_duration 302895 #1"
+      "681304 behaviour_metric_delta reactivation_window"
     ],
     "kind": "claim"
   },
@@ -2655,7 +2658,9 @@
     "spell": 681304,
     "clause": "instantly pops the Hemostasis, dealing ${$803326m1+0+$AP*0.43+$sps*1.03} Shadow damage",
     "labels": [
-      "681304 effect_value 803326e0 #2"
+      "681304 behaviour_metric_delta blood_burst_damage_base",
+      "681304 behaviour_metric_delta blood_burst_damage_sp",
+      "681304 behaviour_metric_delta blood_burst_damage_ap"
     ],
     "kind": "claim"
   },
@@ -2666,13 +2671,13 @@
       {
         "claim": "and reducing their healing received by $680333s1%",
         "labels": [
-          "681304 effect_value 680333e0 #3"
+          "681304 behaviour_metric_delta heal_reduction"
         ]
       },
       {
         "claim": "for $680333d",
         "labels": [
-          "681304 spell_duration 680333 #4"
+          "681304 behaviour_metric_delta heal_reduction_duration"
         ]
       }
     ],
