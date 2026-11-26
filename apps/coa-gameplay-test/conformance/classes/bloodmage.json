@@ -5809,6 +5809,2658 @@
       },
       "void_on_cast_failure": true,
       "observe_source": "Upper period bracket & single-bleed count for 706258 Coagulation (5000 ms period, 504102 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 15 BasePoints=1 via AscensionBloodmageTalents.cpp:1731-1734). Before learning 706258 (control: Blood Shield 504296 alone): both bleeds 10044 and 13318 survive. After learning 706258 (expire_ms 100) and casting 504296, read at 5150 ms after cast (window [5050, 5350] -> ~5250 ms after learn, < 5500 ms = 1.1 * 5000): lowest-id bleed 10044 is dispelled (0) while second bleed 13318 survives (1). Reference search 2026-11-26: see no_shield_control."
+    },
+    {
+      "spell": 681078,
+      "name": "Pooled Vitality (health-cost spell grants 1 stack of 680687)",
+      "kind": "metric_delta",
+      "variant": "grant_one",
+      "label_suffix": "grant_one",
+      "quote": "Spells that cost health now grant a stack of Pooled Vitality, stacking $680687u times.",
+      "trigger_spell": 504296,
+      "gate_spell": 681078,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          680687,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680687
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "observe_source": "Pooled Vitality 681078 (passive, Spell.dbc Effect[0] aura 4 dummy; Spell.cpp:5497-5504 + AscensionBloodmageVitality.cpp:68-82): non-triggered family-26 spells with PowerType == POWER_HEALTH that spend health cast Pooled Vitality 680687 (StackAmount 10 = $680687u) when 681078 is known. Trigger: Blood Shield 504296 (PowerType -2 POWER_HEALTH, ManaCostPercentage 10 -> 150 HP cost, instant, self-cast, 1500 ms GCD cleared by wait_ms 500 + expire_ms 1500 = 2000 ms). Clears 680687 before each phase; control without 681078 reads 0 stacks, after real learn of 681078 reads 1 stack (exact). Reference search 2026-11-26: coa-history 681078/680687: 0 events in 186 logs; coabuildhub spells_master_index.json 681078 matches verbatim."
+    },
+    {
+      "spell": 681078,
+      "name": "Pooled Vitality (11 health-cost casts cap at 10 stacks of 680687)",
+      "kind": "metric_delta",
+      "variant": "max_stacks",
+      "label_suffix": "max_stacks",
+      "quote": "Spells that cost health now grant a stack of Pooled Vitality, stacking $680687u times.",
+      "trigger_spell": 504296,
+      "gate_spell": 681078,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "setup_casts": [
+        504296,
+        504296,
+        504296,
+        504296,
+        504296,
+        504296,
+        504296,
+        504296,
+        504296,
+        504296
+      ],
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          680687,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680687
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "observe_source": "Pooled Vitality 681078 ($680687u = 10, 680687 Spell.dbc StackAmount 10). Makes 11 real Blood Shield 504296 casts (10 setup casts 1600 ms apart + 1 trigger cast, 11 x 150 = 1650 HP out of 10000, expire_ms 1500 clears GCD between phases) in each phase: control without 681078 reads 0 stacks; treatment with 681078 caps at 10 stacks (exact, proving cap at 10 despite 11 casts). Reference search 2026-11-26: see grant_one."
+    },
+    {
+      "spell": 681078,
+      "name": "Pooled Vitality (Mortal Form Rage cast consumes 10 stacks and empowers Heartbreak)",
+      "kind": "metric_delta",
+      "variant": "consume_empower",
+      "label_suffix": "consume_empower",
+      "quote": "Mortal Form spells that cost Rage consume 10 stacks of Pooled Vitality to become empowered.",
+      "trigger_spell": 572895,
+      "gate_spell": 681078,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          680687,
+          10,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 807563
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionBloodmageVitality.cpp:204-216: empowered Heartbreak 572895 applies Heartbreak buff 807563 on caster in treatment (1), 0 in control without 681078."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680687
+      },
+      "before_expected": 10,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Pooled Vitality 681078 (AscensionBloodmageVitality.cpp:27-66, 204-216; AscensionPooledVitality.h:13-25): in Mortal Form (no 802877), casting a Rage-costing Bloodmage spell with 10 stacks of 680687 consumes 10 stacks and empowers it. Precondition fixture: 680687 set to 10 stacks before each phase (cost reason: grant_one and max_stacks prove real acquisition of 1..10 stacks; control phase without 681078 also receives the same 10-stack fixture and leaves all 10 stacks unconsumed with aura 807563 == 0). Heartbreak 572895 (PowerType 1 Rage, ManaCost 400, CastTime 2000 ms, wait_ms 2500 covers cast + 500 ms margin): reads 10 stacks / aura 807563 == 0 before learning 681078 and 0 stacks / aura 807563 == 1 (Empowered) after learning 681078. Reference search 2026-11-26: see grant_one."
+    },
+    {
+      "spell": 681078,
+      "name": "Pooled Vitality (Cursed Form Rage cast does not consume 10 stacks)",
+      "kind": "metric_delta",
+      "variant": "cursed_no_consume",
+      "label_suffix": "cursed_no_consume",
+      "quote": "Mortal Form spells that cost Rage consume 10 stacks of Pooled Vitality to become empowered.",
+      "learn": [
+        681078,
+        562720
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_cast_targets": [
+        "caster"
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_spell": 578305,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          680687,
+          10,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 802877
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Casting Blood Curse 562720 applies Cursed Form marker 802877 in the after phase (AscensionBloodmageTalents.cpp:276-293)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 578305
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Proves Bloodbolt 578305 (300 Rage, ExcludeCasterAuraSpell 0) actually went off in Cursed Form."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680687
+      },
+      "before_expected": 10,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative Mortal-Form control for Pooled Vitality 681078 (AscensionBloodmageVitality.cpp:29: CanEmpower returns false when player->HasAura(802877)). With 681078 known and 10 stacks of 680687 fixtured, casting Blood Curse 562720 (sets 802877 Cursed Form) followed by Bloodbolt 578305 (300 Rage, castable in Cursed Form) fires 578305 (spell_go_count 1) while leaving all 10 stacks of 680687 unconsumed (10 == 10). Paired with consume_empower. Reference search 2026-11-26: see grant_one."
+    },
+    {
+      "spell": 680823,
+      "name": "Spice of Life (10% chance per periodic damage tick to grant Pooled Vitality)",
+      "kind": "flat_chance_rate",
+      "variant": "dot_rate",
+      "label_suffix": "dot_rate",
+      "quote": "Your periodic damage and healing now has a $h% chance to grant a stack of Pooled Vitality.",
+      "chance_pct": 10,
+      "trigger_spell": 504134,
+      "trigger_target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "caster aura 823764 (target resistance -9999 on magic schools): prevents full resists on Crimson Tide 504134 periodic Shadow ticks so every tick deals damage and enters the proc check (precondition fixture; test-only aura with no player cast)"
+        }
+      ],
+      "stop_trigger_aura": true,
+      "cast_wait_ms": 15500,
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 504134,
+        "target": "dummy",
+        "periodic": true
+      },
+      "event": {
+        "metric": "spell_cast_count",
+        "spell": 680687
+      },
+      "cycles": 120,
+      "unlearned_cycles": 2,
+      "trials_per_cycle": 5,
+      "parts": 5,
+      "streams": 3,
+      "isolation": {
+        "reach_yd": 10,
+        "source": "Crimson Tide 504134 has EffectRadiusIndex 13 (10 yd) around caster; Spice of Life 680823 triggers Pooled Vitality 680687 on TARGET_UNIT_CASTER (self only, 0 yd); 3 ungrouped streams spaced 50 yd apart exceed 10 + 4 = 14 yd so neither 504134 nor 680687 can cross streams."
+      },
+      "observe_source": "Spice of Life 680823 (passive, Spell.dbc ProcChance 10 = $h, Effect[0] aura 42 triggering Pooled Vitality 680687; pending_db_world/rev_20260920_46_bloodmage_spice_of_life_proc.sql sets spell_proc ProcFlags 262144 DONE_PERIODIC, SpellTypeMask 3 DAMAGE|HEAL, SpellPhaseMask 2 HIT, Chance 10, Cooldown 0). Trigger: Crimson Tide 504134 (instant, 400 Rage, cast_power 1000, DurationIndex 8 = 15000 ms, Amplitude 3000 ms -> 5 periodic Shadow damage ticks per cast inside 15500 ms with 500 ms buffer; 681078 unlearned so only 680823 can cast 680687). Unlearned control: 2 x 5 x 5 x 3 = 150 trials (>= 50), expects 0 procs. Treatment: 120 x 5 x 5 x 3 = 9000 trials (>= 8917 flip-proof trials for 10% with G-19 +-2 pt band over 5 parts, residual failure <= 0.1% per pair). Paired with hot_rate. Reference search 2026-11-26: coa-history 680823/680687: 0 events in 186 logs; coabuildhub spells_master_index.json 680823 matches verbatim."
+    },
+    {
+      "spell": 680823,
+      "name": "Spice of Life (10% chance per periodic healing tick to grant Pooled Vitality)",
+      "kind": "flat_chance_rate",
+      "variant": "hot_rate",
+      "label_suffix": "hot_rate",
+      "quote": "Your periodic damage and healing now has a $h% chance to grant a stack of Pooled Vitality.",
+      "chance_pct": 10,
+      "trigger_spell": 28880,
+      "trigger_target": "caster",
+      "caster_health_pct": 50,
+      "cast_wait_ms": 15500,
+      "trial": {
+        "metric": "spell_heal_count",
+        "spell": 28880,
+        "target": "caster"
+      },
+      "event": {
+        "metric": "spell_cast_count",
+        "spell": 680687
+      },
+      "cycles": 120,
+      "unlearned_cycles": 2,
+      "trials_per_cycle": 5,
+      "parts": 5,
+      "streams": 3,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Gift of the Naaru 28880 targets caster (TARGET_UNIT_TARGET_ALLY, self only, 0 yd) and Spice of Life 680823 triggers Pooled Vitality 680687 on TARGET_UNIT_CASTER (self only, 0 yd); 3 ungrouped streams spaced 50 yd apart cannot interact."
+      },
+      "observe_source": "Periodic-healing arm for Spice of Life 680823 (rev_20260920_46_bloodmage_spice_of_life_proc.sql SpellTypeMask 3 = DAMAGE | HEAL, SpellFamilyName 0, Chance 10). Trigger: Gift of the Naaru 28880 (0 cost, instant, DurationIndex 8 = 15000 ms, Effect[0] aura 8 SPELL_AURA_PERIODIC_HEAL Amplitude 3000 ms -> 5 periodic heal ticks per cast inside cast_wait_ms 15500 ms with 500 ms buffer; caster held at 50% of 10000 HP before every cast so heals are effective; 681078 unlearned so only 680823 casts 680687). Unlearned control: 2 x 5 x 5 x 3 = 150 trials (>= 50), expects 0 procs. Treatment: 120 x 5 x 5 x 3 = 9000 trials (>= 8917 flip-proof trials for 10% with G-19 +-2 pt band over 5 parts, residual failure <= 0.1% per pair). Paired with dot_rate. Reference search 2026-11-26: see dot_rate."
+    },
+    {
+      "spell": 681026,
+      "name": "Vitality For Later (consuming Pooled Vitality heals up to 10 allies)",
+      "kind": "heal_sum",
+      "variant": "cap",
+      "label_suffix": "cap",
+      "quote": "Consuming Pooled Vitality now heals up to $681025i allies within $681025a1 yds for ${$681025m1+$681025ppl1+$SP*0.25+$SPI*0.5}, scaling with Spirit and healing power.",
+      "gate_spell": 681026,
+      "learn": [
+        681078
+      ],
+      "allies": [
+        {
+          "id": "vfl_a1",
+          "dx": 2,
+          "dy": 0,
+          "grouped": true
+        },
+        {
+          "id": "vfl_a2",
+          "dx": 3,
+          "dy": 0,
+          "grouped": true
+        },
+        {
+          "id": "vfl_a3",
+          "dx": 4,
+          "dy": 0,
+          "grouped": true
+        }
+      ],
+      "creatures": [
+        {
+          "id": "vfl_c1",
+          "entry": 631,
+          "distance": 5,
+          "faction": 35
+        },
+        {
+          "id": "vfl_c2",
+          "entry": 631,
+          "distance": 6,
+          "faction": 35
+        },
+        {
+          "id": "vfl_c3",
+          "entry": 631,
+          "distance": 7,
+          "faction": 35
+        },
+        {
+          "id": "vfl_c4",
+          "entry": 631,
+          "distance": 8,
+          "faction": 35
+        },
+        {
+          "id": "vfl_c5",
+          "entry": 631,
+          "distance": 9,
+          "faction": 35
+        },
+        {
+          "id": "vfl_c6",
+          "entry": 631,
+          "distance": 10,
+          "faction": 35
+        },
+        {
+          "id": "vfl_c7",
+          "entry": 631,
+          "distance": 11,
+          "faction": 35
+        }
+      ],
+      "casts": [
+        {
+          "spell": 804805,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 504085,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 804805,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 504085,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 804805,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 504085,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 804805,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 504085,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 804805,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 504085,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 804805,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 504085,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        }
+      ],
+      "checks": [
+        {
+          "name": "cap",
+          "judge": "cap",
+          "spell": 681025,
+          "expected": 60,
+          "control_expected": 0,
+          "witness": "treatment"
+        }
+      ],
+      "observe_source": "Vitality For Later 681026 (AscensionBloodmageVitality.cpp:75-79): consuming 10 Pooled Vitality 680687 stacks casts 681025 Vitality for Later (Spell.dbc MaxAffectedTargets 10 = $681025i, Effect[0] SPELL_EFFECT_HEAL, TargetA 22 TARGET_SRC_CASTER, TargetB 30 TARGET_UNIT_SRC_AREA_ALLY, EffectRadiusIndex 10 = 30 yd). Offers 11 assistable candidates within 11 yd (caster + 3 grouped allies + 7 friendly assistable creatures entry 631 type_flags 0x1000 CREATURE_TYPE_FLAG_CAN_ASSIST, faction 35). Each of 6 cycles casts real Gorge 804805 (AttributesEx5 512 ticks immediately -> +10 stacks of 680687, costs 400 HP) followed by real Empowered Sanguine Mend 504085 at caster (200 Rage set by cast_steps, instant cast when Empowered, heals caster back to full, consumes 10 stacks, triggers 681025): 0 total heals in control without 681026, 60 total heals (6 x 10 of 11) in treatment; witness requires all 11 candidates healed at least once (chance any candidate missed across 6 draws of 10 of 11 is <= 11 * (1/11)^6 = 6.2e-6). An uncapped heal reads 66. Reference search 2026-11-26: coa-history 681026: 0 events (passive), 681025: 4346 SPELL_HEAL events across 7 logs (min 0, max 1069, mean 551.0); coabuildhub spells_master_index.json 681026 matches verbatim ('up to 10 allies within 30 yds')."
+    },
+    {
+      "spell": 681026,
+      "name": "Vitality For Later (heals allies within 30 yd exact radius)",
+      "kind": "metric_delta",
+      "variant": "radius",
+      "label_suffix": "radius",
+      "quote": "Consuming Pooled Vitality now heals up to $681025i allies within $681025a1 yds for ${$681025m1+$681025ppl1+$SP*0.25+$SPI*0.5}, scaling with Spirit and healing power.",
+      "learn": [
+        681078,
+        804805
+      ],
+      "setup_casts": [
+        804805
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_spell": 504085,
+      "gate_spell": 681026,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "ally_offsets": {
+        "ally": 29.5,
+        "ally2": 30.5
+      },
+      "ally_arm": {
+        "allies": 2,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681025,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Outer ally2 at 30.5 yd (beyond 30.0 yd exact AoE radius of 681025 on player targets, Spell.cpp:9450-9462; < 33.0 yd = +10%) receives 0 heals of 681025."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 29.5,
+            "expected": 29.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets moves ally 29.5 yd along x from caster (dz 0, flat spawn ground; inside 30.0 yd exact radius, > 27.0 yd = -10%)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 30.5,
+            "expected": 30.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets moves ally2 30.5 yd along x from caster (dz 0, flat spawn ground; outside 30.0 yd exact radius, < 33.0 yd = +10%)."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681025,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Vitality For Later 681026 radius ($681025a1 = 30 yd, 681025 EffectRadiusIndex[0] 10 = 30.0 yd, TargetA 22 TARGET_SRC_CASTER, TargetB 30 TARGET_UNIT_SRC_AREA_ALLY). Spell.cpp:1395-1405 adds no leeway for TargetB 30, and WorldObjectSpellAreaTargetCheck (Spell.cpp:9446-9462) uses exact centre-to-centre distance 30.0 yd for player targets (unitTarget->IsControlledByPlayer() skips combat reach). Brackets 30.0 yd with ally at 29.5 yd (> 27.0 yd = -10%, healed once in treatment, 0 in control) and ally2 at 30.5 yd (< 33.0 yd = +10%, 0 heals in both phases); both distances asserted via precondition distance_2d arms. Real Gorge 804805 + Empowered Sanguine Mend 504085 consumes 10 stacks. Reference search 2026-11-26: see cap."
+    },
+    {
+      "spell": 681026,
+      "name": "Vitality For Later (heal amount at reference stats: 232)",
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "quote": "Consuming Pooled Vitality now heals up to $681025i allies within $681025a1 yds for ${$681025m1+$681025ppl1+$SP*0.25+$SPI*0.5}, scaling with Spirit and healing power.",
+      "learn": [
+        681078,
+        804805
+      ],
+      "setup_casts": [
+        804805
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_spell": 504085,
+      "gate_spell": 681026,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681025,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 232,
+      "tolerance": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Vitality For Later 681026 -> 681025 Effect[0] SPELL_EFFECT_HEAL: BasePoints 59 + DieSides 1, RealPointsPerLevel 3.5, BaseLevel/SpellLevel 27, MaxLevel 0 (/srv/coa/server-data/dbc Spell.dbc). At level 60 (33 levels above 27): SpellEffectInfo::CalcValue (SpellInfo.cpp:497) computes 59 + int32(33 * 3.5) + 1 = 59 + 115 + 1 = 175 (tooltip $681025m1+$681025ppl1 = 175.5; G-28 per-level int32 truncation of 0.5). AscensionBloodmageVitality.cpp:113-114 adds Spirit * 0.5: at reference Spirit 114 and SP 0, 175 + 57 = 232 (tol 1 for G-27/G-28 rounding; tooltip resolves 232.5). Precondition fixture: 984954 removes spell crit so raw heal is deterministic. Control without 681026 reads 0. Paired with heal_sp and heal_spi. Reference search 2026-11-26: see cap."
+    },
+    {
+      "spell": 681026,
+      "name": "Vitality For Later (heal amount scales with +20000 SP: 5232)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "Consuming Pooled Vitality now heals up to $681025i allies within $681025a1 yds for ${$681025m1+$681025ppl1+$SP*0.25+$SPI*0.5}, scaling with Spirit and healing power.",
+      "learn": [
+        681078,
+        804805
+      ],
+      "setup_casts": [
+        804805
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_spell": 504085,
+      "gate_spell": 681026,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681025,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5232,
+      "tolerance": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell-power arm for Vitality For Later 681026 ($SP*0.25; pending_db_world/rev_20260914_13_pooled_vitality.sql spell_bonus_data 681025 direct_bonus = 0.25). Same fixture as heal_base at player_spell_power 20000 (hit_arm: true): 232 + 20000 * 0.25 = 5232 (tol 1; excludes 0 SP = 232 and 0.5 SP = 10232). Reference search 2026-11-26: see cap."
+    },
+    {
+      "spell": 681026,
+      "name": "Vitality For Later (heal amount scales with +1000 Spirit -> 1144.33 Human Spirit: 747)",
+      "kind": "metric_delta",
+      "variant": "heal_spi",
+      "label_suffix": "heal_spi",
+      "quote": "Consuming Pooled Vitality now heals up to $681025i allies within $681025a1 yds for ${$681025m1+$681025ppl1+$SP*0.25+$SPI*0.5}, scaling with Spirit and healing power.",
+      "learn": [
+        681078,
+        804805
+      ],
+      "setup_casts": [
+        804805
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_spell": 504085,
+      "gate_spell": 681026,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          486,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "stat",
+            "fields": {
+              "stat": 4
+            },
+            "before_expected": 1144,
+            "expected": 1144,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "QA Test +1000 Spirit 486 on Human Bloodmage (base 111 + 1000 = 1111, x1.03 The Human Spirit 20598 = 1144.33 -> 1144 displayed) in both phases."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681025,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 747,
+      "tolerance": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spirit arm for Vitality For Later 681026 ($SPI*0.5; AscensionBloodmageVitality.cpp:113-114). Same fixture as heal_base with QA Test +1000 Spirit 486 on Human Bloodmage ((111 + 1000) * 1.03 The Human Spirit 20598 = 1144.33, precondition stat 4 == 1144): 175 + 1144.33 * 0.5 = 747.165 -> 747 (tol 1; +515 over heal_base 232, excluding 0 Spirit scaling = 232 and 1.0 Spirit scaling = 1319). Reference search 2026-11-26: see cap."
+    },
+    {
+      "spell": 681336,
+      "name": "Raging Hunger (triggering Pooled Vitality generates 3 Rage = 30 internal)",
+      "kind": "metric_delta",
+      "variant": "rage_gain",
+      "label_suffix": "rage_gain",
+      "quote": "Triggering Pooled Vitality now also generates $/10;s1 Rage.",
+      "learn": [
+        681078
+      ],
+      "trigger_spell": 504296,
+      "gate_spell": 681336,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "phase_auras": [
+        [
+          680687,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 30,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "observe_source": "Raging Hunger 681336 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 3 (SPELLMOD_EFFECT1), BasePoints 29 + DieSides 1 = +30 internal Rage ($/10;s1 = 3 displayed Rage; Rage internal scale 10:1) on EffectSpellClassMask[0] 536870912 = Pooled Vitality 680687 Effect[0] SPELL_EFFECT_ENERGIZE MiscValue 1 POWER_RAGE BasePoints -1 + DieSides 1 = 0 base -> 30 with 681336 (/srv/coa/server-data/dbc Spell.dbc). With 681078 known, regen off, Rage set to 0 before each phase cast of health-cost Blood Shield 504296 (which triggers 680687; wait_ms 500 + expire_ms 1500 = 2000 ms clears 1500 ms GCD): reads 0 Rage before learning 681336 and 30 internal Rage (3 Rage) after a real learn of 681336 (exact, excludes 0 and 60). Reference search 2026-11-26: coa-history 681336/680687: 0 events in 186 logs; coabuildhub spells_master_index.json 681336 matches verbatim."
+    },
+    {
+      "spell": 807490,
+      "name": "Organ Orbs (1 stack of Pooled Vitality increases Spirit by 3%)",
+      "kind": "metric_delta",
+      "variant": "spirit_one_stack",
+      "label_suffix": "spirit_one_stack",
+      "quote": "Each stack of Pooled Vitality now increases your Spirit by $s1%.",
+      "learn": [
+        681078
+      ],
+      "trigger_spell": 504296,
+      "gate_spell": 807490,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          680687,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 4
+      },
+      "before_expected": 114.0,
+      "expected": 117.42,
+      "expected_ratio": 1.03,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "observe_source": "Organ Orbs 807490 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 23 (SPELLMOD_EFFECT3), BasePoints 2 + DieSides 1 = +3 ($s1 = 3%) on EffectSpellClassMask[0] 536870912 = Pooled Vitality 680687 Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue 4 Spirit BasePoints -1 + DieSides 1 = 0% base -> +3% per stack (/srv/coa/server-data/dbc Spell.dbc). With 681078 known and 680687 cleared before each phase (expire_ms 1500 clears 1500 ms GCD), one real Blood Shield 504296 cast grants 1 real stack of 680687: live unrounded Spirit (stat_exact 4, Human baseline 114.33) rises by ratio 1.03 (tol 0.002, excludes 1.00 and 1.06) after a real learn of 807490. Paired with spirit_five_stacks. Reference search 2026-11-26: coa-history 807490/680687: 0 events in 186 logs; coabuildhub spells_master_index.json 807490 matches verbatim."
+    },
+    {
+      "spell": 807490,
+      "name": "Organ Orbs (5 stacks of Pooled Vitality increase Spirit by 15%)",
+      "kind": "metric_delta",
+      "variant": "spirit_five_stacks",
+      "label_suffix": "spirit_five_stacks",
+      "quote": "Each stack of Pooled Vitality now increases your Spirit by $s1%.",
+      "learn": [
+        681078
+      ],
+      "setup_casts": [
+        504296,
+        504296,
+        504296,
+        504296
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_spell": 504296,
+      "gate_spell": 807490,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          680687,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680687
+            },
+            "before_expected": 5,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "5 real Blood Shield 504296 casts (4 setup + 1 trigger) grant exactly 5 stacks of 680687 in both phases."
+          }
+        ]
+      },
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 4
+      },
+      "before_expected": 114.0,
+      "expected": 131.1,
+      "expected_ratio": 1.15,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "observe_source": "Multi-stack scaling arm for Organ Orbs 807490 ('Each stack' x 3%): 5 real Blood Shield 504296 casts grant 5 stacks of 680687 (aura_stacks == 5 in both phases; expire_ms 1500 clears 1500 ms GCD). Live unrounded Spirit (stat_exact 4, Human baseline 114.33) rises by ratio 1.15 (tol 0.002, excludes flat +3% = 1.03 and doubled +30% = 1.30) after learning 807490. Reference search 2026-11-26: see spirit_one_stack."
+    },
+    {
+      "spell": 807566,
+      "name": "Acquired Taste (casting Infuse generates 2 additional stacks of Pooled Vitality: 1 -> 3)",
+      "kind": "metric_delta",
+      "variant": "infuse_stacks",
+      "label_suffix": "infuse_stacks",
+      "quote": "Casting Infuse or Vampyr's Kiss now generates 2 additional stacks of Pooled Vitality.",
+      "learn": [
+        681078
+      ],
+      "trigger_spell": 681403,
+      "gate_spell": 807566,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          680687,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680687
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Acquired Taste 807566 (pending_db_world/rev_20260920_40_bloodmage_cast_proc_triggers.sql: spell_proc SpellFamilyName 26, Mask0 32768 Vampyr's Kiss | Mask2 4194304 Infuse, ProcFlags 70656, SpellPhaseMask 1 CAST, DisableEffectsMask 2 so only Effect[0] triggers 524905 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS MiscValue 2 on 680687). With 681078 Pooled Vitality known and 680687 cleared before each phase, casting Infuse 681403 (PowerType -2 POWER_HEALTH 35% base HP = 526 HP, instant, enemy target) grants 1 baseline stack before learning 807566 and 1 + 2 = 3 stacks after a real learn of 807566 (exact, excludes +0 = 1, +1 = 2, and unfixed +3 = 4). Paired with vampyrs_kiss_stacks. Reference search 2026-11-26: coa-history 807566/524905: 0 events in 186 logs; coabuildhub spells_master_index.json 807566 matches verbatim."
+    },
+    {
+      "spell": 807566,
+      "name": "Acquired Taste (casting Vampyr's Kiss generates 2 additional stacks of Pooled Vitality: 1 -> 3)",
+      "kind": "metric_delta",
+      "variant": "vampyrs_kiss_stacks",
+      "label_suffix": "vampyrs_kiss_stacks",
+      "quote": "Casting Infuse or Vampyr's Kiss now generates 2 additional stacks of Pooled Vitality.",
+      "learn": [
+        681078
+      ],
+      "trigger_spell": 504281,
+      "gate_spell": 807566,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          680687,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680687
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Vampyr's Kiss arm for Acquired Taste 807566 (rev_20260920_40_bloodmage_cast_proc_triggers.sql Mask0 32768 = Vampyr's Kiss 504281 level-58 rank, PowerType -2 POWER_HEALTH 28 + 20% base HP = 328 HP, ExcludeCasterAuraSpell 802877 Mortal Form = default, instant, enemy target). With 681078 known and 680687 cleared before each phase, casting 504281 grants 1 baseline stack before learning 807566 and 1 + 2 = 3 stacks after learning 807566 (exact). Paired with infuse_stacks. Reference search 2026-11-26: see infuse_stacks."
+    },
+    {
+      "spell": 804805,
+      "name": "Gorge (duration 15000 ms)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Instantly gain 10 stacks of Pooled Vitality every $T1 sec for $d.",
+      "expected_ms": 15000,
+      "applied_aura": 804805,
+      "target": "caster",
+      "cast_spell": 804805,
+      "cast_target": "caster",
+      "observe_source": "Gorge 804805 DurationIndex 8 = 15000 ms ($d; /srv/coa/server-data/dbc SpellDuration.dbc), PowerType -2 POWER_HEALTH (100 + 20% base HP = 400 HP), instant self-cast. Real cast of 804805 proves aura_duration_ms absent before cast and ~15000 ms after cast, plus expiry bracket around 15000 ms (excluding +-5% = 750 ms on both sides). Reference search 2026-11-26: coa-history 804805/520318: 0 events in 186 logs; coabuildhub spells_master_index.json 804805 matches ('Instantly gain 10 stacks of Pooled Vitality every 5 sec for 15 sec')."
+    },
+    {
+      "spell": 804805,
+      "name": "Gorge (instantly grants 10 stacks of Pooled Vitality on cast)",
+      "kind": "metric_delta",
+      "variant": "instant_stacks",
+      "label_suffix": "instant_stacks",
+      "quote": "Instantly gain 10 stacks of Pooled Vitality every $T1 sec for $d.",
+      "trigger_spell": 804805,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          680687,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804805,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680687
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          300,
+          1500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Gorge 804805 AttributesEx5 = 512 (SPELL_ATTR5_START_PERIODIC_AT_APPLY), Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL Amplitude 5000 ms triggering 520318 (SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS MiscValue 10 on 680687; /srv/coa/server-data/dbc Spell.dbc). Uncast before control reads 0 stacks; 500 ms after real 804805 cast (game_time.after [300, 1500] ms, well before first 5000 ms periodic tick), caster immediately holds 10 stacks of 680687 (exact). Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 804805,
+      "name": "Gorge (5000 ms period: only 1 trigger by 4650 ms, excluding -10%)",
+      "kind": "metric_delta",
+      "variant": "period_before",
+      "label_suffix": "period_before",
+      "quote": "Instantly gain 10 stacks of Pooled Vitality every $T1 sec for $d.",
+      "trigger_spell": 804805,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          804805,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 520318
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 4650,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4550,
+          4950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Lower period bracket for Gorge 804805 ($T1 = 5000 ms, Effect[0] Amplitude 5000 ms triggering 520318; AttributesEx5 512 fires 1st cast on apply at t=0). Uncast control reads 0 casts of 520318; after real 804805 cast, reads spell_cast_count(520318) at wait_ms 4650 (game_time.after [4550, 4950] ms, strictly > 4500 ms = -10% of 5000 ms): must equal 1 (excluding a 4500 ms or shorter period). Paired with period_after. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 804805,
+      "name": "Gorge (5000 ms period: 2nd trigger landed by 5200 ms, excluding +10%)",
+      "kind": "metric_delta",
+      "variant": "period_after",
+      "label_suffix": "period_after",
+      "quote": "Instantly gain 10 stacks of Pooled Vitality every $T1 sec for $d.",
+      "trigger_spell": 804805,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          804805,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 520318
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 5200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5050,
+          5450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper period bracket for Gorge 804805 ($T1 = 5000 ms). Uncast control reads 0 casts of 520318; after real 804805 cast, reads spell_cast_count(520318) at wait_ms 5200 (game_time.after [5050, 5450] ms, strictly < 5500 ms = +10% of 5000 ms): must equal 2 (proving 2nd tick landed inside (4950, 5450] ms, excluding 5500 ms or longer period). Together period_before [4550, 4950] and period_after [5050, 5450] bracket 5000 ms inside +-10% on both sides. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 680732,
+      "name": "Dark Essence (Bloodbolt heals Blood Rituals ally for 228..236 over 2 ticks at ref SP)",
+      "kind": "metric_delta",
+      "variant": "bloodbolt_heal_base",
+      "label_suffix": "bloodbolt_heal_base",
+      "quote": "Casting Cursed Form abilities or Bloodbolt will now heal allies affected by Blood Rituals for ${$681036m1+$681036ppl1+$BH*0.1} every $681036t1 sec for $681036d.",
+      "trigger_spell": 578305,
+      "gate_spell": 680732,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 2,
+        "ally_auras": [
+          [
+            706623,
+            1,
+            "ally",
+            "caster"
+          ]
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681036,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "681036 DurationIndex 27 = 3000 ms, Amplitude 1500 ms -> 2 periodic heal ticks on Blood Rituals ally in treatment, 0 in control without 680732."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681036,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "spell_ascension_dark_essence::Select (AscensionBloodmageSecondary.cpp:473-480) filters to allies with 706623 Blood Rituals: unmarked ally2 receives 0 heals."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 706623
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Precondition fixture: Blood Rituals 706623 active on ally in both phases."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 706623
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Negative control: ally2 carries no Blood Rituals 706623 in either phase."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681036,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 232,
+      "after_at_least": 228,
+      "after_at_most": 236,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Essence 680732 (AscensionBloodmageSecondary.cpp:240-242, 469-487; pending_db_world/rev_20260920_72_bloodmage_dark_essence.sql): casting Bloodbolt 578305 or Cursed Form abilities casts 681036 on allies with Blood Rituals 706623 (precondition fixture on ally; ally2 unmarked negative control reads 0 heals). 681036 Effect[0] aura 8 SPELL_AURA_PERIODIC_HEAL: BasePoints 29, DieSides 5 (roll 30..34), RealPointsPerLevel 2.0, BaseLevel/SpellLevel 18, MaxLevel 0 -> at level 60 (42 levels above 18): 30..34 + 84 = 114..118 per tick x 2 ticks (Duration 3000 ms / Amplitude 1500 ms) = 228..236 at SP 0. Precondition fixture 984954 disables spell crits. Wait 3500 ms gives 500 ms buffer past 3000 ms final tick. Control without 680732 reads 0. Paired with bloodbolt_heal_sp and cursed_trigger. Reference search 2026-11-26: coa-history 680732: 0 events (passive), 681036: 27468 SPELL_PERIODIC_HEAL / 6620 APPLIED / 6627 REMOVED across 8 logs (min 0, max 295, mean 180.0); coabuildhub spells_master_index.json 680732 matches (note older snapshot wrote 'every 1 sec' vs installed Spell.dbc Amplitude 1500 ms = 1.5 sec; installed DBC governs per G-9)."
+    },
+    {
+      "spell": 680732,
+      "name": "Dark Essence (Bloodbolt heal scales with +20000 BH: 4228..4236 over 2 ticks)",
+      "kind": "metric_delta",
+      "variant": "bloodbolt_heal_sp",
+      "label_suffix": "bloodbolt_heal_sp",
+      "quote": "Casting Cursed Form abilities or Bloodbolt will now heal allies affected by Blood Rituals for ${$681036m1+$681036ppl1+$BH*0.1} every $681036t1 sec for $681036d.",
+      "trigger_spell": 578305,
+      "gate_spell": 680732,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_auras": [
+          [
+            706623,
+            1,
+            "ally",
+            "caster"
+          ]
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681036,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "2 periodic heal ticks over 3000 ms in treatment, 0 in control."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681036,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 4232,
+      "after_at_least": 4228,
+      "after_at_most": 4236,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Healing-power ($BH*0.1) arm for Dark Essence 680732 (pending_db_world/rev_20260920_72_bloodmage_dark_essence.sql spell_bonus_data 681036 dot_bonus = 0.1 per periodic heal tick). At player_spell_power 20000 (hit_arm: true): each tick gains +2000 (2114..2118) -> 4228..4236 over 2 ticks (excludes 0 SP = 228..236 and split 0.05/tick = 2228..2236). Reference search 2026-11-26: see bloodbolt_heal_base."
+    },
+    {
+      "spell": 680732,
+      "name": "Dark Essence (Cursed Form ability Bloodfang Bite also heals Blood Rituals ally)",
+      "kind": "metric_delta",
+      "variant": "cursed_trigger",
+      "label_suffix": "cursed_trigger",
+      "quote": "Casting Cursed Form abilities or Bloodbolt will now heal allies affected by Blood Rituals for ${$681036m1+$681036ppl1+$BH*0.1} every $681036t1 sec for $681036d.",
+      "learn": [
+        562720
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_cast_targets": [
+        "caster"
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "gate_spell": 680732,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 2,
+        "ally_auras": [
+          [
+            706623,
+            1,
+            "ally",
+            "caster"
+          ]
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681036,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Unmarked ally2 without 706623 Blood Rituals receives 0 heals."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681036,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Cursed-Form-ability trigger arm for Dark Essence 680732 (AscensionBloodmageSecondary.cpp:240-242 IsCursedFormAbility(info)). Enters Cursed Form via Blood Curse 562720 then casts Bloodfang Bite 572551 (CasterAuraSpell 525031, 300 Rage, instant): 0 681036 ticks before learning 680732, 2 ticks on Blood Rituals ally (0 on unmarked ally2) after learning 680732. Reference search 2026-11-26: see bloodbolt_heal_base."
+    },
+    {
+      "spell": 680732,
+      "name": "Dark Essence (periodic heal ticks every 1500 ms)",
+      "kind": "metric_delta",
+      "variant": "period",
+      "label_suffix": "period",
+      "quote": "Casting Cursed Form abilities or Bloodbolt will now heal allies affected by Blood Rituals for ${$681036m1+$681036ppl1+$BH*0.1} every $681036t1 sec for $681036d.",
+      "learn": [
+        680732
+      ],
+      "trigger_spell": 578305,
+      "gate_timing": "start",
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_auras": [
+          [
+            706623,
+            1,
+            "ally",
+            "caster"
+          ]
+        ]
+      },
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_heal",
+        "spell": 681036,
+        "target": "ally",
+        "since_spell": 578305
+      },
+      "before_expected": 1500,
+      "expected": 1500,
+      "tolerance": 75,
+      "wait_ms": 3500,
+      "expire_ms": 3500,
+      "void_on_cast_failure": true,
+      "observe_source": "Period check for Dark Essence 680732 ($681036t1 = 1500 ms; 681036 Effect[0] Amplitude 1500 ms, Duration 3000 ms -> 2 ticks at 1500 and 3000 ms, 1 interval of 1500 ms). Waits 3500 ms (500 ms post-tick buffer) and reads event_interval_median_ms of 681036 spell_heal on ally since 578305 cast: 1500 +- 75 ms (5% band excludes 1350 and 1650 ms, +-10% on both sides; unlearned 0-tick control is bloodbolt_heal_base). Reference search 2026-11-26: see bloodbolt_heal_base."
+    },
+    {
+      "spell": 680732,
+      "name": "Dark Essence (681036 aura held past 2720 ms, excluding -10% of 3000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Casting Cursed Form abilities or Bloodbolt will now heal allies affected by Blood Rituals for ${$681036m1+$681036ppl1+$BH*0.1} every $681036t1 sec for $681036d.",
+      "trigger_spell": 578305,
+      "gate_spell": 680732,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_auras": [
+          [
+            706623,
+            1,
+            "ally",
+            "caster"
+          ]
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 681036,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2780,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2720,
+          2960
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Lower duration bracket for Dark Essence 680732 ($681036d = 3000 ms, DurationIndex 27). Reads aura 681036 on Blood Rituals ally at wait_ms 2780 after instant Bloodbolt 578305 (game_time.after [2720, 2960] ms, strictly > 2700 ms = -10%): 0 before learning 680732, 1 after learning 680732. Paired with duration_expired. Reference search 2026-11-26: see bloodbolt_heal_base."
+    },
+    {
+      "spell": 680732,
+      "name": "Dark Essence (681036 aura expired by 3150 ms, excluding +10% of 3000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_expired",
+      "label_suffix": "duration_expired",
+      "quote": "Casting Cursed Form abilities or Bloodbolt will now heal allies affected by Blood Rituals for ${$681036m1+$681036ppl1+$BH*0.1} every $681036t1 sec for $681036d.",
+      "trigger_spell": 578305,
+      "gate_spell": 680732,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_auras": [
+          [
+            706623,
+            1,
+            "ally",
+            "caster"
+          ]
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681036,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Proves 681036 applied and completed both periodic ticks in treatment before expiring."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 681036,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 3150,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3050,
+          3280
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper duration bracket for Dark Essence 680732 ($681036d = 3000 ms). Reads aura 681036 on Blood Rituals ally at wait_ms 3150 after instant Bloodbolt 578305 (game_time.after [3050, 3280] ms, strictly < 3300 ms = +10%): aura is gone (0) while ally_arm confirms 2 periodic heal ticks landed in treatment (0 in control). Together duration_held [2720, 2960] and duration_expired [3050, 3280] bracket 3000 ms inside +-10% on both sides. Reference search 2026-11-26: see bloodbolt_heal_base."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (Shadow damage at reference stats: 565)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Unleash a powerful surge of blood, dealing ${$m1+0+$sps*0.5+$spi*1} Shadow damage to an enemy,",
+      "trigger_spell": 572895,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572895,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 565,
+      "tolerance": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Heartbreak 572895 (level 60 rank 5, PowerType 1 Rage, ManaCost 400, CastTime 2000 ms, SchoolMask 32 Shadow, Effect[0] SPELL_EFFECT_HEALTH_LEECH BasePoints 450 + DieSides 1 = 451, BaseLevel/SpellLevel 60 -> 0 levels above base, BonusMultiplier 0; AscensionBloodmageVitality.cpp:117-119 adds ShadowSP * 0.5 + Spirit * 1.0). At reference stats (SP 0, Spirit 114): 451 + 0 + 114 = 565 (tol 1). Precondition fixtures: 823764 removes magic resists, 984954 removes spell crits. Wait 2500 ms (500 ms buffer past 2000 ms cast). Uncast control reads 0. Paired with damage_sp and damage_spi. Reference search 2026-11-26: coa-history 572895: 22 SPELL_CAST_START / 22 SPELL_DAMAGE across 2 logs (min 986, max 2538, mean 1712.0); coabuildhub spells_master_index.json 520314 matches formula."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (Shadow damage scales with +20000 SP: 10565)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Unleash a powerful surge of blood, dealing ${$m1+0+$sps*0.5+$spi*1} Shadow damage to an enemy,",
+      "trigger_spell": 572895,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572895,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10565,
+      "tolerance": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Shadow spell power arm for Heartbreak 572895 ($sps*0.5; AscensionBloodmageVitality.cpp:117-119). Same fixture as damage_base at player_spell_power 20000 (hit_arm: true): 565 + 20000 * 0.5 = 10565 (tol 1; excludes 0 SP = 565 and 1.0 SP = 20565). Reference search 2026-11-26: see damage_base."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (Shadow damage scales with +1000 Spirit -> 1144.33 Human Spirit: 1595)",
+      "kind": "metric_delta",
+      "variant": "damage_spi",
+      "label_suffix": "damage_spi",
+      "quote": "Unleash a powerful surge of blood, dealing ${$m1+0+$sps*0.5+$spi*1} Shadow damage to an enemy,",
+      "trigger_spell": 572895,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          486,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "stat",
+            "fields": {
+              "stat": 4
+            },
+            "before_expected": 1144,
+            "expected": 1144,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "QA Test +1000 Spirit 486 on Human Bloodmage ((111 + 1000) * 1.03 The Human Spirit 20598 = 1144.33 -> 1144 displayed) in both phases."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572895,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1595,
+      "tolerance": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spirit arm for Heartbreak 572895 ($spi*1; AscensionBloodmageVitality.cpp:117-119). Same fixture as damage_base with QA Test +1000 Spirit 486 on Human Bloodmage ((111 + 1000) * 1.03 The Human Spirit 20598 = 1144.33, precondition stat 4 == 1144): 451 + 0 + 1144.33 = 1595.33 -> 1595 (tol 1; +1030 over damage_base 565). Reference search 2026-11-26: see damage_base."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (heals allies within 20 yd of target)",
+      "kind": "metric_delta",
+      "variant": "heal_radius",
+      "label_suffix": "heal_radius",
+      "quote": "and healing $520315i allies within $520315a1 yds of the target for ${$m3+0+$BH*.3+$spi*1}.",
+      "trigger_spell": 572895,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "ally_offsets": {
+        "ally": 22.5,
+        "ally2": 23.5
+      },
+      "ally_arm": {
+        "allies": 2,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 520315,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Outer ally2 at 20.5 yd from dummy (beyond 20.0 yd exact radius of 520315 on player targets, Spell.cpp:9450-9462; < 22.0 yd = +10%) receives 0 heals of 520315."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 19.5,
+            "expected": 19.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "dummy at x=+3.0 and ally at x=+22.5 (dz 0, flat spawn ground) -> 19.5 yd from dummy (inside 20.0 yd radius, > 18.0 yd = -10%)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 20.5,
+            "expected": 20.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "dummy at x=+3.0 and ally2 at x=+23.5 (dz 0, flat spawn ground) -> 20.5 yd from dummy (outside 20.0 yd radius, < 22.0 yd = +10%)."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 520315,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Heartbreak 572895 Effect[2] triggers 520315 at TARGET_DEST_TARGET_ENEMY -> TARGET_UNIT_DEST_AREA_ALLY, EffectRadiusIndex 9 = 20.0 yd ($520315a1). Spell.cpp:1395-1405 and 9446-9462 apply exact 20.0 yd radius from dummy centre on player targets. Dummy at x=3.0, ally at x=22.5 (19.5 yd from dummy, > 18.0 yd = -10%, healed once after cast, 0 uncast) and ally2 at x=23.5 (20.5 yd from dummy, < 22.0 yd = +10%, 0 heals). Reference search 2026-11-26: coa-history 520315: 73 SPELL_HEAL events across 2 logs (min 926, max 2268, mean 1398.0)."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (ally heal 520315 at reference stats: 538 per tooltip $m3+$BH*.3+$spi*1)",
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "quote": "and healing $520315i allies within $520315a1 yds of the target for ${$m3+0+$BH*.3+$spi*1}.",
+      "trigger_spell": 572895,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520315,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 538,
+      "tolerance": 2,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Heartbreak 572895 Effect[2] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE BasePoints 423 (DieSides 0; client $m3 = 424, CalcValue = 423) triggers 520315 SPELL_EFFECT_HEAL. Tooltip states ${$m3+0+$BH*.3+$spi*1}: at reference stats (SP 0, Spirit 114), tooltip expects 424 + 0 + 114 = 538 (or 423 + 114 = 537; tol 2 covers the 1-pt DieSides=0 offset while excluding missing Spirit scaling = 423). Precondition fixture 984954 disables spell crits. Uncast control reads 0. Paired with heal_sp and heal_spi. Reference search 2026-11-26: coa-history 520315: 73 SPELL_HEAL events across 2 logs (min 926, max 2268, mean 1398.0 \u2014 confirms 520315 scaled strongly above base 423 on live)."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (ally heal 520315 at +20000 BH: 6538 per tooltip $m3+$BH*.3+$spi*1)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "and healing $520315i allies within $520315a1 yds of the target for ${$m3+0+$BH*.3+$spi*1}.",
+      "trigger_spell": 572895,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520315,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 6538,
+      "tolerance": 2,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Healing-power arm ($BH*0.3) for Heartbreak 572895 -> 520315 at player_spell_power 20000 (hit_arm: true): tooltip expects 538 + 20000 * 0.3 = 6538 (tol 2). Reference search 2026-11-26: see heal_base."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (ally heal 520315 at +1000 Spirit -> 1144 Human Spirit: 1568 per tooltip $m3+$BH*.3+$spi*1)",
+      "kind": "metric_delta",
+      "variant": "heal_spi",
+      "label_suffix": "heal_spi",
+      "quote": "and healing $520315i allies within $520315a1 yds of the target for ${$m3+0+$BH*.3+$spi*1}.",
+      "trigger_spell": 572895,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          486,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "stat",
+            "fields": {
+              "stat": 4
+            },
+            "before_expected": 1144,
+            "expected": 1144,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "QA Test +1000 Spirit 486 on Human Bloodmage ((111 + 1000) * 1.03 The Human Spirit 20598 = 1144.33 -> 1144 displayed) in both phases."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520315,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1568,
+      "tolerance": 2,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spirit arm ($spi*1) for Heartbreak 572895 -> 520315 with QA Test +1000 Spirit 486 on Human Bloodmage (precondition stat 4 == 1144): tooltip expects 424 + 0 + 1144 = 1568 (tol 2). Reference search 2026-11-26: see heal_base."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (Empowered grants +165 AP and SP to party and raid members)",
+      "kind": "metric_delta",
+      "variant": "empowered_party_raid",
+      "label_suffix": "empowered_party_raid",
+      "quote": "Empowered: Increases your party and raid members attack or spell power by $s2 for $807563d,",
+      "learn": [
+        804805
+      ],
+      "setup_casts": [
+        804805
+      ],
+      "setup_cast_targets": [
+        "caster"
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572895,
+      "gate_spell": 681078,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 5,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "attack_power",
+            "fields": {},
+            "before_expected": 223,
+            "expected": 388,
+            "tolerance": 0,
+            "source": "807563 Effect[0] aura 344 SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT adds +165 AP ($s2, 223 -> 388) to party member ally when Empowered, 0 unempowered."
+          },
+          {
+            "actors": [
+              "ally5"
+            ],
+            "metric": "attack_power",
+            "fields": {},
+            "before_expected": 223,
+            "expected": 388,
+            "tolerance": 0,
+            "reach_source": "807563 Effect[0] aura 344 uses TargetA 56 TARGET_UNIT_CASTER_AREA_RAID with EffectRadiusIndex 287 (100 yd, Spell.dbc), reaching raid subgroup 2 ally5.",
+            "source": "807563 Effect[0] aura 344 SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT adds +165 AP (223 -> 388) to raid subgroup-2 member ally5 when Empowered."
+          },
+          {
+            "actors": [
+              "ally5"
+            ],
+            "metric": "spell_power",
+            "fields": {
+              "school": 5
+            },
+            "before_expected": 0,
+            "expected": 165,
+            "tolerance": 0,
+            "reach_source": "807563 Effect[1] aura 345 uses TargetA 56 TARGET_UNIT_CASTER_AREA_RAID with EffectRadiusIndex 287 (100 yd, Spell.dbc), reaching raid subgroup 2 ally5.",
+            "source": "807563 Effect[1] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT adds +165 SP (0 -> 165) to raid subgroup-2 member ally5 when Empowered."
+          }
+        ]
+      },
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 165,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Empowered Heartbreak 572895 Effect[1] BasePoints 164 + DieSides 1 = 165 ($s2) triggers 807563 (AscensionBloodmageVitality.cpp:204-216; TargetA 56 TARGET_UNIT_CASTER_AREA_RAID, Radius 100 yd; Effect[0] aura 344 +165 AP, Effect[1] aura 345 +165 SP). Setup Gorge 804805 grants 10 stacks of 680687 in both phases; before learning 681078 (control), 572895 is unempowered (ally and raid subgroup-2 ally5 read baseline 0 SP / 223 AP); after learning 681078 (treatment), Empowered 572895 consumes 10 stacks and raises both ally (party) and ally5 (raid subgroup 2) to 165 SP (+165) and 388 AP (+165) exact. Reference search 2026-11-26: coa-history 807563: 40 APPLIED / 40 REMOVED / 12 REFRESH across 2 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (Empowered buff 807563 held past 18000 ms after cast)",
+      "kind": "metric_delta",
+      "variant": "empowered_duration_held",
+      "label_suffix": "empowered_duration_held",
+      "quote": "Empowered: Increases your party and raid members attack or spell power by $s2 for $807563d,",
+      "learn": [
+        804805
+      ],
+      "setup_casts": [
+        804805
+      ],
+      "setup_cast_targets": [
+        "caster"
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572895,
+      "gate_spell": 681078,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 807563,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 20500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          20100,
+          21800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Lower duration bracket for Empowered Heartbreak 807563 ($807563d = 20000 ms, DurationIndex 18; 572895 CastTime = 2000 ms, so 807563 applies at +2000 ms and expires at +22000 ms). Reads aura 807563 on ally at wait_ms 20500 (game_time.after [20100, 21800] ms after cast start = 18100..19800 ms after apply, strictly > 18000 ms = -10%): 0 without 681078, 1 with 681078. Paired with empowered_duration_expired. Reference search 2026-11-26: see empowered_party_raid."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (Empowered buff 807563 expired before 22000 ms after cast)",
+      "kind": "metric_delta",
+      "variant": "empowered_duration_expired",
+      "label_suffix": "empowered_duration_expired",
+      "quote": "Empowered: Increases your party and raid members attack or spell power by $s2 for $807563d,",
+      "learn": [
+        804805
+      ],
+      "setup_casts": [
+        804805
+      ],
+      "setup_cast_targets": [
+        "caster"
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572895,
+      "gate_spell": 681078,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 807563
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Proves Empowered Heartbreak actually cast 807563 once in treatment (0 in control) before it expired."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 807563,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 22600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          22200,
+          23800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper duration bracket for Empowered Heartbreak 807563 ($807563d = 20000 ms; 572895 CastTime = 2000 ms). Reads aura 807563 on ally at wait_ms 22600 (game_time.after [22200, 23800] ms after cast start = 20200..21800 ms after apply, strictly < 22000 ms = +10%): aura is gone (0) while ally_arm confirms 807563 was cast once in treatment. Together empowered_duration_held and empowered_duration_expired bracket 20000 ms inside +-10% on both sides. Reference search 2026-11-26: see empowered_party_raid."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (Empowered Visceral Power 807687 adds +95 AP/SP at level 60, raising follow-up Bloodbolt 578305 by +169)",
+      "kind": "metric_delta",
+      "variant": "empowered_self_l60",
+      "label_suffix": "empowered_self_l60",
+      "quote": "plus an additional ${$807687m1+$807687ppl1} for you, scaling with level.",
+      "learn": [
+        804805,
+        572895
+      ],
+      "setup_casts": [
+        804805,
+        572895
+      ],
+      "setup_cast_targets": [
+        "caster",
+        "dummy"
+      ],
+      "setup_wait_ms": 2200,
+      "trigger_spell": 578305,
+      "gate_spell": 681078,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_since": true,
+      "phase_auras": [
+        [
+          804805,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_power",
+            "fields": {
+              "school": 5
+            },
+            "before_expected": 0,
+            "expected": 260,
+            "tolerance": 0,
+            "source": "Caster SP rises by 165 (807563) + 95 (807687 Visceral Power at level 60) = +260 (0 -> 260)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "attack_power",
+            "fields": {},
+            "before_expected": 223,
+            "expected": 483,
+            "tolerance": 0,
+            "source": "Caster AP rises by 165 (807563) + 95 (807687 Visceral Power at level 60) = +260 (223 -> 483)."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "spell_power",
+            "fields": {
+              "school": 5
+            },
+            "before_expected": 0,
+            "expected": 165,
+            "tolerance": 0,
+            "source": "Ally receives only 807563 (+165 SP, not 807687), isolating caster's +95 Visceral Power bonus (260 - 165 = 95)."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy"
+      },
+      "before_expected": 350,
+      "expected": 519,
+      "expected_gain": 169,
+      "tolerance": 12,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Visceral Power 807687 (AscensionBloodmageVitality.cpp:215; Spell.dbc TargetA 1 TARGET_UNIT_CASTER, BaseLevel/SpellLevel 40, MaxLevel 0, Effect[0] aura 344 AP & Effect[1] aura 345 SP, BasePoints 14 + DieSides 1 = 15, RealPointsPerLevel 4.0 -> at level 60: 15 + 20 * 4 = 95). Setup Gorge 804805 (t=0, +10 stacks) + Heartbreak 572895 (t=2200, finishes t=4200, consumes 10 stacks) empowers in treatment (after learning 681078), applying 807563 (+165) + 807687 (+95) = +260 AP & SP on caster (ally reads +165 SP only, isolating +95); follow-up Bloodbolt 578305 cast at t=4400 (before Gorge's t=5000 tick, unempowered; rev_20260930_30_bloodmage_issue_batch.sql 0.45*SP + 0.20*AP, DieSides 12 -> max roll diff +-11; 823764 no resist, 984954 no crit, phase_since: true, dummy_distance 3 yd, wait_ms 1000) consumes +260 AP & SP for +169 Shadow damage (260*0.45 + 260*0.20 = 117 + 52 = 169, tol 12 covers +-11 DieSides roll while excluding 807563 alone = +107 and level-50 gain = +143). Paired with empowered_self_l50 for level scaling. Reference search 2026-11-26: coa-history 807687: 12 APPLIED / 12 REMOVED / 4 REFRESH across 2 logs."
+    },
+    {
+      "spell": 572895,
+      "name": "Heartbreak (Empowered Visceral Power 807687 adds +55 AP/SP at level 50, raising follow-up Bloodbolt 578305 by +143)",
+      "kind": "metric_delta",
+      "variant": "empowered_self_l50",
+      "label_suffix": "empowered_self_l50",
+      "quote": "plus an additional ${$807687m1+$807687ppl1} for you, scaling with level.",
+      "caster_level": 50,
+      "learn": [
+        804805,
+        572895
+      ],
+      "setup_casts": [
+        804805,
+        572895
+      ],
+      "setup_cast_targets": [
+        "caster",
+        "dummy"
+      ],
+      "setup_wait_ms": 2200,
+      "trigger_spell": 578305,
+      "gate_spell": 681078,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_since": true,
+      "phase_auras": [
+        [
+          804805,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_power",
+            "fields": {
+              "school": 5
+            },
+            "before_expected": 0,
+            "expected": 220,
+            "tolerance": 0,
+            "source": "Caster SP at level 50 rises by 165 (807563) + 55 (807687 at level 50) = +220 (0 -> 220)."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "spell_power",
+            "fields": {
+              "school": 5
+            },
+            "before_expected": 0,
+            "expected": 165,
+            "tolerance": 0,
+            "source": "Ally receives flat 807563 (+165 SP), isolating caster's +55 Visceral Power at level 50 (220 - 165 = 55)."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy"
+      },
+      "before_expected": 340,
+      "expected": 483,
+      "expected_gain": 143,
+      "tolerance": 12,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Level-50 scaling arm for Visceral Power 807687 ('scaling with level', G-32; BaseLevel/SpellLevel 40, BasePoints 14 + DieSides 1 = 15, RealPointsPerLevel 4.0 -> at level 50: 15 + 10 * 4 = 55). At caster_level 50 (asserted by caster_level option), setup Gorge 804805 + Empowered Heartbreak 572895 raises caster AP & SP by +220 (165 + 55; ally SP 0 -> 165), and follow-up Bloodbolt 578305 (0.45*SP + 0.20*AP, DieSides 12 -> max roll diff +-11, phase_since: true, dummy_distance 3 yd, wait_ms 1000) gains +143 Shadow damage (220*0.45 + 220*0.20 = 99 + 44 = 143, tol 12 excludes 807563-only +107 and level-60 +169). Reference search 2026-11-26: see empowered_self_l60."
+    },
+    {
+      "spell": 300226,
+      "name": "Nightmare (above 50% HP: Rage ability Veinburst consumes 2% max HP = 200)",
+      "kind": "metric_delta",
+      "variant": "health_cost_above_50",
+      "label_suffix": "health_cost_above_50",
+      "quote": "abilities that cost Rage now consume $704257s2% of your maximum health to damage or heal your target for an additional $301273s1% of the value.",
+      "trigger_spell": 504260,
+      "gate_spell": 300226,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        5100,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 5100,
+      "expected": 4900,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Nightmare 300226 (AscensionBloodmageTalents.cpp:1632-1650): when player->GetHealthPct() > 50.0f and casting a non-triggered Rage-costing ability, consumes CountPctFromMaxHealth(704257 Effect[1] CalcValue = BasePoints 1 + DieSides 1 = 2% = $704257s2) via ModifyHealth(-cost). Trigger: Veinburst 504260 (PowerType 1 Rage, ManaCost 300, CastTime 2000 ms, pure Shadow damage with no self-heal; target dummy; caster starts at 5100 / 10000 = 51% HP, regen off): reads 5100 before learning 300226 and 4900 (-200 = -2% of 10000) after learning 300226 (exact, excludes 0% = 5100 and 4% = 4700). Wait 2500 ms (500 ms past 2000 ms cast). Paired with health_cost_at_50_control. Reference search 2026-11-26: coa-history 300226: 0 events (passive), 704257: 5793 SPELL_DAMAGE / 4124 MISSED across 14 logs, 303013: 9824 SPELL_DAMAGE across 14 logs; coabuildhub spells_master_index.json 300226 matches verbatim ('2% of your maximum health ... additional 10%')."
+    },
+    {
+      "spell": 300226,
+      "name": "Nightmare (at 50% HP boundary: Rage ability Veinburst consumes 0% max HP)",
+      "kind": "metric_delta",
+      "variant": "health_cost_at_50_control",
+      "label_suffix": "health_cost_at_50_control",
+      "quote": "While above 50% maximum health,",
+      "trigger_spell": 504260,
+      "gate_spell": 300226,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 5000,
+      "expected": 5000,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Exact 50% threshold control for Nightmare 300226 ('While above 50% maximum health'; AscensionBloodmageTalents.cpp:1637 checks GetHealthPct() <= 50.0f). Same fixture as health_cost_above_50 at caster_health [5000, 10000] (50.0%): reads 5000 before and 5000 after learning 300226 (0 HP consumed at 50%). Paired with health_cost_above_50, damage_above_50, damage_at_50_control. Reference search 2026-11-26: see health_cost_above_50."
+    },
+    {
+      "spell": 300226,
+      "name": "Nightmare (above 50% HP: Rage damage spell Heartbreak deals +10% damage)",
+      "kind": "metric_delta",
+      "variant": "damage_above_50",
+      "label_suffix": "damage_above_50",
+      "quote": "abilities that cost Rage now consume $704257s2% of your maximum health to damage or heal your target for an additional $301273s1% of the value.",
+      "trigger_spell": 572895,
+      "gate_spell": 300226,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_spell_power": 20000,
+      "caster_health": [
+        5100,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_since": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572895,
+        "target": "dummy"
+      },
+      "before_expected": 10565,
+      "expected": 11621,
+      "expected_ratio": 1.1,
+      "tolerance": 0.01,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Damage bonus arm for Nightmare 300226 ($301273s1 = 10%, 301273 Effect[0] BasePoints 9 + DieSides 1 = 10; AscensionBloodmageTalents.cpp:1648 + Player.cpp:10667-10669 SPELLMOD_DAMAGE * 1.10f). Trigger: Heartbreak 572895 (zero-roll DieSides 1, Rage cost 400) at +20000 SP with 823764 (no resist), 984954 (no crit), caster_health [5100, 10000] (51%), phase_since: true: before 10565, after floor(10565 * 1.10) = 11621 (ratio 1.10, tol 0.01 excludes 1.00 and 1.20). Paired with damage_at_50_control and heal_above_50. Reference search 2026-11-26: see health_cost_above_50."
+    },
+    {
+      "spell": 300226,
+      "name": "Nightmare (at 50% HP boundary: Rage damage spell Heartbreak deals +0% bonus)",
+      "kind": "metric_delta",
+      "variant": "damage_at_50_control",
+      "label_suffix": "damage_at_50_control",
+      "quote": "While above 50% maximum health,",
+      "trigger_spell": 572895,
+      "gate_spell": 300226,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_spell_power": 20000,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_since": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572895,
+        "target": "dummy"
+      },
+      "before_expected": 10565,
+      "expected": 10565,
+      "expected_ratio": 1.0,
+      "tolerance": 0.005,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Exact 50% boundary damage control for Nightmare 300226: same fixture as damage_above_50 at caster_health [5000, 10000] (50.0%): before 10565, after 10565 (ratio 1.0 +- 0.005, excludes +10%). Reference search 2026-11-26: see health_cost_above_50."
+    },
+    {
+      "spell": 300226,
+      "name": "Nightmare (above 50% HP: Rage healing spell Sanguine Mend heals +10%)",
+      "kind": "metric_delta",
+      "variant": "heal_above_50",
+      "label_suffix": "heal_above_50",
+      "quote": "abilities that cost Rage now consume $704257s2% of your maximum health to damage or heal your target for an additional $301273s1% of the value.",
+      "trigger_spell": 504085,
+      "gate_spell": 300226,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_spell_power": 20000,
+      "caster_health": [
+        5100,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_since": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 504085,
+        "target": "caster"
+      },
+      "before_expected": 12600,
+      "expected": 13860,
+      "expected_ratio": 1.1,
+      "tolerance": 0.015,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Healing bonus arm for Nightmare 300226 ('damage or heal your target for an additional 10%'; Unit.cpp:10964 ApplySpellMod SPELLMOD_DAMAGE applies to direct healing too). Trigger: Sanguine Mend 504085 (PowerType 1 Rage, ManaCost 200, CastTime 2500 ms, self-cast, 984954 disables spell crits) at +20000 SP (roll +-26 over ~12600 = +-0.21%), caster_health [5100, 10000] (51%), phase_since: true, wait_ms 3000 (500 ms past 2500 ms cast): ratio 1.10 +- 0.015 (excludes 1.00 and 1.20). Paired with heal_at_50_control and damage_above_50. Reference search 2026-11-26: see health_cost_above_50."
+    },
+    {
+      "spell": 300226,
+      "name": "Nightmare (at 50% HP boundary: Rage healing spell Sanguine Mend heals +0% bonus)",
+      "kind": "metric_delta",
+      "variant": "heal_at_50_control",
+      "label_suffix": "heal_at_50_control",
+      "quote": "While above 50% maximum health,",
+      "trigger_spell": 504085,
+      "gate_spell": 300226,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_spell_power": 20000,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_since": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 504085,
+        "target": "caster"
+      },
+      "before_expected": 12600,
+      "expected": 12600,
+      "expected_ratio": 1.0,
+      "tolerance": 0.015,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Exact 50% boundary healing control for Nightmare 300226: same fixture as heal_above_50 at caster_health [5000, 10000] (50.0%): ratio 1.0 +- 0.015 (excludes +10%). Reference search 2026-11-26: see health_cost_above_50."
+    },
+    {
+      "spell": 570735,
+      "name": "Crimson Etchings (removes 150 HP cost of Blood Shield)",
+      "kind": "metric_delta",
+      "variant": "blood_shield_cost",
+      "label_suffix": "blood_shield_cost",
+      "quote": "Removes the health cost of your Blood Shield and Vital Shield.",
+      "trigger_spell": 504296,
+      "gate_spell": 570735,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 9850,
+      "expected": 10000,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "observe_source": "Crimson Etchings 570735 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), BasePoints -101 + DieSides 1 = -100% on EffectSpellClassMask[0] 1342177280 = 268435456 (Blood Shield 504296) | 1073741824 (Vital Shield 504849) (/srv/coa/server-data/dbc Spell.dbc). Blood Shield 504296 costs 10% of Bloodmage level-60 BaseHP 1504 = int32(150.4) = 150 HP (SpellInfo.cpp:3212-3214). With caster_health [10000, 10000] and regen off (expire_ms 1500 clears 1500 ms GCD): health reads 9850 before learning 570735 and 10000 after a real learn of 570735 (exact). Paired with vital_shield_cost. Reference search 2026-11-26: coa-history 570735: 0 events (passive), 504296: 74 casts across 23 logs; coabuildhub spells_master_index.json 570735 matches verbatim."
+    },
+    {
+      "spell": 570735,
+      "name": "Crimson Etchings (removes 230 HP cost of Vital Shield)",
+      "kind": "metric_delta",
+      "variant": "vital_shield_cost",
+      "label_suffix": "vital_shield_cost",
+      "quote": "Removes the health cost of your Blood Shield and Vital Shield.",
+      "trigger_spell": 504849,
+      "gate_spell": 570735,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          504849,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "health",
+      "fields": {},
+      "before_expected": 9770,
+      "expected": 10000,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "observe_source": "Vital Shield arm for Crimson Etchings 570735 (Mask0 bit 1073741824 = Vital Shield 504849: ManaCost 50 + 12% of Bloodmage level-60 BaseHP 1504 = 50 + int32(180.48) = 230 HP, SpellInfo.cpp:3205-3214). Clears 504849 before each phase and reads health at wait_ms 500 (strictly before 504849's first 5000 ms periodic heal tick; expire_ms 1500 clears 1500 ms GCD) with caster_health [10000, 10000] and regen off: reads 9770 before learning 570735 and 10000 after a real learn of 570735 (exact). Paired with blood_shield_cost. Reference search 2026-11-26: coa-history 504849: 7 casts across 6 logs; see blood_shield_cost."
+    },
+    {
+      "spell": 707900,
+      "name": "Blood Tap (regenerates 50% of 1000 max Rage = 500 in exchange for 451 HP)",
+      "kind": "metric_delta",
+      "variant": "rage_base",
+      "label_suffix": "rage_base",
+      "quote": "Instantly regenerate $s1% of your maximum Rage in exchange for health.",
+      "trigger_spell": 707900,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "phase_power_in_uncast_before": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "health",
+            "fields": {},
+            "before_expected": 10000,
+            "expected": 9549,
+            "tolerance": 0,
+            "source": "707900 PowerType -2 POWER_HEALTH ManaCostPercentage 30 -> int32(1504 * 0.30) = 451 HP spent (10000 -> 9549), proving 'in exchange for health'."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 1
+            },
+            "before_expected": 1000,
+            "expected": 1000,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Baseline Bloodmage max Rage is 1000 internal (100 displayed)."
+          }
+        ]
+      },
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 500,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Blood Tap 707900 (extra_spells[18], Spell.dbc PowerType -2 POWER_HEALTH ManaCostPercentage 30 -> int32(1504 * 0.30) = 451 HP; Effect[0] 137 SPELL_EFFECT_ENERGIZE_PCT MiscValue 1 POWER_RAGE BasePoints 49 + DieSides 1 = 50% = $s1). With regen off, Rage set to 0 before both phases (phase_power_in_uncast_before) and caster_health [10000, 10000]: uncast control reads 0 Rage / 10000 HP; real 707900 cast reads 500 internal Rage (50% of precondition max_power 1000) and 9549 HP (-451 HP) exact. Paired with rage_scaled_max. Reference search 2026-11-26: coa-history 707900: 211 SPELL_CAST_SUCCESS / 211 SPELL_ENERGIZE across 22 logs (min 50, max 61, mean 58.0 displayed Rage \u2014 confirming 50% of 100..120 max Rage on live)."
+    },
+    {
+      "spell": 707900,
+      "name": "Blood Tap (with Dark Pact 1200 max Rage: regenerates 50% = 600 internal Rage)",
+      "kind": "metric_delta",
+      "variant": "rage_scaled_max",
+      "label_suffix": "rage_scaled_max",
+      "quote": "Instantly regenerate $s1% of your maximum Rage in exchange for health.",
+      "learn": [
+        560256
+      ],
+      "trigger_spell": 707900,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "phase_power_in_uncast_before": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 1
+            },
+            "before_expected": 1200,
+            "expected": 1200,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Dark Pact 560256 (+20 max Rage = +200 internal) raises max Rage to 1200 in both phases."
+          }
+        ]
+      },
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 600,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Maximum-Rage scaling arm for Blood Tap 707900 ('50% of your maximum Rage', excluding flat 50 Rage). Learns Dark Pact 560256 (max_power 1 == 1200 precondition): uncast control reads 0 Rage; real 707900 cast reads 600 internal Rage (50% of 1200, exact). Reference search 2026-11-26: see rage_base (live logs confirm 60..61 Rage with max-Rage talents)."
     }
   ],
   "player_observations": [],
