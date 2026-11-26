@@ -151,9 +151,10 @@
     {
       "action": "assert",
       "actor": "p",
-      "label": "Burnscorch Wand drops loot",
+      "label": "Burnscorch Wand drops item 410204 in its open loot window",
       "metric": "loot_count",
-      "min": 1,
+      "item": 410204,
+      "equals": 1,
       "within_ms": 3000
     },
     {
@@ -177,9 +178,10 @@
     {
       "action": "assert",
       "actor": "p",
-      "label": "Charstone Warband also drops loot",
+      "label": "Charstone Warband drops item 500821 in its open loot window",
       "metric": "loot_count",
-      "min": 2,
+      "item": 500821,
+      "equals": 1,
       "within_ms": 3000
     }
   ]
