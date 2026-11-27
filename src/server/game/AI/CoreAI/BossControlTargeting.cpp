@@ -58,6 +58,7 @@ bool BossControl::IsControlSpell(SpellInfo const* spellInfo)
         case SPELL_GANDLING_SHADOW_PORTAL:
         case SPELL_ERANIKUS_DEEP_SLUMBER:
         case SPELL_ILLUCIA_FEAR_ASCENSION:
+        case SPELL_KRASTINOV_GHOULISH_POTION:
             return true;
         default:
             break;
