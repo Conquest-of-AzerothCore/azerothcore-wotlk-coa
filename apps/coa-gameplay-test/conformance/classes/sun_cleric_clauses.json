@@ -1037,7 +1037,7 @@
       "300723 behaviour_hit_ratio fire_damage"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacré. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
+    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacr\u00e9. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
     "text_source": {
       "basis": "owner_ruling",
       "spell": 300723,
@@ -6676,7 +6676,7 @@
     "spell": 805301,
     "clause": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
     "kind": "claim",
-    "reason": "The gate and the ally heal are read by ally_bless_heal: the ally is below full health, the caster's mana is 850 then 872 at the Daybreak hook against a gate at 860.4, and the Daybreak arm proves the same heal landed in both phases. Open, tool need returned: \"sacrifice additional mana\" is the paid (extra + 3) / 4 of AscensionSunClericAbilities.cpp:365, which depends on the random heal amount and needs an arm-to-arm ratio. Not given a final status. Round B b1 (mentor D-214): the mana sacrifice is judged by direction only (D-165), partial proof counted on direction: ally_bless_mana (its before phase, 850 at the hook, is the below-30% arm: no extra heal and no extra mana; its after phase, 872, is the above-30% arm) reads the extra heal and mana below what the heal’s own cost leaves above the gate, and no extra mana or heal below it; ally_bless_mana_no_form is the control without the form. Observation, not an expectation: the code pays (extra + 3) / 4 (AscensionSunClericAbilities.cpp:399, set by e36bc50aad); that formula is code-only and not the tooltip’s, so the exact value stays open for the mentor.",
+    "reason": "The gate and the ally heal are read by ally_bless_heal: the ally is below full health, the caster's mana is 850 then 872 at the Daybreak hook against a gate at 860.4, and the Daybreak arm proves the same heal landed in both phases. Open, tool need returned: \"sacrifice additional mana\" is the paid (extra + 3) / 4 of AscensionSunClericAbilities.cpp:365, which depends on the random heal amount and needs an arm-to-arm ratio. Not given a final status. Round B b1 (mentor D-214): the mana sacrifice is judged by direction only (D-165), partial proof counted on direction: ally_bless_mana (its before phase, 850 at the hook, is the below-30% arm: no extra heal and no extra mana; its after phase, 872, is the above-30% arm) reads the extra heal and mana below what the heal\u2019s own cost leaves above the gate, and no extra mana or heal below it; ally_bless_mana_no_form is the control without the form. Observation, not an expectation: the code pays (extra + 3) / 4 (AscensionSunClericAbilities.cpp:399, set by e36bc50aad); that formula is code-only and not the tooltip\u2019s, so the exact value stays open for the mentor.",
     "claims": [
       {
         "claim": "you sacrifice additional mana with each heal",
@@ -7751,7 +7751,7 @@
     "labels": [
       "572389 behaviour_metric_delta devotion_exclusivity"
     ],
-    "reason": "Pending live pair run. devotion_exclusivity proves casting Devotion of Dawn 572389 replaces existing Devotion of Radiance 575043 from the same Sun Cleric on a friendly ally (575043: 1 -> 0, 572389: 0 -> 1)."
+    "reason": "devotion_exclusivity proves casting 572389 replaces caster's prior Devotion on ally while preserving a second Sun Cleric (ally2)'s Devotion of Emperors 572552 on ally (1 -> 1)."
   },
   {
     "spell": 572390,
@@ -7772,7 +7772,7 @@
     "labels": [
       "572390 behaviour_metric_delta devotion_exclusivity"
     ],
-    "reason": "Pending live pair run. devotion_exclusivity proves casting Greater Devotion of Dawn 572390 replaces existing Greater Devotion of Radiance 575045 from the same Sun Cleric on grouped ally (575045: 1 -> 0, 572390: 0 -> 1)."
+    "reason": "devotion_exclusivity proves casting 572390 replaces caster's prior Devotion on ally while preserving a second Sun Cleric (ally2)'s Greater Devotion of Emperors 572553 on ally (1 -> 1)."
   },
   {
     "spell": 572552,
@@ -7793,7 +7793,7 @@
     "labels": [
       "572552 behaviour_metric_delta devotion_exclusivity"
     ],
-    "reason": "Pending live pair run. devotion_exclusivity proves casting Devotion of Emperors 572552 replaces existing Devotion of Dawn 572389 from the same Sun Cleric on friendly ally (572389: 1 -> 0, 572552: 0 -> 1)."
+    "reason": "devotion_exclusivity proves casting 572552 replaces caster's prior Devotion on ally while preserving a second Sun Cleric (ally2)'s Devotion of Radiance 575043 on ally (1 -> 1)."
   },
   {
     "spell": 572553,
@@ -7814,7 +7814,7 @@
     "labels": [
       "572553 behaviour_metric_delta devotion_exclusivity"
     ],
-    "reason": "Pending live pair run. devotion_exclusivity proves casting Greater Devotion of Emperors 572553 replaces existing Greater Devotion of Radiance 575045 from the same Sun Cleric on grouped ally (575045: 1 -> 0, 572553: 0 -> 1)."
+    "reason": "devotion_exclusivity proves casting 572553 replaces caster's prior Devotion on ally while preserving a second Sun Cleric (ally2)'s Greater Devotion of Dawn 572390 on ally (1 -> 1)."
   },
   {
     "spell": 575043,
@@ -7834,7 +7834,7 @@
     "labels": [
       "575043 behaviour_metric_delta devotion_exclusivity"
     ],
-    "reason": "Pending live pair run. devotion_exclusivity proves casting Devotion of Radiance 575043 replaces existing Devotion of Dawn 572389 from the same Sun Cleric on friendly ally (572389: 1 -> 0, 575043: 0 -> 1)."
+    "reason": "devotion_exclusivity proves casting 575043 replaces caster's prior Devotion on ally while preserving a second Sun Cleric (ally2)'s Devotion of Emperors 572552 on ally (1 -> 1)."
   },
   {
     "spell": 575045,
@@ -7854,7 +7854,7 @@
     "labels": [
       "575045 behaviour_metric_delta devotion_exclusivity"
     ],
-    "reason": "Pending live pair run. devotion_exclusivity proves casting Greater Devotion of Radiance 575045 replaces existing Greater Devotion of Dawn 572390 from the same Sun Cleric on grouped ally (572390: 1 -> 0, 575045: 0 -> 1)."
+    "reason": "devotion_exclusivity proves casting 575045 replaces caster's prior Devotion on ally while preserving a second Sun Cleric (ally2)'s Greater Devotion of Emperors 572553 on ally (1 -> 1)."
   },
   {
     "spell": 680639,
@@ -7917,7 +7917,7 @@
       "spell": 680639,
       "dbc_differs": "no field differs from Spell.dbc"
     },
-    "reason": "Pending live pair run. armor_base (+728 at base INT 119 -> 142.8, wait_ms 700 past 500 ms Refresh) and armor_int_boost (+1016 with +48 INT fixture 48100) prove dynamic 5x Intellect Armor bonus."
+    "reason": "armor_base (+724 at base INT 119 -> int32(142.8) = 142, wait_ms 700 past 500 ms Refresh) and armor_int_boost (+1014 with +48 INT fixture 48100, int32(200.4) = 200) prove dynamic 5x Intellect Armor bonus."
   },
   {
     "spell": 680639,
@@ -7980,7 +7980,7 @@
       "681160 behaviour_cast_applies_aura duration",
       "681160 behaviour_expiry duration"
     ],
-    "reason": "Pending live pair run (settled Defect D-2). cost_ally_25yd proves real mana spend reduction on ally at 25 yd (Radiant Flame 806060: power 660 -> 677, -17 mana = -5%), cost_out_of_range proves unchanged spend at 40 yd (660 -> 660), cost_raid_subgroup2 proves -5% spell_power_cost on raid subgroup 2 ally5 at 25 yd (340 -> 323), and duration proves 30 min (1800000 ms) duration and expiry."
+    "reason": "Settled Defect D-2: cost_ally_25yd proves real mana spend reduction on ally at 25 yd (Shadow Word: Pain 589: power 701 -> 716, -15 mana = -5%), cost_out_of_range proves unchanged spend at 40 yd (701 -> 701), cost_raid_subgroup2 proves -5% spell_power_cost on raid subgroup 2 ally5 at 25 yd (340 -> 323), and duration proves 30 min (1800000 ms) duration and expiry."
   },
   {
     "spell": 681160,
@@ -7989,7 +7989,7 @@
     "labels": [
       "681160 behaviour_metric_delta devotion_exclusivity"
     ],
-    "reason": "Pending live pair run. devotion_exclusivity proves casting Greater Devotion of Grace 681160 replaces existing Greater Devotion of Dawn 572390 from the same Sun Cleric on grouped ally (572390: 1 -> 0, 681160: 0 -> 1)."
+    "reason": "devotion_exclusivity proves casting 681160 replaces caster's prior Devotion on ally while preserving a second Sun Cleric (ally2)'s Greater Devotion of Radiance 575045 on ally (1 -> 1)."
   },
   {
     "spell": 502396,
@@ -8254,13 +8254,22 @@
       {
         "claim": "preventing mounting,",
         "labels": [
-          "801524 behaviour_metric_delta mount_block"
+          "801524 mount_block 458 blocked",
+          "801524 mount_block 458 unmounted",
+          "801524 mount_block 458 allowed",
+          "801524 mount_block 458 mounted",
+          "801524 mount_block 458 held",
+          "801524 mount_block 458 dismounted"
         ]
       },
       {
         "claim": "fleeing,",
         "labels": [
-          "801524 behaviour_metric_delta prevent_flee_aura"
+          "801524 flee_block 11360 cast",
+          "801524 flee_block 11360 branded",
+          "801524 flee_block 11360 blocked",
+          "801524 flee_block 11360 held",
+          "801524 flee_block 11360 control"
         ]
       },
       {

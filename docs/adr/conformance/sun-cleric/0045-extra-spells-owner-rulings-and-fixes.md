@@ -46,10 +46,12 @@ class-kit snapshots, and server source inspection:
     `ProcCharges = 0`, and zero C++ or SQL wiring; taking damage while below `50%` health never triggered `706442`.
   - `706442` (`SPELL_EFFECT_HEAL_PCT`, `SpellFamilyName = 33`, `AttributesEx3 = 0`) had `BasePoints = 9`, `DieSides = 1`
     (`10%` max health, conflicting with the buff tooltip's `15%`).
-- **Owner ruling (`Q-sc-ex-3`, 2026-11-27):** `buff_15_pct` — set `706442` `Effect[0].BasePoints = 14` (`15%` max
-  health; keep `AttributesEx3 = 0` so class heal tuning `887015` `-20%` applies consistently with `806479` Solar
-  Prayer), register `706442` in `ClientSpellPatches` so `$706442s1%` displays `15%`, and trigger `706442` once per
-  `800622` application from `sun_cleric_scaling::OnDamage` when `player->HealthBelowPctDamaged(50, damage)`.
+- **Owner ruling (`Q-sc-ex-3`, 2026-11-27):** `buff_15_pct` — set `706442` `DmgClass = SPELL_DAMAGE_CLASS_MAGIC`
+  (matching `806479` Solar Prayer; raw `Spell.dbc` had `DmgClass = 0`, which caused `Unit::SpellHealingBonusDone` to
+  return early before class healing modifiers) and `Effect[0].BasePoints = 14` (`15%` max health, `AttributesEx3 = 0`,
+  yielding `15% * 0.8 = 12%` net under class heal tuning `887015` `-20%`), register `706442` in `ClientSpellPatches` so
+  `$706442s1%` displays `15%`, and trigger `706442` once per `800622` application from `sun_cleric_scaling::OnDamage`
+  when `player->HealthBelowPctDamaged(50, damage)`.
 
 ### 4. `Q-sc-ex-4` (`all_schools_and_auto`) — Dawnfall (`806118`)
 
@@ -159,7 +161,9 @@ class-kit snapshots, and server source inspection:
 3. **`src/server/coa/AscensionSunClericContracts.cpp`:**
    - Keep `Named(info, 500141)` setting `Effects[0].ChainTarget = 5` (`Q-sc-ex-1`).
    - In `Named(info, 800231)`, set `info->Effects[EFFECT_0].BonusMultiplier = 0.0f` (`Q-sc-ex-2`).
-   - For `706442`, set `info->Effects[EFFECT_0].BasePoints = 14` (`15%`, `AttributesEx3` unchanged) and call
+   - For `706442`, set `info->DmgClass = SPELL_DAMAGE_CLASS_MAGIC` (matching `806479` Solar Prayer so class heal tuning
+     `887015` `-20%` applies in `Unit::SpellHealingBonusDone`, yielding `15% * 0.8 = 12%` net) and
+     `info->Effects[EFFECT_0].BasePoints = 14` (`15%`, `AttributesEx3` unchanged), and call
      `Ascension::ClientSpellPatches::Instance().Register(id)` (`Q-sc-ex-3`).
    - In `sun_cleric_scaling::OnDamage`, wire `800622` -> `706442` once per aura application via
      `chosen->GetScriptValue(706442)` and `player->HealthBelowPctDamaged(50, damage)` (`Q-sc-ex-3`).

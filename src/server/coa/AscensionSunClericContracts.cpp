@@ -265,6 +265,7 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(217);
     if (id == 706442)
     {
+        info->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
         info->Effects[EFFECT_0].BasePoints = 14;
         Ascension::ClientSpellPatches::Instance().Register(id);
     }

@@ -10015,6 +10015,48 @@ class FleeBlockScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, {**self.entry, 'flee_health_pct': 0})
 
+    def test_opt_in_aura_spell_reads_the_triggered_aura_for_branded_and_held(self):
+        sun_cleric = load_class_file(27)
+        entry = {'spell': 801524, 'name': 'Chains of Light (fleeing)', 'kind': 'flee_block', 'quote': 'fleeing,',
+                 'creature_entry': self.CUB, 'flee_health_pct': 10, 'reads': 5, 'read_interval_ms': 250,
+                 'aura_spell': 806697}
+        scenario, expectations = behaviour_scenario(sun_cleric, entry)
+        steps = run.validate(scenario)['steps']
+        branded = next(step for step in steps if step.get('label') == '801524 flee_block 11360 branded')
+        held = next(step for step in steps if step.get('label') == '801524 flee_block 11360 held')
+        self.assertEqual((branded['spell'], held['spell']), (806697, 806697))
+        self.assertEqual([e.rank_id for e in expectations if e.label.endswith(('branded', 'held'))], [806697, 806697])
+
+    def test_mount_block_opt_in_aura_spell_and_blocked_code(self):
+        sun_cleric = load_class_file(27)
+        entry = {'spell': 801524, 'name': 'Chains of Light (mounting)', 'kind': 'mount_block',
+                 'quote': 'preventing mounting,', 'mount_spell': 458, 'aura_spell': 806697, 'blocked_code': 146}
+        scenario, expectations = behaviour_scenario(sun_cleric, entry)
+        steps = run.validate(scenario)['steps']
+        brands = [step for step in steps if step['action'] == 'set_aura' and step['spell'] == 806697]
+        self.assertEqual([step['stacks'] for step in brands], [1, 0, 1])
+        blocked = next(e for e in expectations if e.label.endswith('blocked'))
+        self.assertEqual(blocked.displayed, '146')
+
+    def test_hit_ratio_second_hit_expected_casts_twice_per_trial_without_reapplying_arm_casts(self):
+        sun_cleric = load_class_file(27)
+        entry = {'spell': 806121, 'name': 'Judgement Day (next hit)', 'kind': 'hit_ratio',
+                 'label_suffix': 'next_damage_bonus',
+                 'quote': 'Affected enemies take $570125s2% increased damage from your next instance of damage.',
+                 'expected': 1.5, 'second_hit_expected': 1.0, 'observe_spell': 502396, 'learn': [502396],
+                 'target': 'dummy', 'dummy_distance': 5, 'cast_power': 1363,
+                 'control': {'auras': [[823764, 1]]},
+                 'treatment': {'learn': [806121], 'casts': [{'spell': 806121, 'target': 'caster'}],
+                               'auras': [[823764, 1]]},
+                 'critical': False, 'trials': 5, 'void_on_cast_failure': True}
+        scenario, [expectation] = behaviour_scenario(sun_cleric, entry)
+        steps = run.validate(scenario)['steps']
+        self.assertEqual(len(cast_indices(steps, 806121)), 5)
+        self.assertEqual(len(cast_indices(steps, 502396)), 20)
+        self.assertEqual(expectation.model['second_hit']['expected'], 1.0)
+        self.assertEqual(len(expectation.model['second_hit']['first_pairs']['treatment']), 5)
+        self.assertEqual(len(expectation.model['second_hit']['second_pairs']['treatment']), 5)
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class SelfObservedPeriodicHitRatioTests(unittest.TestCase):

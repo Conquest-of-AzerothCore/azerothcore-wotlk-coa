@@ -945,5 +945,54 @@ class AllyArmAttackSwingsAndPerAllyHealthTests(unittest.TestCase):
                     'allies': 2, 'ally_auras': [[527023, 1, 'ally', bad_unit]]}))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AllyArmSortedRatiosTests(unittest.TestCase):
+    PRIMARY = {'actors': ['caster'], 'metric': 'spell_heal_total', 'count_metric': 'spell_heal_count',
+               'fields': {'spell': 572035, 'target': 'ally'}, 'source': 'primary heal'}
+    BOUNCE_A = {'actors': ['caster'], 'metric': 'spell_heal_total', 'count_metric': 'spell_heal_count',
+                'fields': {'spell': 803816, 'target': 'caster'}, 'source': 'bounce A'}
+    BOUNCE_B = {'actors': ['caster'], 'metric': 'spell_heal_total', 'count_metric': 'spell_heal_count',
+                'fields': {'spell': 803816, 'target': 'ally2'}, 'source': 'bounce B'}
+    SORTED = {'numerators': [1, 2], 'denominator': 0, 'expected': [0.90, 0.81], 'tolerance': 0.03,
+              'source': '90% decay per bounce'}
+
+    def entry(self) -> dict:
+        return steed_entry(ally_arm={'allies': 2, 'arms': [self.PRIMARY, self.BOUNCE_A, self.BOUNCE_B],
+                                     'sorted_ratios': [self.SORTED]})
+
+    def test_descending_ratios_accept_either_order_and_reject_equal_bounces(self):
+        scenario, [expectation] = behaviour_scenario(templar(), self.entry())
+        run.validate(scenario)
+        model = expectation.model
+        arms = model['ally_arm']['arms']
+
+        def values_for(bounce_a: float, bounce_b: float) -> dict:
+            return {model['before_label']: float(model['before_expected']),
+                    model['after_label']: float(model['expected']),
+                    arms[0]['before'][0]: 0.0, arms[0]['after'][0]: 1000.0,
+                    arms[0]['count_before'][0]: 0.0, arms[0]['count_after'][0]: 1.0,
+                    arms[1]['before'][0]: 0.0, arms[1]['after'][0]: bounce_a,
+                    arms[1]['count_before'][0]: 0.0, arms[1]['count_after'][0]: 1.0,
+                    arms[2]['before'][0]: 0.0, arms[2]['after'][0]: bounce_b,
+                    arms[2]['count_before'][0]: 0.0, arms[2]['count_after'][0]: 1.0}
+
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values_for(900.0, 810.0)),
+                                         expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values_for(810.0, 900.0)),
+                                         expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values_for(855.0, 855.0)),
+                                         expectation).status, 'alert')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values_for(1000.0, 1000.0)),
+                                         expectation).status, 'alert')
+
+    def test_malformed_sorted_ratios_are_refused(self):
+        base = {'allies': 2, 'arms': [self.PRIMARY, self.BOUNCE_A, self.BOUNCE_B]}
+        for bad in ([], [{**self.SORTED, 'numerators': [1]}], [{**self.SORTED, 'numerators': [1, 1]}],
+                    [{**self.SORTED, 'numerators': [0, 1]}], [{**self.SORTED, 'expected': [0.81, 0.90]}],
+                    [{**self.SORTED, 'expected': [0.90]}], [{**self.SORTED, 'tolerance': -0.01}]):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                parse({**base, 'sorted_ratios': bad})
+
+
 if __name__ == '__main__':
     unittest.main()

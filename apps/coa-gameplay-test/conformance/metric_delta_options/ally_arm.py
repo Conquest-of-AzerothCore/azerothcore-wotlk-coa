@@ -18,8 +18,8 @@ CASTER_SCOPED_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effectiv
 CASTER_ENTRY_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total'}
 CONTROL_LABEL = 'timed no-cast control'
 EXPIRE_LABEL = 'let the first effect fully expire'
-KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios', 'reach_source', 'ally_attacks',
-        'ally_strikes', 'ally_class', 'ally_power', 'ally_auras'}
+KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios', 'sorted_ratios', 'reach_source',
+        'ally_attacks', 'ally_strikes', 'ally_class', 'ally_power', 'ally_auras'}
 MAX_POWERS = 7
 ALLY_ATTACK_KEYS = {'spell', 'power', 'source'}
 ALLY_ATTACK_SETTLE_MS = 2000
@@ -31,6 +31,7 @@ JUDGED_ARM_KEYS = ('before_expected', 'expected', 'tolerance')
 RATIO_ONLY_ARM_KEYS = ARM_KEYS - set(JUDGED_ARM_KEYS) - {'precondition'} | {'count_metric'}
 ALLY_CAST_KEYS = {'spell', 'spell_go_per_cast', 'source'}
 RATIO_KEYS = {'numerator', 'denominator', 'expected', 'tolerance', 'source'}
+SORTED_RATIO_KEYS = {'numerators', 'denominator', 'expected', 'tolerance', 'source'}
 FLOOR_COUNT_KEY = 'floor_count'
 DISCRIMINATED_DEVIATION = 0.10
 
@@ -64,6 +65,15 @@ class Ratio:
 
 
 @dataclass(frozen=True)
+class SortedRatio:
+    numerators: tuple[int, ...]
+    denominator: int | tuple[int, ...]
+    expected: tuple[float, ...]
+    tolerance: float
+    source: str
+
+
+@dataclass(frozen=True)
 class AllyArm:
     allies: int
     ally_health: tuple[int, int] | None
@@ -80,6 +90,7 @@ class AllyArm:
     ally_power: tuple[tuple[int, int], ...] = ()
     ally_health_map: tuple[tuple[str, int, int], ...] = ()
     ally_auras: tuple[tuple[int, int, str, str], ...] = ()
+    sorted_ratios: tuple[SortedRatio, ...] = ()
 
     @property
     def ally_ids(self) -> tuple[str, ...]:
@@ -191,6 +202,40 @@ def denominator_arms(denominator) -> tuple:
     return (denominator,)
 
 
+def parse_sorted_ratio(raw, arms: int) -> SortedRatio:
+    if not isinstance(raw, dict) or set(raw) != SORTED_RATIO_KEYS:
+        raise ValueError(f'an ally_arm sorted_ratio is {sorted(SORTED_RATIO_KEYS)}, not {raw!r}')
+    numerators = raw['numerators']
+    if (not isinstance(numerators, list) or len(numerators) < 2
+            or not all(type(index) is int and 0 <= index < arms for index in numerators)
+            or len(set(numerators)) != len(numerators)):
+        raise ValueError(f'ally_arm sorted_ratio numerators is two or more distinct arm indices below {arms}, '
+                         f'not {numerators!r}')
+    denom = raw['denominator']
+    if isinstance(denom, list):
+        if (len(denom) < 2 or not all(type(index) is int and 0 <= index < arms for index in denom)
+                or len(set(denom)) != len(denom)):
+            raise ValueError(f'ally_arm sorted_ratio denominator list is two or more distinct arm indices below '
+                             f'{arms}, not {denom!r}')
+        parsed_denom: int | tuple[int, ...] = tuple(denom)
+    elif type(denom) is int and 0 <= denom < arms:
+        parsed_denom = denom
+    else:
+        raise ValueError(f'ally_arm sorted_ratio denominator is an arm index or list below {arms}, not {denom!r}')
+    if set(numerators) & set(denominator_arms(parsed_denom)):
+        raise ValueError(f'ally_arm sorted_ratio numerators {numerators} overlap denominator {denom}')
+    expected = raw['expected']
+    if (not isinstance(expected, list) or len(expected) != len(numerators)
+            or not all(number(value) and value > 0 for value in expected)
+            or list(expected) != sorted(expected, reverse=True)):
+        raise ValueError(f'ally_arm sorted_ratio expected is {len(numerators)} descending positive numbers, '
+                         f'not {expected!r}')
+    if not number(raw['tolerance']) or raw['tolerance'] < 0 or not stated_text(raw['source']):
+        raise ValueError(f'ally_arm sorted_ratio needs tolerance >= 0 and non-empty source, not {raw!r}')
+    return SortedRatio(tuple(numerators), parsed_denom, tuple(float(value) for value in expected),
+                       float(raw['tolerance']), raw['source'])
+
+
 def parse_health_pair(raw) -> tuple[int, int]:
     if (not isinstance(raw, list) or len(raw) != 2
             or not all(type(value) is int for value in raw) or not 1 <= raw[0] <= raw[1]):
@@ -295,10 +340,16 @@ def parse(raw) -> AllyArm:
     ratios = raw.get('ratios', [])
     if not isinstance(ratios, list) or ('ratios' in raw and not ratios):
         raise ValueError(f'ally_arm ratios is a non-empty list, not {ratios!r}')
+    sorted_ratios = raw.get('sorted_ratios', [])
+    if not isinstance(sorted_ratios, list) or ('sorted_ratios' in raw and not sorted_ratios):
+        raise ValueError(f'ally_arm sorted_ratios is a non-empty list, not {sorted_ratios!r}')
     parsed_arms = tuple(parse_arm(arm) for arm in arms)
     parsed_ratios = tuple(parse_ratio(ratio, len(arms)) for ratio in ratios)
-    named = {index for ratio in parsed_ratios
-             for index in (ratio.numerator, *denominator_arms(ratio.denominator), ratio.floor_count)}
+    parsed_sorted_ratios = tuple(parse_sorted_ratio(ratio, len(arms)) for ratio in sorted_ratios)
+    named = ({index for ratio in parsed_ratios
+              for index in (ratio.numerator, *denominator_arms(ratio.denominator), ratio.floor_count)}
+             | {index for ratio in parsed_sorted_ratios
+                for index in (*ratio.numerators, *denominator_arms(ratio.denominator))})
     if any(index is not None and parsed_arms[index].precondition for index in named):
         raise ValueError('an ally_arm ratio names behaviour arms only, never a precondition arm')
     unnamed = [index for index, arm in enumerate(parsed_arms) if arm.ratio_only and index not in named]
@@ -310,8 +361,10 @@ def parse(raw) -> AllyArm:
     if floors:
         raise ValueError(f'ally_arm ratio floor_count {floors} names a judged arm of its own ratio: name a third arm '
                          f'that counts the events, or a ratio-only arm, whose count_metric is then used')
-    uncounted = [index for ratio in parsed_ratios if isinstance(ratio.denominator, tuple)
-                 for index in ratio.denominator if not parsed_arms[index].ratio_only]
+    uncounted = ([index for ratio in parsed_ratios if isinstance(ratio.denominator, tuple)
+                  for index in ratio.denominator if not parsed_arms[index].ratio_only]
+                 + [index for ratio in parsed_sorted_ratios if isinstance(ratio.denominator, tuple)
+                    for index in ratio.denominator if not parsed_arms[index].ratio_only])
     if uncounted:
         raise ValueError(f'ally_arm ratio denominator lists name arms {uncounted} that read no count_metric, so they '
                          f'cannot show their events landed')
@@ -320,7 +373,7 @@ def parse(raw) -> AllyArm:
                    tuple(dict.fromkeys(cast for cast in stated if cast[1] > 1)),
                    parsed_ratios, raw.get('reach_source', ''),
                    tuple(parse_ally_attack(attack) for attack in attacks), 'ally_strikes' in raw, strike_health,
-                   ally_class, tuple(tuple(pair) for pair in power), health_map, ally_auras)
+                   ally_class, tuple(tuple(pair) for pair in power), health_map, ally_auras, parsed_sorted_ratios)
 
 
 def check(spec, ally):
@@ -663,6 +716,11 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
             contract += (f' Its low end widens by arm {ratio.floor_count}\'s delta over arm {ratio.denominator}\'s, '
                          f'one unit per counted event truncated to an integer, and the ratio is unmeasured when the '
                          f'widened band no longer excludes {DISCRIMINATED_DEVIATION:.0%} below expected.')
+    for ratio in ally.sorted_ratios:
+        over = (f'arm {ratio.denominator}' if not isinstance(ratio.denominator, tuple)
+                else f'the sum of arms {list(ratio.denominator)}')
+        contract += (f' Sorted ratios: arms {list(ratio.numerators)} over {over}, sorted descending, expected '
+                     f'{[round(v, 4) for v in ratio.expected]} within {ratio.tolerance:g} ({ratio.source}).')
     scenario['contract'] += contract
 
 
@@ -672,6 +730,11 @@ def model(spec, ally: AllyArm) -> dict:
                           'tolerance': ratio.tolerance, 'source': ratio.source,
                           **({FLOOR_COUNT_KEY: ratio.floor_count} if ratio.floor_count is not None else {})}
                          for ratio in ally.ratios]}
+    sorted_ratios = {'sorted_ratios': [
+        {'numerators': list(ratio.numerators),
+         'denominator': ratio.denominator if not isinstance(ratio.denominator, tuple) else list(ratio.denominator),
+         'expected': list(ratio.expected), 'tolerance': ratio.tolerance, 'source': ratio.source}
+        for ratio in ally.sorted_ratios]}
     strikes = {'strike_reads': [[strike_label(spec, moment, unit, 'start'), strike_label(spec, moment, unit, 'end'),
                                  spec.strike.count] for moment in ('before', 'after') for unit in ally.ally_ids]
                } if ally.ally_strikes else {}
@@ -680,7 +743,8 @@ def model(spec, ally: AllyArm) -> dict:
                    **({'ally_class': ally.ally_class} if ally.ally_class is not None else {}),
                    **({'ally_power': [list(pair) for pair in ally.ally_power]} if ally.ally_power else {}),
                    'arms': arms,
-                   **(ratios if ally.ratios else {}), **strikes}}
+                   **(ratios if ally.ratios else {}),
+                   **(sorted_ratios if ally.sorted_ratios else {}), **strikes}}
 
 
 def arm_model(spec, index: int, arm: Arm) -> dict:
@@ -812,6 +876,30 @@ def verdict(verdict, run, ally: dict):
         texts.append(f'ally ratio arm {ratio["numerator"]} / arm {ratio["denominator"]}: {numerator:g} / '
                      f'{denominator:g} = {read} (expected {ratio["expected"]:g} {band}): '
                      f'{"ok" if held else "off"} ({ratio["source"]})')
+    for ratio in ally.get('sorted_ratios', []):
+        denominator = sum(deltas[index] for index in denominator_arms(ratio['denominator']))
+        arms = {*ratio['numerators'], *denominator_arms(ratio['denominator'])}
+        unlanded = sorted(index for index in arms & uncounted)
+        if unlanded or (not denominator and arms & {index for index, arm in enumerate(ally['arms'])
+                                                    if 'count_metric' in arm}):
+            undiscriminated = True
+            texts.append(f'ally sorted ratios arms {ratio["numerators"]} / arm {ratio["denominator"]}: unmeasured, '
+                         + (f'no event of ratio-only arm(s) {unlanded} landed' if unlanded
+                            else 'the denominator arm did not move'))
+            continue
+        if not denominator:
+            off = True
+            texts.append(f'ally sorted ratios arms {ratio["numerators"]} / arm {ratio["denominator"]}: '
+                         f'the denominator arm did not move: off ({ratio["source"]})')
+            continue
+        measured = sorted((deltas[index] / denominator for index in ratio['numerators']), reverse=True)
+        expected = ratio['expected']
+        tolerance = ratio['tolerance']
+        held = all(abs(actual - target) <= tolerance for actual, target in zip(measured, expected))
+        off = off or not held
+        texts.append(f'ally sorted ratios arms {ratio["numerators"]} / arm {ratio["denominator"]}: '
+                     f'{[round(v, 4) for v in measured]} (expected {[round(v, 4) for v in expected]} '
+                     f'within {tolerance:g}): {"ok" if held else "off"} ({ratio["source"]})')
     explanation = '; '.join([verdict.explanation, *texts])
     status = 'alert' if off else 'unmeasured' if undiscriminated else verdict.status
     return replace(verdict, status=status, explanation=explanation)
