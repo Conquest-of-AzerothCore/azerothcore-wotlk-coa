@@ -3,6 +3,7 @@
 #include "ManastormMgr.h"
 #include "ManastormPotionClient.h"
 #include "AscensionManastormGadgets.h"
+#include "AscensionRunemasterEchoes.h"
 
 #include "ObjectAccessor.h"
 #include "Creature.h"
@@ -2955,10 +2956,13 @@ namespace
         if (!unit || !unit->IsAlive() || !unit->IsInWorld())
             return;
 
-        if (Aura* aura = unit->GetAura(SPELL_SAFETY_BUBBLE_HELPER))
-            aura->RefreshDuration();
-        else
+        if (!unit->HasAura(SPELL_SAFETY_BUBBLE_HELPER))
             unit->CastSpell(unit, SPELL_SAFETY_BUBBLE_HELPER, true);
+        if (Aura* aura = unit->GetAura(SPELL_SAFETY_BUBBLE_HELPER); aura && aura->GetMaxDuration() != -1)
+        {
+            aura->SetMaxDuration(-1);
+            aura->SetDuration(-1);
+        }
     }
 
     void ShelterAtStageEntrance(Player* player)
@@ -6525,7 +6529,10 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         auto const recovery = run->StageRecoveries.find(player->GetGUID().GetCounter());
         if (recovery != run->StageRecoveries.end() &&
             recovery->second.DestinationInstanceId == run->GetInstanceId())
+        {
             player->RemoveAllSpellCooldown();
+            ResetAscensionRunemasterEchoesCooldown(player);
+        }
         else
             for (auto const& gadget : Ascension::Manastorm::Gadgets)
                 if (!gadget.passive && player->HasSpell(gadget.spell) &&

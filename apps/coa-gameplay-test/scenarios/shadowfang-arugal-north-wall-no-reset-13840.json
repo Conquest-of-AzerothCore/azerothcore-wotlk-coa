@@ -1,0 +1,236 @@
+{
+  "schema": 1,
+  "name": "Archmage Arugal keeps fighting a player along the north wall of his lair (#13840, #14021)",
+  "contract": [
+    "#13840 / #14021: Arugal (4275) resets when his target leaves his lair polygon, on every difficulty. #13311 moved the south, west and east edges out, but the north and north-east edges still ran 0.09-0.26 yd outside the walkable navmesh of the north ledge and the floor below it, and the ground reaches about 0.5 yd past the navmesh, so players running along the north wall to reach him after a Shadow Port reset him.",
+    "p stands 0.3 yd outside the old edge at three spots: the north ledge (-78.19, 2161.83), the north-east corner (-67.93, 2156.28) and the north floor (-95.98, 2168.84, z 145.6). Each spot has ground under it. A summoned Arugal runs the same SmartAI and leash as his spawn.",
+    "Expected: Arugal stays in combat and visible while p moves between the three spots. shadowfang-arugal-resets-when-target-leaves-lair still covers the reset outside the lair."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 33,
+      "x": -76.0,
+      "y": 2152.0,
+      "z": 155.8,
+      "o": 3.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: p is in a Normal Shadowfang Keep",
+      "metric": "map_difficulty",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where Shadowfang Keep is spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: ledge floor is under the north ledge spot",
+      "metric": "point_ground_gap",
+      "map": 33,
+      "x": -78.19,
+      "y": 2161.83,
+      "z": 156.5,
+      "min": 0,
+      "max": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: ledge floor is under the north-east corner spot",
+      "metric": "point_ground_gap",
+      "map": 33,
+      "x": -67.93,
+      "y": 2156.28,
+      "z": 156.5,
+      "min": 0,
+      "max": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: lair floor is under the north floor spot",
+      "metric": "point_ground_gap",
+      "map": 33,
+      "x": -95.98,
+      "y": 2168.84,
+      "z": 146.3,
+      "min": 0,
+      "max": 2
+    },
+    {
+      "action": "summon",
+      "label": "Arugal appears on open ledge floor inside the lair, 3 yd east of p",
+      "actor": "p",
+      "as": "arugal",
+      "entry": 4275,
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "arugal"
+    },
+    {
+      "action": "assert",
+      "actor": "arugal",
+      "label": "CONTROL: Arugal is in combat",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "relocate",
+      "label": "p steps onto the north ledge by the wall",
+      "actor": "p",
+      "dx": -2.19,
+      "dy": 9.83
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: p is still on the north ledge spot",
+      "metric": "point_distance_2d",
+      "x": -78.19,
+      "y": 2161.83,
+      "max": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "arugal",
+      "label": "DISCRIMINATING: Arugal is still in combat with p on the north ledge",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Arugal did not reset and vanish (north ledge)",
+      "metric": "nearby_creature_at_client",
+      "entry": 4275,
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "label": "p moves into the north-east corner",
+      "actor": "p",
+      "dx": 10.26,
+      "dy": -5.55
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: p is in the north-east corner spot",
+      "metric": "point_distance_2d",
+      "x": -67.93,
+      "y": 2156.28,
+      "max": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "arugal",
+      "label": "DISCRIMINATING: Arugal is still in combat with p in the north-east corner",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Arugal did not reset and vanish (north-east corner)",
+      "metric": "nearby_creature_at_client",
+      "entry": 4275,
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "label": "p heads west along the north wall",
+      "actor": "p",
+      "dx": -14.025,
+      "dy": 6.28,
+      "dz": -5.1
+    },
+    {
+      "action": "relocate",
+      "label": "p drops to the north floor along the wall",
+      "actor": "p",
+      "dx": -14.025,
+      "dy": 6.28,
+      "dz": -5.1
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: p is on the north floor spot",
+      "metric": "point_distance_2d",
+      "x": -95.98,
+      "y": 2168.84,
+      "max": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "arugal",
+      "label": "DISCRIMINATING: Arugal is still in combat with p on the north floor",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Arugal did not reset and vanish (north floor)",
+      "metric": "nearby_creature_at_client",
+      "entry": 4275,
+      "equals": 1
+    }
+  ]
+}

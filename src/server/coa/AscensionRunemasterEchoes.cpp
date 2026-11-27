@@ -478,6 +478,19 @@ void SendAscensionRunemasterEchoesCooldown(Player* player)
     SendCooldownProjection(player, active);
 }
 
+void ResetAscensionRunemasterEchoesCooldown(Player* player)
+{
+    if (!IsRunemaster(player) || !HasContract())
+        return;
+    bool const hasLedger = player->FindPlayerSettings(LEDGER_KEY) != nullptr;
+    if (!hasLedger && !player->FindPlayerSettings(POOL_KEY))
+        return;
+    player->RestoreSpellCharge(ECHOES_ZENITH, 255);
+    if (hasLedger)
+        Store(player, Ledger{});
+    SendAscensionRunemasterEchoesCooldown(player);
+}
+
 void AddAscensionRunemasterEchoesScripts()
 {
     RegisterSpellScript(spell_ascension_runemaster_echoes);

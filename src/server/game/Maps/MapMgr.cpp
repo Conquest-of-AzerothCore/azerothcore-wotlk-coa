@@ -455,6 +455,28 @@ void MapMgr::Update(uint32 diff)
         }
     }
 
+    auto const UpdateScriptedPrivateWorldMaps = [this, diff](uint32 mapDiff)
+    {
+        for (auto privateItr = _scriptedPrivateWorldMaps.begin(); privateItr != _scriptedPrivateWorldMaps.end();)
+        {
+            Map* map = privateItr->second;
+            if (!map->HavePlayers() && map->CanUnload(mapDiff))
+            {
+                map->UnloadAll();
+                delete map;
+                privateItr = _scriptedPrivateWorldMaps.erase(privateItr);
+                continue;
+            }
+
+            if (m_updater.activated())
+                m_updater.schedule_update(*map, mapDiff, diff);
+            else
+                map->Update(mapDiff, diff);
+
+            ++privateItr;
+        }
+    };
+
     if (GameTime::IsSimulated())
     {
         bool const full = i_timer[3].Passed();
@@ -467,12 +489,17 @@ void MapMgr::Update(uint32 diff)
                 map->Update(t_diff, diff);
         }
 
+        UpdateScriptedPrivateWorldMaps(t_diff);
+
         if (m_updater.activated())
             m_updater.wait();
 
         if (full)
         {
             for (auto const& [mapId, map] : i_maps)
+                map->DelayedUpdate(t_diff);
+
+            for (auto const& [key, map] : _scriptedPrivateWorldMaps)
                 map->DelayedUpdate(t_diff);
 
             i_timer[3].SetCurrent(0);
@@ -491,45 +518,7 @@ void MapMgr::Update(uint32 diff)
             iter->second->Update(uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff);
     }
 
-    for (auto privateItr =
-            _scriptedPrivateWorldMaps.begin();
-        privateItr !=
-            _scriptedPrivateWorldMaps.end();)
-    {
-        Map* map =
-            privateItr->second;
-
-        bool const full =
-            mapUpdateStep == 0;
-
-        uint32 const mapDiff =
-            uint32(
-                full
-                ? i_timer[0].GetCurrent()
-                : 0);
-
-        if (!map->HavePlayers() && map->CanUnload(mapDiff))
-        {
-            map->UnloadAll();
-            delete map;
-            privateItr =
-                _scriptedPrivateWorldMaps.erase(
-                    privateItr);
-            continue;
-        }
-
-        if (m_updater.activated())
-            m_updater.schedule_update(
-                *map,
-                mapDiff,
-                diff);
-        else
-            map->Update(
-                mapDiff,
-                diff);
-
-        ++privateItr;
-    }
+    UpdateScriptedPrivateWorldMaps(uint32(mapUpdateStep == 0 ? i_timer[0].GetCurrent() : 0));
 
     if (m_updater.activated())
         m_updater.wait();

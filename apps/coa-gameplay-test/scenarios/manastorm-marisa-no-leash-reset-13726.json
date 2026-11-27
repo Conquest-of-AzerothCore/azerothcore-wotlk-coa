@@ -1,0 +1,246 @@
+{
+  "schema": 1,
+  "name": "Manastorm Westfall: Marisa du'Paige keeps fighting a player who stops hitting her away from her home (#13726)",
+  "contract": [
+    "#13726: segment 526 runs the native dungeon stage Westfall (map 1769, InstanceType 1) as a scripted private copy of open-world map 0. There Creature::CanCreatureAttack applied the open-world leash: once 11 s pass without direct damage (GetLeashTimer for minlevel 18), a creature more than 50 yd from home that is not in melee range of its target can attack nobody and evades to full health. Marisa's Polymorph (10 s), Sleep (20 s) and Chains of Ice (20 s) and her 15% flee stop the player hitting her for that long while she casts from range, and the fight drifts down the tunnel towards the stage entrance about 70 yd from her spawn.",
+    "The lane stays out of phase 1, so the native Marisa (guid 89574) stays out of reach. An unowned Marisa (599, same SmartAI) is summoned at the native spawn, which becomes her home, walks 57 yd down the tunnel before any fight and roots herself there (42716, a plain root: not lost control, so it does not extend the leash). n engages her, takes her to 70% health, stops attacking and steps 17 yd back, out of melee range and about 40 yd from the stage-entrance shelter (game_tele 2103), so she casts at n from range. n then deals no damage for 16 s, past the 11 s window.",
+    "Expected: like on her native dungeon map, Marisa stays in combat and does not heal back to full."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "n",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 526"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the player entered a private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "n",
+      "guid": 89574
+    },
+    {
+      "action": "set_health",
+      "actor": "n",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "command",
+      "label": "GM mode keeps Marisa from engaging n while she walks",
+      "actor": "n",
+      "command": ".gm on"
+    },
+    {
+      "action": "summon",
+      "label": "An unowned Marisa appears at the native spawn, her home",
+      "actor": "n",
+      "as": "marisa",
+      "entry": 599,
+      "distance": 1,
+      "unowned": true
+    },
+    {
+      "action": "move_point",
+      "label": "Out of combat, Marisa walks 57 yd down the tunnel towards the stage entrance",
+      "actor": "marisa",
+      "dx": 18.23,
+      "dy": -54.15
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Marisa arrived more than 50 yd from her home, still out of combat",
+      "actor": "n",
+      "metric": "nearby_creature_count",
+      "entry": 599,
+      "min_home_distance": 50,
+      "within_ms": 15000,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "marisa",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Marisa roots herself where she stands, so the fight stays more than 50 yd from her home",
+      "actor": "marisa",
+      "spell": 42716,
+      "target": "marisa",
+      "triggered": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Marisa is rooted",
+      "actor": "marisa",
+      "metric": "rooted",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "relocate",
+      "label": "n follows down the tunnel",
+      "actor": "n",
+      "dx": 5.525,
+      "dy": -16.41,
+      "dz": -1.005
+    },
+    {
+      "action": "relocate",
+      "actor": "n",
+      "dx": 5.525,
+      "dy": -16.41,
+      "dz": -1.005
+    },
+    {
+      "action": "relocate",
+      "actor": "n",
+      "dx": 5.525,
+      "dy": -16.41,
+      "dz": -1.005
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".gm off"
+    },
+    {
+      "action": "relocate_to_creature",
+      "actor": "n",
+      "entry": 599
+    },
+    {
+      "action": "attack",
+      "actor": "n",
+      "target": "marisa"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Marisa is in combat with n",
+      "actor": "marisa",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "n"
+    },
+    {
+      "action": "set_health_pct",
+      "actor": "n",
+      "target": "marisa",
+      "pct": 70
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Marisa is at 70% health",
+      "actor": "marisa",
+      "metric": "health_pct",
+      "min": 65,
+      "max": 75
+    },
+    {
+      "action": "relocate",
+      "label": "n steps back up the tunnel, out of melee range",
+      "actor": "n",
+      "dx": -5.525,
+      "dy": 16.41,
+      "dz": 1.005
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: n stands well outside the 8 yd stage-entrance shelter",
+      "actor": "n",
+      "metric": "point_distance_2d",
+      "x": -11242.1,
+      "y": 1473.88,
+      "min": 20
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Marisa casts from range, not in melee range, so chasing does not extend her leash",
+      "actor": "n",
+      "metric": "nearest_creature_distance",
+      "entry": 599,
+      "radius": 40,
+      "min": 10
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the fight stays more than 50 yd from Marisa's home",
+      "actor": "n",
+      "metric": "nearby_creature_count",
+      "entry": 599,
+      "min_home_distance": 50,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: n was not sheltered at the stage entrance",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Marisa is still in combat after 16 s without damage",
+      "actor": "marisa",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Marisa is still more than 50 yd from her home",
+      "actor": "n",
+      "metric": "nearby_creature_count",
+      "entry": 599,
+      "min_home_distance": 50,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Marisa did not heal back to full",
+      "actor": "marisa",
+      "metric": "health_pct",
+      "max": 90
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm stop"
+    }
+  ]
+}
