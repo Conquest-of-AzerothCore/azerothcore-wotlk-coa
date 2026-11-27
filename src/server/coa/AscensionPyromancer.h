@@ -61,7 +61,8 @@ void Accumulate(Player* player, Unit* target, uint32 id, uint32 total);
 uint32 Remaining(Aura const* aura);
 void AspectChain(Player* player, Unit* target, uint32 damage, uint32 remaining);
 void Aspect(Player* player, Unit* target, uint32 damage, bool guaranteed = false);
-void Summon(Player* player, uint32 entry, uint32 propertiesId, Position const& position, uint32 duration);
+void Summon(Player* player, uint32 entry, uint32 propertiesId, Position const& position, uint32 duration,
+            uint32 spellId);
 void PhoenixCommand(Player* player, Unit* target, bool dive);
 bool CanPhoenixCommand(Player* player, Unit* target, bool dive);
 void StartDash(Player* player);
