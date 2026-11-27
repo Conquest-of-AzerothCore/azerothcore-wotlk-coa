@@ -24,7 +24,10 @@ def method(source, signature):
 
 def main():
     rewards = (MODULE / 'ManastormRewards.cpp').read_text()
-    sources = [(MODULE / 'ManastormClientBridge.cpp', ['char const* ValidateEnter(']),
+    sources = [(MODULE / 'ManastormClientBridge.cpp', ['char const* ValidateEnter(',
+                'WorldPacket BuildProgressUpdate(', 'void ManastormClientBridge::SendProgression(',
+                'void ManastormClientBridge::SendGroupProgression(']),
+               (MODULE / 'ManastormProgression.cpp', ['bool ManastormProgression::IsDepthEnterable(']),
                (MODULE / 'ManastormRewards.cpp', ['bool ManastormRewards::LoadWeeklyCacheAllowance(',
                 'bool ManastormRewards::PrepareNormalCacheReward(',
                 'std::vector<ManastormRewardVisibilityRecord>\nManastormRewards::BuildVisibilityRecords('])]
@@ -41,6 +44,7 @@ def main():
         cpp.write_text((HERE / 'harness.cpp').read_text().replace('// ACTUAL_METHODS', methods).replace('struct ManastormWeeklyCacheAllowance;', allowance))
         flags = (['/nologo', '/std:c++20', '/EHsc', str(cpp), '/Fe' + str(exe)] if Path(compiler).stem.lower() == 'cl'
                  else ['-std=c++20', str(cpp), '-o', str(exe)])
+        flags.insert(1, ('/I' if Path(compiler).stem.lower() == 'cl' else '-I') + str(ROOT / 'src/server/coa'))
         subprocess.run([compiler, *flags], cwd=out, check=True, timeout=120)
         subprocess.run([str(exe)], cwd=out, check=True, timeout=30)
     migrations = [ROOT / 'data/sql/updates/pending_db_characters' / name for name in

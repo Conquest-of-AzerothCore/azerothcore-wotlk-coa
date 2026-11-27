@@ -6138,31 +6138,6 @@ ManastormRun* ManastormMgr::StartRun(
                 while (progressRows->NextRow());
             }
         }
-
-        if (!bypassCheckpoint)
-        {
-            for (ObjectGuid::LowType memberGuid : members)
-            {
-                if (memberGuid == ownerGuid)
-                    continue;
-
-                ManastormProgressionSnapshot memberSnapshot{};
-                auto const bestItr = memberBestDepths.find(memberGuid);
-                memberSnapshot.BestCompletedDepth = bestItr != memberBestDepths.end() ? bestItr->second : 0;
-                if (ManastormProgression::IsDepthEnterable(memberSnapshot, depth))
-                    continue;
-
-                if (!ManastormProgression::LoadSnapshot(memberGuid, mode, endgame, memberSnapshot, error))
-                    return nullptr;
-
-                if (!ManastormProgression::IsDepthEnterable(memberSnapshot, depth))
-                {
-                    error = "Every run member must unlock Manastorm checkpoint depth " +
-                        std::to_string(depth) + " before entering.";
-                    return nullptr;
-                }
-            }
-        }
     }
 
     ManastormGenerator generator;

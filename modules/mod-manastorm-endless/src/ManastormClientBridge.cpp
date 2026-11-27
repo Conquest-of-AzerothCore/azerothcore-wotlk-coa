@@ -81,6 +81,14 @@ namespace
         return true;
     }
 
+    WorldPacket BuildProgressUpdate(ObjectGuid subject, Ascension::Manastorm::Progress const& progress)
+    {
+        WorldPacket packet(ManastormNativeOpcode::ProgressUpdate, 104);
+        packet << subject.GetRawValue();
+        Ascension::Manastorm::WriteProgress(packet, progress);
+        return packet;
+    }
+
     bool LoadSlots(Player* player, Slots& slots)
     {
         // Reuse the already installed native loadout storage and prepared
@@ -538,13 +546,30 @@ void ManastormClientBridge::SendProgression(Player* player) const
     Ascension::Manastorm::Progress progress;
     if (!LoadProgress(player, progress))
         return;
-    WorldPacket packet(ManastormNativeOpcode::ProgressUpdate, 104);
-    packet << player->GetGUID().GetRawValue();
-    Ascension::Manastorm::WriteProgress(packet, progress);
-    if (Group* group = player->GetGroup())
-        group->BroadcastPacket(&packet, false);
-    else
+    ObjectGuid const subject = player->GetGUID();
+    WorldPacket const packet = BuildProgressUpdate(subject, progress);
+    Group* group = player->GetGroup();
+    if (!group)
+    {
         player->SendDirectMessage(&packet);
+        return;
+    }
+
+    if (!group->IsLeader(subject))
+    {
+        group->BroadcastPacket(&packet, false, -1, group->GetLeaderGUID());
+        return;
+    }
+
+    group->BroadcastPacket(&packet, false);
+    // The native queue intersects party progress. Give the leader's queue the same unlocks for each slot.
+    for (auto const& member : group->GetMemberSlots())
+    {
+        if (member.guid == subject)
+            continue;
+        WorldPacket const queueProgress = BuildProgressUpdate(member.guid, progress);
+        player->SendDirectMessage(&queueProgress);
+    }
 }
 
 void ManastormClientBridge::SendGroupProgression(Group* group) const
@@ -766,9 +791,14 @@ namespace
     {
     public:
         manastorm_native_group_script()
-            : GroupScript("manastorm_native_group_script", {GROUPHOOK_ON_ADD_MEMBER}) { }
+            : GroupScript("manastorm_native_group_script", {GROUPHOOK_ON_ADD_MEMBER, GROUPHOOK_ON_CHANGE_LEADER}) { }
 
         void OnAddMember(Group* group, ObjectGuid /*guid*/) override
+        {
+            ManastormClientBridge::Instance().SendGroupProgression(group);
+        }
+
+        void OnChangeLeader(Group* group, ObjectGuid /*newLeader*/, ObjectGuid /*oldLeader*/) override
         {
             ManastormClientBridge::Instance().SendGroupProgression(group);
         }
