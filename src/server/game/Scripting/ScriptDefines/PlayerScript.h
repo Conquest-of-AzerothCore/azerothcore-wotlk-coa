@@ -381,6 +381,11 @@ public:
 
     // Called when a player gains XP (before anything is given)
     virtual void OnPlayerGiveXP(Player* /*player*/, uint32& /*amount*/, Unit* /*victim*/, uint8 /*xpSource*/) { }
+    virtual void OnPlayerGiveXPWithGroupAverage(Player* player, uint32& amount, Unit* victim, uint8 xpSource,
+        double /*groupAverageLevel*/)
+    {
+        OnPlayerGiveXP(player, amount, victim, xpSource);
+    }
 
     // Level-up cap for Player::GiveXP. 0 = no restriction; a script returns the
     // highest level the player may reach right now (e.g. gate-1 for

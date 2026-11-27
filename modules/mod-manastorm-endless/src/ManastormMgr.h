@@ -82,7 +82,8 @@ public:
         Player* player,
         uint32& amount,
         Unit* victim,
-        uint8 xpSource);
+        uint8 xpSource,
+        double groupAverageLevel);
 
     void OnBeforeCreatureSelectLevel(
         Creature* creature,

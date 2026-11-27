@@ -143,7 +143,8 @@ void ScriptMgr::OnPlayerBeforeSendLoot(Player* player, ObjectGuid lootGuid, Loot
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_BEFORE_SEND_LOOT, script->OnPlayerBeforeSendLoot(player, lootGuid, loot));
 }
 
-void ScriptMgr::OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource)
+void ScriptMgr::OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource,
+    double groupAverageLevel)
 {
     if (amount > 0)
     {
@@ -153,7 +154,8 @@ void ScriptMgr::OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uin
                 double(std::numeric_limits<uint32>::max()))))
             : 0;
     }
-    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_GIVE_EXP, script->OnPlayerGiveXP(player, amount, victim, xpSource));
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_GIVE_EXP,
+        script->OnPlayerGiveXPWithGroupAverage(player, amount, victim, xpSource, groupAverageLevel));
 }
 
 uint8 ScriptMgr::GetMaxAllowedLevel(Player* player)

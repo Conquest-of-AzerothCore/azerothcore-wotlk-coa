@@ -7052,7 +7052,8 @@ void ManastormMgr::OnPlayerGiveXP(
     Player* player,
     uint32& amount,
     Unit* victim,
-    uint8 /*xpSource*/)
+    uint8 /*xpSource*/,
+    double groupAverageLevel)
 {
     if (!player ||
         !victim ||
@@ -7159,6 +7160,8 @@ void ManastormMgr::OnPlayerGiveXP(
         ManastormModuleConfig::ExperienceRate() *
         ManastormExperienceFormula::RaidSizeFactor(memberCount) *
         ManastormExperienceFormula::LevelGapFactor(player->GetLevel(), highestLevel, maxLevel) *
+        ManastormExperienceFormula::KillGroupLevelShareCap(
+            run->IsGroupRun(), player->GetLevel(), groupAverageLevel) *
         ManastormExperienceFormula::CombatContributionFactor(
             memberCount,
             run->GetMemberDamageDealt(playerGuid),

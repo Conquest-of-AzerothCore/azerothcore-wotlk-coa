@@ -339,7 +339,8 @@ public: /* PlayerScript */
     void OnPlayerMoneyChanged(Player* player, int32& amount);
     void OnPlayerBeforeLootMoney(Player* player, Loot* loot);
     void OnPlayerBeforeSendLoot(Player* player, ObjectGuid lootGuid, Loot* loot);
-    void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource);
+    void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource,
+        double groupAverageLevel = 0.0);
     uint8 GetMaxAllowedLevel(Player* player);
     bool OnPlayerHasNoBonusExperience(Player* player);
     bool OnPlayerHoldsTankOrHealerRole(Player const* player);

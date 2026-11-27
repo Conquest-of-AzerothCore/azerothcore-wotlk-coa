@@ -178,7 +178,7 @@ struct ManastormMgr
             ? candidate
             : nullptr;
     }
-    void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource);
+    void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource, double groupAverageLevel);
     void OnHeal(Unit* healer, Unit* receiver, uint32 gain);
 };
 
@@ -315,9 +315,9 @@ void SetRate(char const* value)
     ManastormModuleConfig::Load(true);
 }
 
-uint32 KillXP(ManastormMgr& mgr, Player& player, Creature& creature, uint32 amount)
+uint32 KillXP(ManastormMgr& mgr, Player& player, Creature& creature, uint32 amount, double groupAverageLevel = 0)
 {
-    mgr.OnPlayerGiveXP(&player, amount, &creature, 0);
+    mgr.OnPlayerGiveXP(&player, amount, &creature, 0, groupAverageLevel);
     return amount;
 }
 
@@ -447,7 +447,7 @@ int main()
     soloRun.SetState(ManastormRunState::Active);
 
     uint32 questXP = 1000;
-    mgr.OnPlayerGiveXP(&player, questXP, nullptr, 0);
+    mgr.OnPlayerGiveXP(&player, questXP, nullptr, 0, 0.0);
     CHECK(questXP == 1000);
     creature.mapId = 1;
     CHECK(KillXP(mgr, player, creature, 1000) == 1000);
@@ -561,30 +561,71 @@ int main()
     CHECK(FloorXP(experience, duoRun).empty());
     SetRate(nullptr);
     ally.flags = PLAYER_FLAGS_NO_XP_GAIN;
+    ally.level = 50;
+    CHECK((FloorXP(experience, duoRun) == std::vector<uint64>{ 2232 }));
     ally.level = 59;
-    CHECK(FloorXP(experience, duoRun).empty());
+    CHECK((FloorXP(experience, duoRun) == std::vector<uint64>{ 1307 }));
     ally.level = 30;
     CHECK((FloorXP(experience, duoRun) == std::vector<uint64>{ 2232 }));
     ally.flags = 0;
     ally.level = 60;
     CHECK(FloorXP(experience, duoRun).empty());
 
+    ManastormRun friendsFive = MakeRun({ 201, 202, 203, 204, 205 }, 1, 50);
+    friendsFive.SetGroupHealthMultiplier(3.4);
+    friendsFive.SetMemberXPBaseline(201, 0, 50);
+    friendsFive.SetMemberXPBaseline(202, 0, 50);
+    friendsFive.SetMemberXPBaseline(203, 0, 49);
+    friendsFive.SetMemberXPBaseline(204, 0, 48);
+    friendsFive.SetMemberXPBaseline(205, 0, 15);
+    friendsFive.RecordMemberDamageDealt(201, 10000);
+    friendsFive.RecordMemberDamageDealt(202, 10000);
+    friendsFive.RecordMemberDamageDealt(203, 10000);
+    friendsFive.RecordMemberDamageDealt(204, 10000);
+    friendsFive.RecordMemberDamageDealt(205, 10000);
+    Player f1({ 201 }, 50, 0, 43, 9, &privateMap);
+    Player f2({ 202 }, 50, 0, 43, 9, &privateMap);
+    Player f3({ 203 }, 49, 0, 43, 9, &privateMap);
+    Player f4({ 204 }, 48, 0, 43, 9, &privateMap);
+    Player f5({ 205 }, 15, 0, 43, 9, &privateMap);
+    connectedPlayers = { &f1, &f2, &f3, &f4, &f5 };
+    std::vector<uint64> const friendsFloor = FloorXP(experience, friendsFive);
+    CHECK((friendsFloor == std::vector<uint64>{ 1897, 1897, 1897, 1897, 670 }));
+
+    ManastormRun reverseBoost = MakeRun({ 301, 302, 303, 304, 305 }, 1, 55);
+    reverseBoost.SetMemberXPBaseline(301, 0, 55);
+    reverseBoost.SetMemberXPBaseline(302, 0, 10);
+    reverseBoost.SetMemberXPBaseline(303, 0, 10);
+    reverseBoost.SetMemberXPBaseline(304, 0, 10);
+    reverseBoost.SetMemberXPBaseline(305, 0, 10);
+    reverseBoost.RecordMemberDamageDealt(301, 10000);
+    reverseBoost.RecordMemberDamageDealt(302, 10000);
+    Player highMember({ 301 }, 55, 0, 43, 9, &privateMap);
+    Player lowMember({ 302 }, 10, 0, 43, 9, &privateMap);
+    mgr.run = &reverseBoost;
+    CHECK(KillXP(mgr, highMember, creature, 1000, 19.0) == 104);
+    CHECK(KillXP(mgr, lowMember, creature, 1000, 19.0) == 20);
+    CHECK(KillXP(mgr, highMember, creature, 1000, 32.5) == 177);
+    CHECK(KillXP(mgr, highMember, creature, 1000) == 300);
+
     ManastormRun carryLeave = MakeRun({ 101, 102 }, 500, 59);
-    carryLeave.SetMemberXPBaseline(101, 499, 59);
-    carryLeave.SetMemberXPBaseline(102, 0, 30);
+    carryLeave.SetMemberXPBaseline(101, 499, 60);
+    carryLeave.SetMemberXPBaseline(102, 0, 59);
     carryLeave.RecordMemberDamageDealt(101, 20000);
     carryLeave.RecordMemberDamageDealt(102, 100);
     CHECK(carryLeave.RemoveMember(101));
     CHECK(carryLeave.IsGroupRun());
     CHECK(carryLeave.GetStageMemberCount() == 2);
-    CHECK(carryLeave.GetHighestMemberLevel() == 59);
+    CHECK(carryLeave.GetHighestMemberLevel() == 60);
     CHECK(carryLeave.GetTotalStageDamageDealt() == 20100);
     CHECK(carryLeave.GetRecordedProgressDepth(102) == 1);
     carryLeave.AdvanceMemberPersonalDepths();
     CHECK(carryLeave.GetMemberPersonalBestDepth(102) == 1);
-    Player carried({ 102 }, 30, 0, 43, 9, &privateMap);
+    Player carried({ 102 }, 59, 0, 43, 9, &privateMap);
     connectedPlayers = { &carried };
     CHECK(FloorXP(experience, carryLeave).empty());
+    mgr.run = &carryLeave;
+    CHECK(KillXP(mgr, carried, creature, 1000) == 0);
 
     ManastormRun raidAfk = MakeRun({ 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 }, 1000);
     raidAfk.RecordMemberDamageDealt(12, 20000);
