@@ -260,7 +260,8 @@
       "metric": "spell_damage_count",
       "spell": 801269,
       "min": 50,
-      "label": "SETUP: Shifting Chaos AoE replicated across the 6 clustered dummies"
+      "max": 60,
+      "label": "SETUP: Shifting Chaos AoE replicated across the 6 clustered dummies (bounded [50, 60])"
     },
     {
       "action": "assert",
@@ -1210,7 +1211,8 @@
       "metric": "spell_damage_count",
       "spell": 801269,
       "min": 250,
-      "label": "SETUP: Shifting Chaos AoE fired throughout Phase 2 across the 6 clustered dummies"
+      "max": 540,
+      "label": "SETUP: Shifting Chaos AoE fired throughout Phase 2 across the 6 clustered dummies (bounded [250, 540])"
     }
   ]
 }
