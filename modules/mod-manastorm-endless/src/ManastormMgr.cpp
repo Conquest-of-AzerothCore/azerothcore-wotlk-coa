@@ -2955,10 +2955,13 @@ namespace
         if (!unit || !unit->IsAlive() || !unit->IsInWorld())
             return;
 
-        if (Aura* aura = unit->GetAura(SPELL_SAFETY_BUBBLE_HELPER))
-            aura->RefreshDuration();
-        else
+        if (!unit->HasAura(SPELL_SAFETY_BUBBLE_HELPER))
             unit->CastSpell(unit, SPELL_SAFETY_BUBBLE_HELPER, true);
+        if (Aura* aura = unit->GetAura(SPELL_SAFETY_BUBBLE_HELPER); aura && aura->GetMaxDuration() != -1)
+        {
+            aura->SetMaxDuration(-1);
+            aura->SetDuration(-1);
+        }
     }
 
     void ShelterAtStageEntrance(Player* player)
