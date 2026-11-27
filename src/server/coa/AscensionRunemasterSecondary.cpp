@@ -45,7 +45,8 @@ enum RunemasterSecondarySpells : uint32
     SPELL_ETERNAL_MAGIC = 806698,
     SPELL_ETERNAL_MAGIC_CHARGES = 3,
     SPELL_FIRE_ENGRAVING = 653211,
-    SPELL_FIREBRAND = 653210
+    SPELL_FIREBRAND = 653210,
+    SPELL_WIZARDRY = 705632
 };
 
 bool IsPrimordialBlast(uint32 spellId)
@@ -362,6 +363,27 @@ public:
         }
     }
 };
+
+class runemaster_wizardry_mana : public PlayerScript
+{
+public:
+    runemaster_wizardry_mana() : PlayerScript("runemaster_wizardry_mana",
+        {PLAYERHOOK_ON_AFTER_UPDATE_MAX_POWER}) { }
+
+    void OnPlayerAfterUpdateMaxPower(Player* player, Powers& power, float& value) override
+    {
+        if (!player || power != POWER_MANA || player->getClass() != CLASS_SPIRIT_MAGE)
+            return;
+        float totalPct = player->GetPctModifierValue(UNIT_MOD_MANA, TOTAL_PCT);
+        float intellect = player->GetStat(STAT_INTELLECT);
+        float manaFromInt = player->GetCreatePowers(POWER_MANA) > 0 ? player->GetManaBonusFromIntellect() : 0.0f;
+        for (AuraEffect const* effect : player->GetAuraEffectsByType(SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT))
+            if (effect->GetId() == SPELL_WIZARDRY &&
+                effect->GetMiscValue() == POWER_MANA && effect->GetMiscValueB() == STAT_INTELLECT)
+                value += (CalculatePct(manaFromInt, effect->GetAmount()) -
+                    CalculatePct(intellect, effect->GetAmount())) * totalPct;
+    }
+};
 }
 
 void AddSC_AscensionRunemasterSecondary()
@@ -369,6 +391,7 @@ void AddSC_AscensionRunemasterSecondary()
     new runemaster_secondary_auras();
     new runemaster_secondary_casts();
     new runemaster_secondary_metadata();
+    new runemaster_wizardry_mana();
     RegisterSpellScript(aura_ascension_arcane_palm_sigil);
     RegisterSpellScript(aura_ascension_damage_palm_sigil);
     RegisterSpellScript(aura_ascension_runemaster_fire_engraving);

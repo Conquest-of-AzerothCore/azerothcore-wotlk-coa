@@ -361,9 +361,15 @@ class necromancer_sessions : public PlayerScript
 {
   public:
     necromancer_sessions()
-        : PlayerScript("necromancer_sessions", {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_PVP_KILL,
-                                                PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET})
+        : PlayerScript("necromancer_sessions",
+                       {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_PVP_KILL,
+                        PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET,
+                        PLAYERHOOK_ON_PLAYER_HAS_ACTIVE_POWER_TYPE})
     {
+    }
+    bool OnPlayerHasActivePowerType(Player const* player, Powers power) override
+    {
+        return player && player->getClass() == CLASS_NECROMANCER && power == POWER_MANA;
     }
     void OnPlayerLogin(Player* player) override
     {

@@ -253,14 +253,8 @@ class aura_ascension_witch_hunter_event : public AuraScript
                 self(504247);
                 break;
             case 92093:
-            {
-                DamageInfo const* shot = event.GetDamageInfo();
-                uint32 speedFactor = uint32(owner->GetAttackTime(RANGED_ATTACK) / 1000.0f * 3.5f);
-                if (event.GetHitMask() & PROC_HIT_CRITICAL)
-                    speedFactor *= 2;
-                owner->RewardRage(shot->GetDamage() + shot->GetAbsorb(), speedFactor, true);
+                self(521239);
                 break;
-            }
             case 804404:
                 self(500161);
                 break;
