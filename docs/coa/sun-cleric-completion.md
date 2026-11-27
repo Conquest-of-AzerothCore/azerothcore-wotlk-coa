@@ -35,11 +35,12 @@ refreshes charges/duration without rearming that choice. Finite bonuses snapshot
 effects and consume only those generations; Hot Spot and Learning Light keep two/three charges.
 Bulwark consumes only block/full-block events and preserves saved remaining charges on load.
 
-Owned Eclipse ticks accumulate without refreshing duration or the next tick. Healing events feed
-the cleric's current hostile victim when available: this is a local targeting choice for an
-ambiguous healing-to-damage contract. Copy spells preserve resolved damage/effective healing and
-normally suppress recursive procs. Holy Form's extra heal is an explicit exception for eligible
-healing procs, but cannot recursively sacrifice mana again.
+Owned Eclipse ticks accumulate without refreshing duration or the next tick. Direct damage feeds
+the burn 505340 on the enemy hit; effective healing feeds the heal over time 505370 (807437
+effect 0) on the healed ally, which accumulates the same way. Fulfillment checks the hit or healed
+target for the cleric's own 505340 or 505370 (#13312). Copy spells preserve resolved
+damage/effective healing and normally suppress recursive procs. Holy Form's extra heal is an
+explicit exception for eligible healing procs, but cannot recursively sacrifice mana again.
 
 ## Explicit local choices
 
