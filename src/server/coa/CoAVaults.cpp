@@ -799,8 +799,9 @@ constexpr float DarkandleTriggerRange = 12.0f;
 constexpr float DarkandleAttackRange = 100.0f;
 constexpr float DarkandleArenaRadius = 20.0f;
 constexpr float DarkandleCandleRange = 60.0f;
-constexpr uint32 EarthquakeRadiusIndex = 13;
-constexpr uint32 EarthquakeMarkerMs = 3000;
+constexpr uint32 EarthquakeRadiusIndex = 40;
+constexpr uint32 EarthquakeGroundRadiusIndex = 14;
+constexpr uint32 EarthquakeMarkerMs = 7000;
 constexpr uint32 DarkandleEscapeMs = 3000;
 constexpr Milliseconds DarkandleTeleportDelay = 3800ms;
 constexpr Milliseconds DarkandleAfterTeleport = 1100ms;
@@ -931,7 +932,7 @@ struct boss_coa_vaults_darkandle : public ScriptedAI
                     Talk(SAY_QUAKE);
                     MarkEarthquake();
                     DoCastAOE(SPELL_EARTHQUAKE);
-                    _events.ScheduleEvent(EVENT_DARK_QUAKE_END, 7s);
+                    _events.ScheduleEvent(EVENT_DARK_QUAKE_END, Milliseconds(EarthquakeMarkerMs));
                     _events.Repeat(20s);
                     break;
                 case EVENT_DARK_QUAKE_END:
@@ -1004,7 +1005,11 @@ private:
         Creature* marker = me->SummonCreature(NPC_SOUND_HELPER, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, EarthquakeMarkerMs);
         if (!marker)
             return;
-        marker->AddAura(SPELL_QUAKE_ZONE, marker);
+        if (Aura* zone = marker->AddAura(SPELL_QUAKE_ZONE, marker))
+        {
+            zone->SetMaxDuration(EarthquakeMarkerMs);
+            zone->SetDuration(EarthquakeMarkerMs);
+        }
     }
 
     void StartEscape()
@@ -2180,9 +2185,10 @@ public:
             case 257105:
             case 257106:
             case 257107:
-                if (SpellRadiusEntry const* radius = sSpellRadiusStore.LookupEntry(EarthquakeRadiusIndex))
-                    for (SpellEffectInfo& effect : info->Effects)
-                        if (effect.RadiusEntry)
+                for (SpellEffectInfo& effect : info->Effects)
+                    if (effect.RadiusEntry)
+                        if (SpellRadiusEntry const* radius = sSpellRadiusStore.LookupEntry(
+                            effect.Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA ? EarthquakeGroundRadiusIndex : EarthquakeRadiusIndex))
                             effect.RadiusEntry = radius;
                 break;
             default:

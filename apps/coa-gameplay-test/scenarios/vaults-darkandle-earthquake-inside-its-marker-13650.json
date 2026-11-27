@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Vaults of the Inquisition: Darkandle's Earthquake stays inside its marker",
+  "contract": "His Majesty Darkandle (162703) marks his Earthquake (256819) with Pickaxe Strike Zone (256917, drawn 9.6 yd wide) on a helper (162745), and the quake leaves pulsing ground for 7 s. The marker vanished after 3 s while the ground kept pulsing, and both parts used 10 yd: the direct hit reached 10 yd and the ground, which adds the player's own 1.5 yd reach, 11.5 yd, so players outside the drawn circle were hit (#13650). Expected: a player 8.5 yd from Darkandle is hit; a player 10.5 yd away is never hit, neither by the quake nor by its ground, and the marker is still shown 2 s after the quake lands.",
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0},
+  "players": [
+    {"id": "tank", "race": 1, "class": 1, "level": 60},
+    {"id": "near", "race": 1, "class": 1, "level": 60},
+    {"id": "far", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "group", "actor": "tank", "target": "near"},
+    {"action": "group", "actor": "tank", "target": "far"},
+    {"action": "teleport", "actor": "tank", "map": 936, "x": -6492.524, "y": -5964.035, "z": 138.21, "o": 3.14159, "ignore_access": true},
+    {"action": "teleport", "actor": "near", "map": 936, "x": -6492.524, "y": -5964.035, "z": 138.21, "o": 3.14159, "ignore_access": true},
+    {"action": "teleport", "actor": "far", "map": 936, "x": -6492.524, "y": -5964.035, "z": 138.21, "o": 3.14159, "ignore_access": true},
+    {"action": "assert", "label": "CONTROL: the grouped players are in the Vaults", "actor": "far", "metric": "map_id", "equals": 936, "within_ms": 10000},
+    {"action": "set_health", "label": "The tank survives the fight", "actor": "tank", "maximum": 5000000, "value": 5000000},
+    {"action": "set_health", "label": "The near player survives the quake", "actor": "near", "maximum": 5000000, "value": 5000000},
+    {"action": "set_health", "label": "The far player survives stray fire", "actor": "far", "maximum": 5000000, "value": 5000000},
+    {"action": "relocate", "label": "Out of the intro trigger, farther from the throne than the tank", "actor": "near", "dy": 15},
+    {"action": "relocate", "label": "Out of the intro trigger, farther from the throne than the tank", "actor": "far", "dy": -15},
+    {"action": "summon", "actor": "tank", "entry": 162703, "as": "darkandle", "distance": 3},
+    {"action": "assert", "label": "Darkandle finishes his intro and attacks the tank", "actor": "tank", "metric": "combat", "equals": 1, "within_ms": 20000},
+    {"action": "relocate_to_creature", "actor": "tank", "entry": 162703, "radius": 40},
+    {"action": "attack", "actor": "tank", "target": "darkandle"},
+    {"action": "wait", "ms": 8000},
+    {"action": "relocate_to_creature", "actor": "near", "entry": 162703, "radius": 60},
+    {"action": "relocate", "label": "Inside the marker, on the side of the hall with a clear line to Darkandle", "actor": "near", "dx": -8.5},
+    {"action": "relocate_to_creature", "actor": "far", "entry": 162703, "radius": 60},
+    {"action": "relocate", "label": "Outside the marker, behind the near player", "actor": "far", "dx": -10.5},
+    {"action": "assert", "label": "The near player stands 8.5 yd from Darkandle", "actor": "near", "metric": "distance", "target": "darkandle", "min": 8.0, "max": 9.0},
+    {"action": "assert", "label": "The far player stands 10.5 yd from Darkandle", "actor": "far", "metric": "distance", "target": "darkandle", "min": 10.0, "max": 11.0},
+    {"action": "assert", "label": "CONTROL: the quake hits the player inside the marker", "actor": "near", "metric": "spell_damage_count", "spell": 256819, "caster": "darkandle", "target": "near", "min": 1, "within_ms": 30000},
+    {"action": "wait", "ms": 2000},
+    {"action": "assert", "label": "The marker is still drawn while the quake ground pulses", "actor": "near", "metric": "nearby_creature_count", "entry": 162745, "spell": 256917, "min": 1},
+    {"action": "wait", "ms": 5000},
+    {"action": "assert", "label": "The quake never hits the player outside the marker", "actor": "far", "metric": "spell_damage_count", "spell": 256819, "caster": "darkandle", "target": "far", "equals": 0}
+  ]
+}
