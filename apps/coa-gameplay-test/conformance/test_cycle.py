@@ -332,10 +332,10 @@ class SkipTest(CycleCase):
 
     def test_an_unfinished_class_skips_its_own_digest_check_with_a_note(self):
         runner = FakeRunner(self.root)
-        run_cycle(self.replay(class_id=15), [step for step in STEPS if step != 'digests'], runner)
+        run_cycle(self.replay(class_id=999), [step for step in STEPS if step != 'digests'], runner)
         self.assertEqual(runner.kinds(), [])
         notes = (self.root / 'out').rglob('*digests*')
-        self.assertTrue(any('class 15 is not a finished class' in path.read_text(encoding='utf-8')
+        self.assertTrue(any('class 999 is not a finished class' in path.read_text(encoding='utf-8')
                             for path in notes if path.is_file()))
 
 
