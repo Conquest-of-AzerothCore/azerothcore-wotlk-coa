@@ -219,7 +219,13 @@
   "foreign_aura_grants": [],
   "effect_overrides": [],
   "item_armor_subclass_effects": [],
-  "unmodelled_effects": [],
+  "unmodelled_effects": [
+    {
+      "spell": 680685,
+      "effect": 1,
+      "reason": "AscensionBloodmageTalents.cpp OnLoadSpellCustomAttr (Bloodmage ADR 0042) clears 680685 Effect[1] (SPELLMOD_ALL_EFFECTS on 572907) and adds Sanguine Rupture's 800775 class mask (0x00200000) to Effect[0] (SPELLMOD_DAMAGE) so 572907 -> 800775 receives +20% once without double-dipping; verified by 680685 e0 spell_modifier 572907 (ok) and 680685 behaviour_hit_ratio sanguine_rupture (5/5 ok)."
+    }
+  ],
   "literal_tokens": [],
   "effect_notes": [],
   "passive_targets": [],
