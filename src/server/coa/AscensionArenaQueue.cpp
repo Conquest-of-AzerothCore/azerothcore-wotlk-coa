@@ -7,6 +7,7 @@
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "AscensionCompatOpcodes.h"
+#include "AscensionConquest.h"
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
 #include "BattlegroundQueue.h"
@@ -1100,9 +1101,7 @@ namespace
         player->UpdatePlayerSetting(SeasonConquestSetting, SEASON_CONQUEST_SEASON, ConquestSeason);
         player->UpdatePlayerSetting(SeasonConquestSetting, SEASON_CONQUEST_EARNED, earned);
         player->ModifyArenaPoints(int32(points));
-        ChatHandler(player->GetSession()).PSendSysMessage(
-            "You've received {} Arena Points. Current Points: ({}) Cap: ({}/{})", points, player->GetArenaPoints(),
-            earned, cap);
+        AscensionConquest::AnnounceArenaPoints(player, points);
     }
 
     void GrantWinRewards(Player* player, uint32 teamType)
@@ -1512,6 +1511,13 @@ namespace
             return false;
         }
     };
+}
+
+void AscensionConquest::AnnounceArenaPoints(Player* player, uint32 points)
+{
+    ChatHandler(player->GetSession()).PSendSysMessage(
+        "You've received {} Arena Points. Current Points: ({}) Cap: ({}/{})", points, player->GetArenaPoints(),
+        ConquestEarnedThisSeason(player), ConquestCap());
 }
 
 void AddAscensionArenaQueueScripts()

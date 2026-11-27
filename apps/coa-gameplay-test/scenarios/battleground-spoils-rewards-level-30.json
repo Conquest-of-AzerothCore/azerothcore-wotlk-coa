@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Level 30 battlegrounds pay the 21-30 Battleground Spoils, more experience for a win and loss rewards for a draw",
-  "contract": "With Call to Arms off, one Alliance and one Horde level 30 player finish Warsong Gulch. The winner is paid Classic Battleground 21-30 (Win) with Battleground Spoils (Win) 1175637; the loser is paid Classic Battleground 21-30 (Loss) with Battleground Spoils (Loss) 1675637. Arena points are paid at level 60 only, so neither gets any. Both gain experience, and the winner gains more. A second match that ends in a draw pays both players the loss reward.",
+  "name": "Level 30 battlegrounds pay the 21-30 Battleground Spoils, 25 arena points and more experience for a win, and loss rewards for a draw",
+  "contract": "With Call to Arms off, one Alliance and one Horde level 30 player finish Warsong Gulch. The winner is paid Classic Battleground 21-30 (Win) with Battleground Spoils (Win) 1175637; the loser is paid Classic Battleground 21-30 (Loss) with Battleground Spoils (Loss) 1675637. The 21-30 win pays 25 arena points and the loss none (live CoA quests 90002 and 90009: SUB dump 2026-10-04). Both gain experience, and the winner gains more. A second match that ends in a draw pays both players the loss reward.",
   "timeout_ms": 600000,
   "location": {
     "map": 0,
@@ -223,10 +223,10 @@
     },
     {
       "action": "assert",
-      "label": "The 21-30 win pays no arena points",
+      "label": "The 21-30 win pays 25 arena points",
       "actor": "alliance",
       "metric": "arena_points",
-      "equals": 0
+      "equals": 25
     },
     {
       "action": "assert",
@@ -457,10 +457,10 @@
     },
     {
       "action": "assert",
-      "label": "The draw pays no arena points",
+      "label": "The draw pays the loss reward, so no more arena points",
       "actor": "alliance",
       "metric": "arena_points",
-      "equals": 0
+      "equals": 25
     }
   ]
 }

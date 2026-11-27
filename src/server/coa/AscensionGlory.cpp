@@ -117,7 +117,13 @@ class ObjectiveTracker : public AllBattlegroundScript
 {
 public:
     ObjectiveTracker() : AllBattlegroundScript("AscensionGloryObjectives",
-        {ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_UPDATE_PLAYER_SCORE}) { }
+        {ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_UPDATE_PLAYER_SCORE, ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_END_REWARD}) { }
+
+    void OnBattlegroundEndReward(Battleground* bg, Player* player, TeamId winnerTeamId) override
+    {
+        if (bg && player && !bg->isArena() && player->GetBgTeamId() == winnerTeamId)
+            Earn(player, BattlegroundWinGlory);
+    }
 
     void OnBattlegroundUpdatePlayerScore(Battleground* bg, Player* player, uint32 type, uint32 value) override
     {
