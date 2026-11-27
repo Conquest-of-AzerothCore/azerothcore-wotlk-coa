@@ -418,6 +418,14 @@ spell name comes from `Spell.dbc`.
 `aura354` lists the class spells of a class map whose `custom_mechanics` carry aura 354 with their risk, custom
 mechanics and first code hits, and flags a spell of risk `stock` or `data_row` as a candidate defect (guide 9.2).
 
+`audit-extra` (`conformance.py audit-extra --class N [--class-file FILE] [--dbc-dir DIR] [--source-root DIR]
+[--log-events CSV] [--out REPORT.json] [--strict]`) audits server-granted class spells from `ClassSpells`,
+`AscensionLiveBaseline::Spells`, `TaughtAbilities`, `FelswornHordeCapitalRifts` (class 14), and `trainer_spell` SQL
+against `CharacterAdvancement.dbc`, `extra_spells`, `excluded_extra_spells`, covered `@s:<id>:` pull-ins, and
+`STOCK_GENERIC_SPELLS` (excluding `552011`). With `--strict`, it exits `2` when any `unaccounted` spell remains;
+`conformance.py ledger` runs this check automatically and refuses unaccounted spells unless `--allow-unaccounted-extra`
+is passed ([ADR 1327](../../../../docs/adr/1327-conformance-audit-extra-spells-before-ledger.md)).
+
 On the Templar, `buckets` fed the batch-1 audit (`coverage.json`), a manifest regenerated at 6cbd4ed4fe (1233
 scenarios), the class code of that commit, the two settled alerts and the ten standing prototype alerts reproduced
 the batch-1 bucket file on all 433 rows (`bucket`, `evidence`, `script_touch`, `token_kind` and every other row

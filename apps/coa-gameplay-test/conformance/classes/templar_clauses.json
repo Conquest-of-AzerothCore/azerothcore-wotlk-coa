@@ -5336,5 +5336,177 @@
     "labels": [],
     "kind": "claim",
     "reason": "not observable on the server (status 4): Effect[0] 138 SPELL_EFFECT_LEAP_BACK on a player is Unit::JumpTo, which only sends SMSG_MOVE_KNOCK_BACK (Unit.cpp:17079-17098); the server relocates the player only on the client's CMSG_MOVE_KNOCK_BACK_ACK (MovementHandler.cpp:818-849). Diagnostic 20261111-224427: one knock-back packet (vertical speed 20.1, horizontal 0, the order to leap straight up) and position x and z, moving, spline and in_flight unchanged for 3 s while the cast completed (524738 on the caster, 520842 on the dummy). A client-side check needs the lab client to cast 524739 and read the player position during and after the leap; expected client values: launch straight up at 20.1 vertical speed with 0 horizontal, an apex near 20.1^2 / (2 x 19.29) = 10.5 yd (computed, not measured), landing back at the start point; no CoA code handles 524739 or 524738"
+  },
+  {
+    "spell": 560963,
+    "clause": "Shackle an Undead or Demon enemy, banishing them for $d (6 sec versus players).",
+    "claims": [
+      {
+        "claim": "Shackle an Undead or Demon enemy",
+        "labels": [
+          "560963 behaviour_metric_delta undead_lands",
+          "560963 behaviour_metric_delta demon_lands",
+          "560963 behaviour_metric_delta humanoid_refused"
+        ]
+      },
+      {
+        "claim": "banishing them for $d",
+        "labels": [
+          "560963 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "(6 sec versus players)",
+        "labels": [
+          "560963 behaviour_metric_delta player_duration"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "Counted pair 20261127-140414 / 20261127-140514 (worldserver sha256 ba5eeef280f3d4603c7ec870053a12bd24923a93eab7024467c2ef27bf70bee8, SpellMgr.cpp 6s PvP DR cap): Undead (201) and Demon (416) land 0->1, Humanoid (6) refused with SPELL_FAILED_BAD_TARGETS (12) and aura 0; PvE duration holds at ~30600 ms and expires by ~32000 ms (30000 ms after 1250 ms cast); PvP duration on Demon-form enemy player holds at ~7000 ms and expires by ~7500 ms (6000 ms after 1250 ms cast)."
+  },
+  {
+    "spell": 560963,
+    "clause": "The shackled unit is immune to Physical damage and is unable to move, attack or cast spells.",
+    "claims": [
+      {
+        "claim": "immune to Physical damage",
+        "labels": [
+          "560963 behaviour_metric_delta physical_immune"
+        ]
+      },
+      {
+        "claim": "unable to move",
+        "labels": [
+          "560963 behaviour_metric_delta unable_to_move"
+        ]
+      },
+      {
+        "claim": "attack",
+        "labels": [
+          "560963 behaviour_metric_delta unable_to_attack"
+        ]
+      },
+      {
+        "claim": "or cast spells",
+        "labels": [
+          "560963 behaviour_metric_delta unable_to_cast"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "Counted pair 20261127-140414 / 20261127-140514 (worldserver sha256 ba5eeef280f3d4603c7ec870053a12bd24923a93eab7024467c2ef27bf70bee8): Void Zone 92559 lands once before 560963 and is immune under 560963 on Demon-form enemy player (owner ruling Q-c7-1); chase_halt move_point on Undead (201) reads ratio 0.0000 against moving unshackled control; Undead dummy melee_attacks_taken drops from >=2 to 0; Demon-form enemy player Renew 25222 cast count stays at 1 (blocked while shackled)."
+  },
+  {
+    "spell": 560963,
+    "clause": "Only 1 target can be shackled at a time.",
+    "labels": [
+      "560963 behaviour_single_target"
+    ],
+    "kind": "claim",
+    "reason": "Counted pair 20261127-140414 / 20261127-140514 (worldserver sha256 ba5eeef280f3d4603c7ec870053a12bd24923a93eab7024467c2ef27bf70bee8): hostile single_target (ADR 1328) on two Undead dummies (201) reads aura 1 on dummy after cast 1, then 0 on dummy and 1 on dummy2 after cast 2."
+  },
+  {
+    "spell": 562226,
+    "clause": "Shows the location of all nearby Undead and Demons on the minimap.",
+    "labels": [
+      "562226 behaviour_metric_delta track_evil"
+    ],
+    "kind": "claim",
+    "reason": "Counted pair 20261127-140414 / 20261127-140514 (worldserver sha256 ba5eeef280f3d4603c7ec870053a12bd24923a93eab7024467c2ef27bf70bee8): track_creature_type Undead (6) 0->1, Demon (3) 0->1, negative contrast Humanoid (7) 0->0."
+  },
+  {
+    "spell": 572629,
+    "clause": "Places an Gift on the friendly target, increasing total stats by $s1% for $d.",
+    "claims": [
+      {
+        "claim": "increasing total stats by $s1% (Strength, Agility, Stamina, Intellect, Spirit)",
+        "labels": [
+          "572629 effect_value e0 #0",
+          "572629 aura_amount e0 #0",
+          "572629 behaviour_metric_delta stats_ally"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "572629 aura_duration_ms #1",
+          "572629 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "Counted pair 20261127-140414 / 20261127-140514 (worldserver sha256 ba5eeef280f3d4603c7ec870053a12bd24923a93eab7024467c2ef27bf70bee8): effect_value/aura_amount e0 = +10%, stat_exact on ally across all 5 stats (81->89.1, 132->145.2, 79->86.9, 32->35.2, 50.47->55.517), and 1800000 ms duration expiry on ally."
+  },
+  {
+    "spell": 572630,
+    "clause": "Places an Oath on all raid and party members, increasing total stats by $s1% for $d.",
+    "claims": [
+      {
+        "claim": "Places an Oath on all raid and party members, increasing total stats by $s1% (Strength, Agility, Stamina, Intellect, Spirit)",
+        "labels": [
+          "572630 effect_value e0 #0",
+          "572630 aura_amount e0 #0",
+          "572630 behaviour_metric_delta stats_raid"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "572630 aura_duration_ms #1",
+          "572630 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "Counted pair 20261127-140414 / 20261127-140514 (worldserver sha256 ba5eeef280f3d4603c7ec870053a12bd24923a93eab7024467c2ef27bf70bee8): effect_value/aura_amount e0 = +10%, stat_exact across all 5 stats on both party subgroup 1 (ally) and raid subgroup 2 (ally5), and 1800000 ms duration expiry."
+  },
+  {
+    "spell": 680306,
+    "clause": "Places an Oath on all raid and party members, increasing Agility by $s1 for $d.",
+    "claims": [
+      {
+        "claim": "Places an Oath on all raid and party members, increasing Agility by $s1",
+        "labels": [
+          "680306 effect_value e0 #0",
+          "680306 aura_amount e0 #0",
+          "680306 behaviour_metric_delta agility_raid"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "680306 aura_duration_ms #1",
+          "680306 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "Counted pair 20261127-140414 / 20261127-140514 (worldserver sha256 ba5eeef280f3d4603c7ec870053a12bd24923a93eab7024467c2ef27bf70bee8): effect_value/aura_amount e0 = +77, stat_exact Agility 132->209 on both party subgroup 1 (ally) and raid subgroup 2 (ally5), and 1800000 ms duration expiry."
+  },
+  {
+    "spell": 807729,
+    "clause": "Take a stand against evil, increasing your threat generated by $s3%",
+    "labels": [
+      "807729 effect_value e2 #0",
+      "807729 aura_amount e2 #0",
+      "807729 behaviour_metric_delta threat_mult_physical",
+      "807729 behaviour_metric_delta threat_physical_control",
+      "807729 behaviour_metric_delta threat_physical_stance"
+    ],
+    "kind": "claim",
+    "reason": "Counted pair 20261127-140414 / 20261127-140514 (worldserver sha256 ba5eeef280f3d4603c7ec870053a12bd24923a93eab7024467c2ef27bf70bee8): effect_value/aura_amount e2 = +170%, threat_multiplier (Physical) 1.0->2.70, Void Zone 92559 threat_per_damage 1.0 control vs 5.40 under real 807729 stance (2.70 * Rate.Threat.TankStance 2.0)."
+  },
+  {
+    "spell": 807729,
+    "clause": "and an additional ${$m1-$m3}% from Holy spells and abilities.",
+    "promise_of": "Take a stand against evil, increasing your threat generated by $s3%",
+    "labels": [
+      "807729 behaviour_metric_delta threat_mult_holy",
+      "807729 behaviour_metric_delta threat_holy_control",
+      "807729 behaviour_metric_delta threat_holy_stance"
+    ],
+    "kind": "claim",
+    "reason": "Counted pair 20261127-140414 / 20261127-140514 (worldserver sha256 ba5eeef280f3d4603c7ec870053a12bd24923a93eab7024467c2ef27bf70bee8): threat_multiplier (Holy) 1.0->3.15 (+45% above 2.70 non-Holy), QA Holy Spell 45648 threat_per_damage 1.0 control vs 6.30 under real 807729 stance (3.15 * Rate.Threat.TankStance 2.0)."
   }
 ]

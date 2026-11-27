@@ -496,6 +496,13 @@ The ledger is `classes/<name>_clauses.json`: a JSON array of `{spell, clause, la
 - Other workstreams never edit the ledger directly. They write a fragment, and the integrator merges it by `(spell,
   clause)` (`LEDGER:121-140`).
 
+Before creating a new class ledger, run `conformance.py audit-extra --class <id> --strict` (ADR 1327) to verify that
+every server-granted spell from `ClassSpells`, `AscensionLiveBaseline::Spells`, `TaughtAbilities`,
+`FelswornHordeCapitalRifts` (class 14), and `trainer_spell` SQL is accounted for in `CharacterAdvancement.dbc`,
+`extra_spells`, `excluded_extra_spells`, `STOCK_GENERIC_SPELLS`, or a covered `@s:<id>:` pull-in. **`conformance.py
+ledger` refuses with exit status 2 while unaccounted spells remain** (pass `--allow-unaccounted-extra` only when
+explicitly overriding the gate).
+
 **`conformance.py ledger` builds a class's first ledger** from data, by the rules below (ADR 0310;
 `LEDGER`, "Writing a first ledger"). Review its output before the first batch: it declares no `claims`, adds no
 behaviour labels, and needs `--text-basis` for each streamed spell. The Templar ledger predates it:

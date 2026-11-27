@@ -3470,6 +3470,27 @@ class SingleTargetScenarioTests(unittest.TestCase):
         self.assertLess(casts[0], gcd_waits[0])
         self.assertLess(gcd_waits[0], casts[1])
 
+    def test_hostile_target_entry_spawns_two_dummies_with_cast_power(self):
+        entry = {'spell': 560963, 'name': 'Shackle The Unrepentant', 'kind': 'single_target',
+                 'quote': 'Only 1 target can be shackled at a time.', 'target_entry': 201,
+                 'cast_power': 100, 'wait_ms': 1600}
+        spec = single_target_spec(entry)
+        scenario, expectations = single_target_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster'])
+        self.assertEqual([(c['id'], c['entry'], c['distance']) for c in scenario['creatures']],
+                         [('dummy', 201, 5), ('dummy2', 201, 5)])
+        self.assertFalse([step for step in scenario['steps'] if step.get('action') == 'group'])
+        casts = [step for step in scenario['steps'] if step.get('action') == 'cast']
+        self.assertEqual([step['target'] for step in casts], ['dummy', 'dummy2'])
+        powers = [step for step in scenario['steps'] if step.get('action') == 'set_power']
+        self.assertEqual([(step['power'], step['value']) for step in powers], [(3, 100), (3, 100)])
+        asserts = {step['label']: step['actor'] for step in scenario['steps'] if step.get('action') == 'assert'}
+        model = expectations[0].model
+        self.assertEqual(asserts[model['first_label']], 'dummy')
+        self.assertEqual(asserts[model['removed_label']], 'dummy')
+        self.assertEqual(asserts[model['second_label']], 'dummy2')
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CastAppliesAuraReadAfterTests(unittest.TestCase):

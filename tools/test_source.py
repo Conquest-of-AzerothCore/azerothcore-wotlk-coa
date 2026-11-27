@@ -54,10 +54,16 @@ class SourceSelectionTests(unittest.TestCase):
                  'apps/coa-gameplay-test/batch.py', 'apps/coa-gameplay-test/catalog.py',
                  'apps/coa-gameplay-test/verification.py', 'apps/coa-gameplay-test/world_cache.py',
                  'apps/coa-dbc/inspect_dbc.py', 'src/server/coa/AscensionSpellProgressionData.h',
+                 'src/server/coa/AscensionCustomClassData.h', 'src/server/coa/AscensionTaughtAbilityData.h',
                  'src/server/shared/SharedDefines.h']
         for path in paths:
             with self.subTest(path=path):
                 self.assertIn('conformance', check_source.select([path])['checks'])
+
+    def test_conformance_commands_include_extra_spells(self):
+        selection = check_source.select(['apps/coa-gameplay-test/conformance/extra_spells.py'])
+        self.assertIn(['apps/coa-gameplay-test/conformance/test_extra_spells.py'],
+                      check_source.commands_for(selection, 'HEAD'))
 
     def test_conformance_selection_checks_every_finished_class_snapshot(self):
         commands = check_source.commands_for(check_source.select(['apps/coa-gameplay-test/conformance/compare.py']),

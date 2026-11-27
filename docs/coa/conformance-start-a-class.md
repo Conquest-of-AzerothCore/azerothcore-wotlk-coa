@@ -28,9 +28,10 @@ that layout; without such transcripts the checkpoint reads "not recorded".
 4. Read [class-conformance-rulings.md](class-conformance-rulings.md) by grep for the G-n a task cites, never whole.
 5. Scaffold the class file: `conformance.py scaffold --class N --out FILE --config WORLDSERVER_CONF --mysql MYSQL`
    (`CONF/docs/scaffolding.md`).
-6. Class map and aura 354 check: guide 9.1 and 9.2 (`conformance.py aura354 --class-map OUT/class-map.json --class N`).
-7. Write the first ledger: `conformance.py ledger` (guide 9.4, `CONF/docs/clause-ledger.md`); review its output before
-   the first batch.
+6. Class map, aura 354 and extra-spells audit: guide 9.1 and 9.2 (`conformance.py aura354 --class-map OUT/class-map.json --class N`,
+   `conformance.py audit-extra --class N --strict`); populate `extra_spells` and `excluded_extra_spells` until zero unaccounted spells remain (ADR 1327).
+7. Write the first ledger: `conformance.py ledger` (guide 9.4, `CONF/docs/clause-ledger.md`); it refuses if
+   `audit-extra` still reports unaccounted spells unless `--allow-unaccounted-extra` is passed. Review its output before the first batch.
 8. Generate, run, compare: `conformance.py generate --class N --out DIR`, then the runs through `tools/verify_all.py`
    or `coa-verify` selections only (guide 9.5).
 9. Work in batches and cycles (guide 9.6): write each cycle's plan (claims taken, target count) first; fresh agents

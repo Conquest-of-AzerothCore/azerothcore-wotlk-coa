@@ -7,6 +7,7 @@ from audit import audit_document
 from buckets import (BucketError, bucket_counts, bucket_document, class_family, class_glob, clause_keys, read_json,
                      read_sources)
 from coverage import EvidenceError
+from extra_spells import ExtraSpellsError, audit_extra_lines, audit_extra_spells
 from profile import DBC_DIR, DbcSetMismatch, load_class_file, server_dbc_dir
 
 REPOSITORY = Path(__file__).resolve().parents[3]
@@ -88,6 +89,24 @@ def aura354_command(args) -> int:
     return 0
 
 
+def audit_extra_command(args) -> int:
+    try:
+        class_file = (json.loads(args.class_file.read_text(encoding='utf-8'))
+                      if args.class_file else load_class_file(args.class_id))
+        if int(class_file.get('class_id', -1)) != args.class_id:
+            raise ExtraSpellsError(
+                f'{args.class_file} has class_id {class_file.get("class_id")}, expected {args.class_id}')
+        dbc_dir = server_dbc_dir(args.dbc_dir or class_file.get('dbc_dir', DBC_DIR))
+        report = audit_extra_spells(class_file, dbc_dir, args.source_root, log_events_path=args.log_events)
+    except (ExtraSpellsError, DbcSetMismatch, ValueError, KeyError, OSError) as error:
+        print(f'No extra-spells audit: {error}', file=sys.stderr)
+        return FAILED
+    print('\n'.join(audit_extra_lines(report)))
+    if args.out:
+        print(write_json(args.out, report))
+    return FAILED if args.strict and report['unaccounted'] else 0
+
+
 def add_batch_commands(commands) -> dict:
     auditing = commands.add_parser('audit', help='write a coverage audit of a clause ledger: every claim with its '
                                                  'evidence, labels and alert labels, from merged compare outputs')
@@ -131,4 +150,19 @@ def add_batch_commands(commands) -> dict:
     checking.add_argument('--class-map', dest='class_map', type=Path, required=True)
     checking.add_argument('--class', dest='class_id', type=int, required=True)
     checking.add_argument('--out', type=Path, help='also write the rows as JSON')
-    return {'audit': audit_command, 'buckets': buckets_command, 'aura354': aura354_command}
+    extra_audit = commands.add_parser('audit-extra',
+                                      help='audit server-granted class spells missing from extra_spells and '
+                                           'excluded_extra_spells')
+    extra_audit.add_argument('--class', dest='class_id', type=int, required=True)
+    extra_audit.add_argument('--class-file', dest='class_file', type=Path,
+                             help='optional class JSON path (defaults to classes/<name>.json for --class)')
+    extra_audit.add_argument('--dbc-dir', dest='dbc_dir', type=Path, help='the server DBC set')
+    extra_audit.add_argument('--source-root', dest='source_root', type=Path, default=REPOSITORY,
+                             help='the source tree to read grant tables and SQL from')
+    extra_audit.add_argument('--log-events', dest='log_events', type=Path,
+                             help='optional EVENT,SPELL_ID,COUNT CSV from combat logs')
+    extra_audit.add_argument('--out', type=Path, help='also write the audit report as JSON')
+    extra_audit.add_argument('--strict', action='store_true',
+                             help='return exit status 2 when any unaccounted spell remains')
+    return {'audit': audit_command, 'buckets': buckets_command, 'aura354': aura354_command,
+            'audit-extra': audit_extra_command}
