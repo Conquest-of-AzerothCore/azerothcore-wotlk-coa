@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionNecromancer.h"
 #include "Creature.h"
 #include "ObjectAccessor.h"
@@ -12,6 +13,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include <algorithm>
+#include <cmath>
 
 namespace AscensionNecromancer
 {
@@ -392,11 +394,13 @@ class spell_ascension_necromancer_ability : public SpellScript
             CorpseExplosion(player, player);
         if (Family(GetSpellInfo(), 2, 67108864))
         {
+            SpellInfo const* sacrificeHeal = sSpellMgr->GetSpellInfo(805031);
             for (Creature* minion : Minions(player))
             {
                 int32 heal = Amount(id, 0, player);
                 if (player->HasAura(704684))
-                    heal = player->CountPctFromMaxHealth(Amount(704684));
+                    heal = int32(std::llround(double(player->CountPctFromMaxHealth(Amount(704684))) *
+                        double(AscensionBattlegroundCombat::UnscaledFactor(player, player, sacrificeHeal, true))));
                 minion->KillSelf();
                 Copy(player, player, 805031, std::max(1, heal), 1);
             }

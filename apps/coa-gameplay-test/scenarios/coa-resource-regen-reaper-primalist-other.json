@@ -1,0 +1,618 @@
+{
+  "schema": 1,
+  "name": "Reaper, Primalist, Guardian and Ranger resource generation fixes",
+  "contract": [
+    "Verifies R1 (Soulbender 804004 triggers 355463 +10 RP once per Deathchaser 805190),",
+    "R2 (Soul Generator 520056 grants 10 RP per hand without double-proccing 359019 on Dirge 801328 crit),",
+    "P1+P2 (Seismic Tremor 680442 grants 1 Rage without NativePowerGainRules double-gen or Primal Resurgence / Seismically Efficient mask leak, and Trembling Rage 560135 does not inflate Seismic Spike 582532),",
+    "G1+S4 (Knight's Calling 504151 scales with max Energy under Battlemaster 707411 and UpdateEnergyRegen runs in UpdateAllStats dividing MP5-like Energy regen 962230 by 5.0f), and",
+    "RG1 (Endurance Training 705039 adds flat +20 Focus)."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 100000
+    },
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "r_target",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 2,
+      "stationary": true
+    },
+    {
+      "id": "p_target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 1000000,
+      "distance": 16,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let characters settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "reaper",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "reaper",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "reaper",
+      "item": 2027
+    },
+    {
+      "action": "equip",
+      "actor": "reaper",
+      "item": 2027,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "label": "R1: Soulbender + Deathchaser",
+      "actor": "reaper",
+      "spell": 804004
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 805190
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_energize_count",
+      "spell": 355463,
+      "save_as": "sb_cnt0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_energize_total",
+      "spell": 355463,
+      "save_as": "sb_tot0"
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 805190,
+      "target": "r_target"
+    },
+    {
+      "action": "assert",
+      "actor": "r_target",
+      "metric": "aura",
+      "spell": 805190,
+      "caster": "reaper",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "R1: Soulbender procs 355463 once per landed Deathchaser",
+      "actor": "reaper",
+      "metric": "spell_energize_count",
+      "spell": 355463,
+      "relative_to": "sb_cnt0",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "R1: Soulbender grants +10 Runic Power (100)",
+      "actor": "reaper",
+      "metric": "spell_energize_total",
+      "spell": 355463,
+      "relative_to": "sb_tot0",
+      "equals": 100,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "R2: control Dirge without Soul Generator then treatment with Soul Generator",
+      "actor": "reaper",
+      "spell": 801328
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 801311,
+      "target": "r_target",
+      "save_as": "dirge_ctrl_hits0"
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 801328,
+      "target": "r_target"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 801311,
+      "target": "r_target",
+      "relative_to": "dirge_ctrl_hits0",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "reaper"
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 520056
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 801328
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 801311
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 801311,
+      "target": "r_target",
+      "save_as": "dirge_hits0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_energize_count",
+      "spell": 359019,
+      "save_as": "sg_cnt0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "power",
+      "power": 6,
+      "save_as": "dirge_rp0"
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 801328,
+      "target": "r_target"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 801311,
+      "target": "r_target",
+      "relative_to": "dirge_hits0",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "R2: Soul Generator does not double-proc 359019",
+      "actor": "reaper",
+      "metric": "spell_energize_count",
+      "spell": 359019,
+      "relative_to": "sg_cnt0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "R2: Dirge critical strike with Soul Generator adds +200 RP on top of baseline (not +300)",
+      "actor": "reaper",
+      "metric": "power",
+      "power": 6,
+      "relative_to": "dirge_rp0",
+      "min": 250,
+      "max": 350
+    },
+    {
+      "action": "stop_attack",
+      "actor": "reaper"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681114,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681115,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681116,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681117,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "label": "P1+P2: Primalist Tremor and Spike mask isolation",
+      "actor": "primalist",
+      "spell": 680442
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 680442
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300688
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680413
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560135
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681280,
+      "save_as": "tremor_tot0"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 680442,
+      "target": "p_target"
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "assert",
+      "label": "P2: Seismic Tremor 681280 ignores Primal Resurgence and Seismically Efficient",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681280,
+      "relative_to": "tremor_tot0",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "P1: Seismic Tremor grants 1 Rage (no NativePowerGainRules duplicate)",
+      "actor": "primalist",
+      "metric": "power",
+      "power": 1,
+      "equals": 10
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560135
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681356,
+      "save_as": "spike_tot0"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "p_target"
+    },
+    {
+      "action": "assert",
+      "label": "P2: Trembling Rage does not inflate Seismic Spike beyond 90 (4+3+2 Rage)",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681356,
+      "relative_to": "spike_tot0",
+      "equals": 90,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "G1+S4: Guardian Knight's Calling % max Energy and flat Energy regen",
+      "actor": "guardian",
+      "spell": 800317
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 504151
+    },
+    {
+      "action": "set_aura",
+      "actor": "guardian",
+      "spell": 707411,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "max_power",
+      "power": 3,
+      "equals": 150
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 800317
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 800317,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "metric": "spell_energize_total",
+      "spell": 504151,
+      "save_as": "kc_tot0"
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 504151
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "G1: Knight's Calling restores 15% of 150 max Energy (22 per tick x 2 ticks = 44) by 5.5s",
+      "actor": "guardian",
+      "metric": "spell_energize_total",
+      "spell": 504151,
+      "relative_to": "kc_tot0",
+      "equals": 44
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 504151,
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "learn",
+      "label": "S4: passive 962230 (+8 Energy per 5s = +1.6/s)",
+      "actor": "guardian",
+      "spell": 962230
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "S4: Guardian Energy regen over 4s reflects +1.6/s instead of /5000",
+      "actor": "guardian",
+      "metric": "power",
+      "power": 3,
+      "min": 44,
+      "max": 52
+    },
+    {
+      "action": "assert",
+      "label": "RG1: Ranger Endurance Training adds flat 20 Focus",
+      "actor": "ranger",
+      "metric": "max_power",
+      "power": 2,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 705039
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "max_power",
+      "power": 2,
+      "equals": 120
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 705039
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "max_power",
+      "power": 2,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "RG1: non-100 Focus baseline (0 on Guardian) distinguishes flat +20 from +20%",
+      "actor": "guardian",
+      "metric": "max_power",
+      "power": 2,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 705039
+    },
+    {
+      "action": "assert",
+      "label": "RG1: Endurance Training adds flat +20 Focus on a 0 baseline (broken +20% stays 0)",
+      "actor": "guardian",
+      "metric": "max_power",
+      "power": 2,
+      "equals": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 705039
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "max_power",
+      "power": 2,
+      "equals": 0
+    }
+  ]
+}

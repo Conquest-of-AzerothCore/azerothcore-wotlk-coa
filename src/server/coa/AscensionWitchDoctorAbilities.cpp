@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionWitchDoctorCompletion.h"
 #include "Creature.h"
 #include "ObjectAccessor.h"
@@ -13,6 +14,7 @@
 #include "SpellScript.h"
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdlib>
 
 namespace
@@ -204,7 +206,14 @@ class witch_doctor_casts : public AllSpellScript
             {
                 if (Unit* previous = ObjectAccessor::GetUnit(*player, state.previousBrew))
                     if (Friendly(player, previous) && player->IsWithinDistInMap(previous, 40.0f))
-                        Copy(player, previous, LoaEchoHeal, healing / 2);
+                    {
+                        uint32 echo = healing / 2;
+                        if (echo)
+                            echo = std::max<uint32>(1, uint32(std::llround(double(echo) *
+                                double(AscensionBattlegroundCombat::UnscaledFactor(
+                                    player, previous, sSpellMgr->GetSpellInfo(LoaEchoHeal), true)))));
+                        Copy(player, previous, LoaEchoHeal, echo);
+                    }
                 state.previousBrew = target->GetGUID();
             }
             if (spell->GetScriptHealingIncludingOverheal() && player->HasAura(LoaBlessing))

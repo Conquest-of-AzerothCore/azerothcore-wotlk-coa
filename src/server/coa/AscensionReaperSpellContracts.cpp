@@ -9,6 +9,7 @@
 #include "ScriptMgr.h"
 #include "SpellInfo.h"
 #include "SpellAuras.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 
 namespace
@@ -28,6 +29,8 @@ constexpr uint32 SPELL_HARVESTING_GROUNDS = 705413;
 constexpr uint32 SPELL_HARVESTING_GROUNDS_SLOW = 707591;
 constexpr uint32 NPC_HARVESTING_GROUNDS = 300662;
 constexpr uint32 SPELL_LIMBO = 800845;
+constexpr uint32 SPELL_SOULBENDER = 804004;
+constexpr uint32 SPELL_SOULBENDER_ENERGIZE = 355463;
 
 class reaper_spell_contracts : public GlobalScript
 {
@@ -39,6 +42,14 @@ public:
     {
         if (!info || info->SpellFamilyName != 36)
             return;
+
+        if (info->Id == SPELL_SOULBENDER &&
+            info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_PROC_TRIGGER_SPELL &&
+            info->Effects[EFFECT_0].TriggerSpell == SPELL_SOULBENDER_ENERGIZE)
+        {
+            info->ProcFlags = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS;
+            info->Effects[EFFECT_0].SpellClassMask = flag96(4, 0, 0);
+        }
 
         if (info->Id == SPELL_HARVESTING_GROUNDS &&
             info->Effects[EFFECT_1].Effect == SPELL_EFFECT_SUMMON &&

@@ -338,6 +338,15 @@ private:
 
 };
 
+enum BattlegroundCatchUpSkipMask : uint8
+{
+    BG_CATCH_UP_SKIP_NONE   = 0x0,
+    BG_CATCH_UP_SKIP_DAMAGE = 0x1,
+    BG_CATCH_UP_SKIP_HEAL   = 0x2,
+    BG_CATCH_UP_SKIP_ABSORB = 0x4,
+    BG_CATCH_UP_SKIP_ALL    = BG_CATCH_UP_SKIP_DAMAGE | BG_CATCH_UP_SKIP_HEAL | BG_CATCH_UP_SKIP_ABSORB
+};
+
 class AC_GAME_API SpellInfo
 {
 friend class SpellMgr;
@@ -364,6 +373,7 @@ public:
     bool AscensionIgnoreAbsorb = false;
     bool AscensionTargetAuraStateOnlyPrimary = false;
     bool AscensionInheritsResolvedAmount = false;
+    uint8 AscensionBattlegroundCatchUpSkip = BG_CATCH_UP_SKIP_NONE;
     bool AscensionInheritsPowerScaling = false;
     bool AscensionFlatAfterWeaponPercent = false;
     // Every SpellCustomAttributes bit is taken; a stealth aura with this set is kept when a hostile spell hits.

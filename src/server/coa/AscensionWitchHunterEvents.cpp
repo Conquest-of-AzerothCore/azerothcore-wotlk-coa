@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionWitchHunterCompletion.h"
 #include "EventMap.h"
 #include "Player.h"
@@ -12,6 +13,7 @@
 #include "SpellScript.h"
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <limits>
 #include <mutex>
 #include <unordered_map>
@@ -251,14 +253,8 @@ class aura_ascension_witch_hunter_event : public AuraScript
                 self(504247);
                 break;
             case 92093:
-            {
-                DamageInfo const* shot = event.GetDamageInfo();
-                uint32 speedFactor = uint32(owner->GetAttackTime(RANGED_ATTACK) / 1000.0f * 3.5f);
-                if (event.GetHitMask() & PROC_HIT_CRITICAL)
-                    speedFactor *= 2;
-                owner->RewardRage(shot->GetDamage() + shot->GetAbsorb(), speedFactor, true);
+                self(521239);
                 break;
-            }
             case 804404:
                 self(500161);
                 break;
@@ -440,7 +436,12 @@ class aura_ascension_witch_hunter_event : public AuraScript
                     for (Unit* target : Nearby(other, 5.0f))
                         if (target != other && owner->IsValidAttackTarget(target))
                         {
-                            owner->CastCustomSpell(567570, SPELLVALUE_BASE_POINT0, int32(damage), target,
+                            int32 cleaveDamage = damage
+                                ? std::max<int32>(1, int32(std::llround(double(damage) *
+                                    double(AscensionBattlegroundCombat::UnscaledFactor(
+                                        owner, target, sSpellMgr->GetSpellInfo(567570), false)))))
+                                : 0;
+                            owner->CastCustomSpell(567570, SPELLVALUE_BASE_POINT0, cleaveDamage, target,
                                                    TRIGGERED_FULL_MASK, nullptr, GetEffect(EFFECT_0),
                                                    caster->GetGUID());
                             CleaveShadowRage(owner, target, event);
@@ -560,7 +561,16 @@ void UnbrokenGain(Player* player, Unit* attacker, uint32 damage)
         return;
     UnbrokenState& state = UnbrokenStateFor(player);
     uint32 cap = uint32(CalculatePct(player->GetMaxHealth(), UNBROKEN_CAP_PERCENT));
-    uint32 gain = std::max<uint32>(1, uint32(uint64(damage) * UnbrokenConversion(attacker) / UNBROKEN_CONVERSION_SCALE));
+    if (cap && AscensionBattlegroundCombat::SharedTopLevel(player, player) != 0)
+        cap = std::max<uint32>(1, uint32(std::llround(
+            double(cap) * double(AscensionBattlegroundCombat::UnitUnscaledFactor(player)))));
+    uint32 effectiveDamage = damage;
+    if (attacker && player->IsHostileTo(attacker) &&
+        AscensionBattlegroundCombat::SharedTopLevel(player, attacker) != 0)
+        effectiveDamage = std::max<uint32>(1, uint32(std::llround(
+            double(damage) * double(AscensionBattlegroundCombat::UnitUnscaledFactor(player)))));
+    uint32 gain = std::max<uint32>(
+        1, uint32(uint64(effectiveDamage) * UnbrokenConversion(attacker) / UNBROKEN_CONVERSION_SCALE));
     state.amount = std::min(cap, state.amount + gain);
     UnbrokenApply(player, state.amount);
 }
@@ -576,14 +586,18 @@ class witch_hunter_unbroken_damage : public UnitScript
 
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
     {
-        UnbrokenGain(Owner(target), attacker, damage);
+        if (Player* player = Owner(target))
+            UnbrokenGain(player, attacker,
+                AscensionBattlegroundCombat::ScaledOutput(attacker, target, damage, nullptr, false));
     }
 
-    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const*) override
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* info) override
     {
         if (damage <= 0)
             return;
-        UnbrokenGain(Owner(target), attacker, uint32(damage));
+        if (Player* player = Owner(target))
+            UnbrokenGain(player, attacker,
+                AscensionBattlegroundCombat::ScaledOutput(attacker, target, uint32(damage), info, false));
     }
 };
 

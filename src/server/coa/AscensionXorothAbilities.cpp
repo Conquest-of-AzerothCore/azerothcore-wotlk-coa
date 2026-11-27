@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionXoroth.h"
 #include "CellImpl.h"
 #include "Corpse.h"
@@ -19,6 +20,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include <algorithm>
+#include <cmath>
 namespace
 {
 using namespace AscensionXoroth;
@@ -543,7 +545,11 @@ class xoroth_casts : public AllSpellScript
                 if (player->HasAura(802345))
                 {
                     HealInfo heal(player, player,
-                                  uint32(player->GetMaxHealth() * fire * (player->HasAura(704182) ? .015f : .01f)),
+                                  uint32(std::max<long long>(0, std::llround(
+                                      double(player->GetMaxHealth()) * fire *
+                                      (player->HasAura(704182) ? 0.015 : 0.01) *
+                                      double(AscensionBattlegroundCombat::UnscaledFactor(
+                                          player, player, info, true))))),
                                   info, info->GetSchoolMask());
                     player->HealBySpell(heal);
                 }

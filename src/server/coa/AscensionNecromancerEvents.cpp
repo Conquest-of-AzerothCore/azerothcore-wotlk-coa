@@ -77,7 +77,8 @@ class aura_ascension_necromancer_event : public AuraScript
         SpellInfo const* info = event.GetSpellInfo();
         uint32 damage = event.GetDamageInfo()->GetDamage();
         bool critical = (event.GetHitMask() & PROC_HIT_CRITICAL) != 0;
-        bool periodic = (event.GetTypeMask() & (PROC_FLAG_DONE_PERIODIC | PROC_FLAG_TAKEN_PERIODIC)) != 0 ||
+        bool periodicEvent = (event.GetTypeMask() & (PROC_FLAG_DONE_PERIODIC | PROC_FLAG_TAKEN_PERIODIC)) != 0;
+        bool periodic = periodicEvent ||
                         (info && (info->Id == 800343 || info->Id == 500237 || info->Id == 803779));
         bool melee =
             (event.GetTypeMask() & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK)) != 0;
@@ -132,11 +133,9 @@ class aura_ascension_necromancer_event : public AuraScript
                     Reduce(player, 533236, INT32_MAX);
                 if (info && Named(info, 500968) && (Chance(player, 705747) || Chance(player, 707880)))
                     Summon(player, 525379, target, target->GetPosition());
-                if (critical && player->HasAura(705752))
-                    Cast(player, player, 706424);
             }
-            else if (critical && player->HasAura(705752))
-                Cast(player, player, 705753);
+            if (critical && player->HasAura(705752))
+                Cast(player, player, periodicEvent ? 706424 : 705753);
             if (critical && Chance(player, 806321))
                 Plague(player, target);
             if (info && (info->SchoolMask & SPELL_SCHOOL_MASK_FROST))
@@ -163,12 +162,6 @@ class aura_ascension_necromancer_event : public AuraScript
         }
         if (minion)
         {
-            uint8 cost = 1;
-            for (auto const& row : State(player).minions)
-                if (row.guid == actor->GetGUID())
-                    cost = std::max<uint8>(1, row.cost);
-            if (Chance(player, 531128, cost))
-                Cast(player, player, 531129);
             if (actor->HasAura(560798, player->GetGUID()))
                 Reduce(player, 801938, std::abs(Amount(806322)));
             if (actor->GetEntry() == 50073 && Chance(player, 503740))

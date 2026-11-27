@@ -4069,6 +4069,51 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
         spellInfo->_InitializeExplicitTargetMask();
     }
 
+    // Propagate battleground catch-up skip masks from base spells to Warcraft Reborn twins and matching namesakes.
+    for (SpellInfo* info : mSpellInfoMap)
+    {
+        if (!info)
+            continue;
+
+        uint32 source = info->Id;
+        bool isNamesake = false;
+        uint8 propagated = BG_CATCH_UP_SKIP_NONE;
+        for (uint8 hop = 0; hop < 2; ++hop)
+        {
+            if (auto const itr = _spellTwinSources.find(source); itr != _spellTwinSources.end())
+                source = itr->second;
+            else if (auto const itr = _spellNamesakeSources.find(source); itr != _spellNamesakeSources.end())
+            {
+                source = itr->second;
+                isNamesake = true;
+            }
+            else
+                break;
+
+            SpellInfo const* base = GetSpellInfo(source);
+            if (!base || base->AscensionBattlegroundCatchUpSkip == BG_CATCH_UP_SKIP_NONE)
+                continue;
+
+            uint8 skip = base->AscensionBattlegroundCatchUpSkip;
+            if (isNamesake)
+            {
+                uint8 allowed = BG_CATCH_UP_SKIP_NONE;
+                if (info->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) || info->HasEffect(SPELL_EFFECT_HEALTH_LEECH) ||
+                    info->HasAura(SPELL_AURA_PERIODIC_DAMAGE) || info->HasAura(SPELL_AURA_PERIODIC_LEECH))
+                    allowed |= BG_CATCH_UP_SKIP_DAMAGE;
+                if (info->HasEffect(SPELL_EFFECT_HEAL) || info->HasAura(SPELL_AURA_PERIODIC_HEAL))
+                    allowed |= BG_CATCH_UP_SKIP_HEAL;
+                if (info->HasAura(SPELL_AURA_SCHOOL_ABSORB) || info->HasAura(SPELL_AURA_MANA_SHIELD))
+                    allowed |= BG_CATCH_UP_SKIP_ABSORB;
+                skip &= allowed;
+            }
+
+            propagated |= skip;
+        }
+
+        info->AscensionBattlegroundCatchUpSkip |= propagated;
+    }
+
     // Xinef: addition for binary spells, ommit spells triggering other spells
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
     {

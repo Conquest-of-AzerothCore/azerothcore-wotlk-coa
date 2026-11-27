@@ -448,7 +448,15 @@ namespace
 class venomancer_player : public PlayerScript
 {
 public:
-    venomancer_player() : PlayerScript("venomancer_player", {PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT}) { }
+    venomancer_player()
+        : PlayerScript("venomancer_player",
+                       {PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_PLAYER_HAS_ACTIVE_POWER_TYPE})
+    {
+    }
+    bool OnPlayerHasActivePowerType(Player const* player, Powers power) override
+    {
+        return player && player->getClass() == CLASS_PROPHET && power == POWER_MANA;
+    }
     void OnPlayerUpdate(Player* player, uint32 diff) override
     {
         using namespace AscensionVenomancer;

@@ -29,6 +29,7 @@ constexpr uint32 DeathchaserExtender = 807546;
 constexpr uint32 DeathchaserFirstRank = 805190;
 constexpr uint32 SoulsForSlaughterDamage = 575847;
 constexpr uint32 SoulforgedWeaponryFreeMurder = 705964;
+constexpr uint32 SoulGenerator = 520056;
 
 class reaper_soulforged_weaponry_metadata : public GlobalScript
 {
@@ -120,6 +121,8 @@ class spell_ascension_reaper_talent_proc : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
+        if (GetId() == SoulGenerator)
+            return false;
         auto rule = std::find_if(Rules.begin(), Rules.end(),
             [this](AscensionReaperTalentProcs::Rule const& entry)
             {

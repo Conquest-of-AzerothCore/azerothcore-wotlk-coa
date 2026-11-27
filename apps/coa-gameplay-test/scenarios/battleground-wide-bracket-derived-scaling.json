@@ -1,0 +1,862 @@
+{
+  "schema": 1,
+  "name": "Widened battleground skips derived and max-health scaling without bypassing healing reduction",
+  "contract": "A level 12 Human Templar (templar, class 19) and a level 29 Human Chronomancer (ally, class 22) of the Alliance enter a Warsong Gulch of the 10-29 bracket against two level 29 Undead Necromancers (top, top2, class 23). The widened bracket lifts health only on UNIT_MOD_HEALTH and leaves Stamina (stat 2) untouched. From player_class_stats (CoA.ClassLevelSixtyStats.Enable defaults to 0; Templar uses Rogue class 4 as fallback_class from level 1 anchor BaseHP 65 and Stamina 25, with Human race stats 0): level 12 Templar BaseHP 182 and Stamina 32 give 182 + 20 + 10 x 12 = 322; level 29 Templar BaseHP 436 and Stamina 46 give 436 + 20 + 10 x 26 = 716. The Templar maximum health gain is 254 base health + 14 Stamina x 10 = 394 and the output ratio is 716 / 322 = 2.22360, so scaling 1000 yields round(1000 x 716 / 322) = 2224. Inside Warsong Gulch, Chastise 803157 (damage), Benediction 801448 (healing) and Power Word: Shield 17 (absorb) still scale to 2224, while scaled_output skips all six TemplarCopies (525028 Retribution, 707720 Sacred Defense, 801456 Deliverance on damage; 707302 Uther's Legacy, 803331 Downfall, 807414 Argent Blade self-heal on healing) and Tome of Light 805422 on absorb. Cross-class scaled_output checks confirm BG_CATCH_UP_SKIP_*: Ignite 12654, Righteous Vengeance 61840, Divine Aegis 47753 (absorb), Death Strike 45470 (heal), Anti-Magic Shell 48707 (absorb), Armor of Faith 1582343 (heal), Chronomancer Protection 560374 (absorb), Witch Doctor Crystal Water 547574 (absorb), Barbarian Headlopped 783054 (damage), Guardian Deadly Blow 706808 (damage), Witch Hunter Dusk Blade 574335 (heal), Bloodmage Infuse 681404 (damage) and Xoroth Gorged 680204 (damage) stay at 1000, while Warrior Deep Wounds 12721 (damage) still scales to 2224. Once the match starts and all players meet at the same position, Warsong Gulch autocasts PvP - Battleground - Dampening 74411. 807414 natively carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, so caster-side Dampening 74411 (SPELL_AURA_MOD_HEALING_DONE_PERCENT) leaves it unchanged, while target-side Mortal Strike 12294 (-50% SPELL_AURA_MOD_HEALING_PCT, applied via set_aura before the cast) still reduces it in Unit::SpellHealingBonusTaken because 807414 uses BG_CATCH_UP_SKIP_HEAL rather than AscensionInheritsResolvedAmount. Damaged templar (1 HP, allow_regeneration false, Walking Stick 2495 equipped, 10000 melee/spell hit and expertise ratings, +200 attack power, carrying Mortal Strike 12294 from top) casts Argent Blade 804929 against 100000-HP cloth target top (no shield/block/parry, no overkill): 804929 hits once for positive damage and triggers 807414 once for a heal of floor(0.50 x damage), so spell_heal_total ratio_to argent_damage lies in [0.49, 0.51] regardless of whether Argent Blade crits, ruling out both double-scaling (~1.11) and AscensionInheritsResolvedAmount bypass (~1.00).",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 12,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 200,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 22,
+      "level": 29
+    },
+    {
+      "id": "top",
+      "race": 5,
+      "class": 23,
+      "level": 29
+    },
+    {
+      "id": "top2",
+      "race": 5,
+      "class": 23,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "stat",
+      "save_as": "templar_stat2",
+      "stat": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "max_health",
+      "save_as": "templar_health"
+    },
+    {
+      "action": "client_packet",
+      "actor": "templar",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "ally",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top2",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "templar is invited to the 10-29 bracket",
+      "actor": "templar",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top is invited to the 10-29 bracket",
+      "actor": "top",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "ally is invited to the 10-29 bracket",
+      "actor": "ally",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top2 is invited to the 10-29 bracket",
+      "actor": "top2",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "templar",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "templar"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "templar enters Warsong Gulch",
+      "actor": "templar",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "top"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "top enters Warsong Gulch",
+      "actor": "top",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "ally",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "ally"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "ally enters Warsong Gulch",
+      "actor": "ally",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "top2",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "top2"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "top2 enters Warsong Gulch",
+      "actor": "top2",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "teleport",
+      "label": "templar meets the others outdoors",
+      "actor": "templar",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "ally meets the others outdoors",
+      "actor": "ally",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top meets the others outdoors",
+      "actor": "top",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top2 meets the others outdoors",
+      "actor": "top2",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "templar Stamina is not lifted",
+      "actor": "templar",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "templar_stat2",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "templar maximum health rises by 254 base health and 14 Stamina equivalent (394)",
+      "actor": "templar",
+      "metric": "max_health",
+      "relative_to": "templar_health",
+      "equals": 394,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "templar has the Templar output ratio 716 / 322",
+      "actor": "templar",
+      "metric": "battleground_output_ratio",
+      "min": 2.2231,
+      "max": 2.2241,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Chastise 803157 damage still scales to 2224",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 803157,
+      "healing": false,
+      "equals": 2224
+    },
+    {
+      "action": "assert",
+      "label": "Templar Benediction 801448 healing still scales to 2224",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 801448,
+      "healing": true,
+      "equals": 2224
+    },
+    {
+      "action": "assert",
+      "label": "Priest Power Word: Shield 17 absorb still scales to 2224",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 17,
+      "healing": true,
+      "absorb": true,
+      "equals": 2224
+    },
+    {
+      "action": "assert",
+      "label": "Templar Retribution 525028 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 525028,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Sacred Defense 707720 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 707720,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Deliverance 801456 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 801456,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Uther's Legacy 707302 heal is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 707302,
+      "healing": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Downfall 803331 heal is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 803331,
+      "healing": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Argent Blade self-heal 807414 is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 807414,
+      "healing": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Tome of Light 805422 absorb is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 805422,
+      "healing": true,
+      "absorb": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Mage Ignite 12654 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 12654,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Paladin Righteous Vengeance 61840 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 61840,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Priest Divine Aegis 47753 absorb is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 47753,
+      "healing": true,
+      "absorb": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Death Knight Death Strike 45470 heal is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 45470,
+      "healing": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Death Knight Anti-Magic Shell 48707 absorb is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 48707,
+      "healing": true,
+      "absorb": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Mystic Enchant Armor of Faith 1582343 heal is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 1582343,
+      "healing": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Chronomancer Protection 560374 absorb is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 560374,
+      "healing": true,
+      "absorb": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Witch Doctor Crystal Water 547574 absorb is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 547574,
+      "healing": true,
+      "absorb": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Barbarian Headlopped 783054 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 783054,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Guardian Deadly Blow 706808 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 706808,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Witch Hunter Dusk Blade 574335 heal is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 574335,
+      "healing": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Bloodmage Infuse 681404 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 681404,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Xoroth Gorged 680204 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 680204,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Positive control: Warrior Deep Wounds 12721 damage still scales to 2224",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 12721,
+      "healing": false,
+      "equals": 2224
+    },
+    {
+      "action": "assert",
+      "label": "Warsong Gulch is in progress",
+      "actor": "templar",
+      "metric": "battleground_status",
+      "equals": 3,
+      "within_ms": 180000
+    },
+    {
+      "action": "teleport",
+      "label": "templar meets top once the match starts",
+      "actor": "templar",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "ally meets the others once the match starts",
+      "actor": "ally",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top meets templar once the match starts",
+      "actor": "top",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top2 meets the others once the match starts",
+      "actor": "top2",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "templar loses Honorless Target",
+      "actor": "templar",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "ally loses Honorless Target",
+      "actor": "ally",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "top loses Honorless Target",
+      "actor": "top",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "top2 loses Honorless Target",
+      "actor": "top2",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Warsong Gulch applies PvP - Battleground - Dampening 74411 to templar",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 74411,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_health",
+      "label": "top has high health to avoid overkill",
+      "actor": "top",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 804929
+    },
+    {
+      "action": "add_item",
+      "actor": "templar",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "templar",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_health",
+      "label": "templar is damaged before casting Argent Blade",
+      "actor": "templar",
+      "value": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "label": "top applies Mortal Strike 12294 (-50% healing taken) to templar",
+      "actor": "templar",
+      "caster": "top",
+      "spell": 12294,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "templar holds Mortal Strike 12294",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 12294,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "templar casts Argent Blade 804929 against top",
+      "actor": "templar",
+      "spell": 804929,
+      "target": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "templar"
+    },
+    {
+      "action": "assert",
+      "label": "Argent Blade 804929 hits top once",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 804929,
+      "target": "top",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "save_as": "argent_damage",
+      "spell": 804929,
+      "target": "top"
+    },
+    {
+      "action": "assert",
+      "label": "Argent Blade 804929 deals positive damage",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 804929,
+      "target": "top",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Argent Blade self-heal 807414 fires once",
+      "actor": "templar",
+      "metric": "spell_heal_count",
+      "spell": 807414,
+      "target": "templar",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Argent Blade self-heal 807414 restores effective health",
+      "actor": "templar",
+      "metric": "spell_effective_heal_total",
+      "spell": 807414,
+      "target": "templar",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Argent Blade self-heal 807414 equals 0.50x damage (no double-scaling and Mortal Strike 12294 still applies)",
+      "actor": "templar",
+      "metric": "spell_heal_total",
+      "spell": 807414,
+      "target": "templar",
+      "ratio_to": "argent_damage",
+      "min": 0.49,
+      "max": 0.51
+    }
+  ]
+}

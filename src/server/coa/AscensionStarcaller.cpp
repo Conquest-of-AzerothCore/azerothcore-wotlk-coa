@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionStarcaller.h"
 #include "CellImpl.h"
 #include "GridNotifiers.h"
@@ -271,7 +272,11 @@ void Aspect(Player* player, Unit* target, uint32 damage, bool forced)
         Stars(player, target);
         if (id == 801128)
         {
-            uint32 value = damage + (player->HasAura(680777) ? player->GetMaxPower(POWER_MANA) / 100 : 0);
+            uint32 manaBonus = player->HasAura(680777)
+                ? AscensionBattlegroundCombat::ScaledOutput(
+                    player, target, player->GetMaxPower(POWER_MANA) / 100, nullptr, false)
+                : 0;
+            uint32 value = damage + manaBonus;
             for (uint32 i = 0; i < 3; ++i)
                 Copy(player, target, 801129, value);
         }

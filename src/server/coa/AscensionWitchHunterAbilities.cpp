@@ -510,7 +510,24 @@ class spell_ascension_witch_hunter_ability : public SpellScript
                 target->RemoveAurasDueToSpell(680517, player->GetGUID());
         }
         if (Heartseeking(GetSpellInfo()) && dealt)
-            player->RewardRage(dealt, 0, true);
+        {
+            uint32 speedFactor = uint32(player->GetAttackTime(RANGED_ATTACK) / 1000.0f * 3.5f);
+            bool crit = false;
+            if (Spell* spell = GetSpell())
+            {
+                if (spell->GetSpellValue()->ForcedCritResult)
+                    crit = true;
+                else if (std::list<TargetInfo> const* targets = spell->GetUniqueTargetInfo())
+                    crit = std::any_of(targets->begin(), targets->end(),
+                                       [guid = target->GetGUID()](TargetInfo const& targetInfo)
+                                       { return targetInfo.targetGUID == guid && targetInfo.crit; });
+            }
+            if (crit)
+                speedFactor *= 2;
+            player->RewardRage(dealt, speedFactor, true);
+        }
+        if (CoilingShot(GetSpellInfo()) && dealt)
+            Cast(player, player, 500164);
         if (id == 680230 && dealt)
             Cast(player, player, 500179);
         if (Desecrate(GetSpellInfo()) && dealt && player->HasAura(560208) &&

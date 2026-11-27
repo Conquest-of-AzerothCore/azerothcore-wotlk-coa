@@ -11,7 +11,10 @@ class Unit;
 namespace AscensionBattlegroundCatchUp
 {
     float OutputRatio(Unit const* unit);
-    uint32 ScaledOutput(Unit const* source, Unit const* target, uint32 amount, SpellInfo const* spell, bool healing);
+    uint32 ScaledOutput(Unit const* source, Unit const* target, uint32 amount, SpellInfo const* spell, bool healing,
+        bool absorb = false);
+    float UnscaledFactor(Unit const* source, Unit const* target, SpellInfo const* spell, bool healing,
+        bool absorb = false);
 }
 
 #endif

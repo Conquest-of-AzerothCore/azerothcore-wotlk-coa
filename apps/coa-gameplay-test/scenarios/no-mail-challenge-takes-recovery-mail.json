@@ -1,0 +1,272 @@
+{
+  "schema": 1,
+  "name": "A no-mail challenge lets the hero take Item Recovery and Worldforged refund mail",
+  "contract": [
+    "Ruling: Item Recovery and Worldforged refund mail return the character's own items, which Ascension's",
+    "Recovery Service delivered straight to the bags, so a no-mail challenge must let the hero take them.",
+    "mod-item-recovery sends both as sender-less GM-stationery mail with ITEM_RECOVERY_MAIL_SUBJECT or",
+    "WORLDFORGED_REFUND_MAIL_SUBJECT; the challenge exempted only the Recruit-A-Friend subject, so the take was",
+    "refused with \"Your challenge forbids receiving mail.\" Expected: under Bloodbath (challenge 15, NO_MAIL)",
+    "CMSG_MAIL_TAKE_ITEM answers MAIL_OK (0) for a Silverleaf in Item Recovery mail and a Mageroyal in",
+    "Worldforged refund mail, and both land in the bags. An Earthroot in the same sender-less GM-stationery mail",
+    "with another subject (boss loot, challenge rewards) stays refused with MAIL_ERR_INTERNAL_ERROR (6), so",
+    "only the subject separates the exempt mail from the refused one."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "name": "Coasrecovery",
+      "race": 1,
+      "class": 23,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "start_challenge",
+      "label": "Fixture: the hero runs Bloodbath (NO_MAIL)",
+      "actor": "hero",
+      "challenge": 15,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "system_mail",
+      "label": "Item Recovery mails a Silverleaf",
+      "actor": "hero",
+      "item": 765,
+      "kind": "recovery"
+    },
+    {
+      "action": "system_mail",
+      "label": "A Worldforged refund mails a Mageroyal",
+      "actor": "hero",
+      "item": 785,
+      "kind": "refund"
+    },
+    {
+      "action": "system_mail",
+      "label": "Other sender-less server mail carries an Earthroot",
+      "actor": "hero",
+      "item": 2449,
+      "kind": "server"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 765,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The recovery mail arrived"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 785,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The refund mail arrived"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 2449,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The other server mail arrived"
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "hero",
+      "entry": 142119
+    },
+    {
+      "action": "client_packet",
+      "label": "DISCRIMINATING: the challenge hook passes the Item Recovery take",
+      "actor": "hero",
+      "opcode": 582,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 765
+        },
+        {
+          "mail_item_guid": 765
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The mailbox hands over the Silverleaf",
+      "actor": "hero",
+      "opcode": 582,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 765
+        },
+        {
+          "mail_item_guid": 765
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "The Item Recovery take succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 765,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 765,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "DISCRIMINATING: the challenge hook passes the Worldforged refund take",
+      "actor": "hero",
+      "opcode": 582,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 785
+        },
+        {
+          "mail_item_guid": 785
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The mailbox hands over the Mageroyal",
+      "actor": "hero",
+      "opcode": 582,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 785
+        },
+        {
+          "mail_item_guid": 785
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "The Worldforged refund take succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 785,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 785,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "Control: the challenge refuses the take from other server mail",
+      "actor": "hero",
+      "opcode": 582,
+      "early": false,
+      "consumed": true,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 2449
+        },
+        {
+          "mail_item_guid": 2449
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 6,
+      "label": "The server mail refusal is MAIL_ERR_INTERNAL_ERROR"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 2449,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 2449,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

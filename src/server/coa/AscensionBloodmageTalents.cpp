@@ -2320,7 +2320,6 @@ void AddSC_AscensionBloodmageTalents()
     new bloodmage_cursed_form_weapons();
     new bloodmage_hunter_and_hunted_casts();
     new bloodmage_nightmare_casts();
-    new bloodmage_infuse_accumulation();
     new bloodmage_blood_constructor();
     new bloodmage_talent_contracts();
     RegisterSpellScript(spell_ascension_bloodmage_sanguine_rupture);
@@ -2361,4 +2360,9 @@ void AddSC_AscensionBloodmageTalents()
     RegisterSpellScript(aura_ascension_bloodmage_blood_howl);
     RegisterSpellScript(aura_ascension_bloodmage_blood_feast);
     RegisterSpellScript(aura_ascension_bloodmage_darkfallen_lament);
+}
+
+void AddSC_AscensionBloodmageInfuse()
+{
+    new bloodmage_infuse_accumulation();
 }

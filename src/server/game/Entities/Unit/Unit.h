@@ -2109,6 +2109,9 @@ public:
     void ExecuteDelayedUnitRelocationEvent();
     void ExecuteDelayedUnitAINotifyEvent();
 
+    [[nodiscard]] float GetBattlegroundOutputRatio() const { return m_ascensionBgOutputRatio; }
+    void SetBattlegroundOutputRatio(float ratio) { m_ascensionBgOutputRatio = ratio; }
+
     void BuildHeartBeatMsg(WorldPacket* data) const;
     void BuildMovementPacket(ByteBuffer* data) const;
 
@@ -2306,6 +2309,8 @@ private:
 
     typedef std::unordered_map<uint64 /*visibleFlag(uint32) + updateType(uint8)*/, BuildValuesCachedBuffer>  ValuesUpdateCache;
     ValuesUpdateCache _valuesUpdateCache;
+
+    float m_ascensionBgOutputRatio = 1.0f;
 };
 
 namespace Acore

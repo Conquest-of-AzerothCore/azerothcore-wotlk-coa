@@ -97,11 +97,17 @@ static LevelValues const HumanWarriorLevelFiftyNine = { 1619, 0, { 118, 79, 108,
 
 static void LiftsWarriorHealthOnly()
 {
-    Lift const lift = LiftBetween(HumanWarriorLevelTwelve, HumanWarriorLevelTwentyNine);
-    CHECK(lift.health == 239.0f && lift.stamina == 22.0f);
-    CHECK(!lift.Empty());
+    Lift const baseLift = LiftBetween(HumanWarriorLevelTwelve, HumanWarriorLevelTwentyNine);
+    CHECK(baseLift.health == 239.0f);
+    CHECK(!baseLift.Empty());
     CHECK(LiftBetween(HumanWarriorLevelTwentyNine, HumanWarriorLevelTwelve).Empty());
     CHECK(LiftBetween(HumanWarriorLevelTwelve, HumanWarriorLevelTwelve).Empty());
+
+    Lift const playerLift = PlayerLiftBetween(HumanWarriorLevelTwelve, HumanWarriorLevelTwentyNine);
+    CHECK(playerLift.health == 459.0f);
+    CHECK(!playerLift.Empty());
+    CHECK(PlayerLiftBetween(HumanWarriorLevelTwentyNine, HumanWarriorLevelTwelve).Empty());
+    CHECK(PlayerLiftBetween(HumanWarriorLevelTwelve, HumanWarriorLevelTwelve).Empty());
 }
 
 static void CapsLiftLevel()
@@ -115,8 +121,8 @@ static void CapsLiftLevel()
 
 static void ComputesWarriorRatio()
 {
-    float const own = static_cast<float>(HumanWarriorLevelTwelve.health) + PlayerStaminaHealth(34);
-    float const top = static_cast<float>(HumanWarriorLevelTwentyNine.health) + PlayerStaminaHealth(56);
+    float const own = PlayerOutputHealth(HumanWarriorLevelTwelve);
+    float const top = PlayerOutputHealth(HumanWarriorLevelTwentyNine);
     CHECK(own == 269.0f && top == 728.0f);
     CHECK(std::abs(OutputRatio(own, top) - 728.0f / 269.0f) < 1e-6f);
     CHECK(OutputRatio(728.0f, 269.0f) == 1.0f);

@@ -16,6 +16,7 @@
  */
 
 #include "AreaDefines.h"
+#include "AscensionBattlegroundCombat.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -2522,7 +2523,11 @@ class spell_gen_lifeblood : public AuraScript
     void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
     {
         if (Unit* owner = GetUnitOwner())
-            amount += int32(CalculatePct(owner->GetMaxHealth(), 1.5f / aurEff->GetTotalTicks()));
+        {
+            uint32 const bonus = CalculatePct(owner->GetMaxHealth(), 1.5f / aurEff->GetTotalTicks());
+            float const factor = AscensionBattlegroundCombat::UnscaledFactor(owner, owner, GetSpellInfo(), true);
+            amount += factor < 1.0f ? int32(std::llround(double(bonus) * double(factor))) : int32(bonus);
+        }
     }
 
     void Register() override
