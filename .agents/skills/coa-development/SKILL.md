@@ -38,6 +38,51 @@ the reference that holds this repository's procedure. Creating or editing this s
 | PR title and description | [pr-description](references/pr-description.md) |
 | Linux slot servers, Ghost e2e tests, client-visible symptoms | [guide-tooling](references/guide-tooling.md) |
 
+## Seed new worktrees from main
+
+Use `~/tmp` as the base directory for new worktrees. Create each worktree in a
+task-specific subdirectory such as `~/tmp/coa-manastorm-leader-depth`.
+
+When creating a worktree, check that the primary checkout's `build-main` is idle, then
+copy it to `<worktree>/build-main`. If it is active, ask the user how to proceed before
+copying it. Preserve timestamps and include Ninja metadata and object files. On Linux,
+`cp -a --reflink=auto -- "$main_checkout/build-main" "$worktree/build-main"` makes an
+independent copy when the destination does not exist. Choose a worktree filesystem with
+enough space for a full copy when reflinks are unavailable.
+
+Use the seed as the starting point for the worktree's own incremental build. CMake and
+Ninja record absolute paths, so check that the build configuration resolves to the new
+worktree before invoking it. Reconfigure for the worktree as needed and inspect the planned
+work before launching a build. If relocation would trigger a full rebuild, report that
+before starting it. Use the [separate worktree settings](../../../docs/coa/verification.md#separate-worktrees)
+with the copied build directory.
+
+## Before starting a build
+
+Cap compilation at three parallel jobs. Pass `--jobs 3` to `verify_all.py` when it
+runs the build stage, or use a lower job limit.
+
+Check the build host for active builds immediately before each build launch, including a
+`verify_all.py` invocation that selects the build stage. Check across worktrees and build
+directories. If the shell is sandboxed, use a host-visible process check so builds outside
+the sandbox are visible.
+
+If a build is running, tell the user which build and directory you found, where identifiable,
+and ask whether to wait, skip the new build, or proceed concurrently. Wait for their answer
+before starting another build. Leave the existing build running unless the user asks to stop
+it. The build-directory ownership rules in `.agents/rules/git-safety.md` still apply.
+
+Before launching any build, use the build tool's dry run or equivalent to list the C++
+source files scheduled for compilation for the selected worktree, build directory and
+targets. Include the file count and full paths relative to the worktree. If the list is
+long, share it as a file. For unity builds, identify the generated compilation units and
+the original source files they include.
+
+Show the list to the user and wait for explicit confirmation before executing that build.
+If the planned files or targets change, show the updated list and request confirmation
+again. If the plan cannot list the files reliably, explain why and wait for the user's
+direction.
+
 ## Proof ladder
 
 Choose the cheapest proof that can distinguish the fixed behavior from the reported failure:
