@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AllSpellScript.h"
+#include "AscensionBattlegroundCombat.h"
 #include "CellImpl.h"
 #include "Containers.h"
 #include "CreatureScript.h"
@@ -24,6 +25,7 @@
 #include "UnitScript.h"
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <list>
 #include <string_view>
 #include <unordered_map>
@@ -599,8 +601,12 @@ class spell_ascension_mystic_thundering_blow : public AuraScript
         Unit* target = eventInfo.GetActionTarget();
         uint32 const school = aurEff->GetMiscValue() > 0 ? uint32(aurEff->GetMiscValue()) : uint32(SPELL_SCHOOL_MASK_NATURE);
         SpellNonMeleeDamage strike(caster, target, GetSpellInfo(), school);
-        caster->CalculateSpellDamageTaken(&strike, int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(),
-            aurEff->GetAmount())), GetSpellInfo());
+        uint32 const rawDamage = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount());
+        float const factor = AscensionBattlegroundCombat::UnscaledFactor(caster, target, GetSpellInfo(), false);
+        int32 const strikeDamage = rawDamage && factor < 1.0f
+            ? std::max<int32>(1, int32(std::llround(double(rawDamage) * double(factor))))
+            : int32(rawDamage);
+        caster->CalculateSpellDamageTaken(&strike, strikeDamage, GetSpellInfo());
         Unit::DealDamageMods(target, strike.damage, &strike.absorb);
         caster->SendSpellNonMeleeDamageLog(&strike);
         caster->DealSpellDamage(&strike, true);

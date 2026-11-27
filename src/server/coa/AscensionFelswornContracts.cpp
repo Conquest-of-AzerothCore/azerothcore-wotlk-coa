@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionFelsworn.h"
 #include "AscensionFelswornData.h"
 #include "DBCStores.h"
@@ -537,7 +538,8 @@ class felsworn_scaling : public UnitScript
         if (player->HasAura(574145) && index == 0 && (Named(info, 802060) || Twin(info)))
             value += player->GetStat(STAT_AGILITY) * .15f;
         if (Named(info, 705129) && index == 0 && player->HasAura(803478))
-            value += player->GetMaxHealth() * .10f;
+            value += player->GetMaxHealth() * .10f *
+                     AscensionBattlegroundCombat::UnscaledFactor(player, player, info, true, true);
         if ((info->Id == 520252 || info->Id == 520253) && !Inner(player))
             value = 0;
         if (info->Id == 804825 && index == EFFECT_0)

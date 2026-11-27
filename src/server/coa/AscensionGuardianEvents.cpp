@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionGuardianCompletion.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -10,6 +11,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 namespace
@@ -143,10 +145,18 @@ class aura_ascension_guardian_event : public AuraScript
                 break;
             case 804891:
             {
-                int64 amount = damage / 20;
+                int64 gain = damage / 20;
+                if (gain && AscensionBattlegroundCombat::SharedTopLevel(owner, event.GetActor()) != 0)
+                    gain = std::max<int64>(1, std::llround(
+                        double(gain) * double(AscensionBattlegroundCombat::UnitUnscaledFactor(owner))));
+                int64 amount = gain;
                 if (AuraEffect const* old = owner->GetAuraEffect(572158, EFFECT_0))
                     amount += old->GetAmount();
-                amount = std::clamp<int64>(amount, 0, std::min<uint64>(owner->GetMaxHealth() / 5,
+                uint64 cap = owner->GetMaxHealth() / 5;
+                if (cap && AscensionBattlegroundCombat::SharedTopLevel(owner, owner) != 0)
+                    cap = std::max<uint64>(1, uint64(std::llround(
+                        double(cap) * double(AscensionBattlegroundCombat::UnitUnscaledFactor(owner)))));
+                amount = std::clamp<int64>(amount, 0, std::min<uint64>(cap,
                     std::numeric_limits<int32>::max()));
                 owner->CastCustomSpell(572158, SPELLVALUE_BASE_POINT0, int32(amount), owner,
                     TRIGGERED_FULL_MASK, nullptr, effect);

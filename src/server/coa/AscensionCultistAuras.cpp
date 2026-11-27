@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionCultist.h"
 #include "AscensionCultistData.h"
 #include "DynamicObject.h"
@@ -11,6 +12,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include <algorithm>
+#include <cmath>
 namespace
 {
 using namespace AscensionCultist;
@@ -288,7 +290,14 @@ class aura_ascension_cultist_lifecycle : public AuraScript
         bool old = State(player).event;
         State(player).event = true;
         if (player->HasAura(681088))
-            GrantEmbodiment(player, CalculatePct(amount, Amount(681088, 1)));
+        {
+            uint32 grant = CalculatePct(amount, Amount(681088, 1));
+            if (grant && damage.GetAttacker() && player->IsHostileTo(damage.GetAttacker()) &&
+                AscensionBattlegroundCombat::SharedTopLevel(player, damage.GetAttacker()) != 0)
+                grant = std::max<uint32>(1, uint32(std::llround(
+                    double(grant) * double(AscensionBattlegroundCombat::UnitUnscaledFactor(player)))));
+            GrantEmbodiment(player, grant);
+        }
         if (Named(GetSpellInfo(), 500715) && player->HasAura(525060) && damage.GetAttacker() &&
             damage.GetAttacker() != player)
             Copy(player, damage.GetAttacker(), 525062, CalculatePct(amount, Amount(525060)));

@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionBattlegroundCombat.h"
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
@@ -24,6 +25,7 @@
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
 #include "TemporarySummon.h"
+#include <limits>
 /*
  * Scripts for spells with SPELLFAMILY_PRIEST and SPELLFAMILY_GENERIC spells used by priest players.
  * Ordered alphabetically using scriptname.
@@ -220,15 +222,19 @@ class spell_pri_divine_aegis : public AuraScript
     {
         PreventDefaultAction();
 
+        Unit* target = eventInfo.GetProcTarget();
         int32 absorb = CalculatePct(int32(eventInfo.GetHealInfo()->GetHeal()), aurEff->GetAmount());
 
         // Multiple effects stack, so let's try to find this aura.
-        if (AuraEffect const* aegis = eventInfo.GetProcTarget()->GetAuraEffect(SPELL_PRIEST_DIVINE_AEGIS, EFFECT_0))
+        if (AuraEffect const* aegis = target->GetAuraEffect(SPELL_PRIEST_DIVINE_AEGIS, EFFECT_0))
             absorb += aegis->GetAmount();
 
-        absorb = std::min(absorb, eventInfo.GetProcTarget()->GetLevel() * 125);
+        uint32 const level = std::max<uint32>(target->GetLevel(),
+            AscensionBattlegroundCombat::SharedTopLevel(GetTarget(), target));
+        absorb = std::min<int32>(absorb, int32(level * 125));
 
-        GetTarget()->CastCustomSpell(SPELL_PRIEST_DIVINE_AEGIS, SPELLVALUE_BASE_POINT0, absorb, eventInfo.GetProcTarget(), true, nullptr, aurEff);
+        GetTarget()->CastCustomSpell(SPELL_PRIEST_DIVINE_AEGIS, SPELLVALUE_BASE_POINT0, absorb, target, true, nullptr,
+            aurEff);
     }
 
     void Register() override
@@ -745,6 +751,12 @@ class spell_pri_power_word_shield : public SpellScript
         {
             int32 newAmount = GetSpellInfo()->Effects[EFFECT_0].CalcValue(caster, nullptr, nullptr);
             newAmount = CalculateSpellAmount(caster, target, newAmount, GetSpellInfo(), aurEff);
+            if (newAmount > 0)
+            {
+                uint32 const scaled = AscensionBattlegroundCombat::ScaledOutput(
+                    caster, target, uint32(newAmount), GetSpellInfo(), true, true);
+                newAmount = int32(std::min<uint32>(scaled, uint32(std::numeric_limits<int32>::max())));
+            }
 
             if (aurEff->GetAmount() > newAmount)
                 return SPELL_FAILED_AURA_BOUNCED;
@@ -1064,7 +1076,13 @@ static void HealFromVampiricEmbrace(Unit* priest, uint32 damage, int32 pct, Aura
     if (!lowest)
         return;
 
-    int32 heal = selfHeal + int32(priest->SpellBaseHealingBonusDone(healSpell->GetSchoolMask()) * VAMPIRISM_HEALING_POWER_COEFFICIENT);
+    int32 bonus = int32(
+        priest->SpellBaseHealingBonusDone(healSpell->GetSchoolMask()) * VAMPIRISM_HEALING_POWER_COEFFICIENT);
+    if (bonus > 0)
+        bonus = int32(std::min<uint32>(
+            AscensionBattlegroundCombat::ScaledOutput(priest, lowest, uint32(bonus), nullptr, true),
+            uint32(std::numeric_limits<int32>::max())));
+    int32 heal = selfHeal + bonus;
     if (heal > 0)
         heal = int32(lowest->SpellHealingBonusTaken(priest, healSpell, uint32(heal), HEAL));
     heal = std::min<int32>(heal, priest->CountPctFromMaxHealth(VAMPIRISM_HEAL_CAP_PCT));

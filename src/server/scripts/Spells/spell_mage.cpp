@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionBattlegroundCombat.h"
 #include "Pet.h"
 #include "Player.h"
 #include "SpellAuraEffects.h"
@@ -22,6 +23,8 @@
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
 #include "TemporarySummon.h"
+#include <algorithm>
+#include <limits>
 /*
  * Scripts for spells with SPELLFAMILY_MAGE and SPELLFAMILY_GENERIC spells used by mage players.
  * Ordered alphabetically using scriptname.
@@ -718,6 +721,12 @@ class spell_mage_ice_barrier : public SpellScript
         {
             int32 newAmount = GetSpellInfo()->Effects[EFFECT_0].CalcValue(caster, nullptr, nullptr);
             newAmount = CalculateSpellAmount(caster, newAmount, GetSpellInfo(), aurEff);
+            if (newAmount > 0)
+            {
+                uint32 const scaled = AscensionBattlegroundCombat::ScaledOutput(
+                    caster, caster, uint32(newAmount), GetSpellInfo(), true, true);
+                newAmount = int32(std::min<uint32>(scaled, uint32(std::numeric_limits<int32>::max())));
+            }
 
             if (aurEff->GetAmount() > newAmount)
                 return SPELL_FAILED_AURA_BOUNCED;

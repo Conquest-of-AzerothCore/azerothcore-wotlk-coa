@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionPooledVitality.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -299,11 +300,16 @@ class aura_ascension_eternal_presence : public AuraScript
     void Proc(AuraEffect const* effect, ProcEventInfo& event)
     {
         PreventDefaultAction();
+        Unit* target = GetTarget();
         uint64 amount = uint64(event.GetDamageInfo()->GetDamage()) * std::clamp(effect->GetAmount(), 0, 100) / 100;
+        if (amount && event.GetActor() && target->IsHostileTo(event.GetActor()) &&
+            AscensionBattlegroundCombat::SharedTopLevel(target, event.GetActor()) != 0)
+            amount = std::max<uint64>(1, uint64(std::llround(
+                double(amount) * double(AscensionBattlegroundCombat::UnitUnscaledFactor(target)))));
         if (!amount)
             return;
-        GetTarget()->CastCustomSpell(EternalPresenceBuff, SPELLVALUE_BASE_POINT0,
-            int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())), GetTarget(), TRIGGERED_FULL_MASK);
+        target->CastCustomSpell(EternalPresenceBuff, SPELLVALUE_BASE_POINT0,
+            int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())), target, TRIGGERED_FULL_MASK);
     }
 
     void Register() override

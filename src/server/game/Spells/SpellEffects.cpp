@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionBattlegroundCombat.h"
 #include "Battleground.h"
 #include "BattlegroundIC.h"
 #include "BattlegroundMgr.h"
@@ -40,6 +41,7 @@
 #include "LocalLevelScaling.h"
 #include "Log.h"
 #include "MapMgr.h"
+#include <cmath>
 #include <limits>
 #include <set>
 #include "MiscPackets.h"
@@ -521,7 +523,10 @@ void Spell::EffectAscensionHealthPctDamage(SpellEffIndex effIndex)
         (mode == 1 && (id == 93358 || (id >= 115171 && id <= 115190)));
     if (!supported)
         return;
-    int64 const amount = int64(LocalLevelScaling::PersonalDamageHealthFor(m_caster, unitTarget)) * int64(damage) / 100;
+    int64 amount = int64(LocalLevelScaling::PersonalDamageHealthFor(m_caster, unitTarget)) * int64(damage) / 100;
+    float const factor = AscensionBattlegroundCombat::UnscaledFactor(m_caster, unitTarget, m_spellInfo, false);
+    if (factor < 1.0f)
+        amount = int64(std::llround(double(amount) * double(factor)));
     m_damage = int32(std::min<int64>(int64(m_damage) + amount, std::numeric_limits<int32>::max()));
 }
 
@@ -1018,7 +1023,12 @@ void Spell::EffectAscensionPctDamage(SpellEffIndex effIndex)
     if (m_spellInfo->Effects[effIndex].MiscValue == 1)
         amount = CalculatePct(m_caster->CalculateDamage(BASE_ATTACK, false, true), damage);
     else
+    {
         amount = CalculatePct(LocalLevelScaling::PersonalDamageHealthFor(m_caster, unitTarget), damage);
+        float const factor = AscensionBattlegroundCombat::UnscaledFactor(m_caster, unitTarget, m_spellInfo, false);
+        if (factor < 1.0f)
+            amount = uint32(std::llround(double(amount) * double(factor)));
+    }
 
     if (m_originalCaster)
         amount = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, amount, SPELL_DIRECT_DAMAGE);

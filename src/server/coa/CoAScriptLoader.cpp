@@ -438,6 +438,7 @@ void AddSC_AscensionReaperTalentProcs();
 void AddSC_AscensionPersonalBank();
 void AddSC_AscensionWisdomball();
 void AddSC_AscensionBloodmageTalents();
+void AddSC_AscensionBloodmageInfuse();
 void AddSC_AscensionBloodmageVitality();
 void AddSC_AscensionTankStanceCritReduction();
 void AddSC_AscensionBattleResurrection();
@@ -919,6 +920,7 @@ void AddCoAScripts()
     AddSC_AscensionAdventureModeRandomAggro();
     AddSC_AscensionDungeonRelease();
     AddSC_AscensionBattlegroundCatchUp();
+    AddSC_AscensionBloodmageInfuse();
     AddSC_AscensionBattlegroundSpiritQueue();
     AddSC_CoABattlegroundRewards();
     AddSC_AscensionRaidRelease();

@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionCultist.h"
 #include "AscensionCultistData.h"
 #include "DBCStores.h"
@@ -14,6 +15,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include <algorithm>
+#include <cmath>
 namespace
 {
 using namespace AscensionCultist;
@@ -205,7 +207,12 @@ class aura_ascension_cultist_event : public AuraScript
                     float flat = base + .4f * player->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW) +
                                  .1f * player->GetTotalAttackPowerValue(BASE_ATTACK);
                     flat *= .5f;
-                    Copy(player, ally, 500748, CalculatePct(damage, Amount(id)) + uint32(std::max(0.0f, flat)));
+                    uint32 derived = CalculatePct(damage, Amount(id));
+                    if (derived)
+                        derived = uint32(std::max<long long>(0, std::llround(double(derived) *
+                            double(AscensionBattlegroundCombat::UnscaledFactor(
+                                player, ally, sSpellMgr->GetSpellInfo(500748), true)))));
+                    Copy(player, ally, 500748, derived + uint32(std::max(0.0f, flat)));
                     MarkVoidTouched(player, ally);
                 }
                 break;

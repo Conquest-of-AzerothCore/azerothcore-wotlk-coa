@@ -153,7 +153,9 @@ def main():
         fixture.src = lambda part: (git_source([
             "git", "show", f"{args.source_ref}:src/server/coa/AscensionXorothAbilities.cpp"
         ], cwd=ROOT).decode("utf-8") if part == "Abilities" else original_source(part))
-    production = fixture.methods("Abilities", ["RefundableMiss", "ConsumeSelected", "RecordBellowsResult"])
+    production = "namespace AscensionBattlegroundCombat { float UnscaledFactor("
+    production += "Unit const*, Unit const*, SpellInfo const*, bool, bool = false) { return 1.0f; } }\n"
+    production += fixture.methods("Abilities", ["RefundableMiss", "ConsumeSelected", "RecordBellowsResult"])
     production += "\n#ifdef _MSC_VER\n#pragma warning(push)\n#pragma warning(disable: 4244)\n#endif\n"
     production += fixture.wrap("Casts", "Abilities", ["OnSpellCast", "OnSpellHitResult"])
     production += "\n#ifdef _MSC_VER\n#pragma warning(pop)\n#endif\n"

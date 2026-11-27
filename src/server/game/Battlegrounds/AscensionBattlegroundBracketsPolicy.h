@@ -40,11 +40,10 @@ namespace AscensionBattlegroundBracketsPolicy
     struct Lift
     {
         float health = 0.0f;
-        float stamina = 0.0f;
 
         bool Empty() const
         {
-            return health == 0.0f && stamina == 0.0f;
+            return health == 0.0f;
         }
     };
 
@@ -156,18 +155,9 @@ namespace AscensionBattlegroundBracketsPolicy
         return target > own ? static_cast<float>(target - own) : 0.0f;
     }
 
-    inline Lift LiftBetween(LevelValues const& own, LevelValues const& target)
+    inline float Gain(float own, float target)
     {
-        Lift lift;
-        lift.health = Gain(own.health, target.health);
-        lift.stamina = Gain(own.stats[2], target.stats[2]);
-        return lift;
-    }
-
-    inline std::uint32_t CappedLiftLevel(std::uint32_t level, std::uint32_t top, std::uint32_t maxLiftLevels)
-    {
-        std::uint32_t const capped = maxLiftLevels == 0 ? top : std::min(top, level + maxLiftLevels);
-        return std::max(capped, level);
+        return target > own ? target - own : 0.0f;
     }
 
     inline float PlayerStaminaHealth(std::uint32_t stamina)
@@ -175,6 +165,31 @@ namespace AscensionBattlegroundBracketsPolicy
         std::uint32_t const base = std::min<std::uint32_t>(stamina, 20);
         std::uint32_t const extra = stamina > 20 ? stamina - 20 : 0;
         return static_cast<float>(base + 10 * extra);
+    }
+
+    inline float PlayerOutputHealth(LevelValues const& values)
+    {
+        return static_cast<float>(values.health) + PlayerStaminaHealth(values.stats[2]);
+    }
+
+    inline Lift LiftBetween(LevelValues const& own, LevelValues const& target)
+    {
+        Lift lift;
+        lift.health = Gain(own.health, target.health);
+        return lift;
+    }
+
+    inline Lift PlayerLiftBetween(LevelValues const& own, LevelValues const& target)
+    {
+        Lift lift;
+        lift.health = Gain(PlayerOutputHealth(own), PlayerOutputHealth(target));
+        return lift;
+    }
+
+    inline std::uint32_t CappedLiftLevel(std::uint32_t level, std::uint32_t top, std::uint32_t maxLiftLevels)
+    {
+        std::uint32_t const capped = maxLiftLevels == 0 ? top : std::min(top, level + maxLiftLevels);
+        return std::max(capped, level);
     }
 
     inline float OutputRatio(float ownHealth, float liftedHealth)

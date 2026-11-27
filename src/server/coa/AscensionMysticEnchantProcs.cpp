@@ -2,6 +2,7 @@
  * Copyright (C) 2016+ AzerothCore <www.azerothcore.org>, released under GNU AGPL v3 license: https://github.com/azerothcore/azerothcore-wotlk/blob/master/LICENSE-AGPL3
  */
 
+#include "AscensionBattlegroundCombat.h"
 #include "Containers.h"
 #include "DatabaseEnv.h"
 #include "Field.h"
@@ -30,6 +31,7 @@
 #include "WorldScript.h"
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <mutex>
 #include <string_view>
 #include <unordered_map>
@@ -463,18 +465,51 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
             caster->CastSpell(target, trigger, true, nullptr, effect);
     }
 
+    static float TriggerUnscaledFactor(Unit const* caster, Unit const* target, Unit const* actionTarget,
+        SpellInfo const* trigger, bool sourceWasDamage)
+    {
+        if (trigger->HasAura(SPELL_AURA_SCHOOL_ABSORB) || trigger->HasAura(SPELL_AURA_MANA_SHIELD))
+        {
+            if (!actionTarget || caster->IsHostileTo(actionTarget) != sourceWasDamage ||
+                AscensionBattlegroundCombat::SharedTopLevel(caster, actionTarget) == 0)
+                return 1.0f;
+            Unit const* ref = (target && !caster->IsHostileTo(target)) ? target : caster;
+            return AscensionBattlegroundCombat::UnscaledFactor(caster, ref, trigger, true, true);
+        }
+        if (trigger->HasEffect(SPELL_EFFECT_HEAL) || trigger->HasAura(SPELL_AURA_PERIODIC_HEAL))
+        {
+            if (!actionTarget || caster->IsHostileTo(actionTarget) != sourceWasDamage ||
+                AscensionBattlegroundCombat::SharedTopLevel(caster, actionTarget) == 0)
+                return 1.0f;
+            Unit const* ref = (target && !caster->IsHostileTo(target)) ? target : caster;
+            return AscensionBattlegroundCombat::UnscaledFactor(caster, ref, trigger, true, false);
+        }
+        if (trigger->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) || trigger->HasAura(SPELL_AURA_PERIODIC_DAMAGE) ||
+            trigger->HasEffect(SPELL_EFFECT_HEALTH_LEECH) || trigger->HasAura(SPELL_AURA_PERIODIC_LEECH))
+        {
+            Unit const* ref = (target && target != caster && caster->IsHostileTo(target)) ? target : actionTarget;
+            return AscensionBattlegroundCombat::UnscaledFactor(caster, ref, trigger, false, false);
+        }
+        return 1.0f;
+    }
+
     void CastPctTrigger(AuraEffect const* effect, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
         SpellInfo const* trigger = sSpellMgr->GetSpellInfo(effect->GetSpellInfo()->Effects[effect->GetEffIndex()].TriggerSpell);
         DamageInfo const* damage = eventInfo.GetDamageInfo();
         HealInfo const* heal = eventInfo.GetHealInfo();
-        uint32 const amount = damage && damage->GetDamage() ? damage->GetDamage() : heal ? heal->GetHeal() : 0;
+        bool const sourceWasDamage = damage && damage->GetDamage();
+        uint32 const amount = sourceWasDamage ? damage->GetDamage() : heal ? heal->GetHeal() : 0;
         Unit* caster = GetTarget();
         Unit* target = eventInfo.GetActionTarget();
         if (!trigger || !amount || !target)
             return;
-        int32 basePoints = std::max(1, int32(CalculatePct(amount, effect->GetAmount())));
+        uint32 const rawPoints = CalculatePct(amount, effect->GetAmount());
+        float const factor = TriggerUnscaledFactor(caster, target, target, trigger, sourceWasDamage);
+        int32 basePoints = std::max(1, factor < 1.0f
+            ? int32(std::llround(double(rawPoints) * double(factor)))
+            : int32(rawPoints));
         caster->CastCustomSpell(target, trigger->Id, &basePoints, nullptr, nullptr, true, nullptr, effect);
     }
 
@@ -511,7 +546,8 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
         }
         DamageInfo const* damage = eventInfo.GetDamageInfo();
         HealInfo const* heal = eventInfo.GetHealInfo();
-        uint32 const amount = damage && damage->GetDamage() ? damage->GetDamage() : heal ? heal->GetHeal() : 0;
+        bool const sourceWasDamage = damage && damage->GetDamage();
+        uint32 const amount = sourceWasDamage ? damage->GetDamage() : heal ? heal->GetHeal() : 0;
         if (!amount)
             return;
         uint32 ticks = 1;
@@ -519,7 +555,12 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
             if (triggered.Amplitude && trigger->GetMaxDuration() > 0 &&
                 (triggered.IsAura(SPELL_AURA_PERIODIC_DAMAGE) || triggered.IsAura(SPELL_AURA_PERIODIC_HEAL)))
                 ticks = std::max<uint32>(1, uint32(trigger->GetMaxDuration()) / triggered.Amplitude);
-        int32 basePoints = std::max(1, int32(float(amount) * rule->AmountPct / 100.0f / float(ticks)));
+        float const rawPoints = float(amount) * rule->AmountPct / 100.0f / float(ticks);
+        float const factor = TriggerUnscaledFactor(caster, target, eventInfo.GetActionTarget(), trigger,
+            sourceWasDamage);
+        int32 basePoints = std::max(1, factor < 1.0f
+            ? int32(std::llround(double(rawPoints) * double(factor)))
+            : int32(rawPoints));
         caster->CastCustomSpell(target, trigger->Id, &basePoints, nullptr, nullptr, true, nullptr, effect);
     }
 

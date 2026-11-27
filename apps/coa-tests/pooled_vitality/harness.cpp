@@ -129,6 +129,11 @@ struct Manager
     std::map<uint32, SpellInfo> rows;
     SpellInfo const* GetSpellInfo(uint32 id) { return rows.contains(id) ? &rows.at(id) : nullptr; }
 } manager;
+namespace AscensionBattlegroundCombat
+{
+uint8 SharedTopLevel(Unit const*, Unit const*) { return 0; }
+float UnitUnscaledFactor(Unit const*) { return 1.0f; }
+}
 auto sSpellMgr = &manager;
 constexpr uint32 CHEAT_POWER = 1;
 int32 irand(int32 low, int32) { return low; }

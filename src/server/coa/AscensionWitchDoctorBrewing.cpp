@@ -137,7 +137,6 @@ class aura_ascension_witch_doctor_beam : public AuraScript
         if (critical)
             amount = Unit::SpellCriticalHealingBonus(player, info, amount, target);
         HealInfo heal(player, target, amount, info, info->GetSchoolMask());
-        Unit::CalcHealAbsorb(heal);
         player->HealBySpell(heal, critical);
         Unit::ProcSkillsAndAuras(player, target, PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS,
                                  PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS,
