@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Necromancer bench: Command: Hook lets a commanded kill give experience with no swing",
+  "contract": "SoloKill.RequirePlayerHit (#10365) gives an ungrouped player experience from a creature only if the player registered a hit on it. Order() (AscensionNecromancerSummons.cpp:405) drives the minion but may not register that hit. Raise: Abomination 500335 (3 Life Force) summons creature 50068; its capacity needs Scourge Apprentice Training 680283 (base 2 -> 3). Command: Hook 504316 is gated by CharacterAdvancement 5314 (Tab 87 'Class', the shared class-ability-point purchase, AbilityEssenceCost 1) and is command-special-cased in DoAction() (jump + cast 800043), distinct from the plain generic-branch 504865 on the same minion. The Necromancer buys that node, raises one Abomination, orders Command: Hook at a creature, never swings, and the Abomination alone kills it. This bench checks whether the necromancer still gains experience from that kill.",
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    {
+      "id": "n",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "n", "entry": 36, "level": 60, "health": 300, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "set_money", "label": "Fund the Class-tab ability essence purchase", "actor": "n", "value": 1000000 },
+    { "action": "learn", "actor": "n", "spell": 680283 },
+    { "action": "learn", "actor": "n", "spell": 500335 },
+    { "action": "advancement_rank", "actor": "n", "entry": 5314, "rank": 1 },
+    {
+      "action": "assert", "label": "SETUP: Command: Hook is learned through the Class-tab purchase", "actor": "n",
+      "metric": "knows_spell", "spell": 504316, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: Life Force capacity is raised to 3", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "min": 3, "within_ms": 3000
+    },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 1500 },
+    { "action": "cast", "label": "Raise an Abomination", "actor": "n", "spell": 500335 },
+    {
+      "action": "assert", "label": "SETUP: one Abomination is raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50068, "min": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let the Abomination take its formation place and the global cooldown pass", "ms": 2000 },
+    { "action": "snapshot", "actor": "n", "metric": "xp", "save_as": "xp0" },
+    { "action": "snapshot", "actor": "n", "metric": "melee_attack_count", "save_as": "swings0" },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "reset_cooldown", "actor": "n", "spell": 504316 },
+    {
+      "action": "cast", "label": "Command: Hook on the creature", "actor": "n", "spell": 504316, "target": "target"
+    },
+    {
+      "action": "assert", "label": "SETUP: the Command cast went through", "actor": "n",
+      "metric": "spell_go_count", "spell": 504316, "min": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the Abomination kills the creature", "actor": "target",
+      "metric": "alive", "equals": 0, "within_ms": 120000
+    },
+    {
+      "action": "assert", "label": "SETUP: the necromancer never swung", "actor": "n",
+      "metric": "melee_attack_count", "relative_to": "swings0", "equals": 0
+    },
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "BENCH: the commanded kill gives experience", "actor": "n",
+      "metric": "xp", "relative_to": "xp0", "min": 1, "within_ms": 3000
+    },
+    { "action": "assert", "label": "BENCH: the experience did not cross a level", "actor": "n", "metric": "level", "equals": 60 }
+  ]
+}

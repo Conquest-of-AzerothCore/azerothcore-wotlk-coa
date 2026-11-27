@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Necromancer bench: Command: Blight lets a commanded kill give experience with no swing",
+  "contract": "SoloKill.RequirePlayerHit (#10365) gives an ungrouped player experience from a creature only if the player registered a hit on it. Order() (AscensionNecromancerSummons.cpp:405) drives the minion but may not register that hit. Raise: Decaying Colossus 500989 (3 Life Force) summons creature 50115; its capacity needs Scourge Apprentice Training 680283 (base 2 -> 3). Command: Blight 504050 is gated by CharacterAdvancement 33764 (Tab 87 'Class', AbilityEssenceCost 1, RequiredEntry all 0, but TabAEInvestment 24: it needs 24 Ability Essence already spent in the shared Class tab, which a full real purchase chain of other Class-tab nodes would have to fund) and is one of the three command-special-cased ids in DoAction() (casts self-buff 801534), distinct from the plain-trainer-learnable 504863 on the same minion. The spell is learned directly, bypassing the CA/tab-investment acquisition gate, for mechanics-only testing of the minion-order path (matrix-documented fallback). The Necromancer raises one Decaying Colossus, orders Command: Blight at a creature, never swings, and the Colossus alone kills it. This bench checks whether the necromancer still gains experience from that kill.",
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    {
+      "id": "n",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "n", "entry": 36, "level": 60, "health": 300, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 680283 },
+    { "action": "learn", "actor": "n", "spell": 500989 },
+    { "action": "learn", "label": "Bypass the CharacterAdvancement 33764 / TabAEInvestment 24 gate for mechanics-only testing", "actor": "n", "spell": 504050 },
+    {
+      "action": "assert", "label": "SETUP: Life Force capacity is raised to 3", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "min": 3, "within_ms": 3000
+    },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 1500 },
+    { "action": "cast", "label": "Raise a Decaying Colossus", "actor": "n", "spell": 500989 },
+    {
+      "action": "assert", "label": "SETUP: one Decaying Colossus is raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50115, "min": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let the Colossus take its formation place and the global cooldown pass", "ms": 2000 },
+    { "action": "snapshot", "actor": "n", "metric": "xp", "save_as": "xp0" },
+    { "action": "snapshot", "actor": "n", "metric": "melee_attack_count", "save_as": "swings0" },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "reset_cooldown", "actor": "n", "spell": 504050 },
+    {
+      "action": "select_nearby",
+      "label": "Select the creature so Order() finds it through GetTarget() (504050's own effect targets the caster)",
+      "actor": "n", "entry": 36
+    },
+    {
+      "action": "cast", "label": "Command: Blight on the creature", "actor": "n", "spell": 504050, "target": "target"
+    },
+    {
+      "action": "assert", "label": "SETUP: the Command cast went through", "actor": "n",
+      "metric": "spell_go_count", "spell": 504050, "min": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the Colossus kills the creature", "actor": "target",
+      "metric": "alive", "equals": 0, "within_ms": 120000
+    },
+    {
+      "action": "assert", "label": "SETUP: the necromancer never swung", "actor": "n",
+      "metric": "melee_attack_count", "relative_to": "swings0", "equals": 0
+    },
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "BENCH: the commanded kill gives experience", "actor": "n",
+      "metric": "xp", "relative_to": "xp0", "min": 1, "within_ms": 3000
+    },
+    { "action": "assert", "label": "BENCH: the experience did not cross a level", "actor": "n", "metric": "level", "equals": 60 }
+  ]
+}
