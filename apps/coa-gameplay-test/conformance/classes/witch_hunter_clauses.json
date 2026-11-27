@@ -6332,5 +6332,1097 @@
         ]
       }
     ]
+  },
+  {
+    "spell": 501342,
+    "clause": "Throw a bola at an enemy, dealing ${$m2+0+$AP*.3} Physical damage",
+    "labels": [
+      "501342 effect_value e1 #0",
+      "501342 hit_mean",
+      "501342 behaviour_metric_delta ap_scaling"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501342,
+    "clause": "and slowing their movement speed by $s1% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and slowing their movement speed by $s1%",
+        "labels": [
+          "501342 effect_value e0 #1",
+          "501342 aura_amount e0 #1",
+          "501342 behaviour_metric_delta base_slow_held"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "501342 aura_duration_ms #2",
+          "501342 behaviour_cast_applies_aura duration",
+          "501342 behaviour_expiry duration",
+          "501342 behaviour_metric_delta base_slow_held",
+          "501342 behaviour_metric_delta base_slow_ends"
+        ]
+      }
+    ],
+    "reason": "Reuses existing witch_hunter.json behaviours 501342 behaviour_metric_delta base_slow_held (1.142857 -> 0.571429 at 8200 ms) and base_slow_ends (back to 1.142857 at 8275 ms)."
+  },
+  {
+    "spell": 500094,
+    "clause": "Embrace the darkness inside you, instantly generating $s1% maximum mana",
+    "labels": [
+      "500094 effect_value e0 #0",
+      "500094 behaviour_metric_delta mana_gain"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500094,
+    "clause": "and $s2% maximum Rage.",
+    "labels": [
+      "500094 effect_value e1 #1",
+      "500094 behaviour_metric_delta rage_gain"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 503679,
+    "clause": "Throw caltrops over a $a1 yd area,",
+    "labels": [
+      "503679 effect_radius e0 #0",
+      "503679 behaviour_metric_delta summon_12",
+      "503679 behaviour_metric_delta distant_control"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 503679,
+    "clause": "lasting for $d.",
+    "labels": [
+      "503679 aura_duration_ms #1",
+      "503679 behaviour_metric_delta held_11s",
+      "503679 behaviour_metric_delta gone_13s"
+    ],
+    "kind": "claim",
+    "reason": "503679 aura_duration_ms #1 reads 12000 ms on dummy via value_reagents destination_unit dummy; 12000 ms caltrop lifetime is also proven behaviourally via held_11s and gone_13s."
+  },
+  {
+    "spell": 503679,
+    "clause": "Enemies that walk over the caltrops suffer ${$504447m1+$504447ppl1+$RAP*.25} Physical Damage",
+    "labels": [
+      "503679 effect_value 504447e0 #2",
+      "503679 behaviour_metric_delta hit_damage",
+      "503679 behaviour_metric_delta hit_damage_rap"
+    ],
+    "kind": "claim",
+    "reason": "Owner ruling Q-wh-ex-2 (single_owner_hit, 2026-11-27): each triggered caltrop deals a single owner-sourced 504447 hit (5 + 0.25*RAP Physical, armor-mitigated 58.62 at RAP 237 and 4620.67 at +20000 RAP)."
+  },
+  {
+    "spell": 503679,
+    "clause": "and $504823s1% slowed movement speed for $504823d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and $504823s1% slowed movement speed",
+        "labels": [
+          "503679 effect_value 504823e0 #3",
+          "503679 behaviour_metric_delta slow_speed"
+        ]
+      },
+      {
+        "claim": "for $504823d.",
+        "labels": [
+          "503679 spell_duration 504823 #4",
+          "503679 behaviour_metric_delta slow_held",
+          "503679 behaviour_metric_delta slow_gone"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 523488,
+    "clause": "Increase the friendly target's armor by ${$m1+0}",
+    "labels": [
+      "523488 effect_value e0 #0",
+      "523488 aura_amount e0 #0",
+      "523488 behaviour_metric_delta armor_ally"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 523488,
+    "clause": "and all primary attributes by $s2 for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and all primary attributes by $s2 (Strength, Agility, Stamina, Intellect, Spirit)",
+        "labels": [
+          "523488 effect_value e1 #1",
+          "523488 aura_amount e1 #1",
+          "523488 behaviour_metric_delta stats_ally"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "523488 aura_duration_ms #2",
+          "523488 behaviour_cast_applies_aura duration",
+          "523488 behaviour_expiry duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 523488,
+    "clause": "@ext:Does not stack with other similar effects.:ext@",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Does not stack armor with other similar effects (Mark of the Wild 9885)",
+        "labels": [
+          "523488 behaviour_metric_delta no_stack_motw"
+        ]
+      },
+      {
+        "claim": "Does not stack with other Edicts from the same caster",
+        "labels": [
+          "523488 behaviour_metric_delta excl_greater_knights",
+          "523488 behaviour_metric_delta excl_greater_inquisitors"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 523510,
+    "clause": "Declare a knight's edict to all party and raid members, increasing their armor by ${$m1+0}",
+    "labels": [
+      "523510 effect_value e0 #0",
+      "523510 aura_amount e0 #0",
+      "523510 behaviour_metric_delta armor_raid",
+      "523510 behaviour_metric_delta out_of_range",
+      "523510 behaviour_metric_delta ungrouped_control",
+      "523510 behaviour_metric_delta players_only_pet",
+      "523510 behaviour_metric_delta no_stack_motw",
+      "523510 behaviour_metric_delta excl_knights",
+      "523510 behaviour_metric_delta excl_greater_inquisitors"
+    ],
+    "kind": "claim",
+    "reason": "Settled Stage 1 D-2 sets MaxAffectedTargets=0 (uncapped raid-wide); owner ruling Q-wh-ex-3 & #4733 confirm players-only filter excluding pets/Shadowhounds."
+  },
+  {
+    "spell": 523510,
+    "clause": "and all primary attributes by $s2 for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and all primary attributes by $s2 (Strength, Agility, Stamina, Intellect, Spirit)",
+        "labels": [
+          "523510 effect_value e1 #1",
+          "523510 aura_amount e1 #1",
+          "523510 behaviour_metric_delta stats_raid"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "523510 aura_duration_ms #2",
+          "523510 behaviour_cast_applies_aura duration",
+          "523510 behaviour_expiry duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 562225,
+    "clause": "Shows the location of all nearby Humanoids, Demons, and Undead on the minimap and increases your stealth detection significantly.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Shows the location of all nearby Humanoids, Demons, and Undead on the minimap",
+        "labels": [
+          "562225 behaviour_metric_delta night_tracking"
+        ]
+      },
+      {
+        "claim": "and increases your stealth detection significantly.",
+        "labels": [
+          "562225 behaviour_metric_delta night_stealth_detect"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 562225,
+    "clause": "Only works at night.",
+    "labels": [
+      "562225 behaviour_metric_delta day_tracking_control",
+      "562225 behaviour_metric_delta day_stealth_control"
+    ],
+    "kind": "claim",
+    "promise_of": "Shows the location of all nearby Humanoids, Demons, and Undead on the minimap and increases your stealth detection significantly."
+  },
+  {
+    "spell": 562390,
+    "clause": "Brand an enemy increasing their chance to be hit by melee and ranged attacks by $s2% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing their chance to be hit by melee and ranged attacks by $s2%",
+        "labels": [
+          "562390 effect_value e1 #0",
+          "562390 aura_amount e1 #0",
+          "562390 behaviour_hit_ratio melee_hit_landed",
+          "562390 behaviour_hit_ratio ranged_hit_landed"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "562390 aura_duration_ms #1",
+          "562390 behaviour_cast_applies_aura duration",
+          "562390 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "reason": "Effect[1] aura 185 (+2% ranged hit) and Effect[2] aura 184 (+2% melee hit) proven both on data readback and behaviourally via pooled hit_ratio landed-rate entries melee_hit_landed (681350) and ranged_hit_landed (501342) with melee_hit_rating / ranged_hit_rating zeroed."
+  },
+  {
+    "spell": 562390,
+    "clause": "You can see marked targets on the mini-map and through stealth or invisibility.",
+    "labels": [
+      "562390 behaviour_detection stealth hidden",
+      "562390 behaviour_detection stealth revealed",
+      "562390 behaviour_detection stealth unrevealed",
+      "562390 behaviour_detection invisibility hidden",
+      "562390 behaviour_detection invisibility revealed",
+      "562390 behaviour_detection invisibility unrevealed",
+      "562390 behaviour_detection client stealth hidden",
+      "562390 behaviour_detection client stealth revealed",
+      "562390 behaviour_detection client stealth unrevealed",
+      "562390 behaviour_detection client invisibility hidden",
+      "562390 behaviour_detection client invisibility revealed",
+      "562390 behaviour_detection client invisibility unrevealed"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 562390,
+    "clause": "@ext:You can only have 1 Brand on an enemy at a time:ext@",
+    "labels": [
+      "562390 behaviour_metric_delta replaced_by_562573",
+      "562390 behaviour_metric_delta replaces_562573"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 562573,
+    "clause": "Brand an enemy, cursing them and reducing their casting speed by $s1% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reducing their casting speed by $s1%",
+        "labels": [
+          "562573 effect_value e0 #0",
+          "562573 aura_amount e0 #0",
+          "562573 behaviour_metric_delta cast_speed_slow"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "562573 aura_duration_ms #1",
+          "562573 behaviour_cast_applies_aura duration",
+          "562573 behaviour_expiry duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 562573,
+    "clause": "Can only affect 1 target at a time.",
+    "labels": [
+      "562573 behaviour_single_target"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 562573,
+    "clause": "@ext:You can only have 1 Brand on an enemy at a time.:ext@",
+    "labels": [
+      "562573 behaviour_metric_delta replaced_by_562390",
+      "562573 behaviour_metric_delta replaces_562390"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572306,
+    "clause": "Purge the evil from an enemy, removing all enrage effects from them.",
+    "labels": [
+      "572306 behaviour_dispel_removal 38166 enemy caster",
+      "572306 behaviour_dispel_removal 42705 enemy caster",
+      "572306 behaviour_dispel_removal 38166 enemy target",
+      "572306 behaviour_dispel_removal 42705 enemy target",
+      "572306 behaviour_dispel_removal 1459 magic caster",
+      "572306 behaviour_dispel_removal 1459 magic target"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 578118,
+    "clause": "Coalesces the shadows, bringing back your Shadow Hound from the dead.",
+    "labels": [
+      "578118 behaviour_metric_delta pet_resurrect"
+    ],
+    "kind": "claim",
+    "reason": "Proven behaviourally via pet_resurrect kind: summons Shadow Hound 50124, kills it, verifies stable dead control, then revives it via 578118 (pet_health 0 -> >= 1)."
+  },
+  {
+    "spell": 680230,
+    "clause": "Activates Blade Stance",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "Owner ruling Q-wh-ex-1 (2026-11-27, status 4 absent feature): Blade Stance 802002 has DUMMY effects only and is listed in LegacyGeneratedClassSpells (AscensionCustomClassData.h:905); closed as an absent feature."
+  },
+  {
+    "spell": 680230,
+    "clause": "Slashes an enemy for Weapon Damage and generates $/10;500179s1 Rage.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Slashes an enemy for Weapon Damage",
+        "labels": [
+          "680230 hit_mean",
+          "680230 behaviour_metric_delta weapon_damage",
+          "680230 behaviour_metric_delta weapon_damage_ap"
+        ]
+      },
+      {
+        "claim": "and generates $/10;500179s1 Rage.",
+        "labels": [
+          "680230 effect_value 500179e0 #0",
+          "680230 behaviour_metric_delta rage_gain"
+        ]
+      }
+    ],
+    "reason": "Owner ruling Q-wh-ex-1 (keep_and_fix, 2026-11-27): disables unlisted triggers E1 802842 (Fiery Judgement) and E2 802007 (Wrangler Net 5s root) and zeros E0 flat+RPL so 680230 deals pure normalized Fire Weapon Damage (verified by plain_weapon_hits 680230 hit_mean plus weapon_damage / weapon_damage_ap with D-1 negative arms) and generates 10 Rage via 500179."
+  },
+  {
+    "spell": 680230,
+    "clause": "$?s500901[ Knocks enemies back a great distance][]",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "Owner ruling Q-wh-ex-1 (2026-11-27, status 4 absent feature): Create Distance 500901 is an absent/unobtainable spell (closed as status 4 absent feature)."
+  },
+  {
+    "spell": 680263,
+    "clause": "Dismiss your Shadow Hound.",
+    "labels": [
+      "680263 behaviour_metric_delta pet_dismiss"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680303,
+    "clause": "Declare a knight's edict to all party and raid members,  increasing Agility by $s1.",
+    "labels": [
+      "680303 effect_value e0 #0",
+      "680303 aura_amount e0 #0",
+      "680303 behaviour_metric_delta agility_raid",
+      "680303 behaviour_metric_delta out_of_range",
+      "680303 behaviour_metric_delta ungrouped_control",
+      "680303 behaviour_metric_delta players_only_pet",
+      "680303 behaviour_metric_delta excl_knights",
+      "680303 behaviour_metric_delta excl_greater_knights"
+    ],
+    "kind": "claim",
+    "reason": "Owner ruling Q-wh-ex-3 (players_only_all_three, 2026-11-27): Stage 1 extends FilterPlayers to 680303 (verified via players_only_pet excluding Shadowhound 50124)."
+  },
+  {
+    "spell": 572298,
+    "clause": "Drink a dark tonic, healing you for ${$m1+0+$STA*6},",
+    "labels": [
+      "572298 effect_value e0 #0",
+      "572298 hit_mean"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572298,
+    "clause": "scaling with your Stamina$?s802022[, increasing your dodge chance by $802022s2%][],",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "scaling with your Stamina",
+        "labels": [
+          "572298 behaviour_hit_ratio stamina_scaling"
+        ]
+      },
+      {
+        "claim": "$?s802022[, increasing your dodge chance by $802022s2%][]",
+        "labels": [
+          "572298 behaviour_metric_delta dodge",
+          "572298 behaviour_metric_delta no_dodge"
+        ]
+      }
+    ],
+    "reason": "Mirrors Vampiric Tonic 802276 (mentor ruling D-360): the $?s802022 dodge conditional resolves to 0% (802022 EffectBasePoints[1] -1 + 1 = 0, 572298 Effect[2] aura 49 amount 0), checked via dodge and no_dodge (status 3 data conformant by D-360)."
+  },
+  {
+    "spell": 572298,
+    "clause": "and increasing your maximum health by $s2% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and increasing your maximum health by $s2%",
+        "labels": [
+          "572298 effect_value e1 #1",
+          "572298 aura_amount e1 #1",
+          "572298 behaviour_metric_delta max_health"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "572298 aura_duration_ms #2",
+          "572298 behaviour_cast_applies_aura duration",
+          "572298 behaviour_expiry duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 572298,
+    "clause": "@ext:Only 1 Tonic can be active at a time.:ext@",
+    "labels": [
+      "572298 behaviour_exclusivity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680515,
+    "clause": "Smash an enemy with your pommel, dealing High Threat Weapon Damage plus ${$m1+$ppl1},",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing Weapon Damage plus ${$m1+$ppl1}",
+        "labels": [
+          "680515 effect_value e0 #0",
+          "680515 hit_mean"
+        ]
+      },
+      {
+        "claim": "High Threat",
+        "labels": [
+          "680515 behaviour_metric_delta threat_above_control"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 680515,
+    "clause": "and increasing their Magic damage taken by $582588s1% for $582588d,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and increasing their Magic damage taken by $582588s1%",
+        "labels": [
+          "680515 effect_value 582588e0 #1",
+          "680515 behaviour_metric_delta magic_taken_control",
+          "680515 behaviour_metric_delta magic_taken",
+          "680515 behaviour_metric_delta magic_taken_5_stacks"
+        ]
+      },
+      {
+        "claim": "for $582588d,",
+        "labels": [
+          "680515 spell_duration 582588 #2",
+          "680515 behaviour_cast_applies_aura debuff_duration",
+          "680515 behaviour_expiry debuff_duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 680515,
+    "clause": "stacking $582588u times.",
+    "labels": [
+      "680515 max_stacks 582588 #3",
+      "680515 behaviour_metric_delta stacks"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802013,
+    "clause": "Taunt an enemy to attack you for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Taunt an enemy to attack you",
+        "labels": [
+          "802013 aggro_redirect primary after",
+          "802013 aggro_redirect extra1 after"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "802013 aura_duration_ms #0",
+          "802013 behaviour_cast_applies_aura duration",
+          "802013 behaviour_expiry duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 802013,
+    "clause": "If the target is a Demon or Undead, they take ${$501383m1+$AP*0.35} additional Shadow damage.",
+    "labels": [
+      "802013 effect_value 501383e0 #1",
+      "802013 behaviour_metric_delta undead_damage",
+      "802013 behaviour_metric_delta demon_damage",
+      "802013 behaviour_metric_delta undead_damage_ap",
+      "802013 behaviour_metric_delta non_demon_undead_control"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680585,
+    "clause": "Activate a dark aura, increasing your Stamina by $s2% and increasing the Shadow Resistance of all party and raid members by ${$m1+0}.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing your Stamina by $s2%",
+        "labels": [
+          "680585 effect_value e1 #0",
+          "680585 aura_amount e1 #0",
+          "680585 behaviour_metric_delta stamina"
+        ]
+      },
+      {
+        "claim": "and increasing the Shadow Resistance of all party and raid members by ${$m1+0}.",
+        "labels": [
+          "680585 effect_value e0 #1",
+          "680585 aura_amount e0 #1",
+          "680585 behaviour_metric_delta shadow_res_raid"
+        ]
+      }
+    ],
+    "reason": "Dark Aura R3 680585: caster-only +5% Stamina (93.0 -> 97.65; grouped ally unchanged at 93.0) and party/raid +60 Shadow Resistance within 100 yd (caster, 30 yd ally, 50 yd raid subgroup 2 ally5 gain +60; 115 yd ally2 gains 0)."
+  },
+  {
+    "spell": 680585,
+    "clause": "Does not stack with similar effects.",
+    "promise_of": "Activate a dark aura, increasing your Stamina by $s2% and increasing the Shadow Resistance of all party and raid members by ${$m1+0}.",
+    "labels": [
+      "680585 behaviour_metric_delta no_stack_shadow_prot"
+    ],
+    "kind": "claim",
+    "reason": "Exclusive resistance aura (SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE): with Prayer of Shadow Protection 27683 (+70 Shadow Res) active, casting Dark Aura 680585 (+60) leaves Shadow Resistance at 70 (+0 gain)."
+  },
+  {
+    "spell": 681442,
+    "clause": "Declare a witching edict to all party and raid members, increasing their spell power by $s1.",
+    "labels": [
+      "681442 effect_value e0 #0",
+      "681442 aura_amount e0 #0",
+      "681442 behaviour_metric_delta sp_raid",
+      "681442 behaviour_metric_delta healing_power",
+      "681442 behaviour_metric_delta players_only_no_pet",
+      "681442 behaviour_cast_applies_aura duration",
+      "681442 behaviour_expiry duration",
+      "681442 behaviour_metric_delta edict_exclusivity",
+      "681442 behaviour_metric_delta cross_class_exclusivity"
+    ],
+    "kind": "claim",
+    "reason": "Q-wh-ex-3: +62 spell damage and healing power across party/raid within 40 yd (out-of-range 50 yd control), players-only filter excludes summoned Shadow Hound 50124, 30 min duration, per-caster Edict and cross-class spell power exclusivity."
+  },
+  {
+    "spell": 681455,
+    "clause": "Place a scourge trap on the ground lasting $d that will explode on the first Undead or Demon enemy to approach it, instantly dealing ${$681457m1+$681457ppl1+$SP*2+$AP*1} Holy damage to enemies within $681457a1 yds.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Place a scourge trap on the ground lasting $d",
+        "labels": [
+          "681455 behaviour_metric_delta trap_held",
+          "681455 behaviour_metric_delta trap_ends"
+        ]
+      },
+      {
+        "claim": "that will explode on the first Undead or Demon enemy to approach it,",
+        "labels": [
+          "681455 behaviour_metric_delta non_undead_ignored",
+          "681455 behaviour_metric_delta undead_base",
+          "681455 behaviour_metric_delta demon_trigger"
+        ]
+      },
+      {
+        "claim": "instantly dealing ${$681457m1+$681457ppl1+$SP*2+$AP*1} Holy damage",
+        "labels": [
+          "681455 effect_value 681457e0 #1",
+          "681455 behaviour_metric_delta undead_base",
+          "681455 behaviour_metric_delta damage_ap",
+          "681455 behaviour_metric_delta damage_sp"
+        ]
+      },
+      {
+        "claim": "to enemies within $681457a1 yds.",
+        "labels": [
+          "681455 effect_radius 681457e0 #2",
+          "681455 behaviour_metric_delta radius_splash"
+        ]
+      }
+    ],
+    "reason": "Q-wh-ex-6: 60s ground trap 506253 ignores Humanoids, detonates on Undead/Demons for 4100 + AP*1 + SP_Holy*2 Holy damage (4382 base, 14382 at +10k AP, 24382 at +10k SP), and splashes Undead within 5 yd while missing distant Undead at 10 yd."
+  },
+  {
+    "spell": 707355,
+    "clause": "Convince your ally to make a deal with darkness, increasing Agility by $s1.",
+    "labels": [
+      "707355 effect_value e0 #0",
+      "707355 aura_amount e0 #0",
+      "707355 behaviour_metric_delta agility_ally",
+      "707355 behaviour_cast_applies_aura duration",
+      "707355 behaviour_expiry duration",
+      "707355 behaviour_metric_delta excl_greater",
+      "707355 behaviour_metric_delta excl_edict",
+      "707355 behaviour_metric_delta excl_cross_class"
+    ],
+    "kind": "claim",
+    "reason": "Inquisitor's Edict R6 707355: +77 Agility on grouped ally, 30 min duration, same-line / per-caster Edict / cross-class Agility exclusivity."
+  },
+  {
+    "spell": 707687,
+    "clause": "Create a magic edict with an ally, increasing their spell power by $s1.",
+    "labels": [
+      "707687 effect_value e0 #0",
+      "707687 aura_amount e0 #0",
+      "707687 behaviour_metric_delta sp_ally",
+      "707687 behaviour_metric_delta healing_power",
+      "707687 behaviour_cast_applies_aura duration",
+      "707687 behaviour_expiry duration",
+      "707687 behaviour_metric_delta excl_greater",
+      "707687 behaviour_metric_delta excl_edict",
+      "707687 behaviour_metric_delta excl_cross_class"
+    ],
+    "kind": "claim",
+    "reason": "Witching Edict R4 707687: +62 spell damage and healing power on grouped ally, 30 min duration, same-line / per-caster Edict / cross-class spell power exclusivity."
+  },
+  {
+    "spell": 574343,
+    "clause": "Slash an enemy, dealing Weapon Damage plus ${$m1+0+$spfi*0.15+$AP*0.15} as Holyfire Damage.",
+    "labels": [
+      "574343 effect_value e0 #0",
+      "574343 hit_mean",
+      "574343 behaviour_metric_delta base_damage",
+      "574343 behaviour_metric_delta sp_damage",
+      "574343 behaviour_metric_delta ap_damage",
+      "574343 behaviour_metric_delta holyfire_absorb",
+      "574343 behaviour_metric_delta not_shadow_absorb"
+    ],
+    "kind": "claim",
+    "reason": "Dawn Blade R8 574343: Weapon Damage + E0 + 0.15*AP + 0.15*SP_Fire proved via weapon_school_hits 574343 hit_mean and metric_delta scaling arms at ref (236..271), +20k SP (+3000), and +20k AP (+6428.6), plus Holyfire school absorb checks (Fire Ward absorbs, Shadow Ward does not)."
+  },
+  {
+    "spell": 574343,
+    "clause": "Grants Flames of Sin and increases the duration by $/1000;803710s2 sec, causing your auto attacks to deal additional Fire damage.",
+    "labels": [
+      "92094 behaviour_metric_delta flames_grant",
+      "92094 behaviour_metric_delta flames_extension",
+      "92094 trigger_magnitude_ratio"
+    ],
+    "kind": "claim",
+    "reason": "Conditional on Inquisition L10 passive Flames of Sin (92094): grant, +3 s duration extension, and auto-attack additional Fire damage are proved by existing 92094 behaviours in witch_hunter.json."
+  },
+  {
+    "spell": 802272,
+    "clause": "You may activate this for $d to allow your Traps to be launched up to 30 yds away.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "You may activate this for $d",
+        "labels": [
+          "802272 aura_duration_ms #0",
+          "802272 behaviour_cast_applies_aura duration",
+          "802272 behaviour_expiry duration"
+        ]
+      },
+      {
+        "claim": "to allow your Traps to be launched up to 30 yds away.",
+        "labels": [
+          "802272 behaviour_metric_delta replacement_shadow",
+          "802272 behaviour_metric_delta replacement_scourge",
+          "802272 behaviour_metric_delta launch_at_25yd",
+          "802272 behaviour_metric_delta launcher_gate_refused"
+        ]
+      }
+    ],
+    "reason": "Trap Launcher 802272: 10 s duration, temporary spell replacement of Shadow Trap (680238 -> 680376) and Scourge Trap (681455 -> 681564), caster-aura gate refusal (22) without 802272, and ground-targeted launch onto dummy 25 yd away without consuming 802272."
+  },
+  {
+    "spell": 802308,
+    "clause": "Drink a bitter tonic, increasing your haste by $s2% and reducing the cost of all abilities by $s1% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing your haste by $s2%",
+        "labels": [
+          "802308 effect_value e1 #0",
+          "802308 aura_amount e1 #0",
+          "802308 behaviour_metric_delta melee_haste",
+          "802308 behaviour_metric_delta ranged_haste",
+          "802308 behaviour_metric_delta spell_cast_control"
+        ]
+      },
+      {
+        "claim": "and reducing the cost of all abilities by $s1%",
+        "labels": [
+          "802308 effect_value e0 #1",
+          "802308 aura_amount e0 #1",
+          "802308 behaviour_metric_delta mana_cost_reduction",
+          "802308 behaviour_metric_delta rage_cost_reduction"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "802308 aura_duration_ms #2",
+          "802308 behaviour_cast_applies_aura duration",
+          "802308 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "reason": "Q-wh-ex-4: +30% melee & ranged haste only (spell cast speed control unchanged at 1.0), -40% actual mana (Darkslayer 681203) and rage (Shadowblast 680269) spent, and 10 s duration."
+  },
+  {
+    "spell": 802308,
+    "clause": "@ext:Only 1 Tonic can be active at a time.:ext@",
+    "labels": [
+      "802308 behaviour_metric_delta one_tonic",
+      "802308 behaviour_metric_delta excl_holy_water"
+    ],
+    "kind": "claim",
+    "reason": "spell_group 1134 enforces 1 active Witch Hunter Tonic (802308 replaces Vampiric Tonic 802276 and Holy Water Tonic buff 803535)."
+  },
+  {
+    "spell": 802281,
+    "clause": "Take on the form of the target enemy Undead or Demon.",
+    "labels": [
+      "802281 behaviour_metric_delta undead_form",
+      "802281 behaviour_metric_delta demon_form",
+      "802281 behaviour_metric_delta humanoid_refused"
+    ],
+    "kind": "claim",
+    "reason": "Copies display_id of target enemy Undead (11200) or Demon (17568) within 10-40 yd and refuses Humanoid (6) with SPELL_FAILED_BAD_TARGETS (12)."
+  },
+  {
+    "spell": 802281,
+    "clause": "Lasts $d, or until you mount up or deal or receive damage.",
+    "labels": [
+      "802281 spell_duration 802281 #0",
+      "802281 behaviour_metric_delta persists_idle",
+      "802281 behaviour_metric_delta mount_cancels",
+      "802281 behaviour_metric_delta deal_damage_cancels",
+      "802281 behaviour_metric_delta receive_damage_cancels"
+    ],
+    "kind": "claim",
+    "reason": "Indefinite duration ($d = -1 until cancelled, verified via spell_duration_ms) persists 60 s idle and cancels with display restoration upon mounting (458), dealing damage (680269), or receiving damage (41394)."
+  },
+  {
+    "spell": 802281,
+    "clause": "While active you will appear as neutral to all aggressive creatures.",
+    "labels": [
+      "802281 behaviour_metric_delta neutral_to_hostile",
+      "802281 behaviour_metric_delta reaction_hostile_and_friendly",
+      "802281 behaviour_metric_delta undead_form"
+    ],
+    "kind": "claim",
+    "reason": "Hostile Undead 11200 can_attack drops 1 -> 0 and reaction_to shifts REP_HOSTILE (1) -> REP_NEUTRAL (3) symmetrically while friendly bystander (entry 68, FACTION_FRIENDLY 35) stays REP_FRIENDLY (4 -> 4) per settled IfNormalReaction fix (AscensionWitchHunterDefenses.cpp:430-443)."
+  },
+  {
+    "spell": 802281,
+    "clause": "Can only be used in the open world.",
+    "labels": [
+      "802281 behaviour_metric_delta dungeon_refused",
+      "802281 behaviour_metric_delta undead_form"
+    ],
+    "kind": "claim",
+    "reason": "AscensionWitchHunterAbilities.cpp:420-423 refuses 802281 with SPELL_FAILED_BAD_TARGETS (12) on dungeon map 36 (dungeon_refused) while open-world map 0 succeeds on the same Undead 11200 target (undead_form)."
+  },
+  {
+    "spell": 802826,
+    "clause": "Smash a holy water tonic beneath you, banishing all Undead and Demon enemies around you for $d and increasing your damage dealt against Undead and Demons by $803535s1% for $803535d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "banishing all Undead and Demon enemies around you for $d",
+        "labels": [
+          "802826 behaviour_metric_delta undead_cc_duration",
+          "802826 behaviour_metric_delta demon_cc",
+          "802826 behaviour_metric_delta humanoid_excluded",
+          "802826 behaviour_metric_delta out_of_range_excluded",
+          "802826 behaviour_metric_delta damageable_stun",
+          "802826 behaviour_metric_delta antiheal_200pct"
+        ]
+      },
+      {
+        "claim": "and increasing your damage dealt against Undead and Demons by $803535s1%",
+        "labels": [
+          "802826 effect_value 803535e0 #1",
+          "802826 behaviour_hit_ratio damage_vs_undead",
+          "802826 behaviour_hit_ratio damage_vs_demon",
+          "802826 behaviour_hit_ratio damage_vs_humanoid_control"
+        ]
+      },
+      {
+        "claim": "for $803535d.",
+        "labels": [
+          "802826 spell_duration 803535 #2",
+          "802826 behaviour_cast_applies_aura buff_duration",
+          "802826 behaviour_expiry buff_duration"
+        ]
+      }
+    ],
+    "reason": "Q-wh-ex-5: 10 s damageable stun + -200% healing received on Undead/Demons within 8 yd (Humanoid and 13 yd controls excluded), plus +30% damage vs Undead/Demons (Humanoid control 1.0x) via 10 s self-buff 803535."
+  },
+  {
+    "spell": 802826,
+    "clause": "@ext:Only 1 Tonic can be active at a time.:ext@",
+    "labels": [
+      "802826 behaviour_metric_delta one_tonic"
+    ],
+    "kind": "claim",
+    "reason": "spell_group 1134 enforces 1 active Witch Hunter Tonic (803535 replaces 802308)."
+  },
+  {
+    "spell": 681203,
+    "clause": "Fire a dark shot at an enemy, dealing $s3% Ranged Weapon Damage plus ${$m1+0} and generating Rage.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Fire a dark shot at an enemy, dealing $s3% Ranged Weapon Damage plus ${$m1+0}",
+        "labels": [
+          "681203 effect_value e2 #0",
+          "681203 effect_value e0 #1",
+          "681203 hit_mean"
+        ]
+      },
+      {
+        "claim": "and generating Rage.",
+        "labels": [
+          "681203 behaviour_metric_delta rage_generation"
+        ]
+      }
+    ],
+    "reason": "Darkslayer R9 681203: 140% Ranged Weapon Damage + 278..293 proved by hit_mean (3 parts, cast_auras [680486]), plus 10..25 Rage energize via 680235."
+  },
+  {
+    "spell": 681203,
+    "clause": "Usable while moving.",
+    "labels": [
+      "92091 behaviour_metric_delta moving_cast"
+    ],
+    "kind": "claim",
+    "reason": "Conditional on Boltslinger L10 passive 500570 / 92091: moving cast of Darkslayer 681203 already proved by 92091 behaviour_metric_delta moving_cast in witch_hunter.json."
+  },
+  {
+    "spell": 680269,
+    "clause": "Fire a shadowy shot at an enemy, dealing $s1% Ranged Weapon Damage plus ${$m2+0} as Shadow damage",
+    "labels": [
+      "680269 effect_value e0 #0",
+      "680269 effect_value e1 #1",
+      "680269 hit_mean",
+      "680269 behaviour_metric_delta shadow_absorb",
+      "680269 behaviour_metric_delta not_fire_absorb"
+    ],
+    "kind": "claim",
+    "reason": "Shadowblast R7 680269: 130% Ranged Weapon Damage + 186..192 Shadow damage proved by hit_mean (2 parts) and Shadow/Fire ward absorb controls."
+  },
+  {
+    "spell": 680269,
+    "clause": "and regenerates $704385s1% maximum mana",
+    "labels": [
+      "705456 behaviour_metric_delta shadowblast_mana",
+      "705456 behaviour_metric_delta shadowblast_max_mana"
+    ],
+    "kind": "claim",
+    "reason": "Conditional on Sharpshooter 705456: 3% maximum mana regeneration (704385) already proved in witch_hunter.json."
+  },
+  {
+    "spell": 680269,
+    "clause": "Enrages your Shadow Hound with Shadow Rage for $804192d, stacking $804192u times.",
+    "labels": [
+      "705455 behaviour_metric_delta hound_grant",
+      "705455 behaviour_expiry duration"
+    ],
+    "kind": "claim",
+    "reason": "Conditional on Shadow Rage 705455: Shadow Hound buff grant and duration already proved in witch_hunter.json."
+  },
+  {
+    "spell": 680269,
+    "clause": "Grants Blasting Powder for $804183d.",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "Status 4 (obsolete client text, owner ruling Q-wh-ex-8 2026-11-27): conditional $?s500056 references pre-rework Feast of Talons granting Blasting Powder 804183; 500056 was reworked to Darkflock/Houndmaster's Call crows, 804183 has zero server code and 0 events in all 186 live combat logs."
+  },
+  {
+    "spell": 804432,
+    "clause": "Bash an enemy with your weapon's hilt, interrupting them and preventing any spell from that school of magic from being cast for $d.",
+    "labels": [
+      "804432 behaviour_expiry lockout"
+    ],
+    "kind": "claim",
+    "reason": "Guard Strike 804432 school_lockout proves interrupt of Evocation 12051 and 3000 ms Arcane school lockout."
+  },
+  {
+    "spell": 804667,
+    "clause": "Increase reputation gains of your party by $s1% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increase reputation gains of your party by $s1%",
+        "labels": [
+          "804667 effect_value e0 #0",
+          "804667 aura_amount e0 #0",
+          "804667 behaviour_metric_delta reputation_party"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "804667 aura_duration_ms #1"
+        ]
+      }
+    ],
+    "no_behaviour_route": {
+      "reason": "Charming Conversation 804667 has DurationIndex 42 = 3600000 ms (1 hour); expiry.py requires 3696050 ms of simulated time, exceeding the 3600000 ms simulated-timeout cap in CoAGameplayTest.cpp:161, run.py:545, and hits.py:68. Kept as data conformant on $d to preserve the current timeout cap.",
+      "attempts": [
+        {
+          "agent": "witch-hunter-phase2-batch-b",
+          "report": ".cache/extra-catchup/witch-hunter/phase2-frag-b.md"
+        }
+      ]
+    },
+    "reason": "Charming Conversation 804667: +5% reputation_gain (faction 72 Stormwind: 1000 -> 1050 on caster and 15 yd party ally, 1000 on 50 yd ally2) is behaviour-proved; 1-hour $d duration stays data-conformant under the 3600000 ms simulated-timeout cap."
+  },
+  {
+    "spell": 804802,
+    "clause": "Strengthen your mental resolve and enhance your reflexes, increasing your chance to parry and dodge attacks by $s2% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing your chance to parry and dodge attacks by $s2%",
+        "labels": [
+          "804802 effect_value e1 #0",
+          "804802 aura_amount e1 #0",
+          "804802 behaviour_metric_delta dodge",
+          "804802 behaviour_metric_delta parry"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "804802 aura_duration_ms #1",
+          "804802 behaviour_cast_applies_aura duration",
+          "804802 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "reason": "Stoicism 804802: +30% dodge_chance and +30% parry_chance for 8 s (8000 ms)."
+  },
+  {
+    "spell": 807710,
+    "clause": "Brand an enemy for $d.",
+    "labels": [
+      "807710 aura_duration_ms #0",
+      "807710 behaviour_cast_applies_aura brand_duration",
+      "807710 behaviour_expiry brand_duration"
+    ],
+    "kind": "claim",
+    "reason": "Brand of the Damned R7 807710 applies a 12 s (12000 ms) brand on enemy."
+  },
+  {
+    "spell": 807710,
+    "clause": "If their health falls below 10% while branded, they are instantly dealt ${$m1+0+$AP*1+$SP*1} Twilight Damage and are cursed, increasing your Magical critical strike chance against them by $807773s1% for $807773d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "If their health falls below 10% while branded, they are instantly dealt ${$m1+0+$AP*1+$SP*1} Twilight Damage",
+        "labels": [
+          "807710 effect_value e0 #1",
+          "807710 aura_amount e0 #1",
+          "807710 behaviour_metric_delta above_10pct_no_proc",
+          "807710 behaviour_metric_delta below_10pct_base",
+          "807710 behaviour_metric_delta below_10pct_ap",
+          "807710 behaviour_metric_delta below_10pct_sp",
+          "807710 behaviour_metric_delta below_10pct_holy_sp"
+        ]
+      },
+      {
+        "claim": "and are cursed, increasing your Magical critical strike chance against them by $807773s1%",
+        "labels": [
+          "807710 effect_value 807773e0 #2",
+          "807710 behaviour_hit_ratio curse_magic_crit",
+          "807710 behaviour_hit_ratio curse_physical_crit_control"
+        ]
+      },
+      {
+        "claim": "for $807773d.",
+        "labels": [
+          "807710 spell_duration 807773 #3",
+          "807710 behaviour_metric_delta curse_duration"
+        ]
+      }
+    ],
+    "reason": "Q-wh-ex-7: does not trigger at 20% HP; at 9% HP deals 1046..1048 + 1.0*AP + 1.0*max(Holy, Shadow) SP Twilight damage (verified at ref, +10k AP, +10k SP, and +10k Holy-only SP via 21499) and applies 12 s curse 807773 (+10 pp Magic crit, 0 pp Physical control)."
+  },
+  {
+    "spell": 807710,
+    "clause": "Deals $570757s1% increased damage to Undead and Demons.",
+    "labels": [
+      "807710 effect_value 570757e0 #4",
+      "807710 behaviour_metric_delta undead_double_damage",
+      "807710 behaviour_metric_delta demon_double_damage"
+    ],
+    "kind": "claim",
+    "reason": "AscensionWitchHunterAbilities.cpp:376-378 doubles 807683 damage (2656..2660 vs 1328..1330 base) against Undead 11200 and Demon 17568."
+  },
+  {
+    "spell": 807710,
+    "clause": "@ext:You can only have 1 Brand on an enemy at a time.:ext@",
+    "labels": [
+      "807710 behaviour_metric_delta one_brand"
+    ],
+    "kind": "claim",
+    "reason": "MainBrand() per-caster per-target exclusivity: casting 807710 replaces Brand of the Profane 562390."
+  },
+  {
+    "spell": 807733,
+    "clause": "You put yourself on guard against evil, increasing your threat generated by $s1%.",
+    "labels": [
+      "807733 effect_value e0 #0",
+      "807733 aura_amount e0 #0",
+      "807733 behaviour_metric_delta threat_mult_physical",
+      "807733 behaviour_metric_delta threat_mult_holy",
+      "807733 behaviour_metric_delta threat_mult_shadow",
+      "807733 behaviour_metric_delta threat_control",
+      "807733 behaviour_metric_delta threat_stance_physical",
+      "807733 behaviour_metric_delta threat_stance_holy"
+    ],
+    "kind": "claim",
+    "reason": "Settled Stage 1 E2 fix: threat_multiplier is 3.10 across Physical, Holy, and Shadow (was 6.138 non-Holy), and live threat_per_damage is 6.20 (3.10 * 2.0 tank stance rate) for both Physical (501342) and Holyfire (574343) vs 1.0 control."
+  },
+  {
+    "spell": 807733,
+    "clause": "Stagger 25% of Physical damage taken from monsters, distributing it over 5 seconds.",
+    "labels": [
+      "807733 behaviour_taken_hit stagger_physical_absorb",
+      "807733 behaviour_taken_hit stagger_magic_control",
+      "807733 behaviour_metric_delta stagger_payout"
+    ],
+    "kind": "claim",
+    "reason": "AscensionWitchHunterDefenses.cpp:72-99, 142-157: absorbs 25% of monster Physical damage (92559), 0% of Magic damage (41394), and pays out the staggered 25% over 5 x 1000 ms ticks."
   }
 ]

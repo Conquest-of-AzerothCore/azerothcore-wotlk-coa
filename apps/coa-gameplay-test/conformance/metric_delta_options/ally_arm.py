@@ -329,8 +329,10 @@ def check(spec, ally):
     from coverage import READBACK, STATE, metric_evidence
     from profile import CASTER
     from values import TARGET
+    from metric_delta_options.bystander import BYSTANDER_ID
     dummy = spec.select_dummy or TARGET in (spec.target, spec.measure_actor, spec.fields.get('target'))
-    units = {CASTER, *ally.ally_ids, *((TARGET,) if dummy else ())}
+    units = {CASTER, *ally.ally_ids, *((TARGET,) if dummy else ()),
+             *((BYSTANDER_ID,) if any(name == 'bystander' for name, _ in spec.options) else ())}
     reads = [(spec.measure_actor, spec.metric, spec.fields, 'its main reading')]
     for index, arm in enumerate(ally.arms):
         unknown = sorted(set(arm.actors) - units)

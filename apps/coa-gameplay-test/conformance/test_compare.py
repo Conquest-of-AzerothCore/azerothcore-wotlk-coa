@@ -866,6 +866,33 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
         self.assertNotIn('trigger_with_value', verdict.detail or {})
 
+    def rolled_aura_227_verdicts(self, measured: str = '1047'):
+        text = '${$m1+0+$AP*1+$SP*1}'
+
+        def tokens(caster, forced):
+            base_val = forced[2] if forced is not None else 1047
+            return [Displayed(text, base_val + caster.ap + caster.sp_by_school.get(1, 0), 0, 'flat')]
+
+        labels = {'effect_value': '1001 effect_value e0 #0', 'aura_amount': '1001 aura_amount e0 #0'}
+        items = [expectation(label, check, text, 'read flat', 0, {'samples': 1}) for check, label in labels.items()]
+        reader = FakeTooltips(tokens, points={(RANK, 0): (1045, 3)},
+                              fields={(RANK, 'Effect[0]'): 6, (RANK, 'EffectApplyAuraName[0]'): 227})
+        steps = [assert_step(label, measured) for label in labels.values()]
+        verdicts = self.value_run(items, [text], steps, reader)
+        return [verdicts[label] for label in labels.values()]
+
+    def test_a_rolled_aura_227_carrier_is_judged_on_its_unpowered_roll_for_effect_value_and_aura_amount(self):
+        for verdict in self.rolled_aura_227_verdicts():
+            self.assertEqual(verdict.status, 'ok')
+            self.assertAlmostEqual(verdict.expected, 1047.0)
+            detail = verdict.detail['trigger_with_value']
+            self.assertAlmostEqual(detail['power_term'], 313.0)
+            self.assertIn('SpellAuraEffects.cpp:6566', verdict.explanation)
+
+    def test_a_rolled_aura_227_carrier_holding_power_term_alerts(self):
+        for verdict in self.rolled_aura_227_verdicts(measured=str(1047 + 313)):
+            self.assertEqual(verdict.status, 'alert')
+
     def test_a_base_roll_only_token_whose_hit_labels_are_not_in_the_comparison_is_an_alert(self):
         verdict = self.base_roll_verdict()
         self.assertEqual(verdict.status, 'alert')

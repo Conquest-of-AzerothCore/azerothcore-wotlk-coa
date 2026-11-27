@@ -1,8 +1,8 @@
 from dataclasses import dataclass, replace
 from pathlib import Path
 
-from behaviours import BEHAVIOUR_METRIC_DELTA, STRIKER, behaviour_entry, prose_rule, waited_ms
-from compare import Run, Verdict, missing_measurement
+from behaviours import BEHAVIOUR_METRIC_DELTA, OWN_CAST_CONTRAST, STRIKER, behaviour_entry, prose_rule, waited_ms
+from compare import CONTRAST, Run, Verdict, missing_measurement
 from hits import MAX_SCENARIO_MS, base_mana_steps, timed
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
@@ -147,7 +147,7 @@ def pet_resurrect_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
         return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
     expected_pet = float(model['pet_entry'])
     got = {key: float(val[reads[key]]) for key in order}
-    detail = {'metric': METRIC, **got}
+    detail = {'metric': METRIC, CONTRAST: OWN_CAST_CONTRAST, **got}
     if (got['entry_summoned'] != expected_pet or got['health_summoned'] <= 0
             or got['entry_dead'] != expected_pet or got['health_dead'] != 0 or got['health_control'] != 0):
         return replace(base, status='unmeasured', detail=detail,

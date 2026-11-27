@@ -1,8 +1,8 @@
 from dataclasses import dataclass, replace
 from pathlib import Path
 
-from behaviours import BEHAVIOUR_METRIC_DELTA, behaviour_entry, prose_rule, waited_ms
-from compare import Run, Verdict, missing_measurement
+from behaviours import BEHAVIOUR_METRIC_DELTA, OWN_CAST_CONTRAST, behaviour_entry, prose_rule, waited_ms
+from compare import CONTRAST, Run, Verdict, missing_measurement
 from hits import MAX_SCENARIO_MS, base_mana_steps, timed
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
@@ -120,7 +120,8 @@ def pet_dismiss_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     control = float(val[reads['control']])
     cast_failure = float(val[reads['cast_failure']])
     after = float(val[reads['after']])
-    detail = {'metric': METRIC, 'before': before, 'control': control, 'cast_failure': cast_failure, 'after': after}
+    detail = {'metric': METRIC, CONTRAST: OWN_CAST_CONTRAST, 'before': before, 'control': control,
+              'cast_failure': cast_failure, 'after': after}
     if before != expected_pet or control != expected_pet:
         return replace(base, status='unmeasured', detail=detail,
                        explanation=f'pet {expected_pet:g} was not held before dismiss (before={before:g}, '

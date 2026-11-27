@@ -3,10 +3,12 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from behaviours import behaviour_scenario
 from metric_delta_options.bystander import BYSTANDER_ID, NAME, BystanderSpec, parse
 from profile import load_class_file
+import run
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
 WITCH_HUNTER_CLASS_ID = 15
@@ -67,12 +69,25 @@ class BystanderOptionTests(unittest.TestCase):
             },
         }
         scenario, _ = behaviour_scenario(class_file, entry)
+        run.validate(scenario)
         ids = [creature['id'] for creature in scenario['creatures']]
         self.assertEqual(ids, ['dummy', BYSTANDER_ID])
         bystander = scenario['creatures'][1]
         self.assertEqual(bystander['faction'], 12)
         self.assertEqual(bystander['entry'], 68)
         self.assertIn('faction 12', scenario['contract'])
+
+        as_actor = {**entry, 'ally_arm': {'allies': 0, 'arms': [{
+            'actors': [BYSTANDER_ID],
+            'metric': 'reaction_to',
+            'fields': {'target': 'caster'},
+            'before_expected': 4,
+            'expected': 4,
+            'tolerance': 0,
+            'source': 'Friendly bystander reaction to caster remains REP_FRIENDLY (4)',
+        }]}}
+        sc_actor, _ = behaviour_scenario(class_file, as_actor)
+        run.validate(sc_actor)
 
 
 if __name__ == '__main__':

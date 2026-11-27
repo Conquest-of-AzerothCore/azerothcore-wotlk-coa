@@ -2,7 +2,7 @@
 
 - Status: proposed (provisional number, renumbered at merge)
 - Date: 2026-11-27
-- Rulings: Witch Hunter (class 15) extra-spell catch-up (`503679`, `562225`, `574343`, `578118`, `680230`, `680263`, `802281`, `804667`)
+- Rulings: Witch Hunter (class 15) extra-spell catch-up (`503679`, `562225`, `562390`, `574343`, `578118`, `680230`, `680263`, `802281`, `802826`, `804667`, `807682..807710`)
 
 ## Context
 
@@ -57,20 +57,31 @@ gaps that cannot be expressed cleanly without extending the shared tooling and h
      `cast_time_ms` live-aura restriction.
    - Extend `value_reagents` `destination_unit` to allow `'dummy'`: spawn the dummy at `cast_distance`, include
      `missile_wait_ms`, and route `PERSISTENT_AREA_AURA (27)` aura reads to `dummy`.
+   - Extend `value_reagents` to accept optional `target_entry` and `distance` overrides (`value_target_override`) so
+     creature-type-gated or min-range spells (`802281` Undead `11200` at `15 yd`, `802826` Undead `11200`) spawn a valid
+     dummy without altering other classes.
 3. **`apps/coa-gameplay-test/conformance/hits.py`**:
    - Add `plain_school_weapon_part` under opt-in `weapon_school_hits` for `SCHOOL_DAMAGE` + `NORMALIZED_WEAPON_DMG`
      spells whose tooltip states `"Weapon Damage"` without a weapon token (`574343`).
    - Add opt-in `plain_weapon_hits` for single-effect flat weapon spells whose tooltip states plain `"Weapon Damage"`
      without a token (`680230`).
-4. **`apps/coa-gameplay-test/conformance/coverage.py`**:
+4. **`apps/coa-gameplay-test/conformance/behaviours.py` and `compare.py`**:
+   - Add `'melee_hit_rating'` and `'ranged_hit_rating'` to `HIT_RATIO_FIXTURE_STATS` so pooled `hit_ratio` landed-rate
+     scenarios (`562390` *Brand of the Profane* `+2%` melee/ranged hit) can zero melee and ranged hit rating.
+   - Mirror `judge_trigger_with_value` in `compare.py::judge_roll` so rolled `SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE`
+     (`227`) carriers (`807682..807710` *Brand of the Damned*, `die_sides = 3`) strip power terms on both `effect_value`
+     and `aura_amount` without needing `effect_overrides`.
+5. **`apps/coa-gameplay-test/conformance/coverage.py`**:
    - Register `stealth_detection`, `reputation_gain`, `pet_entry`, `pet_health`, and `reaction_to` as `STATE` metrics
      with matching `STATE_PROMISES`, and widen `display_id` / `display_of_creature` promises to match `"form"`.
-5. **New `metric_delta_options/` and `kinds/` modules**:
+6. **New `metric_delta_options/` and `kinds/` modules (plus `ally_arm.py` bystander support)**:
    - `metric_delta_options/destination_unit.py` (`ORDER = 46`), `location.py` (`ORDER = 47`), and `bystander.py`
-     (`ORDER = 48`).
-   - `kinds/pet_dismiss.py` (`ORDER = 66`) and `kinds/pet_resurrect.py` (`ORDER = 67`).
-6. **`src/server/coa/CoAGameplayTest.cpp`**:
-   - Add read-only metric `reaction_to` returning `double(unit->GetReactionTo(GetUnit(step.get<std::string>("target"))))`.
+     (`ORDER = 48`), with `ally_arm.py` allowing `bystander` as an arm actor when the option is configured.
+   - `kinds/pet_dismiss.py` (`ORDER = 66`) and `kinds/pet_resurrect.py` (`ORDER = 67`), recording `contrast: 'own_cast'`
+     so `coverage.py` scores them as behavioural state proofs.
+7. **`src/server/coa/CoAGameplayTest.cpp` and `apps/coa-gameplay-test/run.py`**:
+   - Add read-only metric `reaction_to` returning `double(unit->GetReactionTo(GetUnit(step.get<std::string>("target"))))`,
+     and register `reaction_to` (requiring `target` in `actor_ids`) in `run.py`.
 
 ## Consequences
 

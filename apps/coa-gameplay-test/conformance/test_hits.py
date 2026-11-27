@@ -2038,7 +2038,10 @@ class PlainWeaponAndDawnBladeHitTests(unittest.TestCase):
         base = load_class_file(WITCH_HUNTER_CLASS_ID)
         weapon_sets = {**base.get('spell_weapon_sets', {}), str(self.DAWN_BLADE): 'Inquisition',
                        str(self.SABER_SLASH_FIRE): 'Inquisition'}
-        return {**base, 'spell_weapon_sets': weapon_sets, **extra}
+        school_hits = [spell for spell in base.get('weapon_school_hits', []) if spell != self.DAWN_BLADE]
+        plain_hits = [spell for spell in base.get('plain_weapon_hits', []) if spell != self.SABER_SLASH_FIRE]
+        return {**base, 'spell_weapon_sets': weapon_sets, 'weapon_school_hits': school_hits,
+                'plain_weapon_hits': plain_hits, **extra}
 
     def test_dawn_blade_in_weapon_school_hits_adds_normalized_weapon_damage_to_holyfire_part(self):
         plain = reference_hit_model(self.witch_hunter(), self.DAWN_BLADE)

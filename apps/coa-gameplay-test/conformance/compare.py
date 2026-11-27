@@ -730,8 +730,12 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
         reads = [read + terms.total for read in reads]
     trigger_detail = None
     trigger_note = ''
-    if (terms is None and expectation.check == 'effect_value'
-            and tooltips.spell_field(spell_id, f'Effect[{effect}]') == TRIGGER_SPELL_WITH_VALUE_EFFECT):
+    is_aura = (expectation.check in TRIGGER_WITH_VALUE_CHECKS
+               and tooltips.spell_field(spell_id, f'EffectApplyAuraName[{effect}]')
+               == PERIODIC_TRIGGER_SPELL_WITH_VALUE)
+    is_effect = (expectation.check == 'effect_value'
+                 and tooltips.spell_field(spell_id, f'Effect[{effect}]') == TRIGGER_SPELL_WITH_VALUE_EFFECT)
+    if terms is None and (is_aura or is_effect):
         unpowered_caster = unpowered(tokens.caster)
         unpowered_values = []
         for roll in rolls:
@@ -745,8 +749,11 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
             full_mean, judged_mean = fmean(values), fmean(unpowered_values)
             power_term = full_mean - judged_mean
             trigger_detail = {'full_value': full_mean, 'power_term': power_term, 'judged_amount': judged_mean}
-            trigger_note = (f' on an effect {TRIGGER_SPELL_WITH_VALUE_EFFECT} carrier (minus power term '
-                            f'{power_term:g}; SpellEffects.cpp:1862-1868 hands BASE_POINT0 to its triggered spell)')
+            carrier_text = (f'an aura {PERIODIC_TRIGGER_SPELL_WITH_VALUE} carrier' if is_aura
+                            else f'an effect {TRIGGER_SPELL_WITH_VALUE_EFFECT} carrier')
+            source_ref = 'SpellAuraEffects.cpp:6566' if is_aura else 'SpellEffects.cpp:1862-1868'
+            trigger_note = (f' on {carrier_text} (minus power term '
+                            f'{power_term:g}; {source_ref} hands BASE_POINT0 to its triggered spell)')
             values = unpowered_values
     truncated_terms = terms.truncated if terms else 0
     allowance = TRUNCATED_READ * (1 + truncated_terms)

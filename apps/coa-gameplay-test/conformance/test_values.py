@@ -1320,6 +1320,28 @@ class ValueReagentsTest(unittest.TestCase):
                             for step in scenario['steps']))
         self.assertFalse(any(exp.rule.startswith(UNREADABLE) and '$d' in exp.rule for exp in expectations))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_value_reagents_target_entry_and_distance_override_dummy(self):
+        from values import VALUE_REAGENTS_KEY, value_reagent_entry
+        witch_hunter = load_class_file(15)
+        infiltrate = ClassSpell(802281, 'Infiltrate', (802281,), 802281, 22, False)
+        holy_water = ClassSpell(802826, 'Holy Water Tonic', (802826,), 802826, 20, False)
+        with_opt = {
+            **witch_hunter,
+            VALUE_REAGENTS_KEY: [
+                {'spell': 802281, 'target_entry': 11200, 'distance': 15},
+                {'spell': 802826, 'target_entry': 11200},
+            ],
+        }
+        sc_inf, _, _ = value_scenario(with_opt, infiltrate, 802281)
+        self.assertEqual((sc_inf['creatures'][0]['entry'], sc_inf['creatures'][0]['distance']), (11200, 15.0))
+        sc_hw, _, _ = value_scenario(with_opt, holy_water, 802826)
+        self.assertEqual((sc_hw['creatures'][0]['entry'], sc_hw['creatures'][0]['distance']), (11200, 3))
+        for bad in ({'spell': 802281, 'target_entry': 0}, {'spell': 802281, 'distance': 0},
+                    {'spell': 802281, 'distance': 150}, {'spell': 802281, 'target_entry': True}):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                value_reagent_entry({VALUE_REAGENTS_KEY: [bad]}, 802281)
+
 
 if __name__ == '__main__':
     unittest.main()

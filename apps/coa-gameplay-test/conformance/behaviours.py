@@ -6894,7 +6894,8 @@ ENERGIZE_METRIC = 'spell_energize_total'
 SWING_METRIC = 'melee_damage_total'
 SWING_HANDS = frozenset({MAIN_HAND, 1})
 SWING_SETTLE_MS = 100
-HIT_RATIO_FIXTURE_STATS = frozenset({'attack_power', 'ranged_attack_power', 'spell_power', 'spell_hit_rating'})
+HIT_RATIO_FIXTURE_STATS = frozenset({'attack_power', 'ranged_attack_power', 'spell_power', 'spell_hit_rating',
+                                     'melee_hit_rating', 'ranged_hit_rating'})
 HIT_RATIO_RATES = ('critical', 'proc', 'landed')
 LANDED_COUNT_METRIC = 'spell_go_count'
 

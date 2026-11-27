@@ -66,7 +66,18 @@ class PetResurrectTests(unittest.TestCase):
             reads['cast_failure']: 0, reads['entry_after']: SHADOWHOUND, reads['health_after']: 1500,
         }
         self.assertEqual(pet_resurrect_verdict(base, FakeRun(good), exp.model).status, 'ok')
-        self.assertEqual(judge_behaviour(base, FakeRun(good), exp).status, 'ok')
+        dispatched = judge_behaviour(base, FakeRun(good), exp)
+        self.assertEqual(dispatched.status, 'ok')
+        from dataclasses import replace
+        from behaviours import OWN_CAST_CONTRAST
+        from coverage import clause_coverage
+        self.assertEqual(dispatched.detail['contrast'], OWN_CAST_CONTRAST)
+        build = 'a' * 64
+        cov = clause_coverage([{'spell': CALL_FROM_THE_SHADOWS,
+                                'clause': 'Coalesces the shadows, bringing back your Shadow Hound from the dead.',
+                                'labels': [exp.label], 'kind': 'claim'}],
+                              [replace(dispatched, build=build)], build=build)
+        self.assertEqual((cov.proven, cov.behaviour), (1, 1))
 
         still_dead = {**good, reads['health_after']: 0}
         self.assertEqual(pet_resurrect_verdict(base, FakeRun(still_dead), exp.model).status, 'alert')

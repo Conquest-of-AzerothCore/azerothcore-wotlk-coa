@@ -78,6 +78,15 @@ class PetDismissTests(unittest.TestCase):
 
         via_dispatch = judge_behaviour(base, ok_run, exp)
         self.assertEqual(via_dispatch.status, 'ok')
+        from dataclasses import replace
+        from behaviours import OWN_CAST_CONTRAST
+        from coverage import clause_coverage
+        self.assertEqual(via_dispatch.detail['contrast'], OWN_CAST_CONTRAST)
+        build = 'a' * 64
+        cov = clause_coverage([{'spell': DISMISS_HOUND, 'clause': 'Dismiss your Shadow Hound.',
+                                'labels': [exp.label], 'kind': 'claim'}],
+                              [replace(via_dispatch, build=build)], build=build)
+        self.assertEqual((cov.proven, cov.behaviour), (1, 1))
 
 
 if __name__ == '__main__':

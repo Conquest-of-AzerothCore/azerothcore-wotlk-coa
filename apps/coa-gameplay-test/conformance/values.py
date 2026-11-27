@@ -349,12 +349,19 @@ def value_reagent_entry(class_file: dict, rank_id: int) -> tuple[tuple[tuple[int
     if len(entries) > 1:
         raise ValueError(f'{VALUE_REAGENTS_KEY} lists {rank_id} more than once')
     entry = entries[0]
-    extra = set(entry) - {'spell', 'items', 'destination_unit', 'reason'}
+    extra = set(entry) - {'spell', 'items', 'destination_unit', 'target_entry', 'distance', 'reason'}
     raw_items = entry.get('items', [])
     destination = entry.get('destination_unit')
+    target_entry = entry.get('target_entry')
+    distance = entry.get('distance')
     if extra or not isinstance(raw_items, list) or destination not in (None, CASTER, TARGET):
         raise ValueError(f'{VALUE_REAGENTS_KEY} entry for {rank_id} takes spell, items, and optional destination_unit '
-                         f'{CASTER!r} or {TARGET!r}, not {entry!r}')
+                         f'{CASTER!r} or {TARGET!r}, target_entry, and distance, not {entry!r}')
+    if target_entry is not None and (type(target_entry) is not int or target_entry <= 0):
+        raise ValueError(f'{VALUE_REAGENTS_KEY} target_entry for {rank_id} must be a positive int, not {target_entry!r}')
+    if distance is not None and (isinstance(distance, bool) or not isinstance(distance, (int, float))
+                                 or not math.isfinite(distance) or not 0 < distance <= 100):
+        raise ValueError(f'{VALUE_REAGENTS_KEY} distance for {rank_id} must be in (0, 100], not {distance!r}')
     items = []
     for raw in raw_items:
         if (not isinstance(raw, list) or len(raw) != 2
@@ -363,9 +370,19 @@ def value_reagent_entry(class_file: dict, rank_id: int) -> tuple[tuple[tuple[int
             raise ValueError(f'{VALUE_REAGENTS_KEY} item for {rank_id} must be [positive_item, positive_count], '
                              f'not {raw!r}')
         items.append((raw[0], raw[1]))
-    if not items and destination is None:
-        raise ValueError(f'{VALUE_REAGENTS_KEY} entry for {rank_id} must name items or destination_unit')
+    if not items and destination is None and target_entry is None and distance is None:
+        raise ValueError(f'{VALUE_REAGENTS_KEY} entry for {rank_id} must name items, destination_unit, target_entry, '
+                         f'or distance')
     return tuple(items), destination
+
+
+def value_target_override(class_file: dict, rank_id: int) -> tuple[int | None, float | None]:
+    entries = [entry for entry in class_file.get(VALUE_REAGENTS_KEY, []) if entry['spell'] == rank_id]
+    if not entries:
+        return None, None
+    entry = entries[0]
+    distance = entry.get('distance')
+    return entry.get('target_entry'), (float(distance) if distance is not None else None)
 
 
 def value_ally_cast(class_file: dict, rank_id: int) -> tuple[int, ...] | None:
@@ -707,6 +724,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
 
     ally_cast = value_ally_cast(class_file, rank_id)
     reagent_items, destination_unit = value_reagent_entry(class_file, rank_id)
+    target_entry_override, target_distance_override = value_target_override(class_file, rank_id)
     summon_carrier = summon_aura_carrier(class_file, rank_id)
     summon_reads = False
 
@@ -961,8 +979,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             cast_steps.append({'action': 'wait', 'label': CAST_WAIT_LABEL,
                                'ms': facts.cast_time_ms + CAST_MARGIN_MS})
         use_min_range = honour_min_range(class_file)
-        travel_ms = (missile_wait_ms(records, rank_id, cast_distance(records, rank_id, use_min_range),
-                                     force=destination_unit == TARGET)
+        distance = (target_distance_override if target_distance_override is not None
+                    else cast_distance(records, rank_id, use_min_range))
+        travel_ms = (missile_wait_ms(records, rank_id, distance, force=destination_unit == TARGET)
                      if is_hostile(facts) or destination_unit == TARGET else 0)
         if travel_ms:
             cast_steps.append({'action': 'wait', 'label': MISSILE_WAIT_LABEL, 'ms': travel_ms})
@@ -994,9 +1013,11 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     summon_target = summon_reads and is_hostile(facts_of(records, summon_carrier['summon']))
     if (is_hostile(facts) or destination_unit == TARGET or summon_target) and cast_wanted:
         placed = rank_id if is_hostile(facts) or destination_unit == TARGET else summon_carrier['summon']
-        scenario['creatures'] = [{'id': TARGET, 'owner': CASTER, 'entry': DUMMY_ENTRY, 'level': class_file['level'],
-                                  'health': DUMMY_HEALTH,
-                                  'distance': cast_distance(records, placed, honour_min_range(class_file))}]
+        distance = (target_distance_override if target_distance_override is not None
+                    else cast_distance(records, placed, honour_min_range(class_file)))
+        scenario['creatures'] = [{'id': TARGET, 'owner': CASTER,
+                                  'entry': target_entry_override if target_entry_override is not None else DUMMY_ENTRY,
+                                  'level': class_file['level'], 'health': DUMMY_HEALTH, 'distance': distance}]
     if (targets_resurrect(facts) or needs_ally_target or ally_cast is not None) and cast_wanted:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     return scenario, expectations, periodic_totals
