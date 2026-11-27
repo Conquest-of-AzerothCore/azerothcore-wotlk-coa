@@ -1,0 +1,347 @@
+{
+  "schema": 1,
+  "name": "Worldforged pickups reported missing, buried or unlootable sit on the ground",
+  "contract": "Eleven Worldforged pickups were reported missing (#10305, #10250, #10368, #10139, #10154, #10002, #10037), under the ground or inside terrain (#10337, #10316, #10076) or unlootable in the lava (#10026). The server's ground above each (Map::GetHeight from above) was 0.3 to 7.7 yd over them, so they were buried. Expected: each pickup sits between 0.15 yd below and 0.5 yd above the ground.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": -4991.4,
+    "y": -2017.0,
+    "z": -51.149,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -4991.4,
+      "y": -2017.0,
+      "z": -51.149
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Darkcloud Braid is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 515509,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Darkcloud Braid sits on the ground (#10337)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 515509,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": 2549.7,
+      "y": -4544.4,
+      "z": 81.66
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ghoulbane Gauntlets is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 90508,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ghoulbane Gauntlets sits on the ground (#10305)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 90508,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -72.4,
+      "y": -4006.7,
+      "z": 124.173
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Bloodthread Leggings is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95798,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bloodthread Leggings sits on the ground (#10250)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 95798,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": 4143.2,
+      "y": -836.2,
+      "z": 257.446
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Minstrel's Magic is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 517223,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Minstrel's Magic sits on the ground (#10368)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 517223,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": 5102.9,
+      "y": 255.9,
+      "z": 30.366
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Wild Longbow is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 254558,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wild Longbow sits on the ground (#10139)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 254558,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -14103.9,
+      "y": -80.6,
+      "z": 13.446
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gorlash's Seaweed Salad is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 254350,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Gorlash's Seaweed Salad sits on the ground (#10154)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 254350,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -4693.6,
+      "y": -1824.3,
+      "z": -55.014
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Failed Parachute is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 515502,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Failed Parachute sits on the ground (#10316)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 515502,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -13079.5,
+      "y": 373.0,
+      "z": 18.364
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Pristine Tethis Feather is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95725,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Pristine Tethis Feather sits on the ground (#10002)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 95725,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -7132.6,
+      "y": -1272.5,
+      "z": -196.886
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: One Ring to Flame Them All is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95934,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: One Ring to Flame Them All sits on the ground (#10026)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 95934,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": 3770.3,
+      "y": -5305.0,
+      "z": 93.37
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Markri Turret is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 254458,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Markri Turret sits on the ground (#10037)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 254458,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -1843.7,
+      "y": -1916.1,
+      "z": 109.029
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Thornweaver Mace is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 97112,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Thornweaver Mace sits on the ground (#10076)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 97112,
+      "min": -0.15,
+      "max": 0.5
+    }
+  ]
+}

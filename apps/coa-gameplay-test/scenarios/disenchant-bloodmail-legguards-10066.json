@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Disenchant: Bloodmail Legguards yield a Nexus Crystal (#10066)",
+  "contract": "Bloodmail Legguards 227465 (epic legs, item level 61, RequiredDisenchantSkill 225) had DisenchantID 0, so Disenchant 13262 failed on them. The other epic Bloodmail pieces at item level 61, Bloodmail Hauberk 227453 and Bloodmail Coif 99706, use bracket 64, whose only loot is one Nexus Crystal 20725. Expected: a character with Enchanting 300 disenchants the legguards into one Nexus Crystal and the legguards are consumed.",
+  "players": [ { "id": "enchanter", "race": 1, "class": 1, "level": 60 } ],
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_skill", "actor": "enchanter", "skill": 333, "value": 300, "maximum": 300 },
+    { "action": "learn", "actor": "enchanter", "spell": 13262 },
+    { "action": "add_item", "actor": "enchanter", "item": 227465 },
+    { "action": "cast", "label": "Disenchant Bloodmail Legguards", "actor": "enchanter", "spell": 13262, "target_item": 227465 },
+    { "action": "assert", "label": "DISCRIMINATING: the disenchant loot window holds one item", "actor": "enchanter", "metric": "loot_count", "equals": 1, "within_ms": 6000 },
+    { "action": "assert", "label": "the item is a Nexus Crystal", "actor": "enchanter", "metric": "loot_entry", "equals": 20725 },
+    { "action": "collect_loot", "actor": "enchanter" },
+    { "action": "assert", "label": "one Nexus Crystal reaches the bags", "actor": "enchanter", "metric": "item_count", "item": 20725, "equals": 1, "within_ms": 2000 },
+    { "action": "close_loot", "actor": "enchanter" },
+    { "action": "assert", "label": "closing the loot window consumes the legguards", "actor": "enchanter", "metric": "item_count", "item": 227465, "equals": 0, "within_ms": 2000 }
+  ]
+}
