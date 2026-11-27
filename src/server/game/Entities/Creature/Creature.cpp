@@ -2941,7 +2941,7 @@ bool Creature::CanCreatureAttack(Unit const* victim, bool skipDistCheck) const
 
     if (!GetCharmerOrOwnerGUID().IsPlayer())
     {
-        if (GetMap()->IsDungeon())
+        if (GetMap()->IsDungeon() || GetMap()->IsScriptedPrivateInstance())
             return true;
 
         float visibility = std::max<float>(GetVisibilityRange(), victim->GetVisibilityRange());
