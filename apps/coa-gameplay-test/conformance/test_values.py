@@ -1253,5 +1253,43 @@ class CastAuraStacksTest(unittest.TestCase):
                 cast_aura_steps({'cast_auras': [{'spell': 572846, 'auras': [bad]}]}, 572846)
 
 
+class ValueReagentsTest(unittest.TestCase):
+    def test_value_reagent_entry_parses_items_and_destination(self):
+        from values import VALUE_REAGENTS_KEY, value_reagent_entry
+        class_file = {VALUE_REAGENTS_KEY: [{'spell': 804777, 'items': [[1210, 1]], 'destination_unit': CASTER}]}
+        self.assertEqual(value_reagent_entry(class_file, 804777), (((1210, 1),), CASTER))
+        self.assertEqual(value_reagent_entry(class_file, 999999), ((), None))
+
+    def test_invalid_value_reagent_entries_are_refused(self):
+        from values import VALUE_REAGENTS_KEY, value_reagent_entry
+        bad_entries = (
+            [{'spell': 804777}],
+            [{'spell': 804777, 'items': [[1210, 0]]}],
+            [{'spell': 804777, 'items': [[True, 1]]}],
+            [{'spell': 804777, 'items': [[1210, 1]], 'destination_unit': 'dummy'}],
+            [{'spell': 804777, 'items': [[1210, 1]], 'extra': 1}],
+            [{'spell': 804777, 'items': [[1210, 1]]}, {'spell': 804777, 'items': [[1210, 1]]}],
+        )
+        for entries in bad_entries:
+            with self.subTest(entries=entries), self.assertRaises(ValueError):
+                value_reagent_entry({VALUE_REAGENTS_KEY: entries}, 804777)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_value_reagents_adds_items_and_destination_only_when_opted_in(self):
+        from values import VALUE_REAGENTS_KEY
+        cultist = load_class_file(CULTIST_CLASS_ID)
+        ritual = ClassSpell(804777, 'Eldritch Ritual', (804777,), 804777, 0, False)
+        without = {key: value for key, value in cultist.items() if key != VALUE_REAGENTS_KEY}
+        with_opt = {**without, VALUE_REAGENTS_KEY: [{'spell': 804777, 'items': [[1210, 1]], 'destination_unit': CASTER}]}
+        sc_plain, _, _ = value_scenario(without, ritual, 804777)
+        sc_opt, _, _ = value_scenario(with_opt, ritual, 804777)
+        cast_plain = next(step for step in sc_plain['steps'] if step.get('action') == 'cast')
+        cast_opt = next(step for step in sc_opt['steps'] if step.get('action') == 'cast')
+        self.assertNotIn('destination_unit', cast_plain)
+        self.assertEqual(cast_opt['destination_unit'], CASTER)
+        self.assertIn({'action': 'add_item', 'actor': CASTER, 'item': 1210, 'count': 1}, sc_opt['steps'])
+        self.assertNotIn({'action': 'add_item', 'actor': CASTER, 'item': 1210, 'count': 1}, sc_plain['steps'])
+
+
 if __name__ == '__main__':
     unittest.main()

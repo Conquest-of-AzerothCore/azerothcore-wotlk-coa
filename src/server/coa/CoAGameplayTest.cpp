@@ -2859,6 +2859,10 @@ private:
         for (auto const& [id, target] : _targets)
             if (Map* map = sMapMgr->FindMap(target.map, target.instance))
                 fixtureRoots[map].insert(target.guid);
+        for (auto const& [id, actor] : _actors)
+            if (Player* player = actor.session ? actor.session->GetPlayer() : nullptr)
+                if (Map* map = player->FindMap())
+                    fixtureRoots[map];
         for (auto& [map, parents] : fixtureRoots)
         {
             FixtureSummonCollector collector;
@@ -2877,6 +2881,14 @@ private:
                         added = true;
                     }
             } while (added);
+            if (_phase > PHASEMASK_NORMAL)
+                for (Creature* creature : collector.summons)
+                    if (creature->GetSummonerGUID().IsEmpty() && creature->GetPhaseMask() == _phase
+                        && parents.insert(creature->GetGUID()).second)
+                    {
+                        descendants.push_back(creature);
+                        units.insert(ProcCounter::OwnerOf(creature));
+                    }
             for (auto creature = descendants.rbegin(); creature != descendants.rend(); ++creature)
                 (*creature)->DespawnOrUnsummon();
         }
