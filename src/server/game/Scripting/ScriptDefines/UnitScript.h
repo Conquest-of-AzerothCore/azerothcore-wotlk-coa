@@ -118,7 +118,6 @@ public:
     virtual void ModifySpellEffectBaseValue(Unit const* /*caster*/, SpellInfo const* /*spellInfo*/,
         uint8 /*effectIndex*/, float& /*value*/) { }
 
-    // Legacy argument order differs between direct and periodic healing.
     virtual void ModifyHealReceived(Unit* /*first*/, Unit* /*second*/, uint32& /*heal*/, SpellInfo const* /*spellInfo*/) { }
     virtual void ModifyHealReceivedFor(Unit* /*recipient*/, Unit* first, Unit* second, uint32& heal,
         SpellInfo const* spellInfo)

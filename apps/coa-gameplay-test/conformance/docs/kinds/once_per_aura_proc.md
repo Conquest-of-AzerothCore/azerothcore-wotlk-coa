@@ -23,14 +23,8 @@ changes: reuses passive striker casts, `set_health`, `set_combat_avoidance`, `ca
 - **Application 2, hit 3:** Cancels `spell` (`aura == 0`), resets cooldown and re-casts `spell` (`cast_failure == 0`,
   `aura == 1`), resets health to `strike_health`, lands strike 3: `aura(spell)` must stay `1` and `proc_metric` must
   increment by `+1` (total `2`, proving the once-per-aura gate resets on reapplication).
-<!-- coderabbit-ai-generated:v1 -->
-
-<!-- coderabbit-ai-generated-section:v1:a87554f3006705bf9906e312e24747fa419aa3156eccc48ffb6f4ae2de23c13a -->
-
 - **Precondition guards:** Check each phase in order. A measured proc violation returns `alert` immediately.
   A missing read, dirty baseline, missed strike, or failed cast or cancel returns `unmeasured` if reached first.
-
-<!-- /coderabbit-ai-generated:v1 -->
 - **Evidence class:** `proc_metric` (default `spell_heal_count`, `event` in `coverage.METRIC_EVIDENCE`, counted as
   `behaviour`).
 
