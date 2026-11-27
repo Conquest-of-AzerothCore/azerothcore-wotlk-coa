@@ -16,7 +16,9 @@
     "the marked ally adds 803816 for 10% (Dawn 807444 effect 1). Spell power 3000 keeps the heals large enough",
     "that truncating each percentage to whole points stays below 0.1% of the ratio. Gift of C'Thun 706189 (effect",
     "1 aura 136, +4% healing done) is on the cleric: the copy already holds the outgoing modifiers, so a tick",
-    "must heal for exactly its aura amount, not 4% more (the native tick-time multiplier exemption)."
+    "must heal for exactly its aura amount, not 4% more (the native tick-time multiplier exemption). The first",
+    "tick must be absent 2.5 sec after the heal resolves and present by 3.5 sec, and the second must be absent",
+    "2.5 sec after the first and present by 3.5 sec, so an interval off by 0.5 sec or more fails."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -157,14 +159,28 @@
       "max": 18000
     },
     {
+      "action": "wait",
+      "label": "Stop short of the 3 sec boundary",
+      "ms": 2000
+    },
+    {
       "action": "assert",
-      "label": "It ticks every 3 sec",
+      "label": "No tick before 3 sec",
       "actor": "cleric",
       "metric": "spell_heal_count",
       "spell": 505370,
       "target": "ally",
-      "within_ms": 3500,
-      "equals": 1
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The first tick lands at 3 sec",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 505370,
+      "target": "ally",
+      "equals": 1,
+      "within_ms": 1000
     },
     {
       "action": "snapshot",
@@ -187,8 +203,27 @@
     },
     {
       "action": "wait",
-      "label": "Let the global cooldown expire",
-      "ms": 1600
+      "label": "Stop short of the next 3 sec boundary",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "No second tick before 3 sec after the first",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 505370,
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The second tick lands 3 sec after the first",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 505370,
+      "target": "ally",
+      "equals": 2,
+      "within_ms": 1000
     },
     {
       "action": "set_health",
