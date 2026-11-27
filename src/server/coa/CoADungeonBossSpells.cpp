@@ -35,6 +35,7 @@ namespace
     constexpr uint32 NpcTorrentWalker = 21252;
     constexpr float TorrentWalkerSpeed = 7.0f;
     constexpr uint32 TorrentLaps = 3;
+    constexpr uint32 SpellKrastinovGhoulishPotion = 92624;
 
     class spell_coa_torrent_spin : public AuraScript
     {
@@ -520,6 +521,8 @@ public:
             return;
         if (!_loaded)
             Load();
+        if (info->Id == SpellKrastinovGhoulishPotion)
+            info->Effects[EFFECT_1].DieSides = 0;
         if (auto const radius = _radius.find(info->Id); radius != _radius.end())
             if (SpellRadiusEntry const* entry = sSpellRadiusStore.LookupEntry(radius->second))
                 for (SpellEffectInfo& effect : info->Effects)
