@@ -152,6 +152,7 @@ __pycache__/
 !/modules/mod-portable-sawmill/
 !/modules/mod-coa-legendary-items/
 !/modules/mod-ethereal-bazaar/
+!/modules/mod-ale/
 
 # Local Manastorm test runtime and duplicate client staging copies
 /ManastormTestRepack/

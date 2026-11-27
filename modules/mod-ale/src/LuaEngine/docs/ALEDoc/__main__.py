@@ -1,0 +1,249 @@
+import os
+import shutil
+import typing
+from jinja2 import Environment, FileSystemLoader
+from typedecorator import params, returns
+from ALEDoc.parser import ClassParser, MethodDoc
+import glob
+import time
+
+
+@returns([(str, typing.IO)])
+@params(search_path=str)
+def find_class_files(search_path):
+    """Find and open all files containing ALE class methods in `search_path`.
+
+    :param search_path: the path to search for ALE methods in
+    :return: a list of all files containing ALE methods, and the name of their respective classes
+    """
+    # Search for all files ending in "Methods.h".
+    #
+    # recursive=True matters: without it "**" matches a single path component,
+    # so everything in a subfolder of methods/ is silently invisible.
+    method_file_names = glob.glob(os.path.join(search_path, '**', '*Methods.h'), recursive=True)
+    # Open each file.
+    method_files = [open(file_name, 'r') for file_name in method_file_names]
+    return method_files
+
+
+# The order categories appear in the sidebar. Anything not listed follows,
+# alphabetically.
+CATEGORY_ORDER = ['Game', 'Data', 'Playerbots']
+
+# Shown instead of the folder name when the folder reads badly as a heading.
+CATEGORY_LABELS = {
+    'Game': 'Game',
+    'Data': 'Data tables',
+    'Playerbots': 'Playerbots',
+}
+
+# One line at the top of each category page. A folder with no entry here still
+# gets its page, just without the blurb.
+CATEGORY_DESCRIPTIONS = {
+    'Game': 'Players, creatures, items, maps and the rest of the living world: '
+            'what a script reaches while the server is running.',
+    'Data': 'The tables the core loads at startup, reachable by name through '
+            'LookupEntry and ForEachEntry. Writing to one changes the store the '
+            'core itself reads from, without touching SQL or a .dbc file.',
+    'Playerbots': 'The bots of mod-playerbots: the bot itself, its AI, and the '
+                  'managers that create and hold them.',
+}
+
+
+@returns(str)
+@params(path=str)
+def category_of(path):
+    """Return the category a class belongs to, taken from the folder its methods live in.
+
+    There is nothing to maintain: a new folder under methods/ becomes a new
+    category on its own, the way methods/Data/ did. Files sitting directly in
+    methods/ fall into "Game".
+
+    :param path: path of the *Methods.h file
+    :return: the category name
+    """
+    parts = os.path.normpath(path).split(os.sep)
+
+    if 'methods' in parts:
+        below = parts[parts.index('methods') + 1:]
+        # More than one part left means the file sits in a subfolder.
+        if len(below) > 1:
+            return below[0]
+
+    return 'Game'
+
+
+def group_by_category(classes):
+    """Group classes into (name, label, classes) triples, ready for the sidebar."""
+    groups = {}
+    for class_ in classes:
+        groups.setdefault(class_.category, []).append(class_)
+
+    def rank(name):
+        return (CATEGORY_ORDER.index(name), '') if name in CATEGORY_ORDER else (len(CATEGORY_ORDER), name)
+
+    return [(name, CATEGORY_LABELS.get(name, name), sorted(groups[name], key=lambda c: c.name))
+            for name in sorted(groups, key=rank)]
+
+
+def make_renderer(template_path, link_parser_factory):
+    """Return a function that can be used to render Jinja2 templates from the `template_path` directory."""
+
+    # Set up jinja2 environment to load templates from the templates folder.
+    env = Environment(loader=FileSystemLoader(template_path))
+
+
+    def inner(template_name, output_path, level, **kwargs):
+        env.filters['parse_links'], env.filters['parse_data_type'] = link_parser_factory(level)
+        template = env.get_template(template_name)
+        static = make_static(level)
+        root = make_root(level)
+
+        with open('build/' + output_path, 'w') as out:
+            out.write(template.render(level=level, static=static, root=root, **kwargs))
+
+    return inner
+
+
+def make_static(level):
+    return lambda file_name: ('../' * level) + 'static/' + file_name
+
+
+def make_root(level):
+    return lambda file_name: ('../' * level) + file_name
+
+
+if __name__ == '__main__':
+    # Recreate the build folder and copy static files over.
+    if os.path.exists('build'):
+        shutil.rmtree('build')
+    os.mkdir('build')
+    shutil.copytree('ALEDoc/static', 'build/static')
+
+    # Load up all files with methods we need to parse.
+    print('Finding ALE method files...')
+    class_files = find_class_files('../')
+
+    # Parse all the method files.
+    classes = []
+    for f in class_files:
+        print(f'Parsing file {f.name}...')
+        class_ = ClassParser.parse_file(f)
+        class_.category = category_of(f.name)
+        class_.category_label = CATEGORY_LABELS.get(class_.category, class_.category)
+        classes.append(class_)
+        f.close()
+
+    # Sort the classes so they are in the correct order in lists.
+    classes.sort(key=lambda c: c.name)
+
+    # The sidebar groups classes by category; every page shows the same one.
+    categories = group_by_category(classes)
+    print('Categories: ' + ', '.join(f'{name} ({len(members)})' for name, _, members in categories))
+
+    def make_parsers(level):
+        """Returns a function that parses content for refs to other classes, methods, or enums,
+        and automatically inserts the correct link.
+        """
+        # Make lists of all class names and method names.
+        class_names = []
+        method_names = []
+
+        for class_ in classes:
+            class_names.append('[' + class_.name + ']')
+
+            for method in class_.methods:
+                method_names.append('[' + class_.name + ':' + method.name + ']')
+
+        def link_parser(content):
+            # Replace all occurrencies of &Class:Function and then &Class with a link to given func or class
+
+            for name in method_names:
+                # Take the [] off the front of the method's name.
+                full_name = name[1:-1]
+                # Split "Class:Method" into "Class" and "Method".
+                class_name, method_name = full_name.split(':')
+                url = '{}{}/{}.html'.format(('../' * level), class_name, method_name)
+                # Replace occurrencies of &Class:Method with the url created
+                content = content.replace(name, '<a class="text-accent hover:underline" href="{}">{}</a>'.format(url, full_name))
+
+            for name in class_names:
+                # Take the [] off the front of the class's name.
+                class_name = name[1:-1]
+                url = '{}{}/index.html'.format(('../' * level), class_name)
+                # Replace occurrencies of &Class:Method with the url created
+                content = content.replace(name, '<a class="text-accent hover:underline" href="{}">{}</a>'.format(url, class_name))
+
+            return content
+
+        # Links to the "Programming in Lua" documentation for each Lua type.
+        lua_type_documentation = {
+            'nil': 'http://www.lua.org/pil/2.1.html',
+            'boolean': 'http://www.lua.org/pil/2.2.html',
+            'number': 'http://www.lua.org/pil/2.3.html',
+            'string': 'http://www.lua.org/pil/2.4.html',
+            'table': 'http://www.lua.org/pil/2.5.html',
+            'function': 'http://www.lua.org/pil/2.6.html',
+            '...': 'http://www.lua.org/pil/5.2.html',
+        }
+
+        def data_type_parser(content):
+            # If the type is a Lua type, return a link to Lua documentation.
+            if content in lua_type_documentation:
+                url = lua_type_documentation[content]
+                return '<strong><a href="{}">{}</a></strong>'.format(url, content)
+
+            # Otherwise try to build a link to the proper page.
+            if content in class_names:
+                class_name = content[1:-1]
+                url = '{}{}/index.html'.format(('../' * level), class_name)
+                return '<strong><a class="text-accent hover:underline" href="{}">{}</a></strong>'.format(url, class_name)
+
+            # Case for enums to direct to a search on github
+            enum_name = content[1:-1]
+            url = 'https://github.com/azerothcore/azerothcore-wotlk/search?l=cpp&q=%22enum+{}%22&type=Code&utf8=%E2%9C%93'.format(enum_name)
+            return '<strong><a href="{}">{}</a></strong>'.format(url, enum_name)
+
+            # By default we just return the name without the [] around it
+            return content[1:-1]
+
+        return link_parser, data_type_parser
+
+    # Create the render function with the template path and parser maker.
+    render = make_renderer('ALEDoc/templates', make_parsers)
+
+    # Render the index.
+    render('index.html', 'index.html', level=0, classes=classes, categories=categories)
+    # Render the search index.
+    render('search-index.js', 'search-index.js', level=0, classes=classes)
+    # Render the date.
+    render('date.js', 'date.js', level=0, currdate=time.strftime("%d/%m/%Y"))
+
+    # Render one page per category, so the breadcrumb trail leads somewhere.
+    for name, label, members in categories:
+        print(f'Rendering page for category {name}...')
+        render('category.html', name + '.html', level=0,
+               classes=classes, categories=categories,
+               current_category=name,
+               current_category_label=label,
+               current_category_classes=members,
+               current_category_description=CATEGORY_DESCRIPTIONS.get(name, ''))
+
+    for class_ in classes:
+        print(f'Rendering pages for class {class_.name}...')
+
+        # Make a folder for the class.
+        os.mkdir('build/' + class_.name)
+        index_path = '{}/index.html'.format(class_.name)
+        sidebar_path = '{}/sidebar.js'.format(class_.name)
+
+        # Render the class's index page.
+        render('class.html', index_path, level=1, classes=classes, categories=categories, current_class=class_)
+
+        # Render the class's sidebar script.
+        render('sidebar.js', sidebar_path, level=1, classes=classes, categories=categories, current_class=class_)
+
+        # Render each method's page.
+        for method in class_.methods:
+            method_path = '{}/{}.html'.format(class_.name, method.name)
+            render('method.html', method_path, level=1, classes=classes, categories=categories, current_class=class_, current_method=method)
