@@ -304,6 +304,35 @@ namespace AscensionBattlegroundBracketsPolicy
         return ownHealth > 0.0f && liftedHealth > ownHealth ? liftedHealth / ownHealth : 1.0f;
     }
 
+    inline float ClampOutputScale(float scale)
+    {
+        return std::isfinite(scale) && scale >= 0.0f ? scale : 1.0f;
+    }
+
+    inline std::int32_t LevelScaledPointsDelta(std::uint32_t ownLevel, std::uint32_t liftedLevel,
+        std::uint32_t baseLevel, std::uint32_t spellLevel, std::uint32_t maxLevel, float pointsPerLevel)
+    {
+        if (liftedLevel <= ownLevel || pointsPerLevel == 0.0f)
+            return 0;
+
+        auto const effectiveLevel = [baseLevel, spellLevel, maxLevel](std::uint32_t level) -> std::int32_t
+        {
+            std::int32_t effective = static_cast<std::int32_t>(level);
+            if (maxLevel > 0 && effective > static_cast<std::int32_t>(maxLevel))
+                effective = static_cast<std::int32_t>(maxLevel);
+            else if (effective < static_cast<std::int32_t>(baseLevel))
+                effective = static_cast<std::int32_t>(baseLevel);
+            effective -= static_cast<std::int32_t>(std::max(baseLevel, spellLevel));
+            return effective;
+        };
+
+        std::int32_t const ownPoints = static_cast<std::int32_t>(
+            static_cast<float>(effectiveLevel(ownLevel)) * pointsPerLevel);
+        std::int32_t const liftedPoints = static_cast<std::int32_t>(
+            static_cast<float>(effectiveLevel(liftedLevel)) * pointsPerLevel);
+        return liftedPoints - ownPoints;
+    }
+
     template <typename Integer>
     inline Integer SaturatedScale(Integer amount, float ratio)
     {

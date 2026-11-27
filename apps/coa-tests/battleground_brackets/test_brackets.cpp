@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <cstdlib>
+#include <limits>
 
 #define CHECK(condition) \
     do \
@@ -214,6 +215,29 @@ static void ComputesGearBudgetsAndCatchUp()
     CHECK(PlayerGearLift(15, 59, ArmorTier::Plate, ArmorTier::Plate, true, GearValues{}, 0.0f).Empty());
 }
 
+static void ComputesTemplarTuningDeltaAndScaleClamp()
+{
+    CHECK(ClampOutputScale(0.8f) == 0.8f);
+    CHECK(ClampOutputScale(0.5f) == 0.5f);
+    CHECK(ClampOutputScale(0.0f) == 0.0f);
+    CHECK(ClampOutputScale(-0.5f) == 1.0f);
+    CHECK(ClampOutputScale(std::numeric_limits<float>::quiet_NaN()) == 1.0f);
+    CHECK(ClampOutputScale(std::numeric_limits<float>::infinity()) == 1.0f);
+
+    CHECK(LevelScaledPointsDelta(12, 29, 10, 10, 60, -0.40f) == -7);
+    CHECK(LevelScaledPointsDelta(16, 59, 10, 10, 60, -0.40f) == -17);
+    CHECK(LevelScaledPointsDelta(59, 59, 10, 10, 60, -0.40f) == 0);
+    CHECK(LevelScaledPointsDelta(60, 60, 10, 10, 60, -0.40f) == 0);
+    CHECK(LevelScaledPointsDelta(29, 12, 10, 10, 60, -0.40f) == 0);
+
+    CHECK(LevelScaledPointsDelta(16, 59, 10, 10, 60, -0.56f) == -24);
+    CHECK(LevelScaledPointsDelta(16, 59, 10, 10, 60, 0.50f) == 21);
+
+    CHECK(LevelScaledPointsDelta(5, 29, 10, 10, 60, -0.40f) == -7);
+    CHECK(LevelScaledPointsDelta(16, 70, 10, 10, 60, -0.40f) == -18);
+    CHECK(LevelScaledPointsDelta(16, 59, 10, 10, 60, 0.0f) == 0);
+}
+
 int main()
 {
     ParsesDefaultRanges();
@@ -228,5 +252,6 @@ int main()
     BridgesFortyNineLevels();
     KeepsHealthShare();
     ComputesGearBudgetsAndCatchUp();
+    ComputesTemplarTuningDeltaAndScaleClamp();
     std::cout << "Battleground wide bracket policy checks passed\n";
 }

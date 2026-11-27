@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Widened battleground skips derived and max-health scaling without bypassing healing reduction",
-  "contract": "A level 12 Human Templar (templar, class 19) and a level 29 Human Chronomancer (ally, class 22) of the Alliance enter a Warsong Gulch of the 10-29 bracket against two level 29 Undead Necromancers (top, top2, class 23). The widened bracket lifts health only on UNIT_MOD_HEALTH (+394 bare + 207 gear health = +601) and leaves Stamina (stat 2) untouched. From player_class_stats (CoA.ClassLevelSixtyStats.Enable defaults to 0; Templar uses Rogue class 4 as fallback_class from level 1 anchor BaseHP 65 and Stamina 25, with Human race stats 0): level 12 Templar BaseHP 182 and Stamina 32 give 182 + 20 + 10 x 12 = 322; level 29 Templar BaseHP 436 and Stamina 46 give 436 + 20 + 10 x 26 = 716. The Templar maximum health gain is 254 base health + 14 Stamina x 10 + 207 gear health = 601 while the output ratio remains 716 / 322 = 2.22360, so scaling 1000 yields round(1000 x 716 / 322) = 2224. Inside Warsong Gulch, Chastise 803157 (damage), Benediction 801448 (healing) and Power Word: Shield 17 (absorb) still scale to 2224, while scaled_output skips all six TemplarCopies (525028 Retribution, 707720 Sacred Defense, 801456 Deliverance on damage; 707302 Uther's Legacy, 803331 Downfall, 807414 Argent Blade self-heal on healing) and Tome of Light 805422 on absorb. Cross-class scaled_output checks confirm BG_CATCH_UP_SKIP_*: Ignite 12654, Righteous Vengeance 61840, Divine Aegis 47753 (absorb), Death Strike 45470 (heal), Anti-Magic Shell 48707 (absorb), Armor of Faith 1582343 (heal), Chronomancer Protection 560374 (absorb), Witch Doctor Crystal Water 547574 (absorb), Barbarian Headlopped 783054 (damage), Guardian Deadly Blow 706808 (damage), Witch Hunter Dusk Blade 574335 (heal), Bloodmage Infuse 681404 (damage) and Xoroth Gorged 680204 (damage) stay at 1000, while Warrior Deep Wounds 12721 (damage) still scales to 2224. Once the match starts and all players meet at the same position, Warsong Gulch autocasts PvP - Battleground - Dampening 74411. 807414 natively carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, so caster-side Dampening 74411 (SPELL_AURA_MOD_HEALING_DONE_PERCENT) leaves it unchanged, while target-side Mortal Strike 12294 (-50% SPELL_AURA_MOD_HEALING_PCT, applied via set_aura before the cast) still reduces it in Unit::SpellHealingBonusTaken because 807414 uses BG_CATCH_UP_SKIP_HEAL rather than AscensionInheritsResolvedAmount. Damaged templar (1 HP, allow_regeneration false, Walking Stick 2495 equipped, 10000 melee/spell hit and expertise ratings, +200 attack power, carrying Mortal Strike 12294 from top) casts Argent Blade 804929 against 100000-HP cloth target top (no shield/block/parry, no overkill): 804929 hits once for positive damage and triggers 807414 once for a heal of floor(0.50 x damage), so spell_heal_total ratio_to argent_damage lies in [0.49, 0.51] regardless of whether Argent Blade crits, ruling out both double-scaling (~1.11) and AscensionInheritsResolvedAmount bypass (~1.00).",
+  "contract": "A level 12 Human Templar (templar, class 19) and a level 29 Human Chronomancer (ally, class 22) of the Alliance enter a Warsong Gulch of the 10-29 bracket against two level 29 Undead Necromancers (top, top2, class 23). The widened bracket lifts health only on UNIT_MOD_HEALTH (+394 bare + 207 gear health = +601) and leaves Stamina (stat 2) untouched. From player_class_stats (CoA.ClassLevelSixtyStats.Enable defaults to 0; Templar uses Rogue class 4 as fallback_class from level 1 anchor BaseHP 65 and Stamina 25, with Human race stats 0): level 12 Templar BaseHP 182 and Stamina 32 give 182 + 20 + 10 x 12 = 322; level 29 Templar BaseHP 436 and Stamina 46 give 436 + 20 + 10 x 26 = 716. The Templar maximum health gain is 254 base health + 14 Stamina x 10 + 207 gear health = 601 while the output ratio remains 716 / 322 = 2.22360, so scaling 1000 yields round(1000 x 716 / 322) = 2224. Inside Warsong Gulch, Chastise 803157 (damage), Benediction 801448 (healing) and Power Word: Shield 17 (absorb) still scale to 2224, while scaled_output skips all six TemplarCopies (525028 Retribution, 707720 Sacred Defense, 801456 Deliverance on damage; 707302 Uther's Legacy, 803331 Downfall, 807414 Argent Blade self-heal on healing), Tome of Light 805422 on absorb, and the flat/unscaled Templar spells (500689 Divine Fury, 520544 Templar Rituals, 524740 Norgannon's Wrath, 707111 Eternal Blessing on damage; 803160 Chakra of Light, 804150 Grace, 806352 Mending Ward on healing; 706583 Staffguard on absorb). Cross-class scaled_output checks confirm BG_CATCH_UP_SKIP_*: Ignite 12654, Righteous Vengeance 61840, Divine Aegis 47753 (absorb), Death Strike 45470 (heal), Anti-Magic Shell 48707 (absorb), Armor of Faith 1582343 (heal), Chronomancer Protection 560374 (absorb), Witch Doctor Crystal Water 547574 (absorb), Barbarian Headlopped 783054 (damage), Guardian Deadly Blow 706808 (damage), Witch Hunter Dusk Blade 574335 (heal), Bloodmage Infuse 681404 (damage) and Xoroth Gorged 680204 (damage) stay at 1000, while Warrior Deep Wounds 12721 (damage) still scales to 2224. Once the match starts and all players meet at the same position, Warsong Gulch autocasts PvP - Battleground - Dampening 74411. 807414 natively carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, so Unit::SpellPctHealingModsDone skips caster modifiers to avoid double-applying PvE auras, while Templar battleground tuning still applies Dampening 74411 (-20%) and CoA.Battleground.Templar.HealingScale (0.50) alongside target-side Mortal Strike 12294 (-50% SPELL_AURA_MOD_HEALING_PCT in Unit::SpellHealingBonusTaken). Damaged templar (1 HP, allow_regeneration false, Walking Stick 2495 equipped, 10000 melee/spell hit and expertise ratings, +200 attack power, carrying Mortal Strike 12294 from top) casts Argent Blade 804929 against 100000-HP cloth target top (no shield/block/parry, no overkill): 804929 hits once for positive damage and triggers 807414 once for 0.50 (Mortal Strike) x 0.80 (Dampening 74411) x 0.50 (Templar HealingScale) = 0.20x damage, so spell_heal_total ratio_to argent_damage lies in [0.18, 0.22] regardless of whether Argent Blade crits, ruling out no-Dampening (0.25), no-Templar-scale (0.40), bypass (0.50/1.00) and double-scaling (0.44).",
   "timeout_ms": 300000,
   "location": {
     "map": 0,
@@ -492,6 +492,95 @@
     },
     {
       "action": "assert",
+      "label": "Templar Divine Fury 500689 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 500689,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Templar Rituals 520544 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 520544,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Norgannon's Wrath 524740 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 524740,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Eternal Blessing 707111 damage is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 707111,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Chakra of Light 803160 heal is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 803160,
+      "healing": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Grace 804150 heal is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 804150,
+      "healing": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Mending Ward 806352 heal is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 806352,
+      "healing": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Templar Staffguard 706583 absorb is skipped",
+      "actor": "templar",
+      "metric": "scaled_output",
+      "target": "templar",
+      "amount": 1000,
+      "spell": 706583,
+      "healing": true,
+      "absorb": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
       "label": "Mage Ignite 12654 damage is skipped",
       "actor": "templar",
       "metric": "scaled_output",
@@ -849,14 +938,14 @@
     },
     {
       "action": "assert",
-      "label": "Argent Blade self-heal 807414 equals 0.50x damage (no double-scaling and Mortal Strike 12294 still applies)",
+      "label": "Argent Blade self-heal 807414 equals 0.20x damage (Mortal Strike 0.50 x Dampening 0.80 x Templar HealingScale 0.50)",
       "actor": "templar",
       "metric": "spell_heal_total",
       "spell": 807414,
       "target": "templar",
       "ratio_to": "argent_damage",
-      "min": 0.49,
-      "max": 0.51
+      "min": 0.18,
+      "max": 0.22
     }
   ]
 }

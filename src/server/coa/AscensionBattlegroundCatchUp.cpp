@@ -19,6 +19,7 @@
 #include "SpellAuras.h"
 #include "SpellInfo.h"
 #include <algorithm>
+#include <atomic>
 #include <limits>
 
 namespace
@@ -34,6 +35,7 @@ struct AppliedLift final : DataMap::Base
 {
     Policy::Lift lift;
     float ratio = 1.0f;
+    uint32 targetLevel = 0;
 };
 
 void ApplyModifierDelta(Unit* unit, UnitMods mod, float delta)
@@ -74,7 +76,8 @@ void RemoveLift(Unit* unit)
     unit->SetHealth(Policy::KeptHealth(health, oldMax, unit->GetMaxHealth()));
 }
 
-void ApplyLift(Unit* unit, Policy::Lift const& lift, float ratio, bool preserveHealthPct = true)
+void ApplyLift(Unit* unit, Policy::Lift const& lift, float ratio, bool preserveHealthPct = true,
+    uint32 targetLevel = 0)
 {
     if (lift.Empty())
     {
@@ -95,7 +98,7 @@ void ApplyLift(Unit* unit, Policy::Lift const& lift, float ratio, bool preserveH
 
     AppliedLift* existing = unit->CustomData.Get<AppliedLift>(LiftKey);
     if (existing && existing->lift.health == lift.health && existing->lift.armor == lift.armor &&
-        existing->ratio == ratio)
+        existing->ratio == ratio && existing->targetLevel == targetLevel)
         return;
 
     Policy::Lift const oldLift = existing ? existing->lift : Policy::Lift{};
@@ -108,6 +111,7 @@ void ApplyLift(Unit* unit, Policy::Lift const& lift, float ratio, bool preserveH
     }
     existing->lift = lift;
     existing->ratio = ratio;
+    existing->targetLevel = targetLevel;
     unit->SetBattlegroundOutputRatio(ratio);
     ApplyModifierDelta(unit, UNIT_MOD_HEALTH, lift.health - oldLift.health);
     ApplyArmorLiftDelta(unit, oldLift.armor, lift.armor);
@@ -213,7 +217,8 @@ void RefreshPlayerLift(Player* player, bool preserveHealthPct = true, bool remov
         lift.armor += gear.armor;
     }
     ApplyLift(player, lift,
-        Policy::OutputRatio(Policy::PlayerOutputHealth(own), Policy::PlayerOutputHealth(lifted)), preserveHealthPct);
+        Policy::OutputRatio(Policy::PlayerOutputHealth(own), Policy::PlayerOutputHealth(lifted)),
+        preserveHealthPct, target);
 }
 
 Policy::LevelValues PetLevelValues(PetLevelInfo const& info, bool hasMana)
@@ -222,6 +227,146 @@ Policy::LevelValues PetLevelValues(PetLevelInfo const& info, bool hasMana)
     for (uint8 stat = STAT_STRENGTH; stat < MAX_STATS; ++stat)
         values.stats[stat] = info.stats[stat];
     return values;
+}
+
+std::atomic<float> TemplarDamageScale{ 0.80f };
+std::atomic<float> TemplarHealingScale{ 0.50f };
+std::atomic<float> TemplarAbsorbScale{ 0.50f };
+
+constexpr uint32 SPELL_BATTLEGROUND_DAMPENING = 74411;
+constexpr uint32 SPELL_TEMPLAR_CLASS_TUNING = 887007;
+constexpr uint32 SPELL_TEMPLAR_PVP_TUNING = 887107;
+constexpr uint32 SPELL_TEMPLAR_OATHKEEPER_PVP_TUNING = 887144;
+
+void RefreshTemplarTuningAuras(Player* player)
+{
+    if (!player || player->getClass() != CLASS_MONK)
+        return;
+
+    for (uint32 spellId : { SPELL_TEMPLAR_CLASS_TUNING, SPELL_TEMPLAR_PVP_TUNING, SPELL_TEMPLAR_OATHKEEPER_PVP_TUNING })
+        if (Aura* aura = player->GetAura(spellId))
+            aura->RecalculateAmountOfEffects();
+}
+
+bool IsTemplarLiftedTuningEffect(uint32 spellId, uint8 index)
+{
+    return (spellId == SPELL_TEMPLAR_CLASS_TUNING && index == EFFECT_2) ||
+        (spellId == SPELL_TEMPLAR_PVP_TUNING && index == EFFECT_0) ||
+        (spellId == SPELL_TEMPLAR_OATHKEEPER_PVP_TUNING && (index == EFFECT_0 || index == EFFECT_1));
+}
+
+void AdjustTemplarTuningBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value)
+{
+    if (!caster || !info || !IsTemplarLiftedTuningEffect(info->Id, index))
+        return;
+
+    Player const* player = caster->ToPlayer();
+    if (!player || player->getClass() != CLASS_MONK)
+        return;
+
+    AppliedLift const* applied = player->CustomData.Get<AppliedLift>(LiftKey);
+    if (!applied || applied->targetLevel <= player->GetLevel())
+        return;
+
+    value += float(Policy::LevelScaledPointsDelta(player->GetLevel(), applied->targetLevel, info->BaseLevel,
+        info->SpellLevel, info->MaxLevel, info->Effects[index].RealPointsPerLevel));
+}
+
+bool IsTemplarBattlegroundCombat(Unit const* source, Unit const* target, bool healing)
+{
+    if (!source || !target || !source->IsControlledByPlayer() || !target->IsControlledByPlayer())
+        return false;
+
+    if (source->IsHostileTo(target) == healing)
+        return false;
+
+    Player const* sourcePlayer = source->GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player const* targetPlayer = target->GetCharmerOrOwnerPlayerOrPlayerItself();
+    if (!sourcePlayer || !targetPlayer || sourcePlayer->getClass() != CLASS_MONK)
+        return false;
+
+    Map const* map = source->FindMap();
+    if (!map || !map->IsBattleground() || target->FindMap() != map)
+        return false;
+
+    Battleground const* battleground = sourcePlayer->GetBattleground();
+    return battleground && !battleground->isArena() && battleground == targetPlayer->GetBattleground() &&
+        battleground->GetMapId() == map->GetId();
+}
+
+bool IsTemplarDerivedDamageCopy(SpellInfo const* spell)
+{
+    return spell && (spell->AscensionInheritsResolvedAmount || spell->Id == 525028 || spell->Id == 801456);
+}
+
+bool IsTemplarDampeningBypassHealCopy(SpellInfo const* spell)
+{
+    return spell && spell->HasAttribute(SPELL_ATTR3_IGNORE_CASTER_MODIFIERS) &&
+        (spell->Id == 707302 || spell->Id == 803331 || spell->Id == 807414);
+}
+
+uint32 ApplyTemplarBattlegroundDamageScale(Unit const* source, Unit const* target, uint32 amount,
+    SpellInfo const* spell)
+{
+    if (amount == 0 || !IsTemplarBattlegroundCombat(source, target, false) || IsTemplarDerivedDamageCopy(spell))
+        return amount;
+
+    if (spell && spell->SpellFamilyName == SPELLFAMILY_POTION)
+        return amount;
+
+    float const scale = TemplarDamageScale.load(std::memory_order_relaxed);
+    return scale == 1.0f ? amount : Policy::ScaleAmount(amount, scale);
+}
+
+int32 ApplyTemplarBattlegroundDamageScaleSigned(Unit const* source, Unit const* target, int32 amount,
+    SpellInfo const* spell)
+{
+    if (amount <= 0)
+        return amount;
+
+    uint32 const scaled = ApplyTemplarBattlegroundDamageScale(source, target, uint32(amount), spell);
+    return int32(std::min<uint32>(scaled, uint32(std::numeric_limits<int32>::max())));
+}
+
+uint32 ApplyTemplarBattlegroundHealing(Unit const* healer, Unit const* target, uint32 amount, SpellInfo const* spell)
+{
+    if (amount == 0 || !IsTemplarBattlegroundCombat(healer, target, true))
+        return amount;
+
+    if (spell && spell->SpellFamilyName == SPELLFAMILY_POTION)
+        return amount;
+
+    float factor = TemplarHealingScale.load(std::memory_order_relaxed);
+    if (IsTemplarDampeningBypassHealCopy(spell))
+    {
+        AuraEffect const* bgDampening = healer->GetAuraEffect(SPELL_BATTLEGROUND_DAMPENING, EFFECT_0);
+        if (!bgDampening)
+        {
+            Player const* owner = healer->GetCharmerOrOwnerPlayerOrPlayerItself();
+            bgDampening = owner ? owner->GetAuraEffect(SPELL_BATTLEGROUND_DAMPENING, EFFECT_0) : nullptr;
+        }
+        if (bgDampening && bgDampening->GetAmount() < 0)
+            factor *= std::max(0.0f, 1.0f + float(bgDampening->GetAmount()) / 100.0f);
+    }
+
+    return factor == 1.0f ? amount : Policy::ScaleAmount(amount, factor);
+}
+
+int32 ApplyTemplarBattlegroundAbsorbScale(Unit const* caster, Unit const* target, int32 amount,
+    SpellInfo const* spell)
+{
+    if (amount <= 0 || !IsTemplarBattlegroundCombat(caster, target, true))
+        return amount;
+
+    if (spell && spell->SpellFamilyName == SPELLFAMILY_POTION)
+        return amount;
+
+    float const scale = TemplarAbsorbScale.load(std::memory_order_relaxed);
+    if (scale == 1.0f)
+        return amount;
+
+    uint32 const scaled = Policy::ScaleAmount(uint32(amount), scale);
+    return int32(std::min<uint32>(scaled, uint32(std::numeric_limits<int32>::max())));
 }
 
 void RefreshPetLift(Pet* pet)
@@ -251,6 +396,7 @@ void RefreshOwnerLifts(Player* player)
     RefreshPlayerLift(player);
     if (Pet* pet = player->GetPet())
         RefreshPetLift(pet);
+    RefreshTemplarTuningAuras(player);
 }
 
 void RemoveOwnerLifts(Player* player)
@@ -258,6 +404,7 @@ void RemoveOwnerLifts(Player* player)
     RemoveLift(player);
     if (Pet* pet = player->GetPet())
         RemoveLift(pet);
+    RefreshTemplarTuningAuras(player);
 }
 
 uint8 BattlegroundCatchUpSkipForSpell(uint32 spellId)
@@ -313,8 +460,11 @@ uint8 BattlegroundCatchUpSkipForSpell(uint32 spellId)
         case 280376:
         case 281051:
         case 300870:
+        case 500689:
         case 504606:
+        case 520544:
         case 524091:
+        case 524740:
         case 525028:
         case 561318:
         case 570050:
@@ -341,6 +491,7 @@ uint8 BattlegroundCatchUpSkipForSpell(uint32 spellId)
         case 705929:
         case 706808:
         case 706898:
+        case 707111:
         case 707469:
         case 707575:
         case 707660:
@@ -473,10 +624,13 @@ uint8 BattlegroundCatchUpSkipForSpell(uint32 spellId)
         case 800179:
         case 802271:
         case 802399:
+        case 803160:
         case 803331:
+        case 804150:
         case 804736:
         case 805187:
         case 806073:
+        case 806352:
         case 807170:
         case 807414:
         case 807420:
@@ -504,6 +658,7 @@ uint8 BattlegroundCatchUpSkipForSpell(uint32 spellId)
         case 560374:
         case 653283:
         case 704277:
+        case 706583:
         case 706759:
         case 805422:
         case 805718:
@@ -537,6 +692,16 @@ public:
 
     void OnAfterConfigLoad(bool reload) override
     {
+        TemplarDamageScale.store(
+            Policy::ClampOutputScale(sConfigMgr->GetOption<float>("CoA.Battleground.Templar.DamageScale", 0.80f)),
+            std::memory_order_relaxed);
+        TemplarHealingScale.store(
+            Policy::ClampOutputScale(sConfigMgr->GetOption<float>("CoA.Battleground.Templar.HealingScale", 0.50f)),
+            std::memory_order_relaxed);
+        TemplarAbsorbScale.store(
+            Policy::ClampOutputScale(sConfigMgr->GetOption<float>("CoA.Battleground.Templar.AbsorbScale", 0.50f)),
+            std::memory_order_relaxed);
+
         if (reload)
             return;
 
@@ -583,7 +748,10 @@ public:
     void OnPlayerLevelChanged(Player* player, uint8) override
     {
         if (player->CustomData.Get<AppliedLift>(LiftKey))
+        {
             RefreshPlayerLift(player);
+            RefreshTemplarTuningAuras(player);
+        }
     }
 
     void OnPlayerMapChanged(Player* player) override
@@ -652,30 +820,41 @@ class ascension_battleground_catch_up_output : public UnitScript
 public:
     ascension_battleground_catch_up_output()
         : UnitScript("ascension_battleground_catch_up_output", true,
-            {UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN, UNITHOOK_MODIFY_MELEE_DAMAGE,
-                UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK, UNITHOOK_ON_BEFORE_HEAL_ABSORB,
-                UNITHOOK_ON_AFTER_AURA_EFFECT_CALCULATE_AMOUNT})
+            {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
+                UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
+                UNITHOOK_ON_BEFORE_HEAL_ABSORB, UNITHOOK_ON_AFTER_AURA_EFFECT_CALCULATE_AMOUNT})
     { }
+
+    void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
+    {
+        AdjustTemplarTuningBaseValue(caster, info, index, value);
+    }
 
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& amount, SpellInfo const* spell) override
     {
         amount = ScaledSigned(attacker, target, amount, spell, false);
+        amount = ApplyTemplarBattlegroundDamageScaleSigned(attacker, target, amount, spell);
     }
 
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& amount) override
     {
         amount = AscensionBattlegroundCombat::ScaledOutput(attacker, target, amount, nullptr, false);
+        amount = ApplyTemplarBattlegroundDamageScale(attacker, target, amount, nullptr);
     }
 
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& amount, SpellInfo const* spell) override
     {
         amount = AscensionBattlegroundCombat::ScaledOutput(attacker, target, amount, spell, false);
+        amount = ApplyTemplarBattlegroundDamageScale(attacker, target, amount, spell);
     }
 
     void OnBeforeHealAbsorb(HealInfo& healInfo) override
     {
-        healInfo.SetHeal(AscensionBattlegroundCombat::ScaledOutput(healInfo.GetHealer(), healInfo.GetTarget(),
-            healInfo.GetHeal(), healInfo.GetSpellInfo(), true));
+        uint32 heal = AscensionBattlegroundCombat::ScaledOutput(healInfo.GetHealer(), healInfo.GetTarget(),
+            healInfo.GetHeal(), healInfo.GetSpellInfo(), true);
+        heal = ApplyTemplarBattlegroundHealing(healInfo.GetHealer(), healInfo.GetTarget(), heal,
+            healInfo.GetSpellInfo());
+        healInfo.SetHeal(heal);
     }
 
     void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit* caster, int32& amount) override
@@ -685,7 +864,9 @@ public:
             return;
 
         WorldObject* const owner = effect->GetBase()->GetOwner();
-        amount = ScaledSigned(caster, owner ? owner->ToUnit() : nullptr, amount, effect->GetSpellInfo(), true, true);
+        Unit* const target = owner ? owner->ToUnit() : nullptr;
+        amount = ScaledSigned(caster, target, amount, effect->GetSpellInfo(), true, true);
+        amount = ApplyTemplarBattlegroundAbsorbScale(caster, target, amount, effect->GetSpellInfo());
     }
 };
 }

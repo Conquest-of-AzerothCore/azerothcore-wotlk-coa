@@ -225,6 +225,7 @@ int main()
     CHECK(player.maxHealth == 600 + 207 && player.health == 600 + 207);
     CHECK(player.armor == 10 + clothGapTwelve && player.GetBattlegroundArmorLift() == float(clothGapTwelve));
     CHECK(player.stats[STAT_STAMINA] == 0.0f);
+    CHECK(player.CustomData.Get<AppliedLift>(LiftKey)->targetLevel == 29u);
     float const ratio = player.CustomData.Get<AppliedLift>(LiftKey)->ratio;
     CHECK(ratio > 2.307f && ratio < 2.308f);
     CHECK(player.GetBattlegroundOutputRatio() == ratio);
@@ -254,6 +255,7 @@ int main()
     CHECK(player.maxHealth == 600 + 198 && player.health == uint32(std::lround(400.0 * 798.0 / 827.0)));
     CHECK(player.stats[STAT_STAMINA] == 0.0f);
     CHECK(player.GetBattlegroundOutputRatio() > 2.142f && player.GetBattlegroundOutputRatio() < 2.143f);
+    CHECK(player.CustomData.Get<AppliedLift>(LiftKey)->targetLevel == 29u);
     RefreshPlayerLift(&player);
     CHECK(player.health == uint32(std::lround(400.0 * 798.0 / 827.0)));
     player.level = 29;
