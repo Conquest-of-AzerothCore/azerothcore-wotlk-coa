@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Heroic Captain Kromcrush can be kited beyond his old 30-yard leash",
+  "contract": "Issues #13849 and #13847: on Heroic and Mythic, Captain Kromcrush (14325) and Stomper Kreeg (14322) reset about 30 yards from their spawns, so kiting, a fear or a charge reset them. Expected (proposal, to be confirmed in game): both use the 50-yard circle most bosses have. The same change gives Rethilgore (3914) that circle instead of his cell polygon (#13835) and Baron Silverlaine (3887) and Razorclaw the Butcher (3886) 90 yards, so they can be pulled into each other's room as on Ascension (#13836); those are not covered here.",
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8914.0, "y": -133.0, "z": 80.6},
+  "players": [
+    {"id": "p", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000}
+  ],
+  "steps": [
+    {"action": "ascension_dungeon_difficulty_packet", "actor": "p", "value": 1},
+    {"action": "wait", "ms": 500},
+    {"action": "teleport", "label": "p stands at Captain Kromcrush's spawn in a Heroic Dire Maul", "actor": "p", "map": 429, "x": 627.59, "y": 481.721, "z": 29.4627, "ignore_access": true},
+    {"action": "assert", "label": "CONTROL: Dire Maul on Heroic", "actor": "p", "metric": "map_difficulty", "equals": 1, "within_ms": 15000},
+    {"action": "wait", "ms": 2000},
+    {"action": "set_health", "actor": "p", "value": 50000000, "maximum": 50000000},
+    {"action": "summon", "actor": "p", "as": "kromcrush", "entry": 14325, "distance": 1},
+    {"action": "attack", "actor": "p", "target": "kromcrush"},
+    {"action": "assert", "label": "CONTROL: Kromcrush is in combat", "actor": "kromcrush", "metric": "combat", "equals": 1, "within_ms": 3000},
+    {"action": "relocate", "label": "p backs 40 yards away (first half)", "actor": "p", "dx": -20.0},
+    {"action": "relocate", "label": "p backs 40 yards away (second half)", "actor": "p", "dx": -20.0},
+    {"action": "assert", "label": "CONTROL: Kromcrush follows p more than 30 yards from his spawn", "actor": "kromcrush", "metric": "point_distance_2d", "x": 627.59, "y": 481.721, "min": 32, "within_ms": 10000},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "DISCRIMINATING: Kromcrush stays in combat beyond 30 yards (his 30-yard leash reset him before)", "actor": "kromcrush", "metric": "combat", "equals": 1}
+  ]
+}
