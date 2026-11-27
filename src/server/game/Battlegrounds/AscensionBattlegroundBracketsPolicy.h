@@ -354,6 +354,13 @@ namespace AscensionBattlegroundBracketsPolicy
         return SaturatedScale(amount, ratio);
     }
 
+    inline std::uint32_t BoundedSignedHeal(std::uint32_t scaled, std::uint32_t targetHealth)
+    {
+        std::uint32_t const limit = static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max());
+        std::uint32_t const headroom = targetHealth < limit ? limit - targetHealth : 0u;
+        return std::min(scaled, headroom);
+    }
+
     inline std::uint32_t KeptHealth(std::uint32_t health, std::uint32_t oldMax, std::uint32_t newMax)
     {
         if (oldMax == 0 || health == 0)

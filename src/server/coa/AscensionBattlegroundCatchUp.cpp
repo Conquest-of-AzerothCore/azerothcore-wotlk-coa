@@ -349,7 +349,11 @@ uint32 ApplyTemplarBattlegroundHealing(Unit const* healer, Unit const* target, u
             factor *= std::max(0.0f, 1.0f + float(bgDampening->GetAmount()) / 100.0f);
     }
 
-    return factor == 1.0f ? amount : Policy::ScaleAmount(amount, factor);
+    if (factor == 1.0f)
+        return amount;
+
+    return Policy::BoundedSignedHeal(Policy::ScaleAmount(amount, factor),
+        std::max(target->GetHealth(), target->GetMaxHealth()));
 }
 
 int32 ApplyTemplarBattlegroundAbsorbScale(Unit const* caster, Unit const* target, int32 amount,

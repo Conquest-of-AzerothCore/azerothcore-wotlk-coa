@@ -236,6 +236,11 @@ static void ComputesTemplarTuningDeltaAndScaleClamp()
     CHECK(LevelScaledPointsDelta(5, 29, 10, 10, 60, -0.40f) == -7);
     CHECK(LevelScaledPointsDelta(16, 70, 10, 10, 60, -0.40f) == -18);
     CHECK(LevelScaledPointsDelta(16, 59, 10, 10, 60, 0.0f) == 0);
+
+    CHECK(BoundedSignedHeal(500u, 1000u) == 500u);
+    CHECK(BoundedSignedHeal(ScaleAmount(6u, 536870912.0f), 1000u) ==
+        static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max()) - 1000u);
+    CHECK(BoundedSignedHeal(100u, static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max())) == 0u);
 }
 
 int main()
