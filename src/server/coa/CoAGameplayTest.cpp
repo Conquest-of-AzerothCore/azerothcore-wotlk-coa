@@ -2358,7 +2358,11 @@ class GameplayCase
 public:
     GameplayCase(std::string runId, std::string resultPath, uint32 phase = CoAGameplay::LanePhase(0),
         CoAGameplay::NameAllocator* names = nullptr) : _phase(phase), _runId(std::move(runId)),
-        _resultPath(std::move(resultPath)), _names(names), _admitted(Clock::now()) { }
+        _resultPath(std::move(resultPath)), _names(names), _admitted(Clock::now())
+    {
+        if (_phase > PHASEMASK_NORMAL)
+            _casePhases.insert(_phase);
+    }
 
     void PlaceInBatch(std::string const& batchId, uint32 sequence, std::string const& clock, uint32 lane)
     {
@@ -2881,9 +2885,9 @@ private:
                         added = true;
                     }
             } while (added);
-            if (_phase > PHASEMASK_NORMAL)
+            if (!_casePhases.empty())
                 for (Creature* creature : collector.summons)
-                    if (creature->GetSummonerGUID().IsEmpty() && creature->GetPhaseMask() == _phase
+                    if (creature->GetSummonerGUID().IsEmpty() && _casePhases.count(creature->GetPhaseMask())
                         && parents.insert(creature->GetGUID()).second)
                     {
                         descendants.push_back(creature);
@@ -8777,7 +8781,12 @@ private:
                 player->GetSession()->HandleOpenItemOpcode(request);
         }
         else if (action == "set_phase")
-            player->SetPhaseMask(step.get<uint32>("value", _phase), true);
+        {
+            uint32 const newPhase = step.get<uint32>("value", _phase);
+            if (newPhase > PHASEMASK_NORMAL)
+                _casePhases.insert(newPhase);
+            player->SetPhaseMask(newPhase, true);
+        }
         else if (action == "set_money")
             player->SetMoney(step.get<uint32>("value"));
         else if (action == "add_at_login_flag")
@@ -10006,6 +10015,7 @@ private:
     uint32 _ticks = 0;
     uint32 _maxStepMs = 0;
     uint32 _phase;
+    std::set<uint32> _casePhases;
     uint64 _setupRealMs = 0;
     std::string _runId;
     std::string _resultPath;

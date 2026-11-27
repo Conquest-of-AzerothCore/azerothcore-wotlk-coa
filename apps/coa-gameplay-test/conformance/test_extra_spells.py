@@ -234,6 +234,97 @@ class SourceParsersTest(unittest.TestCase):
             casts, others = log_events(csv)
             self.assertEqual(casts[700], 5)
             self.assertEqual(others[700], 9)
+            self.assertEqual(log_events(Path(tmp) / 'missing.csv'), ({}, {}))
+            with self.assertRaises(ExtraSpellsError):
+                log_events(Path(tmp) / 'missing.csv', required=True)
+
+    def test_cpp_literals_empty_arrays_and_malformed_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = write_source_tree(
+                Path(tmp),
+                class_spells_h=(
+                    'inline constexpr std::array<ClassSpell, 2> ClassSpells = {{\n'
+                    '    { 0x18u, 0X0Au, 0x3e9UL },\n'
+                    '    { 24U, 5LL, 1001ULL },\n'
+                    '}};\n'
+                ),
+                live_baseline_h='inline constexpr std::array<Spell, 1> Spells = {{ { 0x18, 0U, 0x3eaL } }};\n',
+                taught_h='inline constexpr std::array<TaughtAbility, 1> TaughtAbilities = {{ { 24u, 1U, 0x8, 500UL, 1004u } }};\n',
+                compat_cpp='constexpr std::array<FelswornRiftGrant, 1> FelswornHordeCapitalRifts = {{ { 0x3eeU, 0x28u } }};\n',
+            )
+            self.assertEqual(class_spells_table(root, required=True), {24: {1001: 5}})
+            self.assertEqual(live_baseline_spells(root, required=True), {24: {1002}})
+            self.assertEqual(taught_abilities(root, required=True), {24: {1004: (8, 500)}})
+            self.assertEqual(felsworn_rifts(root, required=True), {1006: 40})
+
+            empty_root = write_source_tree(
+                Path(tmp) / 'empty',
+                class_spells_h='inline constexpr std::array<ClassSpell, 0> ClassSpells = {{}};\n',
+                live_baseline_h='inline constexpr std::array<Spell, 0> Spells = {};\n',
+                taught_h='inline constexpr std::array<TaughtAbility, 0> TaughtAbilities = {{}};\n',
+                compat_cpp='constexpr std::array<FelswornRiftGrant, 0> FelswornHordeCapitalRifts = {};\n',
+            )
+            self.assertEqual(class_spells_table(empty_root, required=True), {})
+            self.assertEqual(live_baseline_spells(empty_root, required=True), {})
+            self.assertEqual(taught_abilities(empty_root, required=True), {})
+            self.assertEqual(felsworn_rifts(empty_root, required=True), {})
+
+            bad_root = write_source_tree(
+                Path(tmp) / 'bad',
+                class_spells_h='inline constexpr std::array<ClassSpell, 1> ClassSpells = {{ { 24, BAD, 1001 } }};\n',
+            )
+            with self.assertRaises(ExtraSpellsError):
+                class_spells_table(bad_root, required=True)
+
+    def test_trainer_where_precedence_non_class_retention_ignore_and_update(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = write_source_tree(
+                Path(tmp),
+                base_sql=(
+                    'INSERT INTO `trainer_spell` VALUES '
+                    '(900024, 3001, 10, 0, 0, 0, 0, 0, 4, 0),'
+                    '(900024, 3002, 10, 0, 0, 0, 0, 0, 6, 0),'
+                    '(900019, 3001, 10, 0, 0, 0, 0, 0, 4, 0),'
+                    '(900019, 3002, 10, 0, 0, 0, 0, 0, 6, 0),'
+                    '(200001, 4001, 10, 0, 0, 0, 0, 0, 15, 0);\n'
+                ),
+                updates_world={
+                    '2026_01_01_00_world.sql': (
+                        'DELETE FROM `trainer_spell` WHERE (`TrainerId` = 900024 OR `TrainerId` = 900019) '
+                        'AND `SpellId` = 3002;\n'
+                        'INSERT IGNORE INTO `trainer_spell` (`TrainerId`, `SpellId`, `ReqLevel`) VALUES '
+                        '(900024, 3001, 99), (900024, 3009, 10);\n'
+                        'INSERT INTO `trainer_spell` (`TrainerId`, `SpellId`, `ReqLevel`) '
+                        'SELECT 900024, `SpellId`, `ReqLevel` FROM `trainer_spell` '
+                        'WHERE `TrainerId` = 200001 AND `ReqLevel` IN (15, 20);\n'
+                        'INSERT IGNORE INTO `trainer_spell` (`TrainerId`, `SpellId`, `ReqLevel`) '
+                        'SELECT 900024, 3009, 55 FROM `trainer_spell` WHERE `TrainerId` = 200001;\n'
+                    ),
+                },
+                pending_world={
+                    '2026_02_01_00_world.sql': (
+                        'UPDATE `trainer_spell` SET `ReqSkillRank` = 75, `MoneyCost` = 100 '
+                        'WHERE `TrainerId` = 900024 AND `SpellId` = 3001;\n'
+                        'UPDATE `trainer_spell` SET `ReqLevel` = 22 '
+                        'WHERE `TrainerId` = 900024 AND `SpellId` = 4001;\n'
+                    ),
+                },
+            )
+            self.assertEqual(trainer_spells(root), {
+                24: {3001: 4, 3009: 10, 4001: 22},
+                19: {3001: 4},
+            })
+
+        for name, sql in (
+            ('bad_update_expr', 'UPDATE `trainer_spell` SET `ReqLevel` = `ReqLevel` + 1 WHERE `SpellId` = 3001;\n'),
+            ('bad_update_pk', 'UPDATE `trainer_spell` SET `SpellId` = 9999 WHERE `SpellId` = 3001;\n'),
+            ('bad_where', 'DELETE FROM `trainer_spell` WHERE `MoneyCost` = 10;\n'),
+            ('truncate', 'TRUNCATE TABLE `trainer_spell`;\n'),
+        ):
+            with self.subTest(case=name), tempfile.TemporaryDirectory() as tmp:
+                bad_root = write_source_tree(Path(tmp), pending_world={'2026_02_02_world.sql': sql})
+                with self.assertRaises(ExtraSpellsError):
+                    trainer_spells(bad_root)
 
 
 class ValidationAndAuditTest(unittest.TestCase):
@@ -313,6 +404,7 @@ class ValidationAndAuditTest(unittest.TestCase):
                 'stock_generic': 1,
                 'unchained_ranks': 1,
                 'unaccounted': 2,
+                'missing_dbc': 0,
             })
             self.assertEqual([row['spell'] for row in report['excluded']], [104])
             self.assertEqual([row['spell'] for row in report['stock_generic']], [6603])
@@ -492,6 +584,111 @@ class ExtraSpellsCliAndGateTest(unittest.TestCase):
                     '--dbc-dir', str(dbc_dir), '--source-root', str(root / 'does_not_exist'), '--strict',
                 ])
             self.assertEqual(code, 2)
+
+    def test_audit_extra_cli_rejects_malformed_class_file_and_missing_log_events(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, dbc_dir, class_path, _ = self._fixture(tmp)
+            for label, payload in (
+                ('list', '[]'),
+                ('null', 'null'),
+                ('missing_id', '{}'),
+                ('bool_id', '{"class_id": true}'),
+                ('str_id', '{"class_id": "24"}'),
+            ):
+                bad_path = root / f'bad_{label}.json'
+                bad_path.write_text(payload, encoding='utf-8')
+                with self.subTest(payload=label), \
+                     mock.patch.object(batch_commands, 'server_dbc_dir', return_value=dbc_dir), \
+                     mock.patch('sys.stdout'), mock.patch('sys.stderr'):
+                    code = conformance.main([
+                        'audit-extra', '--class', '24', '--class-file', str(bad_path),
+                        '--dbc-dir', str(dbc_dir), '--source-root', str(root),
+                    ])
+                self.assertEqual(code, 2)
+
+            with mock.patch.object(batch_commands, 'server_dbc_dir', return_value=dbc_dir), \
+                 mock.patch('sys.stdout'), mock.patch('sys.stderr'):
+                missing_logs = conformance.main([
+                    'audit-extra', '--class', '24', '--class-file', str(class_path),
+                    '--dbc-dir', str(dbc_dir), '--source-root', str(root),
+                    '--log-events', str(root / 'no_such.csv'),
+                ])
+            self.assertEqual(missing_logs, 2)
+
+    def test_missing_dbc_and_unranked_same_name_fail_strict_and_ledger_gate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / 'src root'
+            dbc_dir = write_dbc_fixture(
+                Path(tmp) / 'dbc dir',
+                spells=[
+                    {0: 100, 38: 1, 136: 'Shared Name'},
+                    {0: 105, 38: 1, 136: 'Shared Name', 153: ''},
+                ],
+                advancements=[{0: 1, 5: 100, 26: 1, 32: 30}],
+                class_id=24,
+                class_type_id=30,
+            )
+            write_source_tree(
+                root,
+                class_spells_h=(
+                    'inline constexpr std::array<ClassSpell, 2> ClassSpells = {{\n'
+                    '    { 24, 1, 105 },\n'
+                    '    { 24, 1, 999888 },\n'
+                    '}};\n'
+                ),
+            )
+            class_file = {'class_id': 24, 'name': 'synthetic', 'level': 60, 'extra_spells': []}
+            class_path = Path(tmp) / 'synthetic.json'
+            class_path.write_text(json.dumps(class_file), encoding='utf-8')
+            report = audit_extra_spells(class_file, dbc_dir, root)
+            self.assertEqual(report['unchained_ranks'], [])
+            self.assertEqual([entry['spell'] for entry in report['unaccounted']], [105])
+            self.assertEqual(report['missing_dbc'], [{'spell': 999888, 'sources': ['ClassSpells(L1)']}])
+            self.assertEqual(report['counts']['missing_dbc'], 1)
+            lines = '\n'.join(audit_extra_lines(report))
+            self.assertIn('MISSING_DBC\t999888\tClassSpells(L1)', lines)
+
+            with mock.patch.object(batch_commands, 'server_dbc_dir', return_value=dbc_dir), \
+                 mock.patch('sys.stdout'), mock.patch('sys.stderr'):
+                strict_code = conformance.main([
+                    'audit-extra', '--class', '24', '--class-file', str(class_path),
+                    '--dbc-dir', str(dbc_dir), '--source-root', str(root), '--strict',
+                ])
+            self.assertEqual(strict_code, 2)
+
+            err_chunks = []
+            ledger_out = Path(tmp) / 'out_clauses.json'
+            with mock.patch.object(conformance, 'load_class_file', return_value=class_file), \
+                 mock.patch.object(conformance, 'server_dbc_dir', return_value=dbc_dir), \
+                 mock.patch.object(conformance, 'ledger') as mock_ledger, \
+                 mock.patch('sys.stderr.write', side_effect=err_chunks.append), mock.patch('sys.stdout'):
+                refused = conformance.main([
+                    'ledger', '--class', '24', '--out', str(ledger_out),
+                    '--source-root', str(root), '--dbc-dir', str(dbc_dir),
+                ])
+            self.assertEqual(refused, 2)
+            mock_ledger.assert_not_called()
+            err_text = ''.join(err_chunks)
+            self.assertIn(f"--source-root '{root}'", err_text)
+            self.assertIn(f"--dbc-dir '{dbc_dir}'", err_text)
+
+            write_source_tree(
+                root,
+                class_spells_h='inline constexpr std::array<ClassSpell, 1> ClassSpells = {{ { 24, 1, 100 } }};\n',
+            )
+            fake_written = mock.Mock(entries=[{'spell': 100, 'kind': 'claim'}], unlabelled={})
+            with mock.patch.object(conformance, 'load_class_file', return_value=class_file), \
+                 mock.patch.object(conformance, 'server_dbc_dir', return_value=dbc_dir), \
+                 mock.patch.object(conformance, 'ledger', return_value=fake_written) as mock_ledger, \
+                 mock.patch.object(conformance, 'clause_coverage'), \
+                 mock.patch.object(conformance, 'write_ledger'), \
+                 mock.patch('sys.stdout'):
+                ok = conformance.main([
+                    'ledger', '--class', '24', '--out', str(ledger_out),
+                    '--source-root', str(root), '--dbc-dir', str(dbc_dir),
+                ])
+            self.assertEqual(ok, 0)
+            mock_ledger.assert_called_once_with(class_file, dbc_dir, {}, root / 'data' / 'sql' / 'updates')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), 'server DBCs unavailable')
