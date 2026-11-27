@@ -326,12 +326,19 @@ void DealUnmitigatedDamage(Unit* caster, Unit* target, uint32 spellId, uint32 va
     caster->SendSpellNonMeleeDamageLog(&damage);
 }
 
-std::vector<Player*> PlayersNear(WorldObject const* center, float range)
+enum class PlayerRange
+{
+    Spatial,
+    Planar,
+};
+
+std::vector<Player*> PlayersNear(WorldObject const* center, float range, PlayerRange mode = PlayerRange::Spatial)
 {
     std::vector<Player*> out;
     for (auto const& ref : center->GetMap()->GetPlayers())
         if (Player* player = ref.GetSource())
-            if (player->IsAlive() && !player->IsGameMaster() && center->GetExactDist(player) <= range)
+            if (player->IsAlive() && !player->IsGameMaster() &&
+                (mode == PlayerRange::Planar ? center->GetExactDist2d(player) : center->GetExactDist(player)) <= range)
                 out.push_back(player);
     return out;
 }
@@ -1231,7 +1238,7 @@ private:
 
         Unit* target = zealot;
         float best = me->GetExactDist2d(zealot);
-        for (Player* player : PlayersNear(me, best + 2.0f))
+        for (Player* player : PlayersNear(me, best + 2.0f, PlayerRange::Planar))
         {
             float const dist = me->GetExactDist2d(player);
             if (dist >= best)

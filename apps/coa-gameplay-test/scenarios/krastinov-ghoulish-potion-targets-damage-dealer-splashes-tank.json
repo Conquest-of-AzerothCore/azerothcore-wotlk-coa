@@ -15,7 +15,7 @@
     "cast carries no unit target; the scenario counts two throws and requires both to land on the damage dealer. The",
     "tank and healer duo scenario shows the throw is never aimed at them. #13937: the charm effect's amount of 1 was",
     "read by the stock charm check as a maximum target level, so players were transformed but never charmed. The first",
-    "throw must now charm the damage dealer, and the charm must end within its 10 s."
+    "throw must charm the damage dealer. The 10 s charm must still hold after 3 s and expire by the 12 s deadline."
   ],
   "timeout_ms": 150000,
   "location": {"map": 0, "x": -8914, "y": -133, "z": 80.6},
@@ -65,8 +65,11 @@
       "dx": 7, "dy": 3 },
     { "action": "assert", "label": "DISCRIMINATING: the potion charms the level-60 damage dealer (#13937)",
       "actor": "dps", "metric": "charmed", "equals": 1, "within_ms": 20000 },
-    { "action": "assert", "label": "The charm ends within the potion's 10 s duration", "actor": "dps",
-      "metric": "charmed", "equals": 0, "within_ms": 12000 },
+    {"action": "wait", "ms": 3000},
+    { "action": "assert", "label": "The damage dealer is still charmed after 3 s", "actor": "dps",
+      "metric": "charmed", "equals": 1 },
+    { "action": "assert", "label": "The damage dealer's charm ends", "actor": "dps",
+      "metric": "charmed", "equals": 0, "within_ms": 9000 },
     { "action": "assert", "label": "Krastinov throws the Ghoulish Potion twice", "actor": "tank",
       "metric": "timeline_count", "event": "cast", "spell": 92624, "source_entry": 11261, "min": 2, "within_ms": 45000
     },
