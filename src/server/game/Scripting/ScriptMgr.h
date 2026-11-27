@@ -707,6 +707,7 @@ public: /* BGScript */
     void OnBattlegroundCreate(Battleground* bg);
     void OnBattlegroundSetup(Battleground* bg);
     void OnBattlegroundUpdatePlayerScore(Battleground* bg, Player* player, uint32 type, uint32 value);
+    void OnBattlegroundNodeCaptured(Battleground* bg, TeamId teamId);
     bool CanAddGroupToMatchingPool(BattlegroundQueue* queue, GroupQueueInfo* group, uint32 poolPlayerCount, Battleground* bg, BattlegroundBracketId bracketId);
     bool GetPlayerMatchmakingRating(ObjectGuid playerGuid, BattlegroundTypeId bgTypeId, float& outRating);
 
