@@ -20,7 +20,7 @@ INSERT INTO `spell_group` (`id`, `spell_id`) VALUES (2000182, 685029);
 
 DELETE FROM `spell_bonus_data`
     WHERE `entry` IN (704119, 504291, 504101, 680744, 524180, 704120, 681082, 681310,
-        520315, 802313, 572116, 536277, 800775, 803392, 800786, 520312);
+        520315, 802313, 572116, 536277, 800775, 803392, 800786, 520312, 800772);
 INSERT INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (704119, 0.07, 0, 0, 0, 'Bloodmage - Blood Rituals healing power scaling'),
 (504291, 0, 0.05, 0, 0.01, 'Bloodmage - Mortal Wounds bleed spell power and attack power scaling'),
@@ -37,4 +37,5 @@ INSERT INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`
 (800775, 0.35, 0, 0, 0, 'Bloodmage - Sanguine Rupture direct shadow spell power scaling'),
 (803392, 0.15, 0, 0.1, 0, 'Bloodmage - Hematoma spell power and attack power scaling'),
 (800786, 0, 0.2, 0, 0, 'Bloodmage - Sacrificial Rite periodic healing power scaling'),
-(520312, 0.7525, 0, 0, 0, 'Bloodmage - Life''s Essence (Blood Feast) healing power scaling');
+(520312, 0.7525, 0, 0, 0, 'Bloodmage - Life''s Essence (Blood Feast) healing power scaling'),
+(800772, 0, 0.2, 0, 0, 'Bloodmage - Taldaram''s Torment periodic shadow spell power scaling');

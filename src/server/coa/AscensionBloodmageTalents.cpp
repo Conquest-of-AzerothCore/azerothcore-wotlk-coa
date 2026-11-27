@@ -128,6 +128,7 @@ enum BloodmageTalentSpells : uint32
     SPELL_ACCURSED_FORM_AGILITY = 804699,
     SPELL_BLOOD_BOND = 504627,
     SPELL_BLOODWELL_ERUPTION = 560072,
+    SPELL_HEART_RUPTURER = 680685,
     SPELL_DARKFALLEN_LAMENT = 680828,
     SPELL_DARKFALLEN_LAMENT_HEAL = 524180,
     SPELL_THE_CUP_RUNNETH_OVER = 807544,
@@ -2223,6 +2224,16 @@ public:
             info->Effects[EFFECT_1].MiscValue == SPELLMOD_CRITICAL_CHANCE)
         {
             info->Effects[EFFECT_1].SpellClassMask[1] |= SanguineRuptureDamageClassMask1;
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+
+        if (info->Id == SPELL_HEART_RUPTURER &&
+            info->Effects[EFFECT_0].IsAura(SPELL_AURA_ADD_PCT_MODIFIER) &&
+            info->Effects[EFFECT_0].MiscValue == SPELLMOD_DAMAGE)
+        {
+            info->Effects[EFFECT_0].SpellClassMask[1] |= SanguineRuptureDamageClassMask1;
+            info->Effects[EFFECT_1].Effect = 0;
+            info->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
             Ascension::ClientSpellPatches::Instance().Register(info->Id);
         }
 

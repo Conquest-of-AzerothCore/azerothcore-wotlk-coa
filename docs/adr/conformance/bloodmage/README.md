@@ -43,3 +43,4 @@ never renumbered once published (numbers `0025`–`0029` are unused from paralle
 | [0039](0039-owner-rulings-server-kept-no-client-text-change.md) | Owner rulings Q-bm-7 and Q-bm-18: server behaviour kept without client text changes | accepted |
 | [0040](0040-owner-rulings-server-kept-client-text-updated.md) | Owner rulings Q-bm-1, Q-bm-2, Q-bm-4, Q-bm-11, and Q-bm-12: server behaviour kept with updated client texts | accepted |
 | [0041](0041-bloodmage-client-text-corrections-and-ledger-alignment.md) | Bloodmage client text overrides, candidate MPQ tooling, and ledger alignment | accepted |
+| [0042](0042-heart-rupturer-sanguine-rupture-mask-and-torment-dot-scaling.md) | Heart Rupturer Sanguine Rupture mask and Taldaram's Torment DoT SP scaling | accepted |

@@ -10735,9 +10735,9 @@
         "target_health_pct": 34
       },
       "critical": false,
-      "trials": 20,
+      "trials": 40,
       "void_on_cast_failure": true,
-      "observe_source": "806210 Terrorizer: Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS MiscValue 20007 -> ASCENSION_CLASSMASK_AURASTATE_DAMAGE MiscValueB 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 24 + DieSides 1 = +25% (EffectSpellClassMask 2097152 / 8388608 / 16384 matching Veinburst 504819, Bloodfang Bite 572551, and Claw Sweep 500444; AscensionBloodmageTalents.cpp:50,328-331; Spell.dbc). All 3/3 tooltip-named abilities are proved (veinburst_below_35, bloodfang_below_35, claw_sweep_below_35): here Veinburst 504819 at target_health_pct 34 measures +25% (expected 1.25, +-2 pt band [23%, 27%], excluding 0% and +50%). Paired with veinburst_above_35 at 36%. Reference search 2026-11-26: coa-history 806210: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 806210 matches."
+      "observe_source": "806210 Terrorizer: Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS MiscValue 20007 -> ASCENSION_CLASSMASK_AURASTATE_DAMAGE MiscValueB 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 24 + DieSides 1 = +25% (EffectSpellClassMask 2097152 / 8388608 / 16384 matching Veinburst 504819, Bloodfang Bite 572551, and Claw Sweep 500444; AscensionBloodmageTalents.cpp:50,328-331; Spell.dbc). All 3/3 tooltip-named abilities are proved (veinburst_below_35, bloodfang_below_35, claw_sweep_below_35): here Veinburst 504819 at target_health_pct 34 (40 trials) measures +25% (expected 1.25, +-2 pt band [23%, 27%], excluding 0% and +50%). Paired with veinburst_above_35 at 36%. Reference search 2026-11-26: coa-history 806210: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 806210 matches."
     },
     {
       "spell": 806210,
@@ -16214,10 +16214,11 @@
     },
     {
       "spell": 804686,
-      "name": "Everlasting Hunt (1 Blood Shard hit reduces Reave cooldown by 1500 ms)",
+      "name": "Everlasting Hunt (1 Blood Shard hit reduces Reave cooldown by 1500 ms: without)",
       "kind": "cost_gate",
-      "variant": "reave_cd",
+      "variant": "reave_cd_without",
       "label_suffix": "reave_cd",
+      "only_arm": "without",
       "quote": "Damage dealt by Blood Shards now reduces the cooldown of Veinburst and Reave by $/1000;802497S2 sec.",
       "gated_spell": 802469,
       "resource": "cooldown",
@@ -16226,12 +16227,7 @@
       "learn": [
         804849
       ],
-      "setup_casts": [
-        [
-          578305,
-          "dummy"
-        ]
-      ],
+      "setup_casts": [],
       "after_casts": [
         [
           504819,
@@ -16241,12 +16237,13 @@
       "after_wait_ms": 2000,
       "cast_auras": [
         {
-          "spell": 578305,
+          "spell": 802469,
           "auras": [
+            64481,
             823764,
             984954
           ],
-          "reason": "precondition fixture: 823764 prevents resists and 984954 (-1000% spell crit) guarantees non-crit Bloodbolt generates exactly 1 Blood Shard"
+          "reason": "precondition fixture: 823764 prevents resists and 64481+984954 (-100% melee / -1000% spell crit) guarantee non-crit Reave behind-copy 802883 Shadow hit generates exactly 1 Blood Shard via 804849"
         },
         {
           "spell": 504819,
@@ -16257,7 +16254,95 @@
         }
       ],
       "target": "dummy",
-      "observe_source": "804686 Everlasting Hunt Reave leg (802497 Effect[1] 165 MODIFY_COOLDOWN BasePoints -1501 + 1 = -1500 ms on MiscValue 800490 Reave rank 1 -> walks rank chain to 802469, CategoryRecoveryTime 15000 ms, CasterAuraSpell 524861 set automatically by cost_gate; Veinburst 504819 only excludes 802877 so it casts cleanly). Setup builds 1 Blood Shard via non-crit Bloodbolt; primes Reave 802469; at +2000 ms casts Veinburst 504819 launching 1 Blood Shard 504115 -> cuts Reave cooldown by 1500 ms to 13500 ms. Margin 100 ms (13400 refused / 13600 accepted) excludes 10% off on both sides. Reference search 2026-11-26: coa-history 802497: 0 events; bindmysoul 804686 matches verbatim."
+      "observe_source": "804686 Everlasting Hunt Reave leg (802497 Effect[1] 165 MODIFY_COOLDOWN BasePoints -1501 + 1 = -1500 ms on MiscValue 800490 Reave rank 1 -> walks rank chain to 802469, CategoryRecoveryTime 15000 ms). Split via only_arm (without/with/beyond) so each arm starts with 0 Blood Shards: priming Reave 802469 behind the dummy fires non-crit Shadow copy 802883 building 1 Blood Shard under 804849, then Veinburst 504819 at +2000 ms launches that 1 Blood Shard 504115. Here without 804686: Reave still refused 67 at 13600 ms. Reference search 2026-11-26: coa-history 802497: 0 events; bindmysoul 804686 matches verbatim."
+    },
+    {
+      "spell": 804686,
+      "name": "Everlasting Hunt (1 Blood Shard hit reduces Reave cooldown by 1500 ms: with)",
+      "kind": "cost_gate",
+      "variant": "reave_cd_with",
+      "label_suffix": "reave_cd",
+      "only_arm": "with",
+      "quote": "Damage dealt by Blood Shards now reduces the cooldown of Veinburst and Reave by $/1000;802497S2 sec.",
+      "gated_spell": 802469,
+      "resource": "cooldown",
+      "reduction": 1500,
+      "margin_ms": 100,
+      "learn": [
+        804849
+      ],
+      "setup_casts": [],
+      "after_casts": [
+        [
+          504819,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "cast_auras": [
+        {
+          "spell": 802469,
+          "auras": [
+            64481,
+            823764,
+            984954
+          ],
+          "reason": "precondition fixture: 823764 prevents resists and 64481+984954 (-100% melee / -1000% spell crit) guarantee non-crit Reave behind-copy 802883 Shadow hit generates exactly 1 Blood Shard via 804849"
+        },
+        {
+          "spell": 504819,
+          "auras": [
+            823764
+          ],
+          "reason": "precondition fixture: 823764 prevents full resist on Veinburst 504819 and launched Blood Shard 504115"
+        }
+      ],
+      "target": "dummy",
+      "observe_source": "804686 Everlasting Hunt Reave leg (802497 Effect[1] 165 MODIFY_COOLDOWN BasePoints -1501 + 1 = -1500 ms on MiscValue 800490 Reave rank 1 -> walks rank chain to 802469, CategoryRecoveryTime 15000 ms). Split via only_arm (without/with/beyond) so each arm starts with 0 Blood Shards: priming Reave 802469 behind the dummy fires non-crit Shadow copy 802883 building 1 Blood Shard under 804849, then Veinburst 504819 at +2000 ms launches that 1 Blood Shard 504115 -> cuts Reave cooldown by 1500 ms to 13500 ms. Here with 804686: Reave succeeds (0) at 13600 ms. Reference search 2026-11-26: coa-history 802497: 0 events; bindmysoul 804686 matches verbatim."
+    },
+    {
+      "spell": 804686,
+      "name": "Everlasting Hunt (1 Blood Shard hit reduces Reave cooldown by 1500 ms: beyond)",
+      "kind": "cost_gate",
+      "variant": "reave_cd_beyond",
+      "label_suffix": "reave_cd",
+      "only_arm": "beyond",
+      "quote": "Damage dealt by Blood Shards now reduces the cooldown of Veinburst and Reave by $/1000;802497S2 sec.",
+      "gated_spell": 802469,
+      "resource": "cooldown",
+      "reduction": 1500,
+      "margin_ms": 100,
+      "learn": [
+        804849
+      ],
+      "setup_casts": [],
+      "after_casts": [
+        [
+          504819,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "cast_auras": [
+        {
+          "spell": 802469,
+          "auras": [
+            64481,
+            823764,
+            984954
+          ],
+          "reason": "precondition fixture: 823764 prevents resists and 64481+984954 (-100% melee / -1000% spell crit) guarantee non-crit Reave behind-copy 802883 Shadow hit generates exactly 1 Blood Shard via 804849"
+        },
+        {
+          "spell": 504819,
+          "auras": [
+            823764
+          ],
+          "reason": "precondition fixture: 823764 prevents full resist on Veinburst 504819 and launched Blood Shard 504115"
+        }
+      ],
+      "target": "dummy",
+      "observe_source": "804686 Everlasting Hunt Reave leg (802497 Effect[1] 165 MODIFY_COOLDOWN BasePoints -1501 + 1 = -1500 ms on MiscValue 800490 Reave rank 1 -> walks rank chain to 802469, CategoryRecoveryTime 15000 ms). Split via only_arm (without/with/beyond) so each arm starts with 0 Blood Shards: priming Reave 802469 behind the dummy fires non-crit Shadow copy 802883 building 1 Blood Shard under 804849, then Veinburst 504819 at +2000 ms launches that 1 Blood Shard 504115 -> cuts Reave cooldown by 1500 ms to 13500 ms. Here beyond: Reave still refused 67 at 13400 ms. Reference search 2026-11-26: coa-history 802497: 0 events; bindmysoul 804686 matches verbatim."
     },
     {
       "spell": 572279,
@@ -37461,13 +37546,13 @@
         "school_mask": 96
       },
       "before_expected": 0,
-      "expected": 51,
-      "after_at_least": 50,
-      "after_at_most": 53,
+      "expected": 55,
+      "after_at_least": 54,
+      "after_at_most": 57,
       "wait_ms": 1500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "504115 Blood Shard BasePoints 17 + DieSides 1 = 18, ppl = 0, AscensionBloodmageBloodShards.cpp:52,136-139 EMPOWERED_SHARD = {0.15 AP, 0.35 SP}: at AP 223, SP 0 -> int32(18 + 223 * 0.15) = 51 Shadow damage (non-crit via 16255 -100% crit, 823764 spellpen precondition fixtures). Reference search 2026-11-26: coa-history 504115: 65560 hits."
+      "observe_source": "504115 Blood Shard BasePoints 17 + DieSides 1 = 18, ppl = 0, AscensionBloodmageBloodShards.cpp:52,136-139 EMPOWERED_SHARD = {0.15 AP, 0.35 SP}: Accursed Form 562572 applies 804699 (+50% of 60 Agility = +30 AP), raising AP 223 -> 253 at SP 0 -> int32(18 + 253 * 0.15) = 55 Shadow damage (non-crit via 16255 -100% crit, 823764 spellpen precondition fixtures; excludes basic shard 30, 0x 18, and 2x 93). Reference search 2026-11-26: coa-history 504115: 65560 hits."
     },
     {
       "spell": 553267,
@@ -42484,10 +42569,11 @@
     },
     {
       "spell": 680730,
-      "name": "Dissipation R1 (Fleshcraft cooldown reduced by 60 s: 300 s -> 240 s)",
+      "name": "Dissipation R1 (Fleshcraft cooldown reduced by 60 s: 300 s -> 240 s: without)",
       "kind": "cost_gate",
-      "variant": "fleshcraft_cd",
+      "variant": "fleshcraft_cd_without",
       "label_suffix": "fleshcraft_cd",
+      "only_arm": "without",
       "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
       "gated_spell": 801952,
       "resource": "cooldown",
@@ -42495,7 +42581,39 @@
       "target": "caster",
       "cast_power": 1000,
       "margin_ms": 1000,
-      "observe_source": "$/1000;s1 = 60 s (Spell.dbc 680730 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN BasePoints -60001+1 = -60000 ms, mask[0] 8388608 = Fleshcraft 801952 RecoveryTime 300000 ms -> 240000 ms). Arms timed from priming cast: 241 s without 680730 (refused 67), 241 s with 680730 (succeeds 0), 239 s with 680730 (refused 67), bracketing 240 s inside [239 s, 241 s] (excluding 10% off 60 s = 234 s / 246 s). Reference search 2026-11-26: coa-history (186 logs) 680730: 0 (passive); coabuildhub spells_master_index.json 680730 matches verbatim."
+      "observe_source": "$/1000;s1 = 60 s (Spell.dbc 680730 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN BasePoints -60001+1 = -60000 ms, mask[0] 8388608 = Fleshcraft 801952 RecoveryTime 300000 ms -> 240000 ms). Split via only_arm (without/with/beyond) so the with arm's Sated 532125 cannot block the beyond arm's priming Fleshcraft cast. Here without 680730: refused 67 at 241 s. Reference search 2026-11-26: coa-history (186 logs) 680730: 0 (passive); coabuildhub spells_master_index.json 680730 matches verbatim."
+    },
+    {
+      "spell": 680730,
+      "name": "Dissipation R1 (Fleshcraft cooldown reduced by 60 s: 300 s -> 240 s: with)",
+      "kind": "cost_gate",
+      "variant": "fleshcraft_cd_with",
+      "label_suffix": "fleshcraft_cd",
+      "only_arm": "with",
+      "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
+      "gated_spell": 801952,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "caster",
+      "cast_power": 1000,
+      "margin_ms": 1000,
+      "observe_source": "$/1000;s1 = 60 s (Spell.dbc 680730 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN BasePoints -60001+1 = -60000 ms, mask[0] 8388608 = Fleshcraft 801952 RecoveryTime 300000 ms -> 240000 ms). Split via only_arm (without/with/beyond) so the with arm's Sated 532125 cannot block the beyond arm's priming Fleshcraft cast. Here with 680730: succeeds (0) at 241 s. Reference search 2026-11-26: coa-history (186 logs) 680730: 0 (passive); coabuildhub spells_master_index.json 680730 matches verbatim."
+    },
+    {
+      "spell": 680730,
+      "name": "Dissipation R1 (Fleshcraft cooldown reduced by 60 s: 300 s -> 240 s: beyond)",
+      "kind": "cost_gate",
+      "variant": "fleshcraft_cd_beyond",
+      "label_suffix": "fleshcraft_cd",
+      "only_arm": "beyond",
+      "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
+      "gated_spell": 801952,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "caster",
+      "cast_power": 1000,
+      "margin_ms": 1000,
+      "observe_source": "$/1000;s1 = 60 s (Spell.dbc 680730 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN BasePoints -60001+1 = -60000 ms, mask[0] 8388608 = Fleshcraft 801952 RecoveryTime 300000 ms -> 240000 ms). Split via only_arm (without/with/beyond) so this arm starts free of Sated 532125 and its priming cast starts the 240 s cooldown: refused 67 at 239 s. Reference search 2026-11-26: coa-history (186 logs) 680730: 0 (passive); coabuildhub spells_master_index.json 680730 matches verbatim."
     },
     {
       "spell": 680730,
@@ -42575,10 +42693,11 @@
     },
     {
       "spell": 681491,
-      "name": "Dissipation R2 (Fleshcraft cooldown reduced by 120 s: 300 s -> 180 s)",
+      "name": "Dissipation R2 (Fleshcraft cooldown reduced by 120 s: 300 s -> 180 s: without)",
       "kind": "cost_gate",
-      "variant": "fleshcraft_cd",
+      "variant": "fleshcraft_cd_without",
       "label_suffix": "fleshcraft_cd",
+      "only_arm": "without",
       "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
       "gated_spell": 801952,
       "resource": "cooldown",
@@ -42586,7 +42705,39 @@
       "target": "caster",
       "cast_power": 1000,
       "margin_ms": 1000,
-      "observe_source": "$/1000;s1 = 120 s (Spell.dbc 681491 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN BasePoints -120001+1 = -120000 ms, mask[0] 8388608 = Fleshcraft 801952 RecoveryTime 300000 ms -> 180000 ms). Arms timed from priming cast: 181 s without 681491 (refused 67), 181 s with 681491 (succeeds 0), 179 s with 681491 (refused 67), bracketing 180 s inside [179 s, 181 s] (excluding 10% off 120 s = 168 s / 192 s). Reference search 2026-11-26: coa-history (186 logs) 681491: 0 (passive, Rank 2 of 680730); installed Spell.dbc governs."
+      "observe_source": "$/1000;s1 = 120 s (Spell.dbc 681491 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN BasePoints -120001+1 = -120000 ms, mask[0] 8388608 = Fleshcraft 801952 RecoveryTime 300000 ms -> 180000 ms). Split via only_arm (without/with/beyond) so the with arm's Sated 532125 cannot block the beyond arm's priming Fleshcraft cast. Here without 681491: refused 67 at 181 s. Reference search 2026-11-26: coa-history (186 logs) 681491: 0 (passive, Rank 2 of 680730); installed Spell.dbc governs."
+    },
+    {
+      "spell": 681491,
+      "name": "Dissipation R2 (Fleshcraft cooldown reduced by 120 s: 300 s -> 180 s: with)",
+      "kind": "cost_gate",
+      "variant": "fleshcraft_cd_with",
+      "label_suffix": "fleshcraft_cd",
+      "only_arm": "with",
+      "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
+      "gated_spell": 801952,
+      "resource": "cooldown",
+      "reduction": 120000,
+      "target": "caster",
+      "cast_power": 1000,
+      "margin_ms": 1000,
+      "observe_source": "$/1000;s1 = 120 s (Spell.dbc 681491 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN BasePoints -120001+1 = -120000 ms, mask[0] 8388608 = Fleshcraft 801952 RecoveryTime 300000 ms -> 180000 ms). Split via only_arm (without/with/beyond) so the with arm's Sated 532125 cannot block the beyond arm's priming Fleshcraft cast. Here with 681491: succeeds (0) at 181 s. Reference search 2026-11-26: coa-history (186 logs) 681491: 0 (passive, Rank 2 of 680730); installed Spell.dbc governs."
+    },
+    {
+      "spell": 681491,
+      "name": "Dissipation R2 (Fleshcraft cooldown reduced by 120 s: 300 s -> 180 s: beyond)",
+      "kind": "cost_gate",
+      "variant": "fleshcraft_cd_beyond",
+      "label_suffix": "fleshcraft_cd",
+      "only_arm": "beyond",
+      "quote": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
+      "gated_spell": 801952,
+      "resource": "cooldown",
+      "reduction": 120000,
+      "target": "caster",
+      "cast_power": 1000,
+      "margin_ms": 1000,
+      "observe_source": "$/1000;s1 = 120 s (Spell.dbc 681491 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN BasePoints -120001+1 = -120000 ms, mask[0] 8388608 = Fleshcraft 801952 RecoveryTime 300000 ms -> 180000 ms). Split via only_arm (without/with/beyond) so this arm starts free of Sated 532125 and its priming cast starts the 180 s cooldown: refused 67 at 179 s. Reference search 2026-11-26: coa-history (186 logs) 681491: 0 (passive, Rank 2 of 680730); installed Spell.dbc governs."
     },
     {
       "spell": 681491,
@@ -44322,9 +44473,9 @@
       },
       "critical": false,
       "trials": 120,
-      "parts": 15,
+      "parts": 20,
       "void_on_cast_failure": true,
-      "observe_source": "500445 Effect[2] periodic 3000 ms triggers 500447 (aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE MiscValue 124, script aura_ascension_bloodmage_forbidden_power AscensionBloodmageTalents.cpp:987-1007 / rev_20260920_82 sets amount = -CR_ARMOR_PENETRATION). Dummy holds Shadow Protection 25433 (DurationIndex 30 = 1800000 ms, pure aura 143 MOD_RESISTANCE_EXCLUSIVE Shadow, zero proc) set to 200 Shadow resistance; caster holds native permanent Armor Penetration 43926 (DurationIndex 21 = -1, single-effect aura 189 CR_ARMOR_PENETRATION, native EffectBasePoints 199 + DieSides 1 = 200, applied in arm.auras BEFORE warmup with zero aura_amounts override) plus permanent Thundering Strikes 16255 at -100 (zero crits); 2 warmup Veinburst 504819 casts (~7200 ms > 3000 ms tick) guarantee 500447 snapshots full -200 Spell Penetration BEFORE Trial 1 of every part. CoA.MonsterResistance.Enable=true (WorldConfig.cpp:387-395: PerLevel=1.0, PerPercent=5.0; Unit.cpp:2569-2607, 2668-2691): control resistance 200 + 60 level = 260 -> averageResist 260/500 = 0.52 (0.48 kept); treatment 260 - 200 = 60 -> averageResist 60/500 = 0.12 (0.88 kept); exact expected ratio 0.88/0.48 = 1.8333 (+83.33%, G-19 band +-4.17 pp; 15 parts x 162 = 2430 hits/arm, 99% half-width ~1.88 pp <= 2.08 pp half-band, excluding 0x=1.00 and 2x=2.08). Reference search 2026-11-26: coa-history 500445/500447 have 0 events (passive/hidden); coabuildhub lists 500445; installed Spell.dbc and C++ govern.",
+      "observe_source": "500445 Effect[2] periodic 3000 ms triggers 500447 (aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE MiscValue 124, script aura_ascension_bloodmage_forbidden_power AscensionBloodmageTalents.cpp:987-1007 / rev_20260920_82 sets amount = -CR_ARMOR_PENETRATION). Dummy holds Shadow Protection 25433 (DurationIndex 30 = 1800000 ms, pure aura 143 MOD_RESISTANCE_EXCLUSIVE Shadow, zero proc) set to 200 Shadow resistance; caster holds native permanent Armor Penetration 43926 (DurationIndex 21 = -1, single-effect aura 189 CR_ARMOR_PENETRATION, native EffectBasePoints 199 + DieSides 1 = 200, applied in arm.auras BEFORE warmup with zero aura_amounts override) plus permanent Thundering Strikes 16255 at -100 (zero crits); 2 warmup Veinburst 504819 casts (~7200 ms > 3000 ms tick) guarantee 500447 snapshots full -200 Spell Penetration BEFORE Trial 1 of every part. CoA.MonsterResistance.Enable=true (WorldConfig.cpp:387-395: PerLevel=1.0, PerPercent=5.0; Unit.cpp:2569-2607, 2668-2691): control resistance 200 + 60 level = 260 -> averageResist 260/500 = 0.52 (0.48 kept); treatment 260 - 200 = 60 -> averageResist 60/500 = 0.12 (0.88 kept); exact expected ratio 0.88/0.48 = 1.8333 (+83.33%, G-19 band +-4.17 pp; 20 parts x 120 = 2400 trials/arm, 99% half-width ~1.84 pp <= 2.08 pp half-band, excluding 0x=1.00 and 2x=2.08). Reference search 2026-11-26: coa-history 500445/500447 have 0 events (passive/hidden); coabuildhub lists 500445; installed Spell.dbc and C++ govern.",
       "warmup": [
         504819,
         504819
@@ -50908,7 +51059,7 @@
   "player_tooltip_readings": [],
   "hit_notes": [],
   "conditional_spells": [],
-  "weapon_percent_before_flat": [],
+  "weapon_percent_before_flat": [800490, 802463, 802464, 802465, 802466, 802467, 802468, 802469],
   "self_stack_bonus": [],
   "dual_target_effects": [],
   "target_aura_gates": [],
