@@ -23,9 +23,13 @@ kill XP and newly earned floor XP. It is reloadable; floor XP already earned kee
 - **Group effort, raid size and level gap (`N >= 2`):**
   - Floor XP multiplies by `FloorGroupEffortFactor = clamp(groupHealthMultiplier / N, 0, 1)`.
   - Both kill XP and floor XP multiply by `RaidSizeFactor = (5 / N)^2` for `N > 5` (`1.0` for `1..5`).
-  - `LevelGapFactor` scales linearly from `1.0` at a 5-level gap to `0.0` at a 10-level gap (and `0.0`
-    whenever any member reaches `MaxPlayerLevel`), using the stage's peak member count and highest level
-    even if a high-level carry leaves before completion.
+  - `LevelGapFactor` is evaluated per member against the stage's highest level (`gap = highest - level`):
+    no penalty up to a `20`-level gap, then a progressive `((50 - gap) / 30)^1.5` reduction down to `0.0` at
+    a `50`-level gap, and `0.0` for the entire group whenever any member reaches `MaxPlayerLevel` (even for
+    a `MaxPlayerLevel - 1` member). Peak member count and highest level persist if a carry leaves mid-stage.
+  - On kill XP in mixed-level groups, `KillGroupLevelShareCap = min(1.0, averageStageLevel / playerLevel)`
+    caps the core `KillRewarder` `playerLevel / aliveSumLevel` share surplus so pairing a high-level character
+    with low-level characters cannot yield more kill XP than a same-level group.
 - **Dual-pool combat contribution (`N >= 2`):** Members earn full contribution (`1.0`) when either their
   real creature HP damage share or their cross-player effective healing share reaches `40% / N`, ramping
   down to a `10%` floor. Cross-healing excludes self-heals and pets, requires the healed player to have

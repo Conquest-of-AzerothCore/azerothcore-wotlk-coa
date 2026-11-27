@@ -7139,6 +7139,9 @@ void ManastormMgr::OnPlayerGiveXP(
         ? ResolveExternalKillXPMultiplier(player, maxLevel)
         : 1.0;
     uint8 const highestLevel = std::max(run->GetHighestMemberLevel(), player->GetLevel());
+    double const averageLevel = run->IsGroupRun()
+        ? run->GetAverageMemberLevel(playerGuid, player->GetLevel())
+        : double(player->GetLevel());
     bool const withinKillRange = !run->IsGroupRun() ||
         player->IsWithinDistInMap(creature, ManastormExperienceFormula::KillContributionRangeYards);
     bool const isObjectiveCreature = IsObjectiveBoss(creature, *run) ||
@@ -7152,6 +7155,7 @@ void ManastormMgr::OnPlayerGiveXP(
         ManastormModuleConfig::ExperienceRate() *
         ManastormExperienceFormula::RaidSizeFactor(memberCount) *
         ManastormExperienceFormula::LevelGapFactor(player->GetLevel(), highestLevel, maxLevel) *
+        ManastormExperienceFormula::KillGroupLevelShareCap(run->IsGroupRun(), player->GetLevel(), averageLevel) *
         ManastormExperienceFormula::CombatContributionFactor(
             memberCount,
             run->GetMemberDamageDealt(playerGuid),

@@ -1,5 +1,6 @@
 #include "ManastormExperienceFormula.h"
 
+#include <cmath>
 #include <gtest/gtest.h>
 
 TEST(ManastormExperienceFormulaTest, SoloPlayersReceiveUnpenalizedFullCurve)
@@ -10,6 +11,7 @@ TEST(ManastormExperienceFormulaTest, SoloPlayersReceiveUnpenalizedFullCurve)
         EXPECT_DOUBLE_EQ(ManastormExperienceFormula::FloorGroupEffortFactor(1, 0.0), 1.0);
         EXPECT_DOUBLE_EQ(ManastormExperienceFormula::RaidSizeFactor(1), 1.0);
         EXPECT_DOUBLE_EQ(ManastormExperienceFormula::LevelGapFactor(35, 35, 60), 1.0);
+        EXPECT_DOUBLE_EQ(ManastormExperienceFormula::KillGroupLevelShareCap(false, 55, 19.0), 1.0);
         EXPECT_DOUBLE_EQ(
             ManastormExperienceFormula::CombatContributionFactor(1, 0, 0, 0, 0, true, false), 1.0);
     }
@@ -53,13 +55,25 @@ TEST(ManastormExperienceFormulaTest, GroupEffortAndRaidPenaltiesNormalizeThrough
     EXPECT_NEAR(ManastormExperienceFormula::RaidSizeFactor(15), 1.0 / 9.0, 1e-9);
 }
 
-TEST(ManastormExperienceFormulaTest, LevelGapCatchesTwinkAndMaxLevelCarries)
+TEST(ManastormExperienceFormulaTest, LevelGapAllowsMixedPlayWhileCrushingTwinkAndMaxLevelCarries)
 {
-    EXPECT_DOUBLE_EQ(ManastormExperienceFormula::LevelGapFactor(54, 59, 60), 1.0);
-    EXPECT_NEAR(ManastormExperienceFormula::LevelGapFactor(53, 59, 60), 0.8, 1e-9);
-    EXPECT_NEAR(ManastormExperienceFormula::LevelGapFactor(51, 59, 60), 0.4, 1e-9);
-    EXPECT_DOUBLE_EQ(ManastormExperienceFormula::LevelGapFactor(49, 59, 60), 0.0);
+    EXPECT_DOUBLE_EQ(ManastormExperienceFormula::LevelGapFactor(39, 59, 60), 1.0);
+    EXPECT_NEAR(ManastormExperienceFormula::LevelGapFactor(34, 59, 60), std::pow(25.0 / 30.0, 1.5), 1e-9);
+    EXPECT_NEAR(ManastormExperienceFormula::LevelGapFactor(29, 59, 60), std::pow(20.0 / 30.0, 1.5), 1e-9);
+    EXPECT_NEAR(ManastormExperienceFormula::LevelGapFactor(24, 59, 60), std::pow(15.0 / 30.0, 1.5), 1e-9);
+    EXPECT_NEAR(ManastormExperienceFormula::LevelGapFactor(19, 59, 60), std::pow(10.0 / 30.0, 1.5), 1e-9);
+    EXPECT_NEAR(ManastormExperienceFormula::LevelGapFactor(14, 59, 60), std::pow(5.0 / 30.0, 1.5), 1e-9);
+    EXPECT_DOUBLE_EQ(ManastormExperienceFormula::LevelGapFactor(9, 59, 60), 0.0);
     EXPECT_DOUBLE_EQ(ManastormExperienceFormula::LevelGapFactor(59, 60, 60), 0.0);
+    EXPECT_DOUBLE_EQ(ManastormExperienceFormula::LevelGapFactor(10, 60, 60), 0.0);
+}
+
+TEST(ManastormExperienceFormulaTest, KillGroupLevelShareCapBlocksReverseBoostWithoutHurtingLowLevels)
+{
+    EXPECT_DOUBLE_EQ(ManastormExperienceFormula::KillGroupLevelShareCap(true, 30, 30.0), 1.0);
+    EXPECT_DOUBLE_EQ(ManastormExperienceFormula::KillGroupLevelShareCap(true, 15, 42.4), 1.0);
+    EXPECT_NEAR(ManastormExperienceFormula::KillGroupLevelShareCap(true, 50, 42.4), 42.4 / 50.0, 1e-9);
+    EXPECT_NEAR(ManastormExperienceFormula::KillGroupLevelShareCap(true, 55, 19.0), 19.0 / 55.0, 1e-9);
 }
 
 TEST(ManastormExperienceFormulaTest, DualPoolContributionPreventsDpsStarvationAndPokeLeeching)

@@ -281,6 +281,38 @@ public:
         return std::max(_creatureLevel, _stageHighestMemberLevel);
     }
 
+    double GetAverageMemberLevel(ObjectGuid::LowType overrideGuid = 0, uint8 overrideLevel = 0) const noexcept
+    {
+        if (_members.empty())
+            return double(overrideLevel ? overrideLevel : _creatureLevel);
+
+        uint64 sum = 0;
+        uint32 count = 0;
+        for (ObjectGuid::LowType guid : _members)
+        {
+            uint8 level = _creatureLevel;
+            if (overrideGuid && guid == overrideGuid && overrideLevel)
+            {
+                level = overrideLevel;
+            }
+            else
+            {
+                for (uint8 i = 0; i < _memberXPCount; ++i)
+                {
+                    if (_memberXPStates[i].Guid == guid)
+                    {
+                        level = _memberXPStates[i].Level;
+                        break;
+                    }
+                }
+            }
+            sum += level;
+            ++count;
+        }
+
+        return count ? double(sum) / double(count) : double(_creatureLevel);
+    }
+
     uint32 GetRecordedProgressDepth(ObjectGuid::LowType guid) const noexcept
     {
         if (_checkpointBypassed || !IsGroupRun())

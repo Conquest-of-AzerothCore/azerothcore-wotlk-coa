@@ -11,8 +11,8 @@ namespace ManastormExperienceFormula
     inline constexpr double DepthHalfSaturation = 100.0;
     inline constexpr uint32 PersonalDepthGrace = 5;
     inline constexpr uint32 RaidThreshold = 5;
-    inline constexpr uint32 LevelGapPenaltyStart = 5;
-    inline constexpr uint32 LevelGapZeroAt = 10;
+    inline constexpr uint32 LevelGapPenaltyStart = 20;
+    inline constexpr uint32 LevelGapZeroAt = 50;
     inline constexpr double ContributionFullShareRatio = 0.40;
     inline constexpr double MinGroupContributionFactor = 0.10;
     inline constexpr uint64 FullHealthBarBasisPoints = 10000;
@@ -101,7 +101,19 @@ namespace ManastormExperienceFormula
         if (gap >= LevelGapZeroAt)
             return 0.0;
 
-        return double(LevelGapZeroAt - gap) / double(LevelGapZeroAt - LevelGapPenaltyStart);
+        double const linear = double(LevelGapZeroAt - gap) / double(LevelGapZeroAt - LevelGapPenaltyStart);
+        return linear * std::sqrt(linear);
+    }
+
+    inline double KillGroupLevelShareCap(bool isGroupRun, uint8 playerLevel, double averageMemberLevel) noexcept
+    {
+        if (!isGroupRun || !playerLevel || !std::isfinite(averageMemberLevel) || averageMemberLevel <= 0.0)
+            return 1.0;
+
+        if (double(playerLevel) <= averageMemberLevel)
+            return 1.0;
+
+        return std::clamp(averageMemberLevel / double(playerLevel), 0.0, 1.0);
     }
 
     inline double CombatContributionFactor(
