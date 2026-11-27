@@ -144,6 +144,16 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(0);
     });
 
+    ApplySpellFix({ 313223 }, [](SpellInfo* spellInfo)
+    {
+        SpellEffectInfo& effect = spellInfo->Effects[EFFECT_0];
+        if (!effect.IsAura(SPELL_AURA_DUMMY) || effect.TriggerSpell)
+            return;
+        effect.ApplyAuraName = SPELL_AURA_PERIODIC_TRIGGER_SPELL;
+        effect.Amplitude = 6000;
+        effect.TriggerSpell = 313224;
+    });
+
     ApplySpellFix({
         467,    // Thorns (Rank 1)
         782,    // Thorns (Rank 2)

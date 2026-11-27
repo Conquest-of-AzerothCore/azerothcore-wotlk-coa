@@ -1,0 +1,401 @@
+{
+  "schema": 1,
+  "name": "Talon Ripper: the CoA pet's critical strikes grant the owner attack power",
+  "contract": [
+    "Expected values come from the item tooltips (CoA Tavern, SUB/db.exil.es 2026-10-04, AscensionDB WDB 2026-09-04) and the client Spell.dbc, not from the implementation. Each check runs for the CoA pet classes Primalist (spirit beast), Witch Hunter (Houndmaster spec, Shadowhound) and Tinker (Mechano-Bear).",
+    "RPG T1 1379340 reads 'Your pet's critical strikes grant you 30 attack power.' 313807 is ASCENSION_MOD_ATTACK_POWER_FLAT 30 on",
+    "TARGET_UNIT_MASTER. Fixture 82888 'Crit 100% test buff' makes the pet's hits critical; the owner must then gain 313807. Base",
+    "515367 grants 985809 the same way; both pets must carry the item aura, also after the pet is summoned again.",
+    "Witch Hunters have no Polearms proficiency on CoA, so this polearm runs for Primalist and Tinker."
+  ],
+  "timeout_ms": 400000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    },
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primalist_beast",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 50,
+      "health": 100000,
+      "distance": 5
+    },
+    {
+      "id": "primalist_dummy",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 60,
+      "health": 2000000,
+      "distance": 4
+    },
+    {
+      "id": "tinker_dummy",
+      "owner": "tinker",
+      "entry": 1188,
+      "level": 60,
+      "health": 2000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574301
+    },
+    {
+      "action": "cast",
+      "label": "primalist: harness the animal spirit",
+      "actor": "primalist",
+      "spell": 574301,
+      "target": "primalist_beast"
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the pet is out",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "label": "primalist: out of combat before changing gear",
+      "actor": "primalist",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "label": "tinker: summon the pet",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the pet is out",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "tinker: out of combat before changing gear",
+      "actor": "tinker",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 200
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 515367
+    },
+    {
+      "action": "equip",
+      "label": "primalist: equip 515367",
+      "actor": "primalist",
+      "item": 515367,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the owner carries 985807",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 985807,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "primalist: base Talon Ripper: the pet carries 985807",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 985807,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 1379340
+    },
+    {
+      "action": "equip",
+      "label": "primalist: equip 1379340",
+      "actor": "primalist",
+      "item": 1379340,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the owner carries 313465",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 313465,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the pet carries 313465",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 313465,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "primalist: fixture, the pet crits on every hit",
+      "actor": "primalist",
+      "spell": 82888,
+      "stacks": 1,
+      "pet": true
+    },
+    {
+      "action": "attack",
+      "label": "primalist: the pet attacks the dummy",
+      "actor": "primalist",
+      "target": "primalist_dummy",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the owner gains 313807 from the pet's critical strike",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 313807,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574302
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574303
+    },
+    {
+      "action": "cast",
+      "label": "primalist: dismiss the animal spirit",
+      "actor": "primalist",
+      "spell": 574303,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the pet is gone",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "primalist: call the animal spirit",
+      "actor": "primalist",
+      "spell": 574302,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the pet is back",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the summoned pet carries 313465 again",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 313465,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 200
+    },
+    {
+      "action": "add_item",
+      "actor": "tinker",
+      "item": 515367
+    },
+    {
+      "action": "equip",
+      "label": "tinker: equip 515367",
+      "actor": "tinker",
+      "item": 515367,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the owner carries 985807",
+      "actor": "tinker",
+      "metric": "aura_stacks",
+      "spell": 985807,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "tinker: base Talon Ripper: the pet carries 985807",
+      "actor": "tinker",
+      "metric": "pet_aura_stacks",
+      "spell": 985807,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "tinker",
+      "item": 1379340
+    },
+    {
+      "action": "equip",
+      "label": "tinker: equip 1379340",
+      "actor": "tinker",
+      "item": 1379340,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the owner carries 313465",
+      "actor": "tinker",
+      "metric": "aura_stacks",
+      "spell": 313465,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the pet carries 313465",
+      "actor": "tinker",
+      "metric": "pet_aura_stacks",
+      "spell": 313465,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "tinker: fixture, the pet crits on every hit",
+      "actor": "tinker",
+      "spell": 82888,
+      "stacks": 1,
+      "pet": true
+    },
+    {
+      "action": "attack",
+      "label": "tinker: the pet attacks the dummy",
+      "actor": "tinker",
+      "target": "tinker_dummy",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the owner gains 313807 from the pet's critical strike",
+      "actor": "tinker",
+      "metric": "aura_stacks",
+      "spell": 313807,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 2641
+    },
+    {
+      "action": "cast",
+      "label": "tinker: dismiss the pet",
+      "actor": "tinker",
+      "spell": 2641
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the pet is gone",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "label": "tinker: summon the pet again",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the pet is back",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the summoned pet carries 313465 again",
+      "actor": "tinker",
+      "metric": "pet_aura_stacks",
+      "spell": 313465,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

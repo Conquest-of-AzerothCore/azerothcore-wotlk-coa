@@ -1,0 +1,401 @@
+{
+  "schema": 1,
+  "name": "Beast-tamer's Shoulders (Ascended 230892): the CoA pet carries the damage and crit aura",
+  "contract": [
+    "Expected values come from the item tooltips (CoA Tavern, SUB/db.exil.es 2026-10-04, AscensionDB WDB 2026-09-04) and the client Spell.dbc, not from the implementation. Each check runs for the CoA pet classes Primalist (spirit beast), Witch Hunter (Houndmaster spec, Shadowhound) and Tinker (Mechano-Bear).",
+    "230892 (required level 70) reads 'Increases your pets damage dealt by 6% and its critcal strike chance by 5%'. Equip aura",
+    "2188064 is a DUMMY whose TriggerSpell is 2188065 (MOD_DAMAGE_PERCENT_DONE 6, crit 5, on itself). The pet must carry 2188065,",
+    "also after it is summoned again."
+  ],
+  "timeout_ms": 400000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 70
+    },
+    {
+      "id": "witchhunter",
+      "race": 1,
+      "class": 15,
+      "level": 70
+    },
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 70
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primalist_beast",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 60,
+      "health": 100000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574301
+    },
+    {
+      "action": "cast",
+      "label": "primalist: harness the animal spirit",
+      "actor": "primalist",
+      "spell": 574301,
+      "target": "primalist_beast"
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the pet is out",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "label": "primalist: out of combat before changing gear",
+      "actor": "primalist",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "specialization",
+      "label": "witchhunter: Houndmaster",
+      "actor": "witchhunter",
+      "id": 11
+    },
+    {
+      "action": "learn",
+      "actor": "witchhunter",
+      "spell": 801343
+    },
+    {
+      "action": "cast",
+      "label": "witchhunter: summon the pet",
+      "actor": "witchhunter",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "witchhunter: the pet is out",
+      "actor": "witchhunter",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "witchhunter: out of combat before changing gear",
+      "actor": "witchhunter",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "label": "tinker: summon the pet",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the pet is out",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "tinker: out of combat before changing gear",
+      "actor": "tinker",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 8737
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 230892
+    },
+    {
+      "action": "equip",
+      "label": "primalist: equip 230892",
+      "actor": "primalist",
+      "item": 230892,
+      "slot": 2
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the owner carries 2188064",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 2188064,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the pet carries 2188065",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 2188065,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574302
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574303
+    },
+    {
+      "action": "cast",
+      "label": "primalist: dismiss the animal spirit",
+      "actor": "primalist",
+      "spell": 574303,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the pet is gone",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "primalist: call the animal spirit",
+      "actor": "primalist",
+      "spell": 574302,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the pet is back",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the summoned pet carries 2188065 again",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 2188065,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "witchhunter",
+      "spell": 8737
+    },
+    {
+      "action": "add_item",
+      "actor": "witchhunter",
+      "item": 230892
+    },
+    {
+      "action": "equip",
+      "label": "witchhunter: equip 230892",
+      "actor": "witchhunter",
+      "item": 230892,
+      "slot": 2
+    },
+    {
+      "action": "assert",
+      "label": "witchhunter: the owner carries 2188064",
+      "actor": "witchhunter",
+      "metric": "aura_stacks",
+      "spell": 2188064,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "witchhunter: the pet carries 2188065",
+      "actor": "witchhunter",
+      "metric": "pet_aura_stacks",
+      "spell": 2188065,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "witchhunter",
+      "spell": 2641
+    },
+    {
+      "action": "cast",
+      "label": "witchhunter: dismiss the pet",
+      "actor": "witchhunter",
+      "spell": 2641
+    },
+    {
+      "action": "assert",
+      "label": "witchhunter: the pet is gone",
+      "actor": "witchhunter",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "witchhunter",
+      "spell": 801343
+    },
+    {
+      "action": "cast",
+      "label": "witchhunter: summon the pet again",
+      "actor": "witchhunter",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "witchhunter: the pet is back",
+      "actor": "witchhunter",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "witchhunter: the summoned pet carries 2188065 again",
+      "actor": "witchhunter",
+      "metric": "pet_aura_stacks",
+      "spell": 2188065,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 8737
+    },
+    {
+      "action": "add_item",
+      "actor": "tinker",
+      "item": 230892
+    },
+    {
+      "action": "equip",
+      "label": "tinker: equip 230892",
+      "actor": "tinker",
+      "item": 230892,
+      "slot": 2
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the owner carries 2188064",
+      "actor": "tinker",
+      "metric": "aura_stacks",
+      "spell": 2188064,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the pet carries 2188065",
+      "actor": "tinker",
+      "metric": "pet_aura_stacks",
+      "spell": 2188065,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 2641
+    },
+    {
+      "action": "cast",
+      "label": "tinker: dismiss the pet",
+      "actor": "tinker",
+      "spell": 2641
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the pet is gone",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "label": "tinker: summon the pet again",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the pet is back",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the summoned pet carries 2188065 again",
+      "actor": "tinker",
+      "metric": "pet_aura_stacks",
+      "spell": 2188065,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}
