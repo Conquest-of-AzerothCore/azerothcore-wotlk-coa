@@ -372,6 +372,10 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellInfo const
     if (spellproto->SpellFamilyName == 25 && spellproto->Id == 560963)
         return 6 * IN_MILLISECONDS;
 
+    // Enslave Elemental's tooltip specifies eight seconds against players, before diminishing returns.
+    if (spellproto->SpellFamilyName == 20 && spellproto->Id == 954534)
+        return 8 * IN_MILLISECONDS;
+
     // Explicit diminishing duration
     switch (spellproto->SpellFamilyName)
     {

@@ -338,6 +338,25 @@ class CompareTest(unittest.TestCase):
         verdict = self.per_tick_verdict('54', ticks=None)
         self.assertEqual((verdict.status, verdict.expected), ('ok', 54.0))
 
+    def test_a_rolled_per_tick_foreign_total_is_judged_per_tick(self):
+        label = '1001 effect_value 2002e0 #0'
+        text = '${($2002d*1000/$2002T1)*($2002m1+0)}'
+        model = {'effect_spell': 2002, 'effect': 0, 'ticks': 4, 'samples': 2}
+        item = expectation(label, 'effect_value', text, 'read flat per tick', model=model)
+        labels = sample_labels(label, 2)
+
+        def tokens(caster, forced):
+            roll = forced[2] if forced else 95
+            return [Displayed(text, 4.0 * roll, None, 'flat', 2002)]
+
+        reader = FakeTooltips(tokens, {(2002, 0): (94, 2)})
+        ok = self.value_run([item], [text], [assert_step(labels[0], '95'), assert_step(labels[1], '96')], reader)[label]
+        self.assertEqual((ok.status, ok.expected), ('ok', 95.5))
+        self.assertIn('divided by 4 ticks', ok.explanation)
+        self.fresh()
+        bad = self.value_run([item], [text], [assert_step(labels[0], '380'), assert_step(labels[1], '384')], reader)[label]
+        self.assertEqual(bad.status, 'alert')
+
     def rolled_verdict(self, reads, value_of_roll=lambda roll: roll, samples=None):
         text = '${$m1+0+$AP*0.45}'
         label = '1001 effect_value e0 #0'
@@ -1223,6 +1242,17 @@ class CompareTest(unittest.TestCase):
         self.fresh()
         bad = self.value_run([expectation(label, 'power_cost', '141', rule)], [],
                              [assert_step(label, '155')], constant_reader())
+        self.assertEqual(bad[label].status, 'alert')
+
+    def test_base_energy_percent_power_cost_is_compared_and_alerts_on_mismatch(self):
+        label = '1001 power_cost'
+        rule = 'ManaCost 0 + 24% of base_energy 100 divisor 1'
+        ok = self.value_run([expectation(label, 'power_cost', '24', rule)], [],
+                            [assert_step(label, '24')], constant_reader())
+        self.assertEqual((ok[label].status, ok[label].measured, ok[label].expected), ('ok', 24.0, 24.0))
+        self.fresh()
+        bad = self.value_run([expectation(label, 'power_cost', '24', rule)], [],
+                             [assert_step(label, '30')], constant_reader())
         self.assertEqual(bad[label].status, 'alert')
 
     def test_known_aura_absent_is_an_alert(self):

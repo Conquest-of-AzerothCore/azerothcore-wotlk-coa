@@ -844,11 +844,12 @@ struct FelswornRiftGrant
     uint8 RequiredLevel;
 };
 
-constexpr std::array<FelswornRiftGrant, 3> FelswornHordeCapitalRifts =
+constexpr std::array<FelswornRiftGrant, 4> FelswornHordeCapitalRifts =
 {{
     {535598, 26},
     {535599, 30},
-    {535600, 36}
+    {535600, 36},
+    {535602, 40}
 }};
 
 struct SpellTaughtBySpell

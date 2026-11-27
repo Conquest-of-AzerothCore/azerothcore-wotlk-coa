@@ -755,9 +755,19 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'is no total over its ticks'):
             value_scenario(listed, spell, 500694)
 
-    def test_a_listed_rolled_effect_is_refused(self):
-        with self.assertRaisesRegex(ValueError, 'whose points roll'):
-            per_tick_ticks(Records(DataSet(DBC_DIR)), VINDICATION_RANK_2, 0)
+    def test_a_listed_rolled_foreign_total_keeps_sampled_per_tick_reads(self):
+        sunder = ClassSpell(705121, 'Sunder', (705121,), 705121, 0, False)
+        felsworn = load_class_file(14)
+        listed = {**felsworn, PER_TICK_FOREIGN_TOTALS: [{'spell': 556503, 'effect': 0, 'reason': 'x'}]}
+        scenario, expectations, periodic_totals = value_scenario(listed, sunder, 705121)
+        run.validate(scenario)
+        item, = [entry for entry in expectations if entry.label == '705121 effect_value 556503e0 #1']
+        self.assertEqual(item.model['effect_spell'], 556503)
+        self.assertEqual(item.model['effect'], 0)
+        self.assertEqual(item.model['ticks'], 4)
+        self.assertGreaterEqual(item.model['samples'], 1)
+        self.assertNotIn('705121 effect_value 556503e0 #1', [entry['label'] for entry in periodic_totals])
+        self.assertEqual(per_tick_ticks(Records(DataSet(DBC_DIR)), 556503, 0), 4)
 
     def test_trailing_digit_on_a_proc_count_token_is_unmeasurable_not_unreadable(self):
         scenario, expectations = self.build(LIGHTKEEPER, LIGHTKEEPER)
@@ -1219,21 +1229,64 @@ class BaseManaPowerCostTest(unittest.TestCase):
         self.assertEqual(pc_health.rule, 'ManaCost 0 + 10% of base_health 1418 divisor 1')
         self.assertIn('server create mana/health', sc_health['contract'])
 
+    def test_zero_base_mana_and_base_energy_percent_power_cost(self):
+        from hits import base_mana_steps
+        from values import BASE_ENERGY_KEY, BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY
+        felsworn = {
+            **load_class_file(14),
+            BASE_MANA_POWER_COST_KEY: True,
+            'base_mana': {'power': 0, 'value': 0},
+            BASE_HEALTH_KEY: {'value': 1563},
+            BASE_ENERGY_KEY: {'power': ENERGY, 'value': 100},
+        }
+        twisted = ClassSpell(532229, 'Twisted Sight', (532229,), 532229, 0, False)
+        greater_manari = ClassSpell(523495, 'Greater Man\'ari Intuition', (523495,), 523495, 0, False)
+        betray = ClassSpell(804220, 'Betray', (804220,), 804220, 0, False)
+        blood = ClassSpell(802075, 'Blood of Mannoroth', (802075,), 802075, 0, False)
+        _, exp_twisted, _ = value_scenario(felsworn, twisted, 532229)
+        pc_twisted = next(item for item in exp_twisted if item.check == 'power_cost')
+        self.assertEqual(pc_twisted.displayed, '0')
+        self.assertEqual(pc_twisted.rule, 'ManaCost 0 + 4% of base_mana 0 divisor 1')
+        self.assertEqual(base_mana_steps(felsworn, facts_of(Records(DataSet(DBC_DIR)), 532229)), [])
+        sc_manari, exp_manari, _ = value_scenario(felsworn, greater_manari, 523495)
+        run.validate(sc_manari)
+        pc_manari = next(item for item in exp_manari if item.check == 'power_cost')
+        self.assertEqual(pc_manari.displayed, '24')
+        self.assertEqual(pc_manari.rule, 'ManaCost 0 + 24% of base_energy 100 divisor 1')
+        self.assertIn({'action': 'set_power', 'actor': CASTER, 'power': ENERGY, 'value': 24}, sc_manari['steps'])
+        self.assertIn('server create energy', sc_manari['contract'])
+        sc_betray, exp_betray, _ = value_scenario(felsworn, betray, 804220)
+        run.validate(sc_betray)
+        pc_betray = next(item for item in exp_betray if item.check == 'power_cost')
+        self.assertEqual(pc_betray.displayed, '15')
+        self.assertEqual(pc_betray.rule, 'ManaCost 0 + 15% of base_energy 100 divisor 1')
+        self.assertIn({'action': 'set_power', 'actor': CASTER, 'power': ENERGY, 'value': 15}, sc_betray['steps'])
+        _, exp_blood, _ = value_scenario(felsworn, blood, 802075)
+        pc_blood = next(item for item in exp_blood if item.check == 'power_cost')
+        self.assertEqual(pc_blood.displayed, '312')
+        self.assertEqual(pc_blood.rule, 'ManaCost 0 + 20% of base_health 1563 divisor 1')
+
     def test_invalid_base_mana_power_cost_config_is_refused(self):
-        from values import (BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY, base_health_for_power_cost,
-                            base_mana_for_power_cost)
+        from values import (BASE_ENERGY_KEY, BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY, base_energy_for_power_cost,
+                            base_health_for_power_cost, base_mana_for_power_cost)
         for bad in (
                 {BASE_MANA_POWER_COST_KEY: 1},
                 {BASE_MANA_POWER_COST_KEY: True},
                 {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 1, 'value': 1512}},
-                {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': 0}},
+                {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': -1}},
                 {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': True}}):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 base_mana_for_power_cost(bad)
+        self.assertEqual(base_mana_for_power_cost({BASE_MANA_POWER_COST_KEY: True,
+                                                   'base_mana': {'power': 0, 'value': 0}}), 0)
         valid_mana = {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': 1512}}
         for bad_health in (1418, {}, {'value': 0}, {'value': -5}, {'value': True}):
             with self.subTest(bad_health=bad_health), self.assertRaises(ValueError):
                 base_health_for_power_cost({**valid_mana, BASE_HEALTH_KEY: bad_health})
+        for bad_energy in (100, {}, {'power': 0, 'value': 100}, {'power': ENERGY, 'value': 0},
+                           {'power': ENERGY, 'value': -5}, {'power': ENERGY, 'value': True}):
+            with self.subTest(bad_energy=bad_energy), self.assertRaises(ValueError):
+                base_energy_for_power_cost({**valid_mana, BASE_ENERGY_KEY: bad_energy})
 
 
 class CastAuraStacksTest(unittest.TestCase):

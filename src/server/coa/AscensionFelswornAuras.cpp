@@ -110,10 +110,21 @@ class aura_ascension_felsworn_lifecycle : public AuraScript
     }
     void Tick(AuraEffect const* effect)
     {
+        uint32 id = GetId();
+        if (id == 704371 && effect->GetEffIndex() == EFFECT_2)
+        {
+            PreventDefaultAction();
+            int32 step = std::max(0, effect->GetAmount());
+            if (!step)
+                return;
+            for (uint8 slot : {EFFECT_0, EFFECT_1})
+                if (AuraEffect* slow = GetAura()->GetEffect(slot))
+                    slow->ChangeAmount(std::min(0, slow->GetAmount() + step));
+            return;
+        }
         Player* player = Owner(GetCaster());
         if (!player || !player->IsAlive())
             return;
-        uint32 id = GetId();
         if (id == BurningCommander && effect->GetEffIndex() == EFFECT_1)
         {
             PreventDefaultAction();
@@ -343,8 +354,15 @@ class aura_ascension_felsworn_betrayers_inclinations : public AuraScript
     PrepareAuraScript(aura_ascension_felsworn_betrayers_inclinations);
     bool CheckProc(ProcEventInfo& event)
     {
+        if (event.GetSpellInfo() && event.GetSpellInfo()->Id == 804766)
+            return false;
         Unit* victim = event.GetActionTarget();
-        return victim && GetTarget()->IsValidAttackTarget(victim);
+        if (!victim || !GetTarget()->IsValidAttackTarget(victim))
+            return false;
+        if (event.GetTypeMask() & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG | PROC_FLAG_DONE_PERIODIC))
+            if (!(event.GetSpellTypeMask() & PROC_SPELL_TYPE_DAMAGE))
+                return false;
+        return true;
     }
     void Register() override
     {

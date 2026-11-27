@@ -127,7 +127,7 @@ PLAIN_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)(?P<letter>[sSmM])(?P<digit
 TRUNCATED_READ = 1.0
 BONUS_DATA = 'bonus_data'
 COST_DIVISOR = re.compile(r'ManaCost divisor (\d+)')
-BASE_MANA_COST_DIVISOR = re.compile(r'ManaCost \d+ \+ \d+% of base_(?:mana|health) \d+ divisor (\d+)')
+BASE_MANA_COST_DIVISOR = re.compile(r'ManaCost \d+ \+ \d+% of base_(?:mana|health|energy) \d+ divisor (\d+)')
 EXPLORATORY = ('gameplay', 'exploratory')
 ALERT_COLUMNS = ('scenario', 'spell_id', 'rank_id', 'label', 'check', 'status', 'measured', 'expected', 'low', 'high',
                  'deviation', 'explanation', 'server_commit', 'build', 'runs')
@@ -695,6 +695,7 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     token = tokens.readout.values[index]
     plain = PLAIN_TOKEN.fullmatch(token.text)
     spell_id, effect = token_effect(expectation)
+    ticks = (expectation.model or {}).get(PER_TICK_TICKS)
     values = []
     for roll in rolls:
         readout = tooltips.read(expectation.rank_id, tokens.caster, (spell_id, effect, roll))
@@ -702,6 +703,8 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
             return replace(base, status='unmodelled', measured=measured,
                            explanation=f'{token.text} is unreadable with roll {roll} of effect {effect}')
         value = undivided(readout.values[index])
+        if ticks:
+            value /= ticks
         values.append(value * plain_sign(roll) if plain else value)
     steps = [after - before for before, after in zip(values, values[1:])]
     if not (all(step >= -FLOAT_EPSILON for step in steps) or all(step <= FLOAT_EPSILON for step in steps)):
@@ -754,7 +757,8 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     needed = mean_samples(values)
     if needed is not None and placeholder_sample_count(tooltips, spell_id, effect):
         needed = min(needed, planned_reads(expectation, tokens, tooltips, index, spell_id, effect, rolls))
-    roll = (f'{token.text}{trigger_note} over the roll {rolls.start}..{rolls.stop - 1} of effect {effect}: '
+    per_tick_note = f' (divided by {ticks:g} ticks)' if ticks else ''
+    roll = (f'{token.text}{trigger_note}{per_tick_note} over the roll {rolls.start}..{rolls.stop - 1} of effect {effect}: '
             f'{min(values):g} to {max(values):g}{block_note}, uniform mean {expected:.3f} sigma {sigma:.3f}; '
             f'{len(reads)} spell_effect_value reads '
             f'(each one SpellEffectInfo::CalcValue roll{"; " + terms.text() if terms else ""}), mean {mean:.3f}')
@@ -1002,14 +1006,15 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
         if effect is not None and expectation.check == 'effect_value' and not ticks else None
     if base_roll is not None:
         return judge_base_roll(base, expectation, measured, tokens, tooltips, index, base_roll)
-    if effect is not None and not ticks:
+    if effect is not None:
         base_points, die_sides = tooltips.effect_points(*effect)
         if die_sides not in FIXED_DIE_SIDES:
             return judge_roll(base, expectation, run, measured, tokens, tooltips, index,
                               roll_range(base_points, die_sides))
-        carried = judge_trigger_with_value(base, expectation, measured, tokens, tooltips, index, effect)
-        if carried is not None:
-            return carried
+        if not ticks:
+            carried = judge_trigger_with_value(base, expectation, measured, tokens, tooltips, index, effect)
+            if carried is not None:
+                return carried
     expected = undivided(token) / ticks if ticks else undivided(token)
     per_tick = (f', divided by its {ticks:g} ticks: {undivided(token):g} over the application, {expected:g} per '
                 'tick' if ticks else '')

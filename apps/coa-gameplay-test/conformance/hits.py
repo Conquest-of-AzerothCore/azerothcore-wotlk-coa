@@ -1304,6 +1304,8 @@ def base_mana_steps(class_file: dict, facts: RankFacts) -> list[dict]:
     if cost > base['value']:
         raise ValueError(f'{BASE_MANA_FIELD} {base["value"]} is below the cost {cost} of ManaCost '
                          f'{facts.mana_cost} + {facts.mana_cost_percentage}% of base mana')
+    if base['value'] <= 0:
+        return []
     return [{'action': 'set_power', 'actor': CASTER, 'power': POWER_MANA, 'value': base['value']}]
 
 

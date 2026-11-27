@@ -141,6 +141,8 @@ class felsworn_casts : public AllSpellScript
             Torpedo(State(player).torpedoed, *spell->GetUniqueTargetInfo());
         if (!player || info->SpellFamilyName != 20)
             return;
+        if (Named(info, 500028))
+            player->RemoveAurasWithMechanic(1ULL << MECHANIC_ROOT);
         if (Inner(player))
             spell->SetScriptValue(804216, 1);
         if (info->Id == 803715)
@@ -248,7 +250,7 @@ class felsworn_casts : public AllSpellScript
                 {
                     uint64 count = std::min<uint64>(30, aura->GetScriptValue(712483) + 1);
                     aura->SetScriptValue(712483, count);
-                    aura->SetStackAmount(std::max<uint64>(1, count));
+                    aura->SetStackAmount(uint8(std::min<uint64>(aura->GetSpellInfo()->StackAmount, count + 1)));
                 }
         Player* player = Owner(caster);
         if (player && info->Id == 555739 && player->GetWeaponForAttack(OFF_ATTACK, true))

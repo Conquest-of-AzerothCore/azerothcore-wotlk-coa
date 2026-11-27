@@ -30,10 +30,15 @@ VALUE_REAGENTS_KEY = 'value_reagents'
 HONOUR_MIN_RANGE_KEY = 'honour_min_range'
 BASE_MANA_POWER_COST_KEY = 'base_mana_power_cost'
 BASE_HEALTH_KEY = 'base_health'
+BASE_ENERGY_KEY = 'base_energy'
 PERCENT_POWER_COST_CONTRACT = (
     ' Percentage power_cost multiplies ManaCostPercentage by server create mana/health from the class file '
     '(the same server table SpellInfo::CalcPowerCost reads), proving the percentage is applied in '
     'CalcPowerCost rather than that the base mana/health table value is right or that power was spent in a cast.')
+PERCENT_ENERGY_COST_CONTRACT = (
+    ' Percentage power_cost multiplies ManaCostPercentage by server create energy from the class file '
+    '(the same value SpellInfo::CalcPowerCost reads via GetCreatePowers(POWER_ENERGY)), proving the percentage is '
+    'applied in CalcPowerCost rather than that the base energy value is right or that energy was spent in a cast.')
 ALLY_SETUP_SETTLE_MS = 2000
 CHARGE_OFFSET_YD = 10
 NOMINAL_MELEE_RANGE_YD = 5.0
@@ -42,6 +47,7 @@ GAP_CLOSER_MARGIN_YD = 2.0
 GAP_CLOSER_DISTANCE = 'gap_closer_distance'
 POWER_DISPLAY_DIVISOR = {0: 1, 1: 10, 2: 1, 3: 1, 4: 1000, 5: 1, 6: 10}
 MANA = 0
+ENERGY = 3
 HEALTH_POWER = 4294967294
 CAST_MARGIN_MS = 500
 GCD_WAIT_MS = 1600
@@ -555,8 +561,6 @@ def per_tick_foreign_totals(class_file: dict) -> frozenset[tuple[int, int]]:
 
 
 def per_tick_ticks(records: Records, spell_id: int, effect: int) -> float:
-    if records.field('Spell', spell_id, f'EffectDieSides[{effect}]') not in FIXED_DIE_SIDES:
-        raise ValueError(f'{PER_TICK_FOREIGN_TOTALS} lists spell {spell_id} effect {effect}, whose points roll')
     ticks = records.duration_ms(spell_id) / records.amplitude_ms(spell_id, effect)
     return int(ticks) if ticks.is_integer() else ticks
 
@@ -571,8 +575,9 @@ def base_mana_for_power_cost(class_file: dict | None) -> int | None:
         return None
     base = class_file.get('base_mana')
     if (not isinstance(base, dict) or base.get('power') != MANA
-            or type(base.get('value')) is not int or base['value'] <= 0):
-        raise ValueError(f'{BASE_MANA_POWER_COST_KEY} requires base_mana with power {MANA} and a positive integer value')
+            or type(base.get('value')) is not int or base['value'] < 0):
+        raise ValueError(f'{BASE_MANA_POWER_COST_KEY} requires base_mana with power {MANA} and a non-negative integer '
+                         f'value')
     return base['value']
 
 
@@ -585,8 +590,27 @@ def base_health_for_power_cost(class_file: dict | None) -> int | None:
     return base['value']
 
 
+def base_energy_for_power_cost(class_file: dict | None) -> int | None:
+    if base_mana_for_power_cost(class_file) is None or BASE_ENERGY_KEY not in class_file:
+        return None
+    base = class_file[BASE_ENERGY_KEY]
+    if (not isinstance(base, dict) or base.get('power') != ENERGY
+            or type(base.get('value')) is not int or base['value'] <= 0):
+        raise ValueError(f'{BASE_ENERGY_KEY} requires power {ENERGY} and a positive integer value')
+    return base['value']
+
+
+def cast_power_cost(facts: RankFacts, base_energy: int | None) -> int:
+    if facts.power_type == MANA:
+        return 0
+    if facts.power_type == ENERGY and facts.mana_cost_percentage and base_energy is not None:
+        return facts.mana_cost + (base_energy * facts.mana_cost_percentage) // 100
+    return facts.mana_cost
+
+
 def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankFacts,
-                           base_mana: int | None = None, base_health: int | None = None) -> Expectation:
+                           base_mana: int | None = None, base_health: int | None = None,
+                           base_energy: int | None = None) -> Expectation:
     divisor = POWER_DISPLAY_DIVISOR.get(facts.power_type, 1)
     if facts.mana_cost_per_level:
         displayed = f'{facts.mana_cost} + {facts.mana_cost_per_level} per level'
@@ -601,6 +625,11 @@ def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankF
             expected = facts.mana_cost + (base_health * facts.mana_cost_percentage) // 100
             displayed = str(expected // divisor)
             rule = (f'ManaCost {facts.mana_cost} + {facts.mana_cost_percentage}% of base_health {base_health} '
+                    f'divisor {divisor}')
+        elif base_energy is not None and facts.power_type == ENERGY:
+            expected = facts.mana_cost + (base_energy * facts.mana_cost_percentage) // 100
+            displayed = str(expected // divisor)
+            rule = (f'ManaCost {facts.mana_cost} + {facts.mana_cost_percentage}% of base_energy {base_energy} '
                     f'divisor {divisor}')
         else:
             displayed = f'{facts.mana_cost} + {facts.mana_cost_percentage}% of base power'
@@ -682,6 +711,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     first_effect = next((effect for effect in EFFECTS if facts.effects[effect] and (rank_id, effect) not in removed),
                         None)
     rolled: dict[str, int] = {}
+    base_mana = base_mana_for_power_cost(class_file)
+    base_health = base_health_for_power_cost(class_file)
+    base_energy = base_energy_for_power_cost(class_file)
     disabled_effects = disabled_foreign_effects(class_file)
     aura_grants = foreign_aura_grants(class_file)
     per_tick_totals = per_tick_foreign_totals(class_file)
@@ -815,8 +847,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                     needs_ally_target = True
                     ally_grant_proofs.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': rank_id})
                     ally_grant_proofs.append({'action': 'wait', 'label': 'Global cooldown', 'ms': GCD_WAIT_MS})
-                    if facts.mana_cost > 0 and facts.power_type != MANA:
-                        ally_grant_proofs.extend(pay_power_steps(facts.power_type, facts.mana_cost))
+                    cost = cast_power_cost(facts, base_energy)
+                    if cost > 0:
+                        ally_grant_proofs.extend(pay_power_steps(facts.power_type, cost))
                     ally_grant_proofs.append({'action': 'cast', 'actor': CASTER, 'spell': rank_id,
                                               'target': ALLY})
                     ally_grant_proofs.append(measurement(f'{rank_id} cast_failure {duration_spell} #{ordinal}',
@@ -845,6 +878,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                        note_rule(f'read {shown.kind} per tick: the total over the {ticks:g} ticks of spell {token[0]} '
                                  f'effect {token[1]} divided by its tick count', note),
                        {**foreign, PER_TICK_TICKS: ticks})
+                sample_rolled(label, ordinal, shown.text, *token)
                 return
             if periodic.startswith(OVER_TICKS_REASON):
                 periodic_totals.append({'label': label, 'effect': foreign['effect'], **foreign})
@@ -911,8 +945,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         label = f'{rank_id} power_cost'
         measured.append(measurement(label, CASTER, 'spell_power_cost', spell=rank_id))
         power_cost = power_cost_expectation(label, spell.spell_id, rank_id, facts,
-                                            base_mana_for_power_cost(class_file),
-                                            base_health_for_power_cost(class_file))
+                                            base_mana, base_health, base_energy)
         expectations.append(power_cost)
         percent_cost_checked = (not facts.mana_cost_per_level and bool(facts.mana_cost_percentage)
                                 and not power_cost.rule.startswith(UNREADABLE))
@@ -922,8 +955,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             expect(label, 'cooldown_ms', None, str(facts.recast_ms), 'max(RecoveryTime, CategoryRecoveryTime)')
             cast_wanted = True
     if cast_wanted:
-        if facts.mana_cost > 0 and facts.power_type != MANA:
-            cast_steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
+        cost = cast_power_cost(facts, base_energy)
+        if cost > 0:
+            cast_steps.extend(pay_power_steps(facts.power_type, cost))
         cast = {'action': 'cast', 'actor': CASTER, 'spell': rank_id}
         if is_hostile(facts):
             cast['target'] = TARGET
@@ -971,11 +1005,13 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     sampled, samples = sampled_reads(measured, rolled, budget)
     expectations = [replace(item, model={**(item.model or {}), 'samples': samples[item.label]})
                     if item.check == 'effect_value' and item.label in samples else item for item in expectations]
+    percent_contract = (PERCENT_ENERGY_COST_CONTRACT if percent_cost_checked and facts.power_type == ENERGY
+                        else PERCENT_POWER_COST_CONTRACT if percent_cost_checked else '')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spell.name} {rank_id}',
         'contract': ('No-combat check of the effect values, cost, cooldown and aura of one rank against its tooltip.'
-                     + (PERCENT_POWER_COST_CONTRACT if percent_cost_checked else '')),
+                     + percent_contract),
         'players': [player_fixture(class_file)],
         'steps': learn + sampled + cast_steps + after_cast + ally_grant_proofs}
     summon_target = summon_reads and is_hostile(facts_of(records, summon_carrier['summon']))
