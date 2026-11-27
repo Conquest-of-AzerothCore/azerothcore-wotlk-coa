@@ -10,6 +10,8 @@ local SLOTNAME = { "Basic", "Utility", "Major" }
 local GOLD = { 1, 0.82, 0 }
 local QCOL = { { 1, 1, 1 }, { 0.12, 1, 0 }, { 0, 0.44, 0.87 }, { 0.64, 0.21, 0.93 } }   -- common / uncommon / rare / epic: white, green, blue, purple
 local QHEX = { "|cffffffff", "|cff1eff00", "|cff0070dd", "|cffa335ee" }
+local BREED = { [3] = "B/B", [4] = "P/P", [5] = "S/S", [6] = "H/H", [7] = "H/P", [8] = "P/S", [9] = "H/S", [10] = "P/B", [11] = "S/B", [12] = "H/B" }
+local function BreedName(p) return BREED[p.breed] or "Fixed" end
 local QNAME = { "Common", "Uncommon", "Rare", "Epic" }
 local QNAMECOL = {}; for q = 1, 4 do QNAMECOL[q] = QHEX[q] .. QNAME[q] .. "|r" end
 
@@ -25,16 +27,18 @@ local function Color(fs, a) local c = FAMCOL[a] or { 1, 1, 1 }; fs:SetTextColor(
 -- the pets you have NOT collected: one pseudo pet per species from the generated PetDex.lua (flag dex), so they can be listed, searched and inspected like owned ones
 local dexCache = {}
 local function PetOf(sp)
-    local p = S.pets[sp]; if p then return p end
+    if not sp or sp == 0 then return nil end
+    if sp > 0 then return S.pets[sp] end
+    sp = -sp
     local d = WotlkPetDex and WotlkPetDex[sp]; if not d then return nil end
-    local x = dexCache[sp]; if not x then x = { dex = true, name = d[1], family = d[2], icon = d[3], level = 0, quality = 1 }; dexCache[sp] = x end
+    local x = dexCache[sp]; if not x then x = { dex = true, species = sp, name = d[1], family = d[2], icon = d[3], level = 0, quality = 1 }; dexCache[sp] = x end
     return x
 end
 local function InTeam(sp) for n = 1, 3 do for i = 1, 3 do if S.teams[n][i] == sp then return true end end end return false end
 -- one pet against the whole filter: search (space separated words, ALL must match the name or the family), family menu, quality toggles, "in a team"
 local function PetPasses(p, sp, F)
     local name, fam = p.name:lower(), p.family:lower()
-    local zs = WotlkPetSpeciesZones and WotlkPetSpeciesZones[sp]   -- the zones this species lives in (generated data, ZoneLevels.lua)
+    local zs = WotlkPetSpeciesZones and WotlkPetSpeciesZones[p.species]   -- the zones this species lives in (generated data, ZoneLevels.lua)
     if F.zone then
         local here = false; for _, z in ipairs(zs or {}) do if z == F.zone then here = true end end
         if not here then return false end
@@ -50,12 +54,21 @@ local function PetPasses(p, sp, F)
     return true
 end
 local function Sorted()
-    local t = {}
-    for sp, p in pairs(S.pets) do if PetPasses(p, sp, S) then t[#t + 1] = sp end end
-    if S.view ~= "collected" and S.view ~= "team" and WotlkPetDex then
-        for sp in pairs(WotlkPetDex) do if not S.pets[sp] then local p = PetOf(sp); if PetPasses(p, sp, S) then t[#t + 1] = sp end end end
+    local t, owned = {}, {}
+    for id, p in pairs(S.pets) do
+        owned[p.species] = true
+        if PetPasses(p, id, S) then t[#t + 1] = id end
     end
-    table.sort(t, function(a, b) local x, y = PetOf(a).name, PetOf(b).name; if x ~= y then return x < y end return a < b end)
+    S.owned = owned
+    if S.view ~= "collected" and S.view ~= "team" and WotlkPetDex then
+        for sp in pairs(WotlkPetDex) do if not owned[sp] then local p = PetOf(-sp); if PetPasses(p, -sp, S) then t[#t + 1] = -sp end end end
+    end
+    table.sort(t, function(a, b)
+        local x, y = PetOf(a), PetOf(b)
+        if x.name ~= y.name then return x.name < y.name end
+        if x.species ~= y.species then return x.species < y.species end
+        return a < b
+    end)
     return t
 end
 
@@ -150,9 +163,10 @@ local function PetTip(owner, p, sp)
     if p.dex then GameTooltip:AddLine("Not collected  -  " .. p.family, 0.6, 0.6, 0.6)
     else
         GameTooltip:AddLine(QNAME[p.quality or 1] .. " " .. p.family .. "  -  Level " .. p.level, 1, 1, 1)
-        GameTooltip:AddLine("Health " .. (p.cur or p.hp) .. " / " .. p.hp .. "   Attack " .. p.dmg, 0.8, 0.8, 0.8)
+        GameTooltip:AddLine("Health " .. (p.cur or p.hp) .. " / " .. p.hp .. "   Power " .. p.dmg .. "   Speed " .. p.speed, 0.8, 0.8, 0.8)
+        GameTooltip:AddLine("Breed " .. BreedName(p) .. "   Copy #" .. sp, 0.8, 0.8, 0.8)
     end
-    local zs = WotlkPetSpeciesZones and WotlkPetSpeciesZones[sp or 0]
+    local zs = WotlkPetSpeciesZones and WotlkPetSpeciesZones[p.species]
     if zs and #zs > 0 then GameTooltip:AddLine("Found in: " .. table.concat(zs, ", ", 1, math.min(3, #zs)) .. (#zs > 3 and (" +" .. (#zs - 3) .. " more") or ""), 0.6, 0.8, 1, 1) end
     GameTooltip:AddLine(p.dex and "Click: details" or "Click: details   Drag: put in a team", 0.6, 0.6, 0.6); GameTooltip:Show()
 end
@@ -243,9 +257,36 @@ local function FoodMenu(dd)
         local i = UIDropDownMenu_CreateInfo(); i.notCheckable = 1
         i.text = (f.icon and ("|T" .. f.icon .. ":14|t ") or "") .. (good and "" or "|cff888888") .. (f.name or "?") .. " x" .. f.count .. "  (level " .. f.level .. (good and ")" or ": too weak)|r")
         i.disabled = (not good) and 1 or nil
-        i.func = function() AcoreLib.Send("pbj", "feed", S.sel .. "," .. f.id); CloseDropDownMenus() end
+        i.func = function() AcoreLib.Send("pbj", "feed2", S.sel .. "," .. f.id); CloseDropDownMenus() end
         UIDropDownMenu_AddButton(i)
     end
+end
+
+local RELEASE_DIALOG = "WOTLK_PETS_RELEASE"
+StaticPopupDialogs[RELEASE_DIALOG] = {
+    text = "Release %s permanently?%s",
+    button1 = "Release",
+    button2 = CANCEL,
+    OnAccept = function(self, id)
+        id = id or self.data
+        local pet = S.pets[id]
+        if pet and pet.source == 1 then AcoreLib.Send("pbj", "release2", id) end
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+}
+
+local function ConfirmRelease(id)
+    local pet = S.pets[id]
+    if not pet or pet.source ~= 1 then return end
+    local effects = ""
+    if InTeam(id) then effects = effects .. "\nThis copy will be removed from its teams." end
+    if S.follow == id then effects = effects .. "\nThis follower will be dismissed." end
+    local label = string.format("%s (Level %d %s, %s, Copy #%d)",
+        pet.name, pet.level, QNAME[pet.quality], BreedName(pet), id)
+    local popup = StaticPopup_Show(RELEASE_DIALOG, label, effects, id)
+    if popup then popup.data = id end
 end
 
 local function BuildPets()
@@ -261,7 +302,7 @@ local function BuildPets()
     d.sum = CreateFrame("Button", nil, d, "UIPanelButtonTemplate"); d.sum:SetSize(130, 24); d.sum:SetPoint("TOPLEFT", d.stats, "BOTTOMLEFT", 0, -22)
     d.sum:SetScript("OnClick", function()
         if not S.sel then return end
-        if S.follow == S.sel then AcoreLib.Send("pbj", "dismiss", "") else AcoreLib.Send("pbj", "summon", S.sel) end
+        if S.follow == S.sel then AcoreLib.Send("pbj", "dismiss", "") else AcoreLib.Send("pbj", "summon2", S.sel) end
     end)
     d.feed = CreateFrame("Button", nil, d, "UIPanelButtonTemplate"); d.feed:SetSize(130, 24); d.feed:SetPoint("TOPLEFT", d.sum, "BOTTOMLEFT", 0, -4); d.feed:SetText("Feed")
     d.feedDD = CreateFrame("Frame", "WotlkPetsFeedDD", d, "UIDropDownMenuTemplate"); UIDropDownMenu_Initialize(d.feedDD, FoodMenu, "MENU")
@@ -272,10 +313,14 @@ local function BuildPets()
         GameTooltip:AddLine("The food must be of the pet's level or higher. Not during a battle.", 0.8, 0.8, 0.8, 1); GameTooltip:Show()
     end)
     d.feed:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    d.release = CreateFrame("Button", nil, d, "UIPanelButtonTemplate")
+    d.release:SetSize(130, 24); d.release:SetPoint("TOPLEFT", d.feed, "BOTTOMLEFT", 0, -4)
+    d.release:SetText("Release")
+    d.release:SetScript("OnClick", function() ConfirmRelease(S.sel) end)
     d.where = d:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"); d.where:SetJustifyH("LEFT"); d.where:SetWidth(228)
     d.hint = d:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"); d.hint:SetJustifyH("LEFT"); d.hint:SetWidth(228); d.hint:SetTextColor(0.65, 0.65, 0.65)
     d.hint:SetPoint("TOPLEFT", d.where, "BOTTOMLEFT", 0, -8); d.hint:SetText("Wild pets appear near the creatures they live with: up to 3 different kinds around you at a time. One you fought comes back after about 90 seconds.")
-    d.xp = CreateFrame("StatusBar", nil, d); d.xp:SetSize(196, 12); d.xp:SetPoint("TOPLEFT", d.stats, "BOTTOMLEFT", 0, -114)
+    d.xp = CreateFrame("StatusBar", nil, d); d.xp:SetSize(196, 12); d.xp:SetPoint("TOPLEFT", d.stats, "BOTTOMLEFT", 0, -122)
     d.xp:SetStatusBarTexture(WHITE); d.xp:SetStatusBarColor(0.6, 0.3, 0.9); d.xp:SetMinMaxValues(0, 100)
     d.xp.bg = d.xp:CreateTexture(nil, "BACKGROUND"); d.xp.bg:SetAllPoints(); d.xp.bg:SetTexture(0, 0, 0, 0.6)
     d.xp.t = d.xp:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"); d.xp.t:SetPoint("CENTER")
@@ -301,7 +346,7 @@ local function BuildPets()
             b:SetScript("OnLeave", function() GameTooltip:Hide() end)
             b:SetScript("OnClick", function()
                 local p = S.sel and S.pets[S.sel]; if not p then return end
-                p.a[slot] = opt; AcoreLib.Send("pbj", "setabil", S.sel .. "," .. slot .. "," .. opt); Refresh()
+                p.a[slot] = opt; AcoreLib.Send("pbj", "setabil2", S.sel .. "," .. slot .. "," .. opt); Refresh()
             end)
             d.ab[slot .. "," .. opt] = b
         end
@@ -313,30 +358,30 @@ local function RefreshPets()
     ShowIf(paneP.empty, not p); ShowIf(paneP.d, p ~= nil)
     if not p then return end
     local d = paneP.d
-    local zs = WotlkPetSpeciesZones and WotlkPetSpeciesZones[S.sel]
+    local zs = WotlkPetSpeciesZones and WotlkPetSpeciesZones[p.species]
     local where = zs and ("Found in: " .. table.concat(zs, ", ", 1, math.min(6, #zs)) .. (#zs > 6 and (" +" .. (#zs - 6) .. " more") or "")) or "Found in: companion pet"
     d.where:ClearAllPoints()
     if p.dex then   -- not collected: name, family and where to find it; no stats / abilities / buttons
         d.name:SetText(p.name); d.name:SetTextColor(0.65, 0.65, 0.65); d.sub:SetText("Not collected  -  " .. p.family .. (S.hidden and "  |cff999999(hidden by filter)|r" or "")); Color(d.sub, p.family)
         d.stats:SetText("Family   |cffffffff" .. p.family .. "|r"); d.where:SetPoint("TOPLEFT", d.stats, "BOTTOMLEFT", 0, -14); d.where:SetText(where)
-        ShowIf(d.sum, false); ShowIf(d.feed, false); ShowIf(d.xp, false)
+        ShowIf(d.sum, false); ShowIf(d.feed, false); ShowIf(d.release, false); ShowIf(d.xp, false)
         for _, b in pairs(d.ab) do b:Hide() end
         for _, l in ipairs(d.abLabels) do l:Hide() end
-        if modelFor ~= S.sel then modelFor = S.sel; if S.primed then model:SetCreature(S.sel); model:SetRotation(0.61); d.loading:Hide() else d.loading:Show() end end
+        if modelFor ~= S.sel then modelFor = S.sel; if S.primed then model:SetCreature(p.species); model:SetRotation(0.61); d.loading:Hide() else d.loading:Show() end end
         return
     end
-    ShowIf(d.sum, true); ShowIf(d.feed, true); ShowIf(d.xp, true)
+    ShowIf(d.sum, true); ShowIf(d.feed, true); ShowIf(d.release, p.source == 1); ShowIf(d.xp, true)
     for _, l in ipairs(d.abLabels) do l:Show() end
     d.where:SetPoint("TOPLEFT", d.xp, "BOTTOMLEFT", 0, -12); d.where:SetText(where)
     d.name:SetText(p.name); d.name:SetTextColor(unpack(QCOL[p.quality or 1])); d.sub:SetText(QNAME[p.quality or 1] .. " " .. p.family .. "  -  Level " .. p.level .. (S.hidden and "  |cff999999(hidden by filter)|r" or "")); Color(d.sub, p.family)
-    d.stats:SetText("Health   |cffffffff" .. (p.cur or p.hp) .. " / " .. p.hp .. "|r\nAttack   |cffffffff" .. p.dmg .. "|r\nFamily   |cffffffff" .. p.family .. "|r\nQuality   " .. QHEX[p.quality or 1] .. QNAME[p.quality or 1] .. "|r")
+    d.stats:SetText("Health   |cffffffff" .. (p.cur or p.hp) .. " / " .. p.hp .. "|r\nPower   |cffffffff" .. p.dmg .. "|r\nSpeed   |cffffffff" .. p.speed .. "|r\nBreed   |cffffffff" .. BreedName(p) .. "|r")
     d.sum:SetText(S.follow == S.sel and "Dismiss" or "Summon Pet")
     local need = math.max(1, p.need or 100); d.xp:SetMinMaxValues(0, need); d.xp:SetValue(math.min(need, p.xp)); d.xp.t:SetText("Experience " .. p.xp .. " / " .. need)
     if modelFor ~= S.sel then
         modelFor = S.sel
-        if S.primed then model:SetCreature(S.sel); model:SetRotation(0.61); d.loading:Hide() else d.loading:Show() end
+        if S.primed then model:SetCreature(p.species); model:SetRotation(0.61); d.loading:Hide() else d.loading:Show() end
     end
-    if not S.abil[S.sel] and not S.asked[S.sel] then S.asked[S.sel] = true; AcoreLib.Send("pbj", "abil", S.sel) end
+    if not S.abil[S.sel] and not S.asked[S.sel] then S.asked[S.sel] = true; AcoreLib.Send("pbj", "abil2", S.sel) end
     for slot = 1, 3 do for opt = 1, 2 do
         local b = d.ab[slot .. "," .. opt]
         local a = S.abil[S.sel] and S.abil[S.sel][slot .. "," .. opt]
@@ -352,7 +397,7 @@ local function RefreshPets()
 end
 
 ---------------------------------------------------------------- Teams tab
-local function SendTeam(n) local t = S.teams[n]; AcoreLib.Send("pbj", "setteam", n .. "," .. t[1] .. "," .. t[2] .. "," .. t[3]) end
+local function SendTeam(n) local t = S.teams[n]; AcoreLib.Send("pbj", "setteam2", n .. "," .. t[1] .. "," .. t[2] .. "," .. t[3]) end
 
 -- put pet sp into slot i of team n (sp = 0 empties it). From another slot: the two pets swap; from the list: a pet already in this team swaps places.
 function PlaceInTeam(n, i, sp, fromTeam, fromSlot)
@@ -374,7 +419,7 @@ local function BuildTeams()
         local box = CreateFrame("Frame", nil, paneT); box:SetSize(474, 108); box:SetPoint("TOPLEFT", 0, -48 - (n - 1) * 116); box:SetBackdrop(BACKDROP)
         box.title = box:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge"); box.title:SetPoint("TOPLEFT", 14, -10); box.title:SetText("Team " .. n)
         box.act = CreateFrame("Button", nil, box, "UIPanelButtonTemplate"); box.act:SetSize(110, 22); box.act:SetPoint("TOPRIGHT", -12, -8)
-        box.act:SetScript("OnClick", function() S.active = n; AcoreLib.Send("pbj", "active", n); Refresh() end)
+        box.act:SetScript("OnClick", function() S.active = n; AcoreLib.Send("pbj", "active2", n); Refresh() end)
         box.slot = {}
         for i = 1, 3 do
             local b = CreateFrame("Button", nil, box); b:SetSize(140, 52); b:SetPoint("TOPLEFT", 14 + (i - 1) * 150, -42); b:SetBackdrop(BACKDROP)
@@ -408,7 +453,7 @@ local function RefreshTeams()
             local p = sp ~= 0 and S.pets[sp]
             ShowIf(b.icon, p ~= false and p ~= nil and p ~= 0); ShowIf(b.name, p and true or false); ShowIf(b.sub, p and true or false); ShowIf(b.empty, not p)
             if p then
-                b.icon:SetTexture(Icon(p)); b.icon:Show(); b.name:SetText(p.name); b.name:SetTextColor(unpack(QCOL[p.quality or 1])); b.sub:SetText("Lv " .. p.level .. " " .. p.family); Color(b.sub, p.family)
+                b.icon:SetTexture(Icon(p)); b.icon:Show(); b.name:SetText(p.name); b.name:SetTextColor(unpack(QCOL[p.quality or 1])); b.sub:SetText("Lv " .. p.level .. " " .. BreedName(p)); Color(b.sub, p.family)
                 b:SetBackdropBorderColor(0.9, 0.75, 0.2)
             else b:SetBackdropBorderColor(0.4, 0.4, 0.4) end
         end
@@ -427,7 +472,7 @@ function Bind(offset)
             r:ClearAllPoints(); r:SetPoint("TOPLEFT", 0, -(idx - 1) * ROW_H)
             r.sp = sp; r:Show(); r.icon:SetTexture(Icon(p)); r.icon:SetDesaturated(p.dex and true or false);             r.name:SetText(p.name)
             if p.dex then r.name:SetTextColor(0.6, 0.6, 0.6); r.lvl:SetText("") else r.name:SetTextColor(unpack(QCOL[p.quality or 1])); r.lvl:SetText(p.level) end
-            r.sub:SetText(p.family .. (p.dex and "  |cff999999not collected|r" or "") .. (S.follow == sp and "  |cff66ff66(following)|r" or "")); Color(r.sub, p.family); ShowIf(r.sel, S.sel == sp)
+            r.sub:SetText(p.family .. (p.dex and "  |cff999999not collected|r" or "  " .. BreedName(p)) .. (S.follow == sp and "  |cff66ff66(following)|r" or "")); Color(r.sub, p.family); ShowIf(r.sel, S.sel == sp)
         elseif rows[i] then rows[i]:Hide() end
     end
 end
@@ -442,7 +487,7 @@ function Refresh()
     Bind()
     S.hidden = S.sel ~= nil and not S.shown[S.sel]
     local total = 0; for _ in pairs(S.pets) do total = total + 1 end
-    if S.view ~= "collected" and S.view ~= "team" and WotlkPetDex then for sp in pairs(WotlkPetDex) do if not S.pets[sp] then total = total + 1 end end end
+    if S.view ~= "collected" and S.view ~= "team" and WotlkPetDex then for sp in pairs(WotlkPetDex) do if not S.owned[sp] then total = total + 1 end end end
     frame.count:SetText(#list == total and (total .. " pets") or (#list .. " of " .. total .. " pets"))
     S.emptyTxt:SetText(#list > 0 and "" or (total == 0 and "You have no battle pets yet. Capture wild pets in battle." or "No pet matches the filters. Use Clear filters."))
     for _, dd in ipairs(filterBtns) do dd.Text() end
@@ -471,22 +516,46 @@ end
 
 -- The server answers "list" with ONE message per pet (1,500 pets = 1,500 messages): redraw once at "done", not once per message (that froze the client for seconds).
 local function Soon() if not (S.syncing and GetTime() - (S.syncAt or 0) < 15) then Refresh() end end
-AcoreLib.On("pbj", "pet", function(p)
+AcoreLib.On("pbj", "begin2", function()
+    S.pets, S.abil, S.asked = {}, {}, {}
+    S.syncing = true; S.syncAt = GetTime()
+end)
+AcoreLib.On("pbj", "pet2", function(p)
+    local id, breed, speed, source, fields = p:match("^(%d+),(%d+),(%d+),(%d+),(.+)$")
+    if not id then return end
+    p = fields
     local sp, lv, xp, a1, a2, a3, family, icon, hp, dmg, q, cur, need, name = p:match("^(%d+),(%d+),(%d+),(%d+),(%d+),(%d+),(%a+),([^,]+),(%d+),(%d+),(%d+),(%d+),(%d+),(.+)$")
     if not sp then return end
-    S.pets[Num(sp)] = { level = Num(lv), xp = Num(xp), a = { Num(a1), Num(a2), Num(a3) }, family = family, icon = icon, hp = Num(hp), dmg = Num(dmg), quality = Num(q), cur = Num(cur), need = Num(need), name = name }
+    id = Num(id)
+    local old = S.pets[id]
+    if old and old.level ~= Num(lv) then S.abil[id], S.asked[id] = nil, nil end
+    S.pets[id] = { species = Num(sp), breed = Num(breed), speed = Num(speed), source = Num(source), level = Num(lv), xp = Num(xp), a = { Num(a1), Num(a2), Num(a3) }, family = family, icon = icon, hp = Num(hp), dmg = Num(dmg), quality = Num(q), cur = Num(cur), need = Num(need), name = name }
     Soon()
 end)
-AcoreLib.On("pbj", "team", function(p) local n, a, b, c = p:match("^(%d),(%d+),(%d+),(%d+)$"); if n then S.teams[Num(n)] = { Num(a), Num(b), Num(c) }; Soon() end end)
-AcoreLib.On("pbj", "follow", function(p) S.follow = Num(p); Soon() end)
-AcoreLib.On("pbj", "active", function(p) S.active = Num(p); Soon() end)
-AcoreLib.On("pbj", "done", function() S.syncing = false; Refresh() end)
-AcoreLib.On("pbj", "abl", function(p)
+AcoreLib.On("pbj", "team2", function(p) local n, a, b, c = p:match("^(%d),(%d+),(%d+),(%d+)$"); if n then S.teams[Num(n)] = { Num(a), Num(b), Num(c) }; Soon() end end)
+AcoreLib.On("pbj", "follow2", function(p) S.follow = Num(p); Soon() end)
+AcoreLib.On("pbj", "active2", function(p) S.active = Num(p); Soon() end)
+AcoreLib.On("pbj", "done2", function()
+    S.syncing = false
+    if S.sel and not PetOf(S.sel) then S.sel = nil end
+    Refresh()
+end)
+AcoreLib.On("pbj", "abl2", function(p)
     local sp, slot, opt, icon, name, tip, cd, unlock = p:match("^(%d+),(%d),(%d)|([^#]*)#([^#]*)#([^#]*)#(%d+)#(%d+)$")
     if not sp then return end
     sp = Num(sp); S.abil[sp] = S.abil[sp] or {}
     S.abil[sp][slot .. "," .. opt] = { icon = icon, name = name, tip = tip, cd = Num(cd), unlock = Num(unlock) }
     Refresh()
+end)
+AcoreLib.On("pbj", "removed2", function(payload)
+    local id = Num(payload)
+    S.pets[id], S.abil[id], S.asked[id] = nil, nil, nil
+    if S.sel == id then S.sel = nil end
+    if S.follow == id then S.follow = 0 end
+    Soon()
+end)
+AcoreLib.On("pbj", "releaseerror2", function(message)
+    DEFAULT_CHAT_FRAME:AddMessage("|cffffd100[Pets]|r " .. message)
 end)
 AcoreLib.On("pbj", "primed", function() S.primed = true; modelFor = nil; Refresh() end)
 
@@ -498,6 +567,6 @@ SlashCmdList["PETS"] = function()
     if frame:IsShown() then frame:Hide() return end
     frame:Show(); Refresh()
     S.syncing = true; S.syncAt = GetTime()
-    AcoreLib.Send("pbj", "list", "")
+    AcoreLib.Send("pbj", "list2", "")
     if not S.primed then AcoreLib.Send("pbj", "prime", "") end
 end

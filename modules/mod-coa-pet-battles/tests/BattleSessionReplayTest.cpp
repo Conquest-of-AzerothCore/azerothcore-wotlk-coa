@@ -63,6 +63,7 @@ namespace
         JournalRow row;
         row.low = Low(f[1]);
         row.pet.species = static_cast<uint32_t>(std::stoul(f[2]));
+        row.pet.id = 100000000 + row.pet.species;
         row.pet.level = static_cast<uint8_t>(std::stoul(f[3]));
         row.pet.xp = static_cast<uint32_t>(std::stoul(f[4]));
         row.pet.picks = { static_cast<uint8_t>(std::stoul(f[5])), static_cast<uint8_t>(std::stoul(f[6])),
@@ -275,7 +276,7 @@ namespace
                 if (!WorldData().displays.count(species))
                     continue;
                 ++count;
-                Store::OwnedPet const* owned = journal ? journal->Pet(species) : nullptr;
+                Store::OwnedPet const* owned = journal ? journal->PetOfSpecies(species) : nullptr;
                 Prime(character, species, species, owned ? owned->display : 0);
             }
             return count;
@@ -291,27 +292,32 @@ namespace
             --items[character][item];
             produced.push_back("WORLD " + std::to_string(_scheduler.Now()) + " item take " + std::to_string(item));
         }
-        void Summon(uint64_t character, uint32_t species) override { followers.Summon(character, species); }
+        void Summon(uint64_t character, uint32_t petId) override { followers.Summon(character, petId); }
         void Dismiss(uint64_t character) override { followers.Dismiss(character); }
-        uint32_t Follower(uint64_t character) override { return followers.Follower(character); }
+        uint32_t Follower(uint64_t character) override
+        {
+            Store::Journal const* journal = JournalOf(character);
+            return journal ? journal->SpeciesForPet(followers.Follower(character)) : 0;
+        }
         void Suppress(uint64_t character, bool on) override { followers.Suppress(character, on); }
         uint32_t SweepStandIns(uint64_t, float) override { return 0; }
 
         bool Wanted(uint64_t character) const override { return players.at(character).alive; }
-        bool Owns(uint64_t character, uint32_t species) const override
+        bool Owns(uint64_t character, uint32_t petId) const override
         {
             auto const found = journals.find(players.at(character).account);
-            return found != journals.end() && found->second->Owns(species);
+            return found != journals.end() && found->second->Pet(petId);
         }
-        std::optional<uint64_t> SpawnFollower(uint64_t character, uint32_t species) override
+        std::optional<uint64_t> SpawnFollower(uint64_t character, uint32_t petId) override
         {
+            Store::Journal* journal = JournalOf(character);
+            Store::OwnedPet const* pet = journal ? journal->Pet(petId) : nullptr;
+            uint32_t const species = pet ? pet->species : 0;
             produced.push_back("WORLD " + std::to_string(_scheduler.Now()) + " follow spawn " +
                 std::to_string(species));
-            Store::Journal* journal = JournalOf(character);
-            Store::OwnedPet const* pet = journal ? journal->Pet(species) : nullptr;
             auto const displays = WorldData().displays.find(species);
             if (pet && !pet->display && displays != WorldData().displays.end() && !displays->second.empty() &&
-                journal->SetDisplayOnce(species, displays->second.front()))
+                journal->SetDisplayOnce(petId, displays->second.front()))
                 Prime(character, species, species, displays->second.front());
             return ++_followerHandles;
         }
@@ -321,11 +327,12 @@ namespace
         }
         bool Near(uint64_t, uint64_t) const override { return true; }
         void Pace(uint64_t, uint64_t) override { }
-        void SendFollow(uint64_t character, uint32_t species) override
+        void SendFollow(uint64_t character, uint32_t petId) override
         {
-            Send(character, "pbj", "follow", std::to_string(species));
+            Store::Journal const* journal = JournalOf(character);
+            Send(character, "pbj", "follow", std::to_string(journal ? journal->SpeciesForPet(petId) : 0));
         }
-        void Save(uint64_t character, uint32_t species) override { _saved[character] = species; }
+        void Save(uint64_t character, uint32_t petId) override { _saved[character] = petId; }
         std::optional<uint32_t> Saved(uint64_t character) override
         {
             auto const found = _saved.find(character);
@@ -384,7 +391,7 @@ namespace
 
     std::string ExpectedJournal(std::vector<JournalRow> rows)
     {
-        std::sort(rows.begin(), rows.end(), [](JournalRow const& a, JournalRow const& b)
+        std::stable_sort(rows.begin(), rows.end(), [](JournalRow const& a, JournalRow const& b)
         {
             return a.pet.species < b.pet.species;
         });
@@ -504,7 +511,8 @@ namespace
                         uint32_t species = 0;
                         uint32_t health = 0;
                         words >> species >> health;
-                        world.JournalOf(character)->SetHealth(species, health, world.UnixNow());
+                        Store::Journal* journal = world.JournalOf(character);
+                        journal->SetHealth(journal->PetIdForSpecies(species), health, world.UnixNow());
                     }
                     continue;
                 }
@@ -561,9 +569,13 @@ TEST(CoAPetBattlesSessions, EveryRecordedSessionReplays)
 {
     size_t failed = 0;
     size_t inputs = 0;
+    size_t recorded = 0;
     std::string first;
     for (SessionFixture const& session : Sessions())
     {
+        if (session.name == "capture_replaced" || session.name == "capture_released")
+            continue;
+        ++recorded;
         Outcome const outcome = Replay(session);
         inputs += outcome.inputs;
         if (!outcome.failure.empty())
@@ -575,5 +587,58 @@ TEST(CoAPetBattlesSessions, EveryRecordedSessionReplays)
     }
     EXPECT_GT(Sessions().size(), 30u);
     EXPECT_GT(inputs, 0u);
-    EXPECT_EQ(failed, 0u) << failed << " of " << Sessions().size() << " sessions differ; first: " << first;
+    EXPECT_EQ(recorded + 2, Sessions().size());
+    EXPECT_EQ(failed, 0u) << failed << " of " << recorded << " sessions differ; first: " << first;
+}
+
+TEST(CoAPetBattlesSessions, DuplicateCapturesRetainBothOwnedPets)
+{
+    size_t tested = 0;
+    for (SessionFixture session : Sessions())
+    {
+        if (session.name == "capture_replaced")
+        {
+            std::erase_if(session.records, [](Record const& record)
+            {
+                return record.time == 21550 && (record.text.starts_with("prime 15668 ") ||
+                    record.text.starts_with("p7 pbj|pet|15668,"));
+            });
+            for (Record& record : session.records)
+                if (record.text == "p7 pbt|msg|You captured Grimscale Murloc! It replaces the one you had.")
+                    record.text = "p7 pbt|msg|You captured Grimscale Murloc!";
+            auto const old = std::find_if(session.journal.begin(), session.journal.end(),
+                [](JournalRow const& row) { return row.pet.species == 15668; });
+            auto const placed = std::find_if(session.after.begin(), session.after.end(),
+                [](JournalRow const& row) { return row.pet.species == 15668; });
+            ASSERT_NE(old, session.journal.end());
+            ASSERT_NE(placed, session.after.end());
+            session.after.insert(placed, *old);
+        }
+        else if (session.name == "capture_released")
+        {
+            auto const message = std::find_if(session.records.begin(), session.records.end(), [](Record const& record)
+            {
+                return record.text ==
+                    "p7 pbt|msg|You captured Shadowpine Catlord, but you already own a better one, so it was released.";
+            });
+            ASSERT_NE(message, session.records.end());
+            message->text = "p7 pbt|msg|You captured Shadowpine Catlord!";
+            session.records.insert(std::next(message), { "OUT", 78000, "p7 pbt|got|1,Shadowpine Catlord" });
+            session.rolls.insert(session.rolls.end(), { { 1, 2, 1 }, { 1, 2, 2 }, { 1, 2, 1 } });
+            JournalRow caught;
+            caught.low = 7;
+            caught.pet.species = 16345;
+            caught.pet.level = 8;
+            caught.pet.quality = 1;
+            caught.pet.display = 592;
+            caught.pet.picks = { 1, 2, 1 };
+            session.after.push_back(caught);
+        }
+        else
+            continue;
+        ++tested;
+        Outcome const outcome = Replay(session);
+        EXPECT_TRUE(outcome.failure.empty()) << outcome.failure;
+    }
+    EXPECT_EQ(tested, 2u);
 }

@@ -2,6 +2,8 @@
 #include "Describe.h"
 #include "Rules.h"
 #include <algorithm>
+#include <cmath>
+#include <iterator>
 #include <stdexcept>
 
 namespace CoAPetBattles::Engine
@@ -49,8 +51,28 @@ namespace CoAPetBattles::Engine
         return kit;
     }
 
+    Stats StatsForPet(SpeciesDef const& species, double level, double quality, uint8_t maxLevel, uint8_t breed)
+    {
+        auto const& breeds = species.Breeds();
+        auto const profile = breeds.find(breed);
+        if (profile == breeds.end())
+            return PetStats(species.power, species.speed, species.stamina, level, quality, maxLevel);
+
+        BreedStats const& stats = profile->second;
+        if (species.retailBreeds.empty())
+            return PetStats(species.power + stats.power, species.speed + stats.speed, species.stamina + stats.stamina,
+                level, quality, maxLevel);
+
+        constexpr std::array<double, 4> retailQuality = { 0.55000001192, 0.60000002384, 0.64999997616,
+            0.69999998808 };
+        level = std::clamp(level, 1.0, static_cast<double>(maxLevel));
+        double const scale = retailQuality[static_cast<size_t>(std::clamp(quality, 1.0, 4.0)) - 1] * level / 100;
+        return { std::floor(stats.stamina * scale * 5 + 100.5), std::floor(stats.power * scale + 0.5),
+            std::floor(stats.speed * scale + 0.5) };
+    }
+
     Pet NewPet(Catalog const& catalog, uint32_t species, double level, std::optional<std::array<int32_t, 3>> picks,
-        Rng& rng, std::optional<double> quality, std::optional<double> hp)
+        Rng& rng, std::optional<double> quality, std::optional<double> hp, uint8_t breed)
     {
         SpeciesDef const* def = catalog.Species(species);
         if (!def)
@@ -64,7 +86,8 @@ namespace CoAPetBattles::Engine
         pet.family = def->family;
         pet.level = level;
         pet.quality = quality.value_or(1);
-        Stats const stats = PetStats(def->power, def->speed, def->stamina, level, pet.quality, maxLevel);
+        pet.breed = breed;
+        Stats const stats = StatsForPet(*def, level, pet.quality, catalog.Config().maxLevel, breed);
         pet.max = stats.health;
         pet.baseMax = stats.health;
         pet.power = stats.power;
@@ -95,6 +118,21 @@ namespace CoAPetBattles::Engine
             }
         }
         return pet;
+    }
+
+    uint8_t RollBreed(Catalog const& catalog, uint32_t species, Rng& rng)
+    {
+        SpeciesDef const* def = catalog.Species(species);
+        if (!def)
+            return 0;
+        auto const& breeds = def->Breeds();
+        if (breeds.empty())
+            return 0;
+        if (breeds.size() == 1)
+            return breeds.begin()->first;
+        auto breed = breeds.begin();
+        std::advance(breed, rng.Roll(0, static_cast<int32_t>(breeds.size()) - 1));
+        return breed->first;
     }
 
     double RollQuality(Catalog const& catalog, Rng& rng)

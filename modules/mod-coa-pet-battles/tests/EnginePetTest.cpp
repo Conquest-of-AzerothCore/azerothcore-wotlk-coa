@@ -4,6 +4,7 @@
 #include "Engine/Rules.h"
 #include "FixtureReader.h"
 #include <gtest/gtest.h>
+#include <iterator>
 
 using namespace CoAPetBattles;
 using namespace CoAPetBattles::Engine;
@@ -50,6 +51,53 @@ TEST(CoAPetBattlesEngine, RulesMatchUpstream)
     EXPECT_EQ(Damage(20, 260, "Beast", "Critter", 0, 0), 420);
     EXPECT_FALSE(FamilyAt(0).has_value());
     EXPECT_EQ(*FamilyAt(8), "Beast");
+}
+
+TEST(CoAPetBattlesEngine, WildBreedRollAndRetailStatsAgree)
+{
+    DataSet data = FixtureData();
+    uint32_t const species = data.species.begin()->first;
+    uint32_t const unmapped = std::next(data.species.begin())->first;
+    data.breeds[species] = { { 3, { 1700, 1500, 1900 } }, { 5, { 1600, 1400, 2200 } } };
+    Catalog const catalog(data, Settings());
+    ReplayRng rng({ { 0, 1, 1 } });
+    EXPECT_EQ(RollBreed(catalog, unmapped, rng), 0u);
+    uint8_t const breed = RollBreed(catalog, species, rng);
+    EXPECT_EQ(breed, 5u);
+    Pet const pet = NewPet(catalog, species, 25, std::array<int32_t, 3> { 1, 1, 1 }, rng, 3, std::nullopt, breed);
+    EXPECT_EQ(pet.breed, 5u);
+    EXPECT_EQ(pet.max, 1400.0);
+    EXPECT_EQ(pet.power, 227.0);
+    EXPECT_EQ(pet.speed, 357.0);
+    EXPECT_TRUE(rng.Exhausted());
+    EXPECT_TRUE(rng.Divergence().empty());
+}
+
+TEST(CoAPetBattlesEngine, SharedBreedsPreserveKitsAndDeferToRetailProfiles)
+{
+    DataSet data = FixtureData();
+    uint32_t const fallback = data.species.begin()->first;
+    uint32_t const retail = std::next(data.species.begin())->first;
+    data.defaultBreeds = { { BalancedBreed, {} }, { 5, { -50, -50, 150 } } };
+    data.breeds[retail] = { { 7, { 1780, 1680, 1700 } } };
+    Catalog const catalog(data, Settings());
+    SpeciesDef const* def = catalog.Species(fallback);
+    ASSERT_NE(def, nullptr);
+    Stats const old = StatsForPet(*def, 20, 3, 25, 0);
+    Stats const balanced = StatsForPet(*def, 20, 3, 25, BalancedBreed);
+    EXPECT_EQ(balanced.health, old.health);
+    EXPECT_EQ(balanced.power, old.power);
+    EXPECT_EQ(balanced.speed, old.speed);
+    ReplayRng rng({ { 0, 1, 1 } });
+    EXPECT_EQ(RollBreed(catalog, retail, rng), 7u);
+    uint8_t const breed = RollBreed(catalog, fallback, rng);
+    EXPECT_EQ(breed, 5u);
+    Stats const fast = StatsForPet(*def, 20, 3, 25, breed);
+    EXPECT_EQ(fast.health - old.health, -65);
+    EXPECT_NEAR(fast.power - old.power, -13, 1e-9);
+    EXPECT_NEAR(fast.speed - old.speed, 39, 1e-9);
+    EXPECT_TRUE(rng.Exhausted());
+    EXPECT_TRUE(rng.Divergence().empty());
 }
 
 TEST(CoAPetBattlesEngine, PetsBuildLikeUpstream)

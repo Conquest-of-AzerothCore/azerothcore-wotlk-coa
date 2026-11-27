@@ -130,6 +130,9 @@ local function Panel(name, isRight)
         local s = isRight and "E" or "P"; local pet = S[s][S.act[s]]; local f = S.info[s]
         if not pet then return end
         GameTooltip:SetOwner(self, "ANCHOR_BOTTOM"); GameTooltip:SetText(pet.name .. "  (level " .. pet.lv .. ")", 1, 0.82, 0)
+        if pet.power then
+            GameTooltip:AddLine("Power " .. pet.power .. "   Speed " .. pet.speed, 0.8, 0.8, 0.8)
+        end
         if f then
             GameTooltip:AddLine("Family: " .. f.name, 1, 1, 1)
             if f.strong ~= "" then GameTooltip:AddLine("Hits harder against: " .. f.strong, 0.4, 1, 0.4) end
@@ -188,11 +191,14 @@ local function ParseStatuses(text)
     return list
 end
 
+local BREED = { [3] = "B/B", [4] = "P/P", [5] = "S/S", [6] = "H/H", [7] = "H/P", [8] = "P/S",
+    [9] = "H/S", [10] = "P/B", [11] = "S/B", [12] = "H/B" }
+
 local function Refresh(instantSide)
     for _, s in ipairs({ "P", "E" }) do
         local w, a = side[s], S[s][S.act[s]]
         if a then
-            w.model:Set(a.entry, a.icon, a.q, a.hp <= 0, a.scale); w.name:SetText(a.name); w.name:SetTextColor(unpack(QCOL[a.q or 1])); w.lvl:SetText("Lv " .. a.lv)
+            w.model:Set(a.entry, a.icon, a.q, a.hp <= 0, a.scale); w.name:SetText(a.name); w.name:SetTextColor(unpack(QCOL[a.q or 1])); w.lvl:SetText("Lv " .. a.lv .. (a.breed and ("  " .. a.breed) or ""))
             if s == "E" then local o = S.own[S.act.E]; w.own:SetText(o and o.text or ""); if o then w.own:SetTextColor(o.r, o.g, o.b) end else w.own:SetText("") end
             SetHP(w.hp, a.hp, a.max, instantSide == s or instantSide == "all")
         end
@@ -443,8 +449,14 @@ local function Setup()
         local i, st, oq, ol = p:match("^(%d+),(%d),(%d),(%d+)$"); if not i then return end
         st = tonumber(st); local mine = QNAME[tonumber(oq)] and ("Lv " .. ol .. " " .. QNAME[tonumber(oq)]) or ""
         if st == 0 then S.own[tonumber(i)] = { text = "NOT COLLECTED", r = 0.3, g = 1, b = 0.3 }
-        elseif st == 1 then S.own[tonumber(i)] = { text = "UPGRADE - you own " .. mine, r = 1, g = 0.82, b = 0 }
         else S.own[tonumber(i)] = { text = "Collected (" .. mine .. ")", r = 0.7, g = 0.7, b = 0.7 } end
+        Refresh()
+    end)
+    AcoreLib.On("pbt", "breed2", function(p)
+        local index, breed, power, speed = p:match("^(%d+),(%d+),(%d+),(%d+)$")
+        local pet = index and S.E[Num(index)]
+        if not pet then return end
+        pet.breed, pet.power, pet.speed = BREED[Num(breed)], Num(power), Num(speed)
         Refresh()
     end)
     AcoreLib.On("pbt", "got", function(p) local q, name = p:match("^(%d),(.+)$"); if name then CollectedFx(name, tonumber(q)) end end)
@@ -513,6 +525,10 @@ end
 
 -- Build the windows and register the server message handlers AT LOAD: a battle can be started by a wild pet's gossip menu, long before /pbtest is ever typed.
 Setup()
+
+local protocol = CreateFrame("Frame")
+protocol:RegisterEvent("PLAYER_ENTERING_WORLD")
+protocol:SetScript("OnEvent", function() AcoreLib.Send("pbj", "hello2", "") end)
 
 SLASH_PBTEST1 = "/pbtest"
 SlashCmdList["PBTEST"] = function(arg)

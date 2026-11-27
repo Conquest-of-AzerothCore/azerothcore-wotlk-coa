@@ -147,6 +147,8 @@ namespace CoAPetBattles::Engine
         {
             return slot >= 1 && slot <= 3 && abil[slot - 1] ? &*abil[slot - 1] : nullptr;
         }
+        uint32_t ownedPetId = 0;
+        uint8_t breed = 0;
     };
 }
 

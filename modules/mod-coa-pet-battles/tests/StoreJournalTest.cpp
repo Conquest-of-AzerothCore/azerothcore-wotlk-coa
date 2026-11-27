@@ -16,6 +16,8 @@ namespace
         data.species[20] = { 20, "Rat", 200, true, true, true, true, false, "Ability_Druid_Dash", 0.0f };
         data.kits[100] = { 100, "Frostwolf Pup", 7, 100, 0, -100 };
         data.kits[200] = { 200, "Rat", 4, 0, 0, 0 };
+        data.defaultBreeds = { { BalancedBreed, {} }, { 5, { -50, -50, 150 } } };
+        data.breeds[10] = { { 3, { 1700, 1500, 1900 } }, { 5, { 1600, 1400, 2200 } } };
         data.xp[1] = { 1, 1, 50 };
         data.xp[2] = { 2, 2, 60 };
         data.xp[3] = { 3, 3, 70 };
@@ -37,6 +39,7 @@ namespace
     {
         OwnedPet pet;
         pet.species = species;
+        pet.id = species;
         pet.level = level;
         pet.quality = quality;
         pet.revision = revision;
@@ -115,20 +118,28 @@ TEST(CoAPetBattlesJournal, HealthRegeneratesAndCaps)
     EXPECT_EQ(journal.Pet(10)->health, 0u);
 }
 
-TEST(CoAPetBattlesJournal, CaptureKeepsTheBetterPet)
+TEST(CoAPetBattlesJournal, EveryCaptureGetsItsOwnIdAndStats)
 {
-    Journal journal = Make({ Owned(10, 5, 2) });
-    EXPECT_EQ(journal.Compare(10, 2, 5), 2);
-    EXPECT_EQ(journal.Capture(10, 5, { 1, 1, 1 }, 2, 0), CaptureResult::Released);
-    EXPECT_EQ(journal.Compare(10, 1, 25), 2);
-    EXPECT_EQ(journal.Capture(10, 25, { 1, 1, 1 }, 1, 0), CaptureResult::Released);
-    EXPECT_EQ(journal.Compare(10, 2, 6), 1);
-    EXPECT_EQ(journal.Capture(10, 6, { 2, 1, 2 }, 2, 0), CaptureResult::Replaced);
-    EXPECT_EQ(journal.Pet(10)->level, 6);
-    EXPECT_EQ(journal.Pet(10)->picks, (std::array<uint8_t, 3> { 2, 1, 2 }));
-    EXPECT_EQ(journal.Compare(20, 1, 1), 0);
-    EXPECT_EQ(journal.Capture(20, 3, { 1, 1, 1 }, 1, 0), CaptureResult::Added);
-    EXPECT_EQ(journal.Compare(20, 3, 30), 1);
+    Journal journal = Make({ Owned(10, 9, 4) });
+    OwnedPet const* first = journal.Capture(10, 25, { 2, 1, 2 }, 3, 77, 5);
+    OwnedPet const* second = journal.Capture(10, 25, { 2, 1, 2 }, 3, 77, 5);
+    OwnedPet const* third = journal.Capture(10, 3, { 1, 1, 1 }, 1, 0, 3);
+    ASSERT_NE(first, nullptr);
+    ASSERT_NE(second, nullptr);
+    ASSERT_NE(third, nullptr);
+    EXPECT_NE(first->id, second->id);
+    EXPECT_EQ(first->source, PetSource::Wild);
+    EXPECT_EQ(first->breed, 5);
+    EXPECT_EQ(journal.MaxHealth(*first), 1400u);
+    EXPECT_EQ(third->breed, 3);
+    EXPECT_EQ(journal.Pet(10)->level, 9u);
+    EXPECT_EQ(journal.Pets().size(), 4u);
+    EXPECT_EQ(journal.Capture(10, 3, { 1, 1, 1 }, 1, 0, 12), nullptr);
+    EXPECT_EQ(journal.Capture(999, 3, { 1, 1, 1 }, 1, 0), nullptr);
+    Journal reloaded = Make({ *journal.Pet(10), *first, *second, *third });
+    EXPECT_EQ(reloaded.Pet(first->id)->breed, 5u);
+    EXPECT_EQ(reloaded.Pet(second->id)->source, PetSource::Wild);
+    EXPECT_EQ(reloaded.Pets().size(), 4u);
 }
 
 TEST(CoAPetBattlesJournal, UnusableRowsCountAsOwnedAndAreNeverWritten)
@@ -141,9 +152,7 @@ TEST(CoAPetBattlesJournal, UnusableRowsCountAsOwnedAndAreNeverWritten)
     {
         EXPECT_TRUE(journal.Owns(species)) << species;
         EXPECT_EQ(journal.Pet(species), nullptr) << species;
-        EXPECT_EQ(journal.Compare(species, 4, 25), 2) << species;
         EXPECT_FALSE(journal.Add(species, 1, { 1, 1, 1 }, 1, 0)) << species;
-        EXPECT_EQ(journal.Capture(species, 25, { 1, 1, 1 }, 4, 0), CaptureResult::Released) << species;
         EXPECT_FALSE(journal.SetPicks(species, { 2, 2, 2 })) << species;
         EXPECT_FALSE(journal.GrantXp(species, 25, 0).has_value()) << species;
     }
@@ -193,14 +202,37 @@ TEST(CoAPetBattlesJournal, CompanionSyncAddsOnceAtLevelOne)
     std::multimap<uint32_t, uint32_t> const companions = { { 10, 500 }, { 10, 501 }, { 20, 600 }, { 30, 700 } };
     auto knows = [](uint32_t spell) { return spell == 501 || spell == 700; };
     EXPECT_EQ(journal.SyncCompanions(companions, knows), (std::vector<uint32_t> { 10 }));
-    ASSERT_NE(journal.Pet(10), nullptr);
-    EXPECT_EQ(journal.Pet(10)->level, 1);
-    EXPECT_EQ(journal.Pet(10)->quality, 1);
+    ASSERT_NE(journal.PetOfSpecies(10), nullptr);
+    EXPECT_EQ(journal.PetOfSpecies(10)->level, 1);
+    EXPECT_EQ(journal.PetOfSpecies(10)->quality, 1);
     EXPECT_TRUE(journal.SyncCompanions(companions, knows).empty());
 
     Journal leveled = Make({ Owned(10, 9) });
     EXPECT_TRUE(leveled.SyncCompanions(companions, knows).empty());
     EXPECT_EQ(leveled.Pet(10)->level, 9);
+    EXPECT_EQ(leveled.Pet(10)->source, PetSource::Companion);
+    EXPECT_EQ(leveled.Pets().size(), 1u);
+}
+
+TEST(CoAPetBattlesJournal, CompanionGrantCoexistsWithWildCopiesAndIsStableAcrossReload)
+{
+    Journal journal = Make({});
+    OwnedPet const* wild = journal.Capture(20, 5, { 1, 1, 1 }, 3, 5, 5);
+    ASSERT_NE(wild, nullptr);
+    std::multimap<uint32_t, uint32_t> const companions = { { 20, 500 }, { 20, 501 } };
+    EXPECT_EQ(journal.SyncCompanions(companions, [](uint32_t spell) { return spell == 500; }),
+        (std::vector<uint32_t> { 20 }));
+    ASSERT_EQ(journal.Pets().size(), 2u);
+    OwnedPet const* grant = journal.Pets().back();
+    EXPECT_NE(grant->id, wild->id);
+    EXPECT_EQ(grant->source, PetSource::Companion);
+    EXPECT_EQ(grant->level, 1u);
+    EXPECT_EQ(grant->breed, BalancedBreed);
+    EXPECT_EQ(journal.MaxHealth(*grant), StatsHealth(20, 1, 1));
+    Journal reloaded = Make({ *wild, *grant });
+    EXPECT_TRUE(reloaded.SyncCompanions(companions, [](uint32_t spell) { return spell == 501; }).empty());
+    EXPECT_TRUE(reloaded.TakeWrites().empty());
+    EXPECT_EQ(reloaded.Pets().size(), 2u);
 }
 
 TEST(CoAPetBattlesJournal, WritesCarryIncreasingRevisions)
@@ -214,7 +246,8 @@ TEST(CoAPetBattlesJournal, WritesCarryIncreasingRevisions)
     std::vector<RowWrite> const writes = journal.TakeWrites();
     ASSERT_EQ(writes.size(), 3u);
     EXPECT_EQ(writes[0].kind, RowKind::Pet);
-    EXPECT_EQ(writes[0].key, 20u);
+    EXPECT_EQ(writes[0].key, journal.PetIdForSpecies(20));
+    EXPECT_NE(writes[0].key, 20u);
     EXPECT_EQ(writes[0].revision, 8u);
     EXPECT_EQ(writes[1].key, 10u);
     EXPECT_EQ(writes[1].revision, 9u);
@@ -228,4 +261,60 @@ TEST(CoAPetBattlesJournal, WritesCarryIncreasingRevisions)
     EXPECT_TRUE(journal.SetDisplayOnce(10, 55));
     EXPECT_FALSE(journal.SetDisplayOnce(10, 56));
     EXPECT_EQ(journal.Pet(10)->display, 55u);
+}
+
+TEST(CoAPetBattlesJournal, OwnedIdsKeepSameSpeciesCopiesAndTeamsIndependent)
+{
+    OwnedPet first = Owned(10, 5);
+    first.id = 1001;
+    OwnedPet second = Owned(10, 7, 3);
+    second.id = 1002;
+    std::array<Team, TeamCount> teams {};
+    teams[0].slots = { first.id, second.id, 0 };
+    Journal journal = Make({ first, second }, teams);
+
+    ASSERT_EQ(journal.Pets().size(), 2u);
+    EXPECT_EQ(journal.BattleTeam(), teams[0].slots);
+    EXPECT_EQ(journal.SetTeam(2, { second.id, first.id, 0 }), TeamResult::Saved);
+    EXPECT_EQ(journal.SetTeam(3, { first.id, first.id, 0 }), TeamResult::Duplicate);
+    ASSERT_TRUE(journal.SetHealth(first.id, 30, 100));
+    ASSERT_EQ(journal.Feed(first.id, 5, 100), FeedResult::Fed);
+    ASSERT_TRUE(journal.SetPicks(second.id, { 2, 2, 2 }));
+    ASSERT_TRUE(journal.SetDisplayOnce(second.id, 81));
+    ASSERT_TRUE(journal.GrantXp(second.id, 7, 100));
+    EXPECT_EQ(journal.Pet(first.id)->xp, 0u);
+    EXPECT_EQ(journal.Pet(first.id)->picks, first.picks);
+    EXPECT_EQ(journal.Pet(first.id)->display, 0u);
+    EXPECT_EQ(journal.Pet(first.id)->health, 30u);
+    EXPECT_EQ(journal.Pet(second.id)->health, 0u);
+    EXPECT_EQ(journal.Pet(second.id)->xp, 100u);
+    EXPECT_EQ(journal.Pet(second.id)->display, 81u);
+    EXPECT_EQ(journal.Pet(second.id)->picks, (std::array<uint8_t, 3> { 2, 2, 2 }));
+}
+
+TEST(CoAPetBattlesJournal, ReleasePersistsIdAndProtectsCompanionAndLegacy)
+{
+    OwnedPet legacy = Owned(10, 8);
+    OwnedPet companion = Owned(20, 1);
+    companion.source = PetSource::Companion;
+    Journal journal = Make({ legacy, companion });
+    OwnedPet const* captured = journal.Capture(20, 2, { 1, 1, 1 }, 3, 0);
+    ASSERT_NE(captured, nullptr);
+    OwnedPet tombstone = *captured;
+    EXPECT_FALSE(journal.Release(legacy.id));
+    EXPECT_FALSE(journal.Release(companion.id));
+    EXPECT_TRUE(journal.Release(captured->id));
+    EXPECT_FALSE(journal.Release(tombstone.id));
+    auto const writes = journal.TakeWrites();
+    ASSERT_EQ(writes.size(), 2u);
+    EXPECT_EQ(writes.back().kind, RowKind::Release);
+    EXPECT_EQ(writes.back().key, tombstone.id);
+    tombstone.source = PetSource::Released;
+    tombstone.revision = writes.back().revision;
+    Journal reloaded = Make({ legacy, companion, tombstone });
+    EXPECT_EQ(reloaded.Pet(tombstone.id), nullptr);
+    EXPECT_TRUE(reloaded.Rejected().empty());
+    auto const* next = reloaded.Capture(20, 2, { 1, 1, 1 }, 3, 0);
+    ASSERT_NE(next, nullptr);
+    EXPECT_GT(next->id, tombstone.id);
 }

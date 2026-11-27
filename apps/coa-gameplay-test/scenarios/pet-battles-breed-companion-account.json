@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Pet breeds: a fixed companion grant is shared by alts and protected from release",
+  "contract": [
+    "Learning the mapped Albino River Calf companion on either character grants one battle pet to the account.",
+    "Learning it on the second character does not grant a duplicate. A version 2 release command for the copy",
+    "leaves the companion in its team after the account journal is reloaded."
+  ],
+  "timeout_ms": 60000,
+  "vanity_ownership": { "unlock_all": false },
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "main", "race": 1, "class": 1, "level": 60, "security": 2 },
+    { "id": "alt", "race": 1, "class": 1, "level": 60, "security": 2, "account_of": "main" }
+  ],
+  "steps": [
+    { "action": "command", "actor": "main", "command": ".petbattle journal" },
+    { "action": "assert", "label": "CONTROL: fresh account journal starts empty", "actor": "main",
+      "metric": "system_message_contains", "text": "[Pet journal] 0 pets", "equals": 1 },
+    { "action": "command", "actor": "main", "command": ".learn 926133" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "command", "actor": "alt", "command": ".petbattle journal" },
+    { "action": "assert", "label": "the alt can already see the new companion", "actor": "alt",
+      "metric": "system_message_contains", "text": "123380 Albino River Calf L1 q1", "equals": 1 },
+    { "action": "command", "actor": "alt", "command": ".learn 926133" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "command", "actor": "alt", "command": ".petbattle send pbj|setteam2|2,2147483648,0,0" },
+    { "action": "command", "actor": "alt", "command": ".petbattle send pbj|release2|2147483648" },
+    { "action": "wait", "ms": 2000 },
+    { "action": "command", "actor": "main", "command": ".petbattle reload" },
+    { "action": "assert", "label": "one companion survived the release request and reload", "actor": "main",
+      "metric": "system_message_contains", "text": "Reloaded 1 pets", "equals": 1 },
+    { "action": "command", "actor": "main", "command": ".petbattle journal" },
+    { "action": "assert", "label": "the exact companion still occupies team 2", "actor": "main",
+      "metric": "system_message_contains", "text": "Team 2: 123380 0 0", "equals": 1 }
+  ]
+}

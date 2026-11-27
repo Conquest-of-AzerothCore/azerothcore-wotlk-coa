@@ -21,6 +21,7 @@ namespace
             species = FeedingCatalog()->SpeciesIds().front();
             Store::OwnedPet pet;
             pet.species = species;
+            pet.id = species;
             pet.level = 5;
             journal = std::make_unique<Store::Journal>(1, *FeedingCatalog(), std::vector<Store::OwnedPet> { pet },
                 std::array<Store::Team, Store::TeamCount> {}, 1, 0);

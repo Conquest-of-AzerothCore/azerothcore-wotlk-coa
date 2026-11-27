@@ -332,6 +332,7 @@ namespace CoAPetBattles::Wild
         first.level = level;
         first.display = pet.display;
         first.quality = Engine::RollQuality(*_catalog, _rng);
+        first.breed = Engine::RollBreed(*_catalog, first.species, _rng);
         team.push_back(first);
         if (level <= _settings.soloMaxLevel)
             return team;
@@ -351,6 +352,7 @@ namespace CoAPetBattles::Wild
             extra.species = candidates[k];
             extra.level = level;
             extra.quality = Engine::RollQuality(*_catalog, _rng);
+            extra.breed = Engine::RollBreed(*_catalog, extra.species, _rng);
             team.push_back(extra);
             if (candidates.size() > 1)
                 candidates.erase(candidates.begin() + static_cast<std::ptrdiff_t>(k));

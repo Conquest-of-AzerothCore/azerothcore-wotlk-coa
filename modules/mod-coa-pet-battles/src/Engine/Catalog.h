@@ -57,6 +57,10 @@ namespace CoAPetBattles::Engine
         double speed = 0;
         double stamina = 0;
         std::vector<KitEntry> kit;
+        std::map<uint8_t, BreedStats> retailBreeds;
+        std::map<uint8_t, BreedStats> const* defaultBreeds = nullptr;
+
+        std::map<uint8_t, BreedStats> const& Breeds() const;
     };
 
     class Catalog
@@ -77,6 +81,7 @@ namespace CoAPetBattles::Engine
 
     private:
         Settings _settings;
+        std::map<uint8_t, BreedStats> _defaultBreeds;
         std::map<uint32_t, AbilityDef> _abilities;
         std::map<uint32_t, States> _states;
         std::map<uint32_t, std::string> _stateNames;

@@ -7,6 +7,7 @@ from pathlib import Path
 CLIENT = Path(__file__).resolve().parents[2] / 'client'
 ADDONS = CLIENT / 'AddOns'
 MANIFEST = CLIENT / 'MANIFEST.sha256'
+COA_ADDON_CHANGES = {'AddOns/wotlk_pets/Pets.lua', 'AddOns/wotlk_petbattle/Battle.lua'}
 
 
 def manifest():
@@ -50,7 +51,7 @@ class ClientAddonsTest(unittest.TestCase):
         upstream = os.environ.get('PET_BATTLES_UPSTREAM')
         if not upstream:
             self.skipTest('PET_BATTLES_UPSTREAM is not set')
-        for path in manifest():
+        for path in manifest().keys() - COA_ADDON_CHANGES:
             source = Path(upstream) / 'addons' / Path(path).relative_to('AddOns')
             self.assertEqual(source.read_bytes(), (CLIENT / path).read_bytes(), path)
 

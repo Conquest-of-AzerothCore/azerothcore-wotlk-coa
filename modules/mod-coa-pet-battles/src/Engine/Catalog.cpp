@@ -5,7 +5,13 @@
 
 namespace CoAPetBattles::Engine
 {
-    Catalog::Catalog(DataSet const& data, Settings const& settings) : _settings(settings), _presentations(data.presentations)
+    std::map<uint8_t, BreedStats> const& SpeciesDef::Breeds() const
+    {
+        return !retailBreeds.empty() || !defaultBreeds ? retailBreeds : *defaultBreeds;
+    }
+
+    Catalog::Catalog(DataSet const& data, Settings const& settings)
+        : _settings(settings), _defaultBreeds(data.defaultBreeds), _presentations(data.presentations)
     {
         for (auto const& [id, ability] : data.abilities)
             _abilities[id] = { id, ability.name, static_cast<double>(ability.family),
@@ -63,7 +69,9 @@ namespace CoAPetBattles::Engine
             SpeciesDef def { entry, species.name, species.icon,
                 FamilyAt(static_cast<double>(kit->second.family) + 1).value_or("Magic"),
                 static_cast<double>(kit->second.power), static_cast<double>(kit->second.speed),
-                static_cast<double>(kit->second.stamina), {} };
+                static_cast<double>(kit->second.stamina), {}, {}, &_defaultBreeds };
+            if (auto const breeds = data.breeds.find(entry); breeds != data.breeds.end())
+                def.retailBreeds = breeds->second;
             _species[entry] = def;
         }
         for (Presentation const& row : _presentations)

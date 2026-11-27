@@ -159,6 +159,15 @@ namespace CoAPetBattles
         uint32_t species = 0;
     };
 
+    inline constexpr uint8_t BalancedBreed = 3;
+
+    struct BreedStats
+    {
+        int16_t stamina = 0;
+        int16_t power = 0;
+        int16_t speed = 0;
+    };
+
     struct DataSet
     {
         std::map<uint32_t, Species> species;
@@ -168,6 +177,8 @@ namespace CoAPetBattles
         std::map<uint32_t, ModelSize> modelSizes;
         std::map<uint32_t, DisplaySize> displaySizes;
         std::map<uint32_t, Companion> companions;
+        std::map<uint32_t, std::map<uint8_t, BreedStats>> breeds;
+        std::map<uint8_t, BreedStats> defaultBreeds;
         std::map<uint16_t, State> states;
         std::map<uint8_t, XpLevel> xp;
         std::map<uint32_t, uint32_t> standIns;

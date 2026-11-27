@@ -45,6 +45,8 @@ TEST(CoAPetBattlesStore, UpsertGuardsEveryColumnByRevision)
 {
     OwnedPet pet;
     pet.species = 10;
+    pet.id = 501;
+    pet.source = PetSource::Companion;
     pet.level = 4;
     pet.xp = 33;
     pet.picks = { 2, 1, 2 };
@@ -53,21 +55,21 @@ TEST(CoAPetBattlesStore, UpsertGuardsEveryColumnByRevision)
     pet.health = 120;
     pet.healthAt = 5000;
     Journal journal(42, SqlCatalog(), { pet }, {}, 1, 0);
-    ASSERT_TRUE(journal.SetPicks(10, { 2, 2, 2 }));
-    ASSERT_EQ(journal.SetTeam(2, { 10, 0, 0 }), TeamResult::Saved);
+    ASSERT_TRUE(journal.SetPicks(501, { 2, 2, 2 }));
+    ASSERT_EQ(journal.SetTeam(2, { 501, 0, 0 }), TeamResult::Saved);
     ASSERT_TRUE(journal.SetActiveTeam(2));
     std::vector<RowWrite> const writes = journal.TakeWrites();
     ASSERT_EQ(writes.size(), 3u);
 
     std::string const petSql = UpsertStatement(journal, writes[0]);
-    EXPECT_NE(petSql.find("INSERT INTO `coa_pet_journal`"), std::string::npos) << petSql;
-    EXPECT_NE(petSql.find("VALUES (42, 10, 4, 33, 2, 2, 2, 3, 77, 120, 5000, 1)"), std::string::npos) << petSql;
-    EXPECT_EQ(Count(petSql, Guard), 10u) << petSql;
+    EXPECT_NE(petSql.find("INSERT INTO `coa_pet_journal` (`account`, `pet_id`, `species`"), std::string::npos) << petSql;
+    EXPECT_NE(petSql.find("VALUES (42, 501, 10, 4, 33, 2, 2, 2, 3, 77, 120, 5000, 0, 2, 1)"), std::string::npos) << petSql;
+    EXPECT_EQ(Count(petSql, Guard), 13u) << petSql;
     EXPECT_TRUE(EndsWith(petSql, RevisionLast)) << petSql;
 
     std::string const teamSql = UpsertStatement(journal, writes[1]);
     EXPECT_NE(teamSql.find("INSERT INTO `coa_pet_team`"), std::string::npos) << teamSql;
-    EXPECT_NE(teamSql.find("VALUES (42, 2, 10, 0, 0, 2)"), std::string::npos) << teamSql;
+    EXPECT_NE(teamSql.find("VALUES (42, 2, 501, 0, 0, 2)"), std::string::npos) << teamSql;
     EXPECT_EQ(Count(teamSql, Guard), 4u) << teamSql;
     EXPECT_TRUE(EndsWith(teamSql, RevisionLast)) << teamSql;
 
@@ -136,4 +138,14 @@ TEST(CoAPetBattlesStore, SpellsLearnedOnMapThreadsQueueForTheWorldThread)
     EXPECT_EQ(drained.size(), 4000u);
     EXPECT_TRUE(queue.Drain().empty());
     EXPECT_EQ(drained.front().spell, 0u);
+}
+
+TEST(CoAPetBattlesStore, ReleaseTombstoneWinsAgainstDelayedUpserts)
+{
+    Journal journal(42, SqlCatalog(), {}, {}, 1, 0);
+    std::string const sql = UpsertStatement(journal, { RowKind::Release, 42, 501, 9 });
+    EXPECT_NE(sql.find("(`account`, `pet_id`, `species`, `source`, `revision`) VALUES (42, 501, 0, 3, 9)"),
+        std::string::npos);
+    EXPECT_EQ(Count(sql, Guard), 3u);
+    EXPECT_TRUE(EndsWith(sql, RevisionLast));
 }

@@ -124,6 +124,15 @@ namespace CoAPetBattles
                 Companion row { f[0].Get<uint32>(), f[1].Get<uint32>() };
                 data.companions[row.spell] = row;
             });
+            ReadRows("SELECT `species`, `breed`, `stamina`, `power`, `speed` FROM `coa_pet_breed`", [&data](Field* f)
+            {
+                data.breeds[f[0].Get<uint32>()][f[1].Get<uint8>()] = {
+                    f[2].Get<int16>(), f[3].Get<int16>(), f[4].Get<int16>() };
+            });
+            ReadRows("SELECT `breed`, `stamina`, `power`, `speed` FROM `coa_pet_breed_default`", [&data](Field* f)
+            {
+                data.defaultBreeds[f[0].Get<uint8>()] = { f[1].Get<int16>(), f[2].Get<int16>(), f[3].Get<int16>() };
+            });
             return data;
         }
 
@@ -240,11 +249,11 @@ namespace CoAPetBattles
 
         LOG_INFO("server.loading", "Loaded pet battles: {} species, {} kits, {} kit abilities, {} abilities, {} turns, "
             "{} effects, {} effect labels, {} states, {} aura states, {} xp levels, {} zones, {} zone species, "
-            "{} presentations, {} model sizes, {} display sizes, {} companions", data.species.size(),
-            data.kits.size(), data.kitAbilities.size(), data.abilities.size(), data.turns.size(), data.effects.size(),
+            "{} presentations, {} model sizes, {} display sizes, {} companions, {} breed-enabled species",
+            data.species.size(), data.kits.size(), data.kitAbilities.size(), data.abilities.size(), data.turns.size(), data.effects.size(),
             data.labels.size(), data.states.size(), data.auraStates.size(), data.xp.size(), data.zones.size(),
             data.zoneSpecies.size(), data.presentations.size(), data.modelSizes.size(), data.displaySizes.size(),
-            data.companions.size());
+            data.companions.size(), data.breeds.size());
         _data = std::move(data);
         _catalog = std::make_shared<Engine::Catalog const>(_data, _settings);
         _loaded = true;

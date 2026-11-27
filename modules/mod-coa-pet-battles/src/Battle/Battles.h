@@ -56,6 +56,11 @@ namespace CoAPetBattles::Battle
         virtual uint32_t UnixNow() const = 0;
         virtual Store::Journal* JournalOf(uint64_t character) = 0;
         virtual void Flush(Store::Journal& journal) = 0;
+        virtual void FlushRelease(Store::Journal& journal, std::function<void(bool)> complete)
+        {
+            Flush(journal);
+            complete(true);
+        }
         virtual void SyncCompanions(uint64_t character) = 0;
         virtual void Show(uint64_t handle, uint64_t other, Cue const& cue) = 0;
         virtual void Prime(uint64_t character, uint32_t entry, uint32_t species, uint32_t display) = 0;
@@ -63,9 +68,11 @@ namespace CoAPetBattles::Battle
         virtual std::optional<uint8_t> FoodLevel(uint32_t item) = 0;
         virtual bool HasItem(uint64_t character, uint32_t item) = 0;
         virtual void TakeItem(uint64_t character, uint32_t item) = 0;
-        virtual void Summon(uint64_t character, uint32_t species) = 0;
+        virtual void Summon(uint64_t character, uint32_t petId) = 0;
         virtual void Dismiss(uint64_t character) = 0;
         virtual uint32_t Follower(uint64_t character) = 0;
+        virtual uint32_t FollowerId(uint64_t) { return 0; }
+        virtual void DismissReleasedFollowers(uint32_t, uint32_t) { }
         virtual void Suppress(uint64_t character, bool on) = 0;
         virtual uint32_t SweepStandIns(uint64_t character, float yards) = 0;
         virtual void Refused(uint64_t, std::string const&) { }
@@ -77,6 +84,7 @@ namespace CoAPetBattles::Battle
         double level = 1;
         double quality = 1;
         uint32_t display = 0;
+        uint8_t breed = 0;
     };
 
     class Session;
@@ -105,6 +113,9 @@ namespace CoAPetBattles::Battle
         Engine::Rng& GetRng() { return _rng; }
         std::shared_ptr<Engine::Catalog const> GetCatalog() const { return _catalog; }
         PetScale const& GetScale() const { return _scale; }
+        bool UsesOwnedIds(uint64_t character) const { return _ownedIdClients.contains(character); }
+        void SendJournalPet(uint64_t character, Store::Journal const& journal, Store::OwnedPet const& pet,
+            uint32_t now);
         void Unregister(uint64_t character, Session const* session);
 
     private:
@@ -112,13 +123,15 @@ namespace CoAPetBattles::Battle
         void Quit(uint64_t character);
         bool OtherCharacterFighting(uint64_t character) const;
         void ClearLingering(uint64_t character);
-        void FedRefresh(uint64_t character, uint32_t species, uint32_t remaining, uint64_t stepMs);
+        void NotifyRelease(uint32_t account, uint32_t petId);
+        void FedRefresh(uint64_t character, uint32_t petId, uint32_t remaining, uint64_t stepMs);
 
         std::shared_ptr<Engine::Catalog const> _catalog;
         PetScale _scale;
         World& _world;
         Scheduler& _scheduler;
         Engine::Rng& _rng;
+        std::set<uint64_t> _ownedIdClients;
         std::map<uint64_t, std::shared_ptr<Session>> _sessions;
         std::multimap<uint64_t, std::weak_ptr<Session>> _lingering;
     };

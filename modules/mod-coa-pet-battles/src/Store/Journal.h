@@ -16,9 +16,20 @@ namespace CoAPetBattles::Store
     inline constexpr uint8_t TeamCount = 3;
     inline constexpr uint8_t MaxQuality = 4;
 
+    enum class PetSource : uint8_t
+    {
+        Legacy,
+        Wild,
+        Companion,
+        Released,
+    };
+
     struct OwnedPet
     {
         uint32_t species = 0;
+        uint32_t id = 0;
+        uint8_t breed = 0;
+        PetSource source = PetSource::Legacy;
         uint8_t level = 1;
         uint32_t xp = 0;
         std::array<uint8_t, 3> picks = { 1, 1, 1 };
@@ -40,6 +51,7 @@ namespace CoAPetBattles::Store
         Pet,
         Team,
         Account,
+        Release,
     };
 
     struct RowWrite
@@ -57,13 +69,6 @@ namespace CoAPetBattles::Store
         uint8_t levelsGained = 0;
 
         bool operator==(XpGain const&) const = default;
-    };
-
-    enum class CaptureResult
-    {
-        Added,
-        Replaced,
-        Released,
     };
 
     enum class TeamResult
@@ -89,29 +94,32 @@ namespace CoAPetBattles::Store
         std::vector<std::string> const& Rejected() const { return _rejected; }
 
         bool Owns(uint32_t species) const;
-        OwnedPet const* Pet(uint32_t species) const;
+        OwnedPet const* Pet(uint32_t petId) const;
+        OwnedPet const* PetOfSpecies(uint32_t species) const;
+        uint32_t PetIdForSpecies(uint32_t species) const;
+        uint32_t SpeciesForPet(uint32_t petId) const;
         std::vector<OwnedPet const*> Pets() const;
 
         bool Add(uint32_t species, uint8_t level, std::array<uint8_t, 3> picks, uint8_t quality, uint32_t display);
-        CaptureResult Capture(uint32_t species, uint8_t level, std::array<uint8_t, 3> picks, uint8_t quality,
-            uint32_t display);
-        uint8_t Compare(uint32_t species, uint8_t quality, uint8_t level) const;
-        bool SetPicks(uint32_t species, std::array<uint8_t, 3> picks);
-        bool SetDisplayOnce(uint32_t species, uint32_t display);
-        std::optional<XpGain> GrantXp(uint32_t species, uint8_t enemyLevel, uint32_t now);
+        OwnedPet const* Capture(uint32_t species, uint8_t level, std::array<uint8_t, 3> picks, uint8_t quality,
+            uint32_t display, uint8_t breed = 0);
+        bool Release(uint32_t petId);
+        bool SetPicks(uint32_t petId, std::array<uint8_t, 3> picks);
+        bool SetDisplayOnce(uint32_t petId, uint32_t display);
+        std::optional<XpGain> GrantXp(uint32_t petId, uint8_t enemyLevel, uint32_t now);
 
         uint32_t MaxHealth(OwnedPet const& pet) const;
         uint32_t CurrentHealth(OwnedPet const& pet, uint32_t now) const;
-        bool SetHealth(uint32_t species, uint32_t health, uint32_t now);
+        bool SetHealth(uint32_t petId, uint32_t health, uint32_t now);
         size_t HealAll();
-        FeedResult Feed(uint32_t species, uint8_t foodLevel, uint32_t now);
+        FeedResult Feed(uint32_t petId, uint8_t foodLevel, uint32_t now);
 
         TeamResult SetTeam(uint8_t team, std::array<uint32_t, 3> slots);
         bool SetActiveTeam(uint8_t team);
         uint8_t ActiveTeam() const { return _activeTeam; }
         uint32_t ActiveRevision() const { return _activeRevision; }
         Team const& TeamAt(uint8_t team) const;
-        std::array<uint32_t, 3> BattleTeam();
+        std::array<uint32_t, 3> BattleTeam(bool ownedIds = false);
 
         std::vector<uint32_t> SyncCompanions(std::multimap<uint32_t, uint32_t> const& speciesSpells,
             std::function<bool(uint32_t)> const& knowsSpell);
@@ -121,13 +129,18 @@ namespace CoAPetBattles::Store
     private:
         uint8_t MaxLevel() const;
         bool Usable(OwnedPet const& pet, std::string* reason) const;
-        void Keep(OwnedPet pet);
+        OwnedPet const* AddPet(OwnedPet pet);
+        OwnedPet const& Keep(OwnedPet pet);
         void WriteTeam(uint8_t team);
 
         uint32_t _account;
         Engine::Catalog const* _catalog;
         std::map<uint32_t, OwnedPet> _pets;
-        std::set<uint32_t> _blocked;
+        std::multimap<uint32_t, uint32_t> _petIdsBySpecies;
+        std::set<uint32_t> _blockedSpecies;
+        std::set<uint32_t> _companionSpecies;
+        std::set<uint32_t> _blockedLegacySpecies;
+        uint32_t _lastPetId = 0x7FFFFFFF;
         std::array<Team, TeamCount> _teams;
         uint8_t _activeTeam;
         uint32_t _activeRevision;

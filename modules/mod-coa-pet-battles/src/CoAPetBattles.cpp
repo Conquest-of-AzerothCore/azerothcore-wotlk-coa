@@ -37,7 +37,8 @@ namespace
             for (char const* action : { "start", "cmd", "quit", "clean" })
                 Forward("pbt", action);
             for (char const* action : { "list", "abil", "setabil", "setteam", "active", "feed", "summon", "dismiss",
-                "prime" })
+                "prime", "hello2", "list2", "abil2", "setabil2", "setteam2", "active2", "feed2", "summon2",
+                "release2" })
                 Forward("pbj", action);
         }
 

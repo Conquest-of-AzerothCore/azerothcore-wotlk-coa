@@ -31,6 +31,7 @@ namespace
             {
                 Store::OwnedPet pet;
                 pet.species = species[i];
+                pet.id = species[i];
                 pet.level = i == 1 ? secondLevel : 10;
                 pets.push_back(pet);
             }
@@ -284,4 +285,42 @@ TEST(CoAPetBattlesLifecycle, EveryCueNamesItsCharacter)
     ASSERT_FALSE(arena.world.cueCharacters.empty());
     for (uint64_t character : arena.world.cueCharacters)
         EXPECT_EQ(character, 7u);
+}
+
+TEST(CoAPetBattlesLifecycle, OwnedJournalReleasesOnlyTheConfirmedWildCopy)
+{
+    Arena arena;
+    Store::Journal& journal = *arena.world.journal;
+    constexpr std::array<uint8_t, 3> picks = { 1, 1, 1 };
+    Store::OwnedPet const* first = journal.Capture(arena.world.enemy, 8, picks, 3, 0);
+    Store::OwnedPet const* second = journal.Capture(arena.world.enemy, 8, picks, 3, 0);
+    ASSERT_NE(first, nullptr);
+    ASSERT_NE(second, nullptr);
+    uint32_t const released = first->id;
+    uint32_t const kept = second->id;
+    std::string const id = std::to_string(released);
+    std::string const other = std::to_string(kept);
+    arena.battles.Message(7, "pbj", "list2", "");
+    EXPECT_TRUE(arena.world.SentStartingWith("pbj|pet2|" + id + ","));
+    EXPECT_TRUE(arena.world.SentStartingWith("pbj|pet2|" + other + ","));
+    EXPECT_TRUE(arena.world.Sent("pbj|done2|"));
+    arena.battles.Message(7, "pbj", "setteam2", "2," + id + "," + other + ",0");
+    EXPECT_EQ(journal.TeamAt(2).slots, (std::array<uint32_t, 3> { released, kept, 0 }));
+    arena.battles.Message(7, "pbj", "setabil2", other + ",1,2");
+    EXPECT_EQ(journal.Pet(kept)->picks[0], 2u);
+    EXPECT_EQ(journal.Pet(released)->picks[0], 1u);
+
+    arena.Start();
+    ASSERT_TRUE(arena.battles.InBattle(7));
+    arena.battles.Message(8, "pbj", "release2", id);
+    EXPECT_NE(journal.Pet(released), nullptr);
+    EXPECT_TRUE(arena.world.SentStartingWith("pbj|releaseerror2|"));
+    arena.battles.Logout(7);
+
+    arena.battles.Message(7, "pbj", "release2", id);
+    EXPECT_EQ(journal.Pet(released), nullptr);
+    EXPECT_NE(journal.Pet(kept), nullptr);
+    EXPECT_EQ(journal.TeamAt(2).slots, (std::array<uint32_t, 3> { 0, kept, 0 }));
+    EXPECT_TRUE(arena.world.Sent("pbj|removed2|" + id));
+    EXPECT_TRUE(arena.world.Sent("pbj|team2|2,0," + other + ",0"));
 }

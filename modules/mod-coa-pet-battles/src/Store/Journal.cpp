@@ -1,7 +1,8 @@
 #include "Journal.h"
-#include "Engine/Rules.h"
+#include "Engine/PetFactory.h"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace CoAPetBattles::Store
 {
@@ -47,12 +48,22 @@ namespace CoAPetBattles::Store
         for (OwnedPet const& pet : pets)
         {
             _revision = std::max(_revision, pet.revision);
+            _lastPetId = std::max(_lastPetId, pet.id);
+            if (pet.source == PetSource::Released)
+                continue;
+            if (pet.source == PetSource::Companion)
+                _companionSpecies.insert(pet.species);
             std::string reason;
             if (Usable(pet, &reason))
-                _pets[pet.species] = pet;
+            {
+                _pets.emplace(pet.id, pet);
+                _petIdsBySpecies.emplace(pet.species, pet.id);
+            }
             else
             {
-                _blocked.insert(pet.species);
+                _blockedSpecies.insert(pet.species);
+                if (pet.source == PetSource::Legacy)
+                    _blockedLegacySpecies.insert(pet.species);
                 _rejected.push_back("account " + std::to_string(account) + " pet " + std::to_string(pet.species) +
                     ": " + reason);
             }
@@ -74,8 +85,15 @@ namespace CoAPetBattles::Store
     bool Journal::Usable(OwnedPet const& pet, std::string* reason) const
     {
         std::string why;
-        if (!_catalog->Species(pet.species))
+        Engine::SpeciesDef const* def = _catalog->Species(pet.species);
+        if (!pet.id)
+            why = "missing pet ID";
+        else if (!def)
             why = "species unknown";
+        else if (pet.source > PetSource::Companion || (pet.breed && pet.source == PetSource::Legacy))
+            why = "invalid acquisition source";
+        else if (pet.breed && !def->Breeds().contains(pet.breed))
+            why = "breed unavailable";
         else if (pet.level < 1 || pet.level > MaxLevel())
             why = "level " + std::to_string(pet.level) + " outside 1-" + std::to_string(MaxLevel());
         else if (pet.quality < 1 || pet.quality > MaxQuality)
@@ -87,11 +105,16 @@ namespace CoAPetBattles::Store
         return why.empty();
     }
 
-    void Journal::Keep(OwnedPet pet)
+    OwnedPet const& Journal::Keep(OwnedPet pet)
     {
         pet.revision = ++_revision;
-        _pets[pet.species] = pet;
-        _writes.push_back({ RowKind::Pet, _account, pet.species, pet.revision });
+        auto const [position, inserted] = _pets.insert_or_assign(pet.id, pet);
+        if (inserted)
+            _petIdsBySpecies.emplace(pet.species, pet.id);
+        if (pet.source == PetSource::Companion)
+            _companionSpecies.insert(pet.species);
+        _writes.push_back({ RowKind::Pet, _account, pet.id, pet.revision });
+        return position->second;
     }
 
     void Journal::WriteTeam(uint8_t team)
@@ -103,67 +126,95 @@ namespace CoAPetBattles::Store
 
     bool Journal::Owns(uint32_t species) const
     {
-        return _pets.count(species) || _blocked.count(species);
+        return _petIdsBySpecies.contains(species) || _blockedSpecies.contains(species);
     }
 
-    OwnedPet const* Journal::Pet(uint32_t species) const
+    OwnedPet const* Journal::Pet(uint32_t petId) const
     {
-        auto const found = _pets.find(species);
+        auto const found = _pets.find(petId);
         return found == _pets.end() ? nullptr : &found->second;
+    }
+
+    OwnedPet const* Journal::PetOfSpecies(uint32_t species) const
+    {
+        return Pet(PetIdForSpecies(species));
+    }
+
+    uint32_t Journal::PetIdForSpecies(uint32_t species) const
+    {
+        auto const found = _petIdsBySpecies.find(species);
+        return found == _petIdsBySpecies.end() ? 0 : found->second;
+    }
+
+    uint32_t Journal::SpeciesForPet(uint32_t petId) const
+    {
+        OwnedPet const* pet = Pet(petId);
+        return pet ? pet->species : 0;
     }
 
     std::vector<OwnedPet const*> Journal::Pets() const
     {
         std::vector<OwnedPet const*> pets;
-        for (auto const& [species, pet] : _pets)
-            pets.push_back(&pet);
+        pets.reserve(_pets.size());
+        for (auto const& [species, petId] : _petIdsBySpecies)
+            pets.push_back(Pet(petId));
         return pets;
     }
 
     bool Journal::Add(uint32_t species, uint8_t level, std::array<uint8_t, 3> picks, uint8_t quality,
         uint32_t display)
     {
-        if (Owns(species) || !_catalog->Species(species))
+        if (Owns(species))
             return false;
-        OwnedPet pet;
-        pet.species = species;
-        pet.level = ClampLevel(*_catalog, level);
-        pet.picks = ValidPicks(picks) ? picks : std::array<uint8_t, 3> { 1, 1, 1 };
-        pet.quality = std::clamp<uint8_t>(quality, 1, MaxQuality);
-        pet.display = display;
-        _fed.erase(species);
-        Keep(pet);
+        return AddPet({ .species = species, .level = level, .picks = picks, .quality = quality, .display = display })
+            != nullptr;
+    }
+
+    OwnedPet const* Journal::AddPet(OwnedPet pet)
+    {
+        Engine::SpeciesDef const* def = _catalog->Species(pet.species);
+        if (!def || (pet.breed && !def->Breeds().contains(pet.breed)) ||
+            _lastPetId == std::numeric_limits<uint32_t>::max())
+            return nullptr;
+        pet.id = ++_lastPetId;
+        pet.level = ClampLevel(*_catalog, pet.level);
+        pet.picks = ValidPicks(pet.picks) ? pet.picks : std::array<uint8_t, 3> { 1, 1, 1 };
+        pet.quality = std::clamp<uint8_t>(pet.quality, 1, MaxQuality);
+        return &Keep(pet);
+    }
+
+    OwnedPet const* Journal::Capture(uint32_t species, uint8_t level, std::array<uint8_t, 3> picks, uint8_t quality,
+        uint32_t display, uint8_t breed)
+    {
+        return AddPet({ .species = species, .breed = breed, .source = PetSource::Wild, .level = level, .picks = picks,
+            .quality = quality, .display = display });
+    }
+
+    bool Journal::Release(uint32_t petId)
+    {
+        auto const found = _pets.find(petId);
+        if (found == _pets.end() || found->second.source != PetSource::Wild)
+            return false;
+        auto const [first, last] = _petIdsBySpecies.equal_range(found->second.species);
+        auto const index = std::find_if(first, last, [petId](auto const& entry) { return entry.second == petId; });
+        _petIdsBySpecies.erase(index);
+        _pets.erase(found);
+        _fed.erase(petId);
+        _writes.push_back({ RowKind::Release, _account, petId, ++_revision });
+        for (uint8_t team = 1; team <= TeamCount; ++team)
+        {
+            auto& slots = _teams[team - 1].slots;
+            if (std::find(slots.begin(), slots.end(), petId) == slots.end())
+                continue;
+            std::replace(slots.begin(), slots.end(), petId, 0u);
+            WriteTeam(team);
+        }
         return true;
     }
 
-    CaptureResult Journal::Capture(uint32_t species, uint8_t level, std::array<uint8_t, 3> picks, uint8_t quality,
-        uint32_t display)
+    bool Journal::SetPicks(uint32_t petId, std::array<uint8_t, 3> picks)
     {
-        uint8_t const outcome = Compare(species, quality, level);
-        if (outcome == 2 || !_catalog->Species(species))
-            return CaptureResult::Released;
-        if (outcome == 1)
-            _pets.erase(species);
-        Add(species, level, picks, quality, display);
-        return outcome == 1 ? CaptureResult::Replaced : CaptureResult::Added;
-    }
-
-    uint8_t Journal::Compare(uint32_t species, uint8_t quality, uint8_t level) const
-    {
-        if (_blocked.count(species))
-            return 2;
-        OwnedPet const* owned = Pet(species);
-        if (!owned)
-            return 0;
-        uint8_t const wanted = ClampLevel(*_catalog, level);
-        if (quality > owned->quality || (quality == owned->quality && wanted > owned->level))
-            return 1;
-        return 2;
-    }
-
-    bool Journal::SetPicks(uint32_t species, std::array<uint8_t, 3> picks)
-    {
-        OwnedPet const* owned = Pet(species);
+        OwnedPet const* owned = Pet(petId);
         if (!owned || !ValidPicks(picks))
             return false;
         OwnedPet pet = *owned;
@@ -172,9 +223,9 @@ namespace CoAPetBattles::Store
         return true;
     }
 
-    bool Journal::SetDisplayOnce(uint32_t species, uint32_t display)
+    bool Journal::SetDisplayOnce(uint32_t petId, uint32_t display)
     {
-        OwnedPet const* owned = Pet(species);
+        OwnedPet const* owned = Pet(petId);
         if (!owned || owned->display || !display)
             return false;
         OwnedPet pet = *owned;
@@ -183,9 +234,9 @@ namespace CoAPetBattles::Store
         return true;
     }
 
-    std::optional<XpGain> Journal::GrantXp(uint32_t species, uint8_t enemyLevel, uint32_t)
+    std::optional<XpGain> Journal::GrantXp(uint32_t petId, uint8_t enemyLevel, uint32_t)
     {
-        OwnedPet const* owned = Pet(species);
+        OwnedPet const* owned = Pet(petId);
         if (!owned)
             return std::nullopt;
         if (owned->level >= MaxLevel())
@@ -208,7 +259,7 @@ namespace CoAPetBattles::Store
         {
             pet.health = 0;
             pet.healthAt = 0;
-            _fed.erase(species);
+            _fed.erase(petId);
         }
         Keep(pet);
         return XpGain { gain, pet.level, static_cast<uint8_t>(pet.level - start) };
@@ -219,8 +270,7 @@ namespace CoAPetBattles::Store
         Engine::SpeciesDef const* def = _catalog->Species(pet.species);
         if (!def)
             return 0;
-        return static_cast<uint32_t>(Engine::PetStats(def->power, def->speed, def->stamina, pet.level, pet.quality,
-            MaxLevel()).health);
+        return static_cast<uint32_t>(Engine::StatsForPet(*def, pet.level, pet.quality, MaxLevel(), pet.breed).health);
     }
 
     uint32_t Journal::CurrentHealth(OwnedPet const& pet, uint32_t now) const
@@ -234,7 +284,7 @@ namespace CoAPetBattles::Store
         uint64_t const ticks = settings.regenSeconds ? (now - pet.healthAt) / settings.regenSeconds : 0;
         uint64_t const perTick = std::max<uint64_t>(1, uint64_t(max) * settings.regenPercent / 100);
         uint64_t health = pet.health + ticks * perTick;
-        auto const fed = _fed.find(pet.species);
+        auto const fed = _fed.find(pet.id);
         if (fed != _fed.end() && fed->second.first == pet.healthAt && settings.fedStepSeconds)
         {
             uint64_t const until = std::min<uint64_t>(now, fed->second.second);
@@ -245,9 +295,9 @@ namespace CoAPetBattles::Store
         return static_cast<uint32_t>(std::min<uint64_t>(max, health));
     }
 
-    FeedResult Journal::Feed(uint32_t species, uint8_t foodLevel, uint32_t now)
+    FeedResult Journal::Feed(uint32_t petId, uint8_t foodLevel, uint32_t now)
     {
-        OwnedPet const* owned = Pet(species);
+        OwnedPet const* owned = Pet(petId);
         if (!owned)
             return FeedResult::NotOwned;
         uint32_t const current = CurrentHealth(*owned, now);
@@ -259,17 +309,17 @@ namespace CoAPetBattles::Store
         pet.health = current;
         pet.healthAt = now;
         Keep(pet);
-        _fed[species] = { now, now + _catalog->Config().fedSeconds };
+        _fed[petId] = { now, now + _catalog->Config().fedSeconds };
         return FeedResult::Fed;
     }
 
-    bool Journal::SetHealth(uint32_t species, uint32_t health, uint32_t now)
+    bool Journal::SetHealth(uint32_t petId, uint32_t health, uint32_t now)
     {
-        OwnedPet const* owned = Pet(species);
+        OwnedPet const* owned = Pet(petId);
         if (!owned)
             return false;
         OwnedPet pet = *owned;
-        _fed.erase(species);
+        _fed.erase(petId);
         uint32_t const value = std::max<uint32_t>(1, health);
         if (value >= MaxHealth(pet))
         {
@@ -288,12 +338,12 @@ namespace CoAPetBattles::Store
     size_t Journal::HealAll()
     {
         std::vector<OwnedPet> healed;
-        for (auto const& [species, pet] : _pets)
+        for (auto const& [petId, pet] : _pets)
         {
             OwnedPet copy = pet;
             copy.health = 0;
             copy.healthAt = 0;
-            _fed.erase(species);
+            _fed.erase(petId);
             healed.push_back(copy);
         }
         for (OwnedPet const& pet : healed)
@@ -335,7 +385,7 @@ namespace CoAPetBattles::Store
         return _teams[std::clamp<uint8_t>(team, 1, TeamCount) - 1];
     }
 
-    std::array<uint32_t, 3> Journal::BattleTeam()
+    std::array<uint32_t, 3> Journal::BattleTeam(bool ownedIds)
     {
         Team const& active = _teams[_activeTeam - 1];
         if (std::any_of(active.slots.begin(), active.slots.end(), [this](uint32_t s) { return s && _pets.count(s); }))
@@ -348,8 +398,15 @@ namespace CoAPetBattles::Store
             return a->level != b->level ? a->level > b->level : a->species < b->species;
         });
         std::array<uint32_t, 3> slots = { 0, 0, 0 };
-        for (size_t i = 0; i < slots.size() && i < pets.size(); ++i)
-            slots[i] = pets[i]->species;
+        size_t slot = 0;
+        for (OwnedPet const* pet : pets)
+        {
+            if (!ownedIds && PetIdForSpecies(pet->species) != pet->id)
+                continue;
+            slots[slot++] = pet->id;
+            if (slot == slots.size())
+                break;
+        }
         _teams[_activeTeam - 1].slots = slots;
         WriteTeam(_activeTeam);
         return slots;
@@ -362,12 +419,31 @@ namespace CoAPetBattles::Store
         for (auto it = speciesSpells.begin(); it != speciesSpells.end(); it = speciesSpells.upper_bound(it->first))
         {
             uint32_t const species = it->first;
-            if (Owns(species) || !_catalog->Species(species))
+            Engine::SpeciesDef const* def = _catalog->Species(species);
+            if (_companionSpecies.contains(species) || _blockedLegacySpecies.contains(species) || !def)
                 continue;
             auto const [first, last] = speciesSpells.equal_range(species);
-            if (std::any_of(first, last, [&knowsSpell](auto const& entry) { return knowsSpell(entry.second); }) &&
-                Add(species, 1, { 1, 1, 1 }, 1, 0))
-                added.push_back(species);
+            if (!std::any_of(first, last, [&knowsSpell](auto const& entry) { return knowsSpell(entry.second); }))
+                continue;
+
+            auto const [ownedFirst, ownedLast] = _petIdsBySpecies.equal_range(species);
+            auto const legacy = std::find_if(ownedFirst, ownedLast, [this](auto const& entry)
+            {
+                return Pet(entry.second)->source == PetSource::Legacy;
+            });
+            if (legacy != ownedLast)
+            {
+                OwnedPet pet = *Pet(legacy->second);
+                pet.source = PetSource::Companion;
+                Keep(pet);
+            }
+            else
+            {
+                uint8_t const breed = def->retailBreeds.empty() && def->Breeds().contains(BalancedBreed) ?
+                    BalancedBreed : 0;
+                if (AddPet({ .species = species, .breed = breed, .source = PetSource::Companion }))
+                    added.push_back(species);
+            }
         }
         return added;
     }

@@ -18,16 +18,20 @@ namespace CoAPetBattles::Protocol
         std::function<bool(uint32_t item)> hasItem;
         std::function<void(uint32_t item)> takeItem;
         std::function<bool()> inBattle;
-        std::function<void(uint32_t species, uint32_t steps, uint64_t stepMs)> fedRefresh;
-        std::function<void(uint32_t species)> summon;
+        std::function<bool()> releaseBlocked;
+        std::function<void(uint32_t)> released;
+        std::function<void(uint32_t petId, uint32_t steps, uint64_t stepMs)> fedRefresh;
+        std::function<void(uint32_t petId)> summon;
         std::function<void()> dismiss;
         std::function<uint32_t()> follower;
         std::function<std::optional<uint32_t>()> prime;
         uint32_t now = 0;
+        bool ownedIds = false;
     };
 
+    std::string TeamMessage(Store::Journal const& journal, uint8_t team, bool ownedIds = false);
     std::string PetMessage(Engine::Catalog const& catalog, Store::Journal const& journal, Store::OwnedPet const& pet,
-        uint32_t now);
+        uint32_t now, bool ownedIds = false);
     void SendJournal(Engine::Catalog const& catalog, Store::Journal const& journal, JournalReply const& reply);
     bool HandleJournalMessage(Engine::Catalog const& catalog, Store::Journal& journal, std::string const& action,
         std::string const& payload, JournalReply const& reply);

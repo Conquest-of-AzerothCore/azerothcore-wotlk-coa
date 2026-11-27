@@ -170,7 +170,7 @@ namespace CoAPetBattles::Battle
                 if (side == Side::P)
                     if (Store::Journal* journal = _world.JournalOf(_character))
                     {
-                        if (journal->SetDisplayOnce(pet.species, *worn))
+                        if (journal->SetDisplayOnce(pet.ownedPetId, *worn))
                             _world.Prime(_character, pet.species, pet.species, *worn);
                         _world.Flush(*journal);
                     }
@@ -383,22 +383,20 @@ namespace CoAPetBattles::Battle
                 return;
             uint8_t const level = static_cast<uint8_t>(std::min<double>(pet.level, _catalog.Config().maxLevel));
             uint8_t const quality = static_cast<uint8_t>(pet.quality);
-            bool const owned = journal->Owns(pet.species);
-            if (journal->Compare(pet.species, quality, level) == 2)
-            {
-                Direct("pbt", "msg", "You captured " + pet.name + ", but you already own a better one, so it was released.");
-                return;
-            }
             std::array<uint8_t, 3> picks {};
             for (uint8_t& pick : picks)
                 pick = static_cast<uint8_t>(_battles.GetRng().Roll(1, 2));
-            journal->Capture(pet.species, level, picks, quality, pet.display);
-            if (pet.display)
+            Store::OwnedPet const* stored = journal->Capture(pet.species, level, picks, quality, pet.display, pet.breed);
+            if (!stored)
+            {
+                Direct("pbt", "msg", "Your journal could not record the captured pet.");
+                return;
+            }
+            if (pet.display && (_battles.UsesOwnedIds(_character) || journal->PetIdForSpecies(pet.species) == stored->id))
                 _world.Prime(_character, pet.species, pet.species, pet.display);
             _world.Flush(*journal);
-            if (Store::OwnedPet const* stored = journal->Pet(pet.species))
-                Direct("pbj", "pet", Protocol::PetMessage(_catalog, *journal, *stored, _world.UnixNow()));
-            Direct("pbt", "msg", "You captured " + pet.name + "!" + (owned ? " It replaces the one you had." : ""));
+            _battles.SendJournalPet(_character, *journal, *stored, _world.UnixNow());
+            Direct("pbt", "msg", "You captured " + pet.name + "!");
             Direct("pbt", "got", std::to_string(quality) + "," + pet.name);
         }
 
@@ -621,11 +619,11 @@ namespace CoAPetBattles::Battle
             {
                 uint32_t const now = _world.UnixNow();
                 for (Engine::Pet const& pet : _eng.Team(Side::P))
-                    journal->SetHealth(pet.species, static_cast<uint32_t>((!forfeit && pet.hp > 0) ? pet.hp : 1), now);
+                    journal->SetHealth(pet.ownedPetId, static_cast<uint32_t>((!forfeit && pet.hp > 0) ? pet.hp : 1), now);
                 _world.Flush(*journal);
                 for (Engine::Pet const& pet : _eng.Team(Side::P))
-                    if (Store::OwnedPet const* stored = journal->Pet(pet.species))
-                        Direct("pbj", "pet", Protocol::PetMessage(_catalog, *journal, *stored, now));
+                    if (Store::OwnedPet const* stored = journal->Pet(pet.ownedPetId))
+                        _battles.SendJournalPet(_character, *journal, *stored, now);
             }
             Send("end", result);
             _battles.Unregister(_character, this);
@@ -663,16 +661,16 @@ namespace CoAPetBattles::Battle
             {
                 if (!_acted[i + 1])
                     continue;
-                Store::OwnedPet const* before = journal->Pet(team[i].species);
+                Store::OwnedPet const* before = journal->Pet(team[i].ownedPetId);
                 bool const below = before && before->level < maxLevel;
                 std::optional<Store::XpGain> const gain =
-                    journal->GrantXp(team[i].species, static_cast<uint8_t>(_enemyLevel), now);
+                    journal->GrantXp(team[i].ownedPetId, static_cast<uint8_t>(_enemyLevel), now);
                 if (!gain)
                     continue;
                 if (below)
                 {
                     _world.Flush(*journal);
-                    Direct("pbj", "pet", Protocol::PetMessage(_catalog, *journal, *journal->Pet(team[i].species), now));
+                    _battles.SendJournalPet(_character, *journal, *journal->Pet(team[i].ownedPetId), now);
                 }
                 Direct("pbt", "xp", team[i].name + "," + std::to_string(gain->gained) + "," +
                     std::to_string(gain->level) + "," + std::to_string(gain->levelsGained));
@@ -733,10 +731,17 @@ namespace CoAPetBattles::Battle
                 Engine::Pet const& enemy = _eng.Team(Side::E)[i];
                 uint8_t const quality = static_cast<uint8_t>(enemy.quality);
                 uint8_t const level = static_cast<uint8_t>(enemy.level);
-                uint8_t const status = journal ? journal->Compare(enemy.species, quality, level) : 0;
-                Store::OwnedPet const* owned = journal ? journal->Pet(enemy.species) : nullptr;
+                Store::OwnedPet const* owned = journal ? journal->PetOfSpecies(enemy.species) : nullptr;
+                uint8_t status = 0;
+                if (owned)
+                    status = quality > owned->quality || (quality == owned->quality && level > owned->level) ? 1 : 2;
+                else if (journal && journal->Owns(enemy.species))
+                    status = 2;
                 Send("own", std::to_string(i + 1) + "," + std::to_string(status) + "," +
                     std::to_string(owned ? owned->quality : 0) + "," + std::to_string(owned ? owned->level : 0));
+                if (_battles.UsesOwnedIds(_character))
+                    Send("breed2", std::to_string(i + 1) + "," + std::to_string(enemy.breed) + "," +
+                        N(std::floor(enemy.power + 0.5)) + "," + N(std::floor(enemy.speed + 0.5)));
             }
             SendAbilities();
             std::shared_ptr<Session> self = shared_from_this();
@@ -818,17 +823,39 @@ namespace CoAPetBattles::Battle
         _lingering.erase(character);
     }
 
-    void Battles::FedRefresh(uint64_t character, uint32_t species, uint32_t remaining, uint64_t stepMs)
+    void Battles::SendJournalPet(uint64_t character, Store::Journal const& journal, Store::OwnedPet const& pet,
+        uint32_t now)
     {
-        _scheduler.After(stepMs, [this, character, species, remaining, stepMs]
+        bool const ownedIds = UsesOwnedIds(character);
+        if (ownedIds || journal.PetIdForSpecies(pet.species) == pet.id)
+            _world.Send(character, "pbj", ownedIds ? "pet2" : "pet",
+                Protocol::PetMessage(*_catalog, journal, pet, now, ownedIds));
+    }
+
+    void Battles::NotifyRelease(uint32_t account, uint32_t petId)
+    {
+        for (uint64_t character : _ownedIdClients)
+        {
+            if (!_world.Online(character) || _world.Account(character) != account)
+                continue;
+            if (Store::Journal const* journal = _world.JournalOf(character))
+                for (uint8_t team = 1; team <= Store::TeamCount; ++team)
+                    _world.Send(character, "pbj", "team2", Protocol::TeamMessage(*journal, team, true));
+            _world.Send(character, "pbj", "removed2", std::to_string(petId));
+        }
+        _world.DismissReleasedFollowers(account, petId);
+    }
+
+    void Battles::FedRefresh(uint64_t character, uint32_t petId, uint32_t remaining, uint64_t stepMs)
+    {
+        _scheduler.After(stepMs, [this, character, petId, remaining, stepMs]
         {
             if (_world.Online(character))
                 if (Store::Journal* journal = _world.JournalOf(character))
-                    if (Store::OwnedPet const* pet = journal->Pet(species))
-                        _world.Send(character, "pbj", "pet", Protocol::PetMessage(*_catalog, *journal, *pet,
-                            _world.UnixNow()));
+                    if (Store::OwnedPet const* pet = journal->Pet(petId))
+                        SendJournalPet(character, *journal, *pet, _world.UnixNow());
             if (remaining > 1)
-                FedRefresh(character, species, remaining - 1, stepMs);
+                FedRefresh(character, petId, remaining - 1, stepMs);
         });
     }
 
@@ -896,26 +923,28 @@ namespace CoAPetBattles::Battle
             uint8_t const active = journal->ActiveTeam();
             auto const& before = journal->TeamAt(active).slots;
             bool const hadTeam = std::any_of(before.begin(), before.end(),
-                [journal](uint32_t species) { return species && journal->Pet(species); });
-            std::array<uint32_t, 3> const slots = journal->BattleTeam();
+                [journal](uint32_t petId) { return journal->Pet(petId) != nullptr; });
+            std::array<uint32_t, 3> const slots = journal->BattleTeam(UsesOwnedIds(character));
             if (!hadTeam && !journal->Pets().empty())
             {
                 _world.Flush(*journal);
-                _world.Send(character, "pbj", "team", std::to_string(active) + "," + std::to_string(slots[0]) + "," +
-                    std::to_string(slots[1]) + "," + std::to_string(slots[2]));
+                bool const ownedIds = UsesOwnedIds(character);
+                _world.Send(character, "pbj", ownedIds ? "team2" : "team",
+                    Protocol::TeamMessage(*journal, active, ownedIds));
                 _world.Send(character, "pbt", "msg",
                     "No team was set up: using your highest level pets. Change it in /pets > Teams.");
             }
             uint32_t const now = _world.UnixNow();
-            for (uint32_t species : slots)
+            for (uint32_t petId : slots)
             {
-                Store::OwnedPet const* pet = species ? journal->Pet(species) : nullptr;
+                Store::OwnedPet const* pet = journal->Pet(petId);
                 if (!pet)
                     continue;
-                Engine::Pet built = Engine::NewPet(*_catalog, species, pet->level,
+                Engine::Pet built = Engine::NewPet(*_catalog, pet->species, pet->level,
                     std::array<int32_t, 3> { pet->picks[0], pet->picks[1], pet->picks[2] }, _rng, pet->quality,
-                    static_cast<double>(journal->CurrentHealth(*pet, now)));
+                    static_cast<double>(journal->CurrentHealth(*pet, now)), pet->breed);
                 built.display = pet->display;
+                built.ownedPetId = pet->id;
                 mine.push_back(std::move(built));
             }
         }
@@ -935,7 +964,7 @@ namespace CoAPetBattles::Battle
             for (EnemySpec const& enemy : *enemies)
             {
                 theirs.push_back(Engine::NewPet(*_catalog, enemy.species, enemy.level, std::nullopt, _rng,
-                    enemy.quality, std::nullopt));
+                    enemy.quality, std::nullopt, enemy.breed));
                 if (enemy.display)
                     theirs.back().display = enemy.display;
             }
@@ -962,7 +991,7 @@ namespace CoAPetBattles::Battle
                 pet.display = displays[static_cast<size_t>(_rng.Roll(1, static_cast<int32_t>(displays.size()))) - 1];
                 if (side == Side::P && journal)
                 {
-                    if (journal->SetDisplayOnce(pet.species, pet.display))
+                    if (journal->SetDisplayOnce(pet.ownedPetId, pet.display))
                         _world.Prime(character, pet.species, pet.species, pet.display);
                     _world.Flush(*journal);
                 }
@@ -993,6 +1022,7 @@ namespace CoAPetBattles::Battle
 
     void Battles::Logout(uint64_t character)
     {
+        _ownedIdClients.erase(character);
         auto const found = _sessions.find(character);
         if (found != _sessions.end())
         {
@@ -1072,7 +1102,13 @@ namespace CoAPetBattles::Battle
         Store::Journal* journal = _world.JournalOf(character);
         if (!journal)
             return;
+        bool const ownedIds = action.ends_with('2');
+        if (ownedIds)
+            _ownedIdClients.insert(character);
+        if (action == "hello2")
+            return;
         Protocol::JournalReply reply;
+        reply.ownedIds = ownedIds;
         reply.now = _world.UnixNow();
         reply.send = [this, character](std::string_view replyModule, std::string_view replyAction,
             std::string const& replyPayload) { _world.Send(character, replyModule, replyAction, replyPayload); };
@@ -1081,15 +1117,31 @@ namespace CoAPetBattles::Battle
         reply.hasItem = [this, character](uint32_t item) { return _world.HasItem(character, item); };
         reply.takeItem = [this, character](uint32_t item) { _world.TakeItem(character, item); };
         reply.inBattle = [this, character] { return InBattle(character); };
-        reply.fedRefresh = [this, character](uint32_t species, uint32_t steps, uint64_t stepMs)
+        reply.releaseBlocked = [this, character] { return InBattle(character) || OtherCharacterFighting(character); };
+        reply.released = [this, character, journal](uint32_t petId)
         {
-            FedRefresh(character, species, steps, stepMs);
+            uint32_t const account = journal->Account();
+            _world.FlushRelease(*journal, [this, character, account, petId](bool success)
+            {
+                if (success)
+                    NotifyRelease(account, petId);
+                else if (_world.Online(character))
+                    _world.Send(character, "pbj", "releaseerror2", "The release could not be saved. Reopen the journal.");
+            });
         };
-        reply.summon = [this, character](uint32_t species) { _world.Summon(character, species); };
+        reply.fedRefresh = [this, character](uint32_t petId, uint32_t steps, uint64_t stepMs)
+        {
+            FedRefresh(character, petId, steps, stepMs);
+        };
+        reply.summon = [this, character](uint32_t petId) { _world.Summon(character, petId); };
         reply.dismiss = [this, character] { _world.Dismiss(character); };
-        reply.follower = [this, character] { return _world.Follower(character); };
+        reply.follower = [this, character, ownedIds]
+        {
+            return ownedIds ? _world.FollowerId(character) : _world.Follower(character);
+        };
         reply.prime = [this, character] { return _world.PrimeAll(character); };
-        Protocol::HandleJournalMessage(*_catalog, *journal, action, payload, reply);
+        Protocol::HandleJournalMessage(*_catalog, *journal, ownedIds ? action.substr(0, action.size() - 1) : action,
+            payload, reply);
         _world.Flush(*journal);
     }
 

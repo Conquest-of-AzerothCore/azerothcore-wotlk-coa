@@ -41,11 +41,16 @@ namespace CoAPetBattles::Store
                 OwnedPet const* pet = journal.Pet(write.key);
                 if (!pet)
                     return "";
-                return Upsert("coa_pet_journal", { "account", "species" },
-                    { "level", "xp", "ability1", "ability2", "ability3", "quality", "display", "health", "health_at" },
-                    { write.account, pet->species, pet->level, pet->xp, pet->picks[0], pet->picks[1], pet->picks[2],
-                      pet->quality, pet->display, pet->health, pet->healthAt, write.revision });
+                return Upsert("coa_pet_journal", { "account", "pet_id" },
+                    { "species", "level", "xp", "ability1", "ability2", "ability3", "quality", "display", "health",
+                      "health_at", "breed", "source" },
+                    { write.account, pet->id, pet->species, pet->level, pet->xp, pet->picks[0], pet->picks[1],
+                      pet->picks[2], pet->quality, pet->display, pet->health, pet->healthAt, pet->breed,
+                      static_cast<uint8_t>(pet->source), write.revision });
             }
+            case RowKind::Release:
+                return Upsert("coa_pet_journal", { "account", "pet_id" }, { "species", "source" },
+                    { write.account, write.key, 0, static_cast<uint8_t>(PetSource::Released), write.revision });
             case RowKind::Team:
             {
                 if (write.key < 1 || write.key > TeamCount)

@@ -232,6 +232,11 @@ namespace CoAPetBattles::Battle
             sPetJournals->Flush(journal);
         }
 
+        void FlushRelease(Store::Journal& journal, std::function<void(bool)> complete) override
+        {
+            sPetJournals->Flush(journal, std::move(complete));
+        }
+
         void SyncCompanions(uint64_t character) override
         {
             sPetJournals->SyncCompanions(Find(character));
@@ -330,7 +335,7 @@ namespace CoAPetBattles::Battle
                 if (CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(species))
                 {
                     ++count;
-                    Store::OwnedPet const* owned = journal ? journal->Pet(species) : nullptr;
+                    Store::OwnedPet const* owned = journal ? journal->PetOfSpecies(species) : nullptr;
                     Present::SendCreatureRecord(player, *creature, species, owned ? owned->display : 0);
                 }
             return count;
@@ -357,12 +362,25 @@ namespace CoAPetBattles::Battle
                 player->DestroyItemCount(item, 1, true);
         }
 
-        void Summon(uint64_t character, uint32_t species) override
+        void Summon(uint64_t character, uint32_t petId) override
         {
-            sPetBattles->Followers().Summon(character, species);
+            sPetBattles->Followers().Summon(character, petId);
         }
         void Dismiss(uint64_t character) override { sPetBattles->Followers().Dismiss(character); }
-        uint32_t Follower(uint64_t character) override { return sPetBattles->Followers().Follower(character); }
+        uint32_t Follower(uint64_t character) override
+        {
+            Store::Journal const* journal = JournalOf(character);
+            return journal ? journal->SpeciesForPet(sPetBattles->Followers().Follower(character)) : 0;
+        }
+        uint32_t FollowerId(uint64_t character) override { return sPetBattles->Followers().Follower(character); }
+
+        void DismissReleasedFollowers(uint32_t account, uint32_t petId) override
+        {
+            sPetBattles->Followers().DismissMatching(petId, [this, account](uint64_t character)
+            {
+                return Account(character) == account;
+            });
+        }
         void Suppress(uint64_t character, bool on) override { sPetBattles->Followers().Suppress(character, on); }
 
         void Refused(uint64_t character, std::string const& command) override
@@ -498,19 +516,20 @@ namespace CoAPetBattles::Battle
             return phase == NormalPhase || phase >= AllPhases;
         }
 
-        bool Owns(uint64_t character, uint32_t species) const override
+        bool Owns(uint64_t character, uint32_t petId) const override
         {
             Store::Journal* journal = sPetJournals->For(Find(character));
-            return journal && journal->Owns(species);
+            return journal && journal->Pet(petId);
         }
 
-        std::optional<uint64_t> SpawnFollower(uint64_t character, uint32_t species) override
+        std::optional<uint64_t> SpawnFollower(uint64_t character, uint32_t petId) override
         {
             Player* player = Find(character);
             Store::Journal* journal = sPetJournals->For(player);
-            Store::OwnedPet const* pet = journal ? journal->Pet(species) : nullptr;
+            Store::OwnedPet const* pet = journal ? journal->Pet(petId) : nullptr;
             if (!player || !pet)
                 return std::nullopt;
+            uint32_t const species = pet->species;
             float const o = player->GetOrientation();
             float const x = player->GetPositionX() - std::cos(o) * FollowBehind + std::cos(o + 1.57f) * FollowAside;
             float const y = player->GetPositionY() - std::sin(o) * FollowBehind + std::sin(o + 1.57f) * FollowAside;
@@ -524,7 +543,7 @@ namespace CoAPetBattles::Battle
             uint32_t display = pet->display;
             if (display)
                 summon->SetDisplayId(display);
-            else if ((display = summon->GetDisplayId()) && journal->SetDisplayOnce(species, display))
+            else if ((display = summon->GetDisplayId()) && journal->SetDisplayOnce(petId, display))
             {
                 sPetJournals->Flush(*journal);
                 if (CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(species))
@@ -565,24 +584,38 @@ namespace CoAPetBattles::Battle
                     false);
         }
 
-        void SendFollow(uint64_t character, uint32_t species) override
+        void SendFollow(uint64_t character, uint32_t petId) override
         {
             if (Player* player = Find(character))
-                sAddonChannel->Send(player, "pbj", "follow", std::to_string(species));
+                if (Store::Journal* journal = sPetJournals->For(player))
+                {
+                    Battles const* battles = sPetBattles->Registry();
+                    bool const ownedIds = battles && battles->UsesOwnedIds(character);
+                    sAddonChannel->Send(player, "pbj", ownedIds ? "follow2" : "follow",
+                        std::to_string(ownedIds ? petId : journal->SpeciesForPet(petId)));
+                }
         }
 
-        void Save(uint64_t character, uint32_t species) override
+        void Save(uint64_t character, uint32_t petId) override
         {
-            if (species)
-                CharacterDatabase.Execute("REPLACE INTO `coa_pet_follower` (`guid`, `species`) VALUES ({}, {})",
-                    character, species);
+            if (petId)
+            {
+                Store::Journal const* journal = sPetJournals->For(Find(character));
+                if (!journal)
+                    return;
+                CharacterDatabase.Execute("INSERT INTO `coa_pet_follower` (`guid`, `pet_id`) SELECT {}, {} "
+                    "WHERE NOT EXISTS (SELECT 1 FROM `coa_pet_journal` "
+                    "WHERE `account` = {} AND `pet_id` = {} AND `source` = {}) "
+                    "ON DUPLICATE KEY UPDATE `pet_id` = VALUES(`pet_id`)", character, petId, journal->Account(),
+                    petId, static_cast<uint8_t>(Store::PetSource::Released));
+            }
             else
                 CharacterDatabase.Execute("DELETE FROM `coa_pet_follower` WHERE `guid` = {}", character);
         }
 
         std::optional<uint32_t> Saved(uint64_t character) override
         {
-            QueryResult result = CharacterDatabase.Query("SELECT `species` FROM `coa_pet_follower` WHERE `guid` = {}",
+            QueryResult result = CharacterDatabase.Query("SELECT `pet_id` FROM `coa_pet_follower` WHERE `guid` = {}",
                 character);
             if (!result)
                 return std::nullopt;

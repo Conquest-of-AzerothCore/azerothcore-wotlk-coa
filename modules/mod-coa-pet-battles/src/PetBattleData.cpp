@@ -195,6 +195,26 @@ namespace CoAPetBattles
         CheckTurnsAndEffects(data, report);
         CheckPresentations(data, report);
         CheckWorldReferences(data, report, creatureTemplateExists);
+        for (auto const& [entry, breeds] : data.breeds)
+        {
+            auto const species = data.species.find(entry);
+            if (species == data.species.end() || !species->second.wild)
+                report.errors.push_back("breed table references non-wild species " + std::to_string(entry));
+            for (auto const& [breed, stats] : breeds)
+                if (breed < 3 || breed > 12 || stats.stamina <= 0 || stats.power <= 0 || stats.speed <= 0)
+                    report.errors.push_back("invalid breed " + std::to_string(breed) + " for species " +
+                        std::to_string(entry));
+        }
+        if (!data.defaultBreeds.empty())
+        {
+            auto const balanced = data.defaultBreeds.find(BalancedBreed);
+            if (balanced == data.defaultBreeds.end() || balanced->second.stamina || balanced->second.power ||
+                balanced->second.speed)
+                report.errors.push_back("default balanced breed must preserve base stats");
+            for (auto const& [breed, stats] : data.defaultBreeds)
+                if (breed < 3 || breed > 12)
+                    report.errors.push_back("invalid default breed " + std::to_string(breed));
+        }
         return report;
     }
 

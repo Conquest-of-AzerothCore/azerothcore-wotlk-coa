@@ -52,8 +52,8 @@ namespace CoAPetBattles::Store
 
         std::vector<OwnedPet> pets;
         if (QueryResult result = CharacterDatabase.Query("SELECT `species`, `level`, `xp`, `ability1`, `ability2`, "
-            "`ability3`, `quality`, `display`, `health`, `health_at`, `revision` FROM `coa_pet_journal` "
-            "WHERE `account` = {}", account))
+            "`ability3`, `quality`, `display`, `health`, `health_at`, `revision`, `pet_id`, `breed`, `source` "
+            "FROM `coa_pet_journal` WHERE `account` = {}", account))
         {
             do
             {
@@ -68,6 +68,9 @@ namespace CoAPetBattles::Store
                 pet.health = fields[8].Get<uint32>();
                 pet.healthAt = fields[9].Get<uint32>();
                 pet.revision = fields[10].Get<uint32>();
+                pet.id = fields[11].Get<uint32>();
+                pet.breed = fields[12].Get<uint8>();
+                pet.source = static_cast<PetSource>(fields[13].Get<uint8>());
                 pets.push_back(pet);
             } while (result->NextRow());
         }
@@ -153,26 +156,40 @@ namespace CoAPetBattles::Store
         _learned.Push({ player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), spell });
     }
 
-    void PetJournalStore::Flush(Journal& journal)
+    void PetJournalStore::Flush(Journal& journal, std::function<void(bool)> complete)
     {
-        for (RowWrite const& write : journal.TakeWrites())
+        std::vector<RowWrite> const writes = journal.TakeWrites();
+        if (writes.empty())
+            return;
+        uint32_t const account = journal.Account();
+        CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
+        for (RowWrite const& write : writes)
         {
             std::string const sql = UpsertStatement(journal, write);
             if (sql.empty())
                 continue;
-            CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
             transaction->Append(std::string_view(sql));
-            uint32 const account = write.account;
-            _refs.WriteStarted(account);
-            _callbacks.AddCallback(CharacterDatabase.AsyncCommitTransaction(transaction)).AfterComplete(
-                [this, account](bool success)
-                {
-                    if (!success)
-                        LOG_ERROR("module", "Pet journal write for account {} failed", account);
-                    if (_refs.WriteFinished(account))
-                        _journals.erase(account);
-                });
+            if (write.kind == RowKind::Release)
+                transaction->Append("DELETE f FROM `coa_pet_follower` f JOIN `characters` c ON c.`guid` = f.`guid` "
+                    "WHERE c.`account` = {} AND f.`pet_id` = {}", account, write.key);
         }
+        if (transaction->GetSize() == 0)
+            return;
+        _refs.WriteStarted(account);
+        _callbacks.AddCallback(CharacterDatabase.AsyncCommitTransaction(transaction)).AfterComplete(
+            [this, account, complete = std::move(complete)](bool success)
+            {
+                if (!success)
+                    LOG_ERROR("module", "Pet journal write for account {} failed", account);
+                if (_refs.WriteFinished(account))
+                    _journals.erase(account);
+                if (complete)
+                {
+                    if (!success && !Pending(account) && Get(account))
+                        Reload(account);
+                    complete(success);
+                }
+            });
     }
 
     size_t PetJournalStore::Pending(uint32_t account) const

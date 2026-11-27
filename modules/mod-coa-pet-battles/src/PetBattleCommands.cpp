@@ -52,8 +52,8 @@ namespace
     std::string TeamLine(Journal const& journal, uint8 team)
     {
         auto const& slots = journal.TeamAt(team).slots;
-        return "Team " + std::to_string(team) + ": " + std::to_string(slots[0]) + " " + std::to_string(slots[1]) + " " +
-            std::to_string(slots[2]);
+        return "Team " + std::to_string(team) + ": " + std::to_string(journal.SpeciesForPet(slots[0])) + " " + std::to_string(journal.SpeciesForPet(slots[1])) + " " +
+            std::to_string(journal.SpeciesForPet(slots[2]));
     }
 
     class PetBattleCommands : public CommandScript
@@ -157,7 +157,7 @@ namespace
             }
             sPetJournals->Flush(*target->journal);
             handler->SendSysMessage("Added " + SpeciesName(species) + " L" +
-                std::to_string(target->journal->Pet(species)->level));
+                std::to_string(target->journal->PetOfSpecies(species)->level));
             return true;
         }
 
@@ -167,7 +167,7 @@ namespace
             if (!target)
                 return false;
             std::optional<CoAPetBattles::Store::XpGain> const gain =
-                target->journal->GrantXp(species, enemyLevel, Now());
+                target->journal->GrantXp(target->journal->PetIdForSpecies(species), enemyLevel, Now());
             if (!gain)
             {
                 handler->SendErrorMessage("not owned", false);
@@ -185,13 +185,13 @@ namespace
             if (!target)
                 return false;
             uint32 const now = Now();
-            if (!target->journal->SetHealth(species, health, now))
+            if (!target->journal->SetHealth(target->journal->PetIdForSpecies(species), health, now))
             {
                 handler->SendErrorMessage("not owned", false);
                 return false;
             }
             sPetJournals->Flush(*target->journal);
-            OwnedPet const& pet = *target->journal->Pet(species);
+            OwnedPet const& pet = *target->journal->PetOfSpecies(species);
             handler->SendSysMessage(SpeciesName(species) + " health " +
                 std::to_string(target->journal->CurrentHealth(pet, now)) + "/" +
                 std::to_string(target->journal->MaxHealth(pet)));
@@ -214,7 +214,7 @@ namespace
             std::optional<Target> target = JournalOf(handler);
             if (!target)
                 return false;
-            if (!target->journal->SetPicks(species, { first, second, third }))
+            if (!target->journal->SetPicks(target->journal->PetIdForSpecies(species), { first, second, third }))
             {
                 handler->SendErrorMessage("picks must be 1 or 2 for an owned pet", false);
                 return false;
@@ -230,7 +230,19 @@ namespace
             std::optional<Target> target = JournalOf(handler);
             if (!target)
                 return false;
-            switch (target->journal->SetTeam(team, { first, second, third }))
+            std::array<uint32_t, 3> slots = { first, second, third };
+            for (uint32_t& slot : slots)
+            {
+                if (!slot)
+                    continue;
+                slot = target->journal->PetIdForSpecies(slot);
+                if (!slot)
+                {
+                    handler->SendErrorMessage("every pet in a team must be owned", false);
+                    return false;
+                }
+            }
+            switch (target->journal->SetTeam(team, slots))
             {
                 case TeamResult::BadTeam:
                     handler->SendErrorMessage("team must be 1-3", false);
@@ -322,7 +334,9 @@ namespace
             if (!player)
                 return false;
             uint64_t const character = player->GetGUID().GetCounter();
-            uint32_t const species = sPetBattles->Followers().Follower(character);
+            Journal const* journal = sPetJournals->For(player);
+            uint32_t const petId = sPetBattles->Followers().Follower(character);
+            uint32_t const species = journal ? journal->SpeciesForPet(petId) : 0;
             if (!species)
                 handler->SendSysMessage("Follower: none");
             else
