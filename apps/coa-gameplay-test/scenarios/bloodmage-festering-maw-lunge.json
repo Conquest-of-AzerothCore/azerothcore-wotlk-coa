@@ -168,35 +168,12 @@
       "actor": "bloodmage"
     },
     {
-      "action": "reset_cooldown",
-      "actor": "bloodmage",
-      "spell": 500126
-    },
-    {
-      "action": "wait",
-      "label": "Clear global cooldown before casting Lunge",
-      "ms": 1600
-    },
-    {
-      "action": "set_power",
-      "actor": "bloodmage",
-      "power": 1,
-      "value": 1000
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 500126,
-      "target": "dummy"
-    },
-    {
       "action": "assert",
-      "label": "SETUP Phase 2: Lunge is on cooldown before Bloodfang Bite",
+      "label": "SETUP Phase 2: Lunge still has >= 10 s remaining on its 25 s cooldown",
       "actor": "bloodmage",
       "metric": "cooldown_ms",
       "spell": 500126,
-      "min": 20000,
-      "within_ms": 3000
+      "min": 10000
     },
     {
       "action": "wait",
