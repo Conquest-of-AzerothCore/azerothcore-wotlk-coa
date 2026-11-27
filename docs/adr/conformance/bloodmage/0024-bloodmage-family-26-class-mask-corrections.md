@@ -23,8 +23,8 @@ Bloodmage passive/stance modifiers with incorrect or incomplete `EffectSpellClas
    `803392`, Bloodmoon Blast, Vampyr's Kiss, Dark Liturgy, Scarlet Delirium, Keleseth's Calamity, Valanar's Vengeance,
    Darkfallen Lament) and wrongly matched `(0, 0x10000)` (Apotheosis/Dark Feast Rage spells). Setting
    `flag96(0x91168840u, 0x88012A05u, 0x906311B0u)` matches all pure-health flagged bits plus Hemal Excision `(2, 0x20)`
-   and Darkfallen Lament `(2, 0x1000)` (`119` spells; excludes mixed Rage-damage bits such as Blood Burst `(2, 0x8)`,
-   Veinburst `(0, 0x100)`, Malediction `(0, 0x80)`, and Hemoburst `(2, 0x40000000)`).
+   and Darkfallen Lament `(2, 0x1000)` (`119` spells; intentionally excludes the four shared Rage-damage bits
+   `[0] 0x40000000`, `[1] 0x20000000`, `[2] 0x400`, and `[2] 0x800000`).
 4. **Dark Blood `804807` / `807919` (`Effect[0]` `SPELLMOD_COST -25% / -50%`)**: tooltip names `"abilities that require
    Cursed Form"`. DBC mask `(0x01000000, 0x900001, 0x04004889)` missed `33` flagged Cursed Form spells (Rotclaw, Reave,
    Blood Howl, Monstrous Howl, Aortic Assault, Terrify) and wrongly matched non-Cursed spells (`681304` Hemostasis,

@@ -48481,7 +48481,7 @@
     },
     {
       "spell": 704654,
-      "name": "Ultra Instinct (3 stacks grant +15% crit damage vs +9% tooltip)",
+      "name": "Ultra Instinct (3 stacks grant +9% crit damage)",
       "kind": "hit_ratio",
       "variant": "crit_damage_alert",
       "label_suffix": "crit_damage_alert",
@@ -48894,7 +48894,7 @@
     },
     {
       "spell": 804811,
-      "name": "Monstrous Howl (Spell.cpp MIN_GCD=1000 ms clamps -50% 750 ms GCD, refusing cast at 775 ms)",
+      "name": "Monstrous Howl (reduces Bloodfang Bite GCD by 50% to 750 ms)",
       "kind": "metric_delta",
       "variant": "bite_gcd_ready_alert",
       "label_suffix": "bite_gcd_ready_alert",
@@ -49526,7 +49526,7 @@
     },
     {
       "spell": 801959,
-      "name": "Eyes In The Night (5000 ms SQL ICD blocks 2nd proc at 3500 ms vs 3 sec tooltip)",
+      "name": "Eyes In The Night (3 sec ICD allows 2nd proc at 3500 ms)",
       "kind": "metric_delta",
       "variant": "icd_3s_alert",
       "label_suffix": "icd_3s_alert",
@@ -49739,7 +49739,7 @@
     },
     {
       "spell": 801959,
-      "name": "Eyes In The Night (RedirectThreat generates 0 threat when low-HP ally has 0 threat)",
+      "name": "Eyes In The Night (generates direct threat when low-HP ally has 0 threat)",
       "kind": "metric_delta",
       "variant": "threat_zero_ally_alert",
       "label_suffix": "threat_zero_ally_alert",
@@ -50535,7 +50535,7 @@
     },
     {
       "spell": 501132,
-      "name": "Fearmonger (802580 ticks every 2100 ms [-30% period] vs 2308 ms [+30% tick rate])",
+      "name": "Fearmonger (802580 ticks every 2308 ms at +30% tick rate)",
       "kind": "hit_period",
       "variant": "tick_period_tooltip_alert",
       "label_suffix": "tick_period_tooltip_alert",
@@ -50736,7 +50736,7 @@
     },
     {
       "spell": 572907,
-      "name": "Sanguine Rupture (800775 lacks tooltip 0.35 SP scaling at +20000 SP)",
+      "name": "Sanguine Rupture (800775 scales with 0.35 Shadow SP at +20000 SP)",
       "kind": "metric_delta",
       "variant": "damage_sp_alert",
       "label_suffix": "damage_sp_alert",
