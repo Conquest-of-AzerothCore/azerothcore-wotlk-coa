@@ -11,7 +11,7 @@ struct Rank
     std::uint32_t SpellId;
     std::uint8_t RequiredLevel;
 };
-inline constexpr std::array<Rank, 2710> Ranks =
+inline constexpr std::array<Rank, 2711> Ranks =
 {{
     { 12, 300857, 300882, 10 },
     { 12, 300857, 300883, 24 },
@@ -1917,6 +1917,7 @@ inline constexpr std::array<Rank, 2710> Ranks =
     { 27, 500147, 502433, 32 },
     { 27, 500147, 503623, 38 },
     { 27, 500147, 503624, 46 },
+    { 27, 500147, 572035, 58 },
     { 27, 500152, 502440, 38 },
     { 27, 500152, 502441, 48 },
     { 27, 500152, 572157, 56 },

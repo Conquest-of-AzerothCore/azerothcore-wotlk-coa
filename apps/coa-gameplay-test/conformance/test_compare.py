@@ -2307,6 +2307,15 @@ class DbcTooltipsTest(unittest.TestCase):
         self.assertEqual(DbcTooltips(DBC_DIR, rewritten).effect_points(PATIENCE, 1), (4999, 1))
         self.assertEqual(DbcTooltips(DBC_DIR, rewritten).effect_points(PATIENCE, 0), (1999, 1))
 
+    def test_effect_override_base_points_are_applied_when_reading_tooltips(self):
+        override = {'spell': 706442, 'effect': 0, 'base_points': 14, 'citation': 'Q-sc-ex-3'}
+        caster = CasterStats(level=60, ap=0.0, rap=0.0, sp_by_school={school: 0.0 for school in range(1, 7)},
+                             stats={stat: 0.0 for stat in range(5)})
+        plain = {v.text: v.value for v in DbcTooltips(DBC_DIR).read(800622, caster).values}
+        overridden = {v.text: v.value for v in DbcTooltips(DBC_DIR, {'effect_overrides': [override]}).read(800622, caster).values}
+        self.assertEqual(plain['$706442s1'], 10.0)
+        self.assertEqual(overridden['$706442s1'], 15.0)
+
     def test_literal_token_entries_are_absent_for_a_spell_without_one(self):
         tooltips = DbcTooltips(DBC_DIR, CLASS_FILE)
         caster = CasterStats(level=60, ap=100.0, rap=0.0, sp_by_school={school: 0.0 for school in range(1, 7)},
@@ -2831,6 +2840,29 @@ class BetweenPartHitRatioTests(unittest.TestCase):
         verdict = behaviour_hit_ratio_verdict(base, spread, model)
         self.assertNotIn('between-part variance', verdict.explanation)
         self.assertIn('per-cast interval', verdict.explanation)
+
+
+class PerLevelTokenQuestionTests(unittest.TestCase):
+    def test_uppercase_and_mixed_case_per_level_tokens_build_tooltip_value_questions(self):
+        from compare import PER_LEVEL_TOKEN, TOOLTIP_VALUE, unreadable_question
+        for token, expected_match in (('${$m1+$PPL1+$bh*0.141131}', '$PPL1'),
+                                      ('${$502411PPL1+$bh*0.14}', '$502411PPL1'),
+                                      ('${$m1+$Ppl2+$bh*0.2}', '$Ppl2'),
+                                      ('${$m1+$ppl1+$bh*0.2}', '$ppl1')):
+            with self.subTest(token=token):
+                self.assertEqual(PER_LEVEL_TOKEN.findall(token), [expected_match])
+                reader = FakeTooltips([], fields={(RANK, 'Description[enUS]'): f'Heals an ally for {token}.'})
+                detail = unreadable_question(reader, RANK, 'Radiant Cascade', 60, token)
+                self.assertIsNotNone(detail)
+                self.assertEqual(detail['kind'], TOOLTIP_VALUE)
+                self.assertIn(expected_match, detail['question'])
+                self.assertIn('Heals an ally for ___.', detail['question'])
+
+    def test_non_per_level_unreadable_token_returns_no_per_level_question(self):
+        from compare import unreadable_question
+        reader = FakeTooltips([], fields={(RANK, 'Description[enUS]'): 'Jumps to $x1 allies.',
+                                          (RANK, 'SpellDescriptionVariableID'): 0})
+        self.assertIsNone(unreadable_question(reader, RANK, 'Radiant Cascade', 60, '$x1'))
 
 
 if __name__ == '__main__':

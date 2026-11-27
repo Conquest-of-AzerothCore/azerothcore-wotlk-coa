@@ -185,7 +185,7 @@ CLASS_ENTRIES = {PROC_CHECK: ('procs', 'aura'), TRIGGER_CHECK: ('triggers', 'aur
                  COOLDOWN_GATE_CHECK: ('triggers', 'aura'), PROC_ENERGIZE_CHECK: ('procs', 'aura'),
                  SELF_TRIGGER_CHECK: ('triggers', 'aura'), GATE_ABSENCE_CHECK: ('triggers', 'aura'),
                  TALENT_DELTA: ('talent_modifiers', 'talent')}
-PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d')
+PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d', re.IGNORECASE)
 DESCRIPTION_VARIABLE = re.compile(r'\$<\w+>')
 SENTENCE_END = re.compile(r'[.!?](?=\s|$|[$@])|\n')
 BLANK = '___'
@@ -273,12 +273,27 @@ def literal_values(class_file: dict, rank_id: int, description: str) -> list[Dis
     return [token for token in tokens if token is not None]
 
 
+class OverriddenPoints(Records):
+    def __init__(self, dbc, overrides: Mapping[tuple[int, int], int]):
+        super().__init__(dbc)
+        self.overrides = overrides
+
+    def field(self, table_name: str, identity: int, name: str):
+        if table_name == 'Spell' and name.startswith('EffectBasePoints['):
+            effect = int(name[17:-1])
+            if (identity, effect) in self.overrides:
+                return self.overrides[(identity, effect)]
+        return super().field(table_name, identity, name)
+
+
 class DbcTooltips:
     def __init__(self, dbc_dir: Path, class_file: dict | None = None):
         self.dbc_dir = Path(dbc_dir)
         self.dbc = dataset(self.dbc_dir)
-        self.records = Records(self.dbc)
         self.class_file = class_file or {}
+        overrides = {(entry['spell'], entry['effect']): entry['base_points']
+                     for entry in self.class_file.get('effect_overrides', []) if 'base_points' in entry}
+        self.records = OverriddenPoints(self.dbc, overrides) if overrides else Records(self.dbc)
         self.first_ranks: dict[int, int] | None = None
 
     def read(self, rank_id: int, caster: CasterStats, forced: tuple[int, int, int] | None = None,

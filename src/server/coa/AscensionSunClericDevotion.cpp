@@ -25,10 +25,14 @@ public:
         if (!dawnsear && !sunflare)
             return;
         for (auto const& row : SunClericCoefficients)
-            if (row.spell == info->Id && row.effect == index && row.sp != 0.0f)
+            if (row.spell == info->Id && row.effect == index)
             {
                 float const bonusPercent = Amount(SUN_CLERIC_GRACE, dawnsear ? 0 : 1) / 100.0f;
-                value += row.sp * std::max(0, player->SpellBaseDamageBonusDone(info->GetSchoolMask())) * bonusPercent;
+                int32 const spellPower = std::max(0, player->SpellBaseDamageBonusDone(info->GetSchoolMask()));
+                if (dawnsear && row.sp != 0.0f)
+                    value += row.sp * spellPower * bonusPercent;
+                else if (!dawnsear && sunflare)
+                    value += spellPower * bonusPercent;
             }
     }
 };

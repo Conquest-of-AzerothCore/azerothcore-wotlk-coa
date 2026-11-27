@@ -312,11 +312,10 @@ void ActivateDawn(Player* player)
                 Cast(player, player, helper);
     Refresh(player);
 }
-void Fulfill(Player* player, Spell* spell, Spell* guard, Unit* target)
+namespace
 {
-    if (!spell || !guard || !spell->GetScriptValue(Dawn) || guard->GetScriptValue(807441))
-        return;
-    guard->SetScriptValue(807441, 1);
+void ApplyFulfillmentRewards(Player* player, Unit* target)
+{
     if (player->HasAura(805581))
         Reduce(player, 500154, std::abs(Amount(807445)));
     if (player->HasAura(680622))
@@ -324,10 +323,24 @@ void Fulfill(Player* player, Spell* spell, Spell* guard, Unit* target)
     if (player->HasAura(704562))
         Cast(player, player, 680672);
     if (player->HasSpell(92136) || player->HasAura(92136))
-        for (Unit* ally : Allies(player,player,Radius(704911),sSpellMgr->GetSpellInfo(704911)->MaxAffectedTargets))
+        for (Unit* ally : Allies(player, player, Radius(704911), sSpellMgr->GetSpellInfo(704911)->MaxAffectedTargets))
             Cast(player, ally, 704911);
     if (player->HasAura(707081) && target && player->IsValidAttackTarget(target))
         Cast(player, target, 657125);
+}
+}
+void Fulfill(Player* player, Spell* spell, Spell* guard, Unit* target)
+{
+    if (!spell || !guard || !spell->GetScriptValue(Dawn) || guard->GetScriptValue(807441))
+        return;
+    guard->SetScriptValue(807441, 1);
+    ApplyFulfillmentRewards(player, target);
+}
+void FulfillTaken(Player* player, Unit* target)
+{
+    if (!player)
+        return;
+    ApplyFulfillmentRewards(player, target);
 }
 static bool IsBoss(Unit const* target)
 {

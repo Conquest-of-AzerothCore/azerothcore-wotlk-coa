@@ -1,18 +1,18 @@
 {
   "schema": 1,
-  "name": "Sun Cleric: Vow of Dawn bounces to 6 total targets under Dawn on Glorious Execution and every Sunslam tick (#10407)",
+  "name": "Sun Cleric: Vow of Dawn bounces to 5 total targets under Dawn on Glorious Execution and every Sunslam tick (#10407)",
   "contract": [
     "Issue #10407: Vow of Dawn (803491) -> Dawn (804584 -> 807440) -> Glorious Execution (800626) or Sunslam (805629)",
-    "must hit 3 targets without Dawn (primary + Amount(803492) = 2 bounces) and 6 targets with Dawn Fulfillment active",
-    "(primary + (2 + 1) * 2 - 1 = 5 bounces). Per Sun Cleric ADR 0027 (owner ruling O-23) and #12951, every Sunslam",
-    "tick (805639) counts as its own direct hit for every Vow, including Vow of Dawn's bounce count. On unfixed main,",
-    "AscensionSunClericEvents.cpp defined tickGuard for both 805639 and 807058, but defined a separate bounceGuard that",
-    "only checked 807058 and fell back to the shared channeled Sunslam Spell* for 805639: tick 1 bounced 5 times and",
-    "set script value 803491 on the channel, suppressing Vow of Dawn bounces on subsequent ticks (5 or 10 total bounces",
-    "instead of 20). Phase 1 verifies Glorious Execution without Dawn bounces 2 times (3 targets total). Phase 2",
-    "verifies Glorious Execution under Dawn Fulfillment bounces 5 times (6 targets total). Phase 3 (DISCRIMINATING)",
-    "verifies all four Sunslam ticks (805639) under Dawn Fulfillment each bounce 5 times (20 total 803493 casts), never",
-    "bouncing onto the primary target or a distant control dummy 22 yd away."
+    "must hit 3 targets without Dawn (primary + Amount(803492) = 2 bounces) and 5 targets with Dawn Fulfillment active",
+    "(primary + count * 2 = 4 bounces per Sun Cleric ADR 0045 Q-sc-ex-6). Per Sun Cleric ADR 0027 (owner ruling O-23)",
+    "and #12951, every Sunslam tick (805639) counts as its own direct hit for every Vow, including Vow of Dawn's bounce",
+    "count. On unfixed main, AscensionSunClericEvents.cpp defined tickGuard for both 805639 and 807058, but defined a",
+    "separate bounceGuard that only checked 807058 and fell back to the shared channeled Sunslam Spell* for 805639:",
+    "tick 1 bounced and set script value 803491 on the channel, suppressing Vow of Dawn bounces on subsequent ticks.",
+    "Phase 1 verifies Glorious Execution without Dawn bounces 2 times (3 targets total). Phase 2 verifies Glorious",
+    "Execution under Dawn Fulfillment bounces 4 times (5 targets total). Phase 3 (DISCRIMINATING) verifies all four",
+    "Sunslam ticks (805639) under Dawn Fulfillment each bounce 4 times (16 total 803493 casts), never bouncing onto",
+    "the primary target or a distant control dummy 22 yd away."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -127,12 +127,12 @@
     { "action": "wait", "label": "Let Vow of Dawn Fulfillment bounces resolve", "ms": 1000 },
     {
       "action": "assert",
-      "label": "CONTROL: Glorious Execution under Dawn bounces 5 times (6 targets total)",
+      "label": "CONTROL: Glorious Execution under Dawn bounces 4 times (5 targets total)",
       "actor": "cleric",
       "metric": "spell_cast_count",
       "spell": 803493,
       "relative_to": "bounces_before_ge_dawn",
-      "equals": 5
+      "equals": 4
     },
     {
       "action": "assert",
@@ -169,12 +169,12 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Every Sunslam tick under Dawn bounces Vow of Dawn 5 times (20 bounces total, 6 targets per tick)",
+      "label": "DISCRIMINATING: Every Sunslam tick under Dawn bounces Vow of Dawn 4 times (16 bounces total, 5 targets per tick)",
       "actor": "cleric",
       "metric": "spell_cast_count",
       "spell": 803493,
       "relative_to": "bounces_before_sunslam",
-      "equals": 20
+      "equals": 16
     },
     {
       "action": "assert",

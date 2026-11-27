@@ -262,11 +262,12 @@ def effect_roll(low: float, high: float) -> Distribution:
 
 
 def weapon_hit(readout: Readout, effects: Sequence[int], caster: CasterStats, weapon: WeaponProfile | None,
-               *, percent_before_flat: bool = False) -> tuple[Distribution, float, list[str]]:
+               *, percent_before_flat: bool = False,
+               rolls: Mapping[int, Sequence[float]] | None = None) -> tuple[Distribution, float, list[str]]:
     if weapon is None:
         raise Unmodelled('weapon damage needs the weapon stats of the class file')
     percent = Fraction(1)
-    flat_floor = 0
+    flat_dist: Distribution = {0: 1.0}
     flat = 0.0
     texts: list[str] = []
     for index, effect in enumerate(effects):
@@ -276,17 +277,22 @@ def weapon_hit(readout: Readout, effects: Sequence[int], caster: CasterStats, we
             texts += shown
         elif effect in WEAPON_FLAT_EFFECTS:
             value, shown = fixed_value(readout, index, 'flat')
-            flat_floor += math.floor(value)
-            flat += value
+            if rolls and index in rolls:
+                values = rolls[index]
+                flat_dist = summed(flat_dist, rolled_hit(values))
+                flat += sum(values) / len(values)
+            else:
+                flat_dist = summed(flat_dist, {math.floor(value): 1.0})
+                flat += value
             texts += shown
     speed = weapon.normalized_speed if NORMALIZED_WEAPON_DMG in effects else weapon.speed_ms / 1000
     bonus = caster.ap / ATTACK_POWER_PER_DPS * speed
     roll = uniform(math.floor(weapon.min_damage + bonus), math.floor(weapon.max_damage + bonus))
     if percent_before_flat:
-        distribution = mapped(roll, lambda damage: math.floor(damage * percent) + flat_floor)
+        distribution = summed(mapped(roll, lambda damage: math.floor(damage * percent)), flat_dist)
         tooltip_mean = float(percent) * ((weapon.min_damage + weapon.max_damage) / 2 + bonus) + flat
     else:
-        distribution = mapped(roll, lambda damage: math.floor((damage + flat_floor) * percent))
+        distribution = mapped(summed(roll, flat_dist), lambda damage: math.floor(damage * percent))
         tooltip_mean = float(percent) * ((weapon.min_damage + weapon.max_damage) / 2 + bonus + flat)
     return distribution, tooltip_mean, ordered(readout, texts)
 
@@ -439,7 +445,7 @@ def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterS
     events = 1
     if kind == 'weapon':
         distribution, tooltip_mean, texts = weapon_hit(readout, spell_effects, caster, weapon,
-                                                        percent_before_flat=percent_before_flat)
+                                                        percent_before_flat=percent_before_flat, rolls=rolls)
     elif kind == TRIGGERED_WEAPON:
         distribution, tooltip_mean, texts = triggered_hit(readout, triggered[indexes[0]], caster, weapon)
     else:
@@ -719,7 +725,9 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
     if kind in PERIODIC_KINDS.values():
         shown = periodic_tick_readout(records, rank_id, caster, readout, indexes[0])
     modifiers = for_school(aura_modifiers(records, auras, class_file['level']), school_mask)
-    rolls = {} if kind in WEAPON_KINDS else rolled_values(records, rank_id, caster, shown, indexes)
+    flat_indexes = [index for index in indexes if facts.effects[index] in WEAPON_FLAT_EFFECTS]
+    rolls = (rolled_values(records, rank_id, caster, shown, flat_indexes) if kind == 'weapon'
+             else {} if kind in WEAPON_KINDS else rolled_values(records, rank_id, caster, shown, indexes))
     for index, amount in (flat or {}).items():
         if index not in rolls:
             raise Unmodelled(f'the block value term of {rank_id} effect {index} needs its rolled values')

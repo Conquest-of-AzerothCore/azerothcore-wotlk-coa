@@ -33,6 +33,8 @@ void ApplyContracts(SpellInfo* info)
         info->AttributesEx3 |= SPELL_ATTR3_DOT_STACKING_RULE;
     if (id == 572886)
         info->Effects[EFFECT_0].MiscValue = SPELL_SCHOOL_MASK_ALL;
+    if (id == RejuvenatingRays)
+        info->Attributes |= SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL | SPELL_ATTR0_ONLY_OUTDOORS;
     if (id == Rejuvenating)
         for (auto& effect : info->Effects)
             if (effect.IsAura())
@@ -149,6 +151,7 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 806118)
     {
+        info->Effects[EFFECT_0].MiscValue = SPELL_SCHOOL_MASK_ALL;
         info->Effects[2].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
         info->Effects[2].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ALLY);
     }
@@ -247,9 +250,24 @@ void ApplyContracts(SpellInfo* info)
     if (Named(info, 500141))
         info->Effects[0].ChainTarget = 5;
     if (Named(info, 800231))
+    {
+        info->Effects[EFFECT_0].BonusMultiplier = 0.0f;
         for (auto& effect : info->Effects)
             if (effect.Effect == 168)
                 effect.Effect = SPELL_EFFECT_DUMMY;
+    }
+    if (id == 572390)
+    {
+        info->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER_AREA_RAID);
+        info->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(12);
+    }
+    if (id == 681160)
+        info->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(217);
+    if (id == 706442)
+    {
+        info->Effects[EFFECT_0].BasePoints = 14;
+        Ascension::ClientSpellPatches::Instance().Register(id);
+    }
     if (id == 804751)
         info->AttributesEx2 &= ~SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
     if (id == 707768)
@@ -382,11 +400,14 @@ public:
                  info->HasAura(SPELL_AURA_PERIODIC_LEECH)))
                 damage = uint32(damage * std::max(0.0f, 1.0f + float(stand->GetAmount()) / 100.0f));
     }
-    void ModifyMeleeDamage(Unit*, Unit* caster, uint32& damage) override
+    void ModifyMeleeDamage(Unit* target, Unit* caster, uint32& damage) override
     {
         Player* player = Owner(caster);
         if (player == caster && player && player->HasAura(807749))
             AddPct(damage, Amount(807749, 1, player));
+        if (target && player == caster && player)
+            if (AuraEffect const* dawnfall = target->GetAuraEffect(806118, EFFECT_0, player->GetGUID()))
+                AddPct(damage, dawnfall->GetAmount());
     }
     void OnDamage(Unit*, Unit* victim, uint32& damage) override
     {
@@ -397,6 +418,13 @@ public:
         if (player && player == victim && int64(player->GetHealth()) - damage < int64(player->CountPctFromMaxHealth(10)))
             if (DynamicObject* zone = player->GetDynObject(520647))
                 zone->Remove();
+        if (player && player == victim && damage)
+            if (Aura* chosen = player->GetAura(800622))
+                if (!chosen->GetScriptValue(706442) && player->HealthBelowPctDamaged(50, damage))
+                {
+                    chosen->SetScriptValue(706442, 1);
+                    Cast(player, player, 706442);
+                }
     }
 };
 }

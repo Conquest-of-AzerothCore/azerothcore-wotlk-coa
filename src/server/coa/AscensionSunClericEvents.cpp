@@ -28,6 +28,10 @@ bool Vow(uint32 id)
 {
     return std::find(std::begin(SunClericVows), std::end(SunClericVows), id) != std::end(SunClericVows);
 }
+bool AllowOverhealVow(uint32 id)
+{
+    return id == 803489 || id == 803491 || id == 803719 || id == 807547;
+}
 class aura_ascension_sun_cleric_event : public AuraScript
 {
     PrepareAuraScript(aura_ascension_sun_cleric_event);
@@ -48,7 +52,8 @@ class aura_ascension_sun_cleric_event : public AuraScript
         uint32 id = GetId();
         auto* info = event.GetSpellInfo();
         uint32 damage = event.GetDamageInfo() ? event.GetDamageInfo()->GetDamage() : 0;
-        uint32 healing = event.GetHealInfo() ? event.GetHealInfo()->GetEffectiveHeal() : 0;
+        uint32 healing = event.GetHealInfo() ?
+            (AllowOverhealVow(id) ? event.GetHealInfo()->GetHeal() : event.GetHealInfo()->GetEffectiveHeal()) : 0;
         bool periodic = event.GetTypeMask() & (PROC_FLAG_DONE_PERIODIC | PROC_FLAG_TAKEN_PERIODIC);
         if (!periodic)
         {
@@ -159,21 +164,25 @@ class aura_ascension_sun_cleric_event : public AuraScript
         Spell* raw = const_cast<Spell*>(event.GetProcSpell());
         Spell* spell = Origin(player,raw);
         uint32 damage = event.GetDamageInfo() ? event.GetDamageInfo()->GetDamage() : 0;
-        uint32 healing = event.GetHealInfo() ? event.GetHealInfo()->GetEffectiveHeal() : 0;
+        uint32 healing = event.GetHealInfo() ?
+            (AllowOverhealVow(id) ? event.GetHealInfo()->GetHeal() : event.GetHealInfo()->GetEffectiveHeal()) : 0;
         Unit* target = event.GetActionTarget();
         bool old = State(player).event;
         bool oldDawn = State(player).dawnEvent;
         State(player).event = true;
         bool ownSpell = spell && spell->GetCaster() == player;
-        State(player).dawnEvent = ownSpell && spell->GetScriptValue(DawnCast);
-        bool fulfillment = ownSpell && spell->GetScriptValue(Dawn);
+        bool takenDawn = id == 807547 && !ownSpell && player->HasAura(Dawn);
+        State(player).dawnEvent = (ownSpell && spell->GetScriptValue(DawnCast)) || takenDawn;
+        bool fulfillment = (ownSpell && spell->GetScriptValue(Dawn)) || takenDawn;
         if (Vow(id))
         {
             bool automatic = event.GetTypeMask() & PROC_FLAG_DONE_MELEE_AUTO_ATTACK;
             bool compatible = id != 807749 || !automatic;
             Spell* tickGuard = raw && (raw->GetSpellInfo()->Id == 805639 || raw->GetSpellInfo()->Id == 807058) ?
                 raw : spell;
-            if (fulfillment && compatible)
+            if (takenDawn)
+                FulfillTaken(player, event.GetActor());
+            else if (fulfillment && compatible)
                 Fulfill(player, spell, tickGuard, target);
             if (!State(player).dawnEvent)
             {
@@ -207,7 +216,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
                 nearby.remove_if([player,damage](Unit* unit) { return damage && !player->IsValidAttackTarget(unit); });
                 uint32 count = uint32(Amount(803492));
                 if (fulfillment)
-                    count = (count + 1) * 2 - 1;
+                    count *= 2;
                 for (Unit* unit : nearby)
                 {
                     if (!count--)
@@ -243,9 +252,17 @@ class aura_ascension_sun_cleric_event : public AuraScript
             if (id == 807547)
             {
                 auto allies = Allies(player, player, Radius(505197));
-                allies.sort([player](Unit* a, Unit* b) { return player->GetDistance(a) < player->GetDistance(b); });
+                allies.remove(player);
+                Unit* ally = nullptr;
                 if (!allies.empty())
-                    Copy(player, allies.front(), 505197,
+                {
+                    allies.sort([player](Unit* a, Unit* b) { return player->GetDistance(a) < player->GetDistance(b); });
+                    ally = allies.front();
+                }
+                else if (player->IsAlive())
+                    ally = player;
+                if (ally)
+                    Copy(player, ally, 505197,
                         CalculatePct(amount, Amount(807750, 0, player) * (fulfillment ? 2 : 1)));
             }
             if (id == 807749 && fulfillment && !automatic && !tickGuard->GetScriptValue(807749))

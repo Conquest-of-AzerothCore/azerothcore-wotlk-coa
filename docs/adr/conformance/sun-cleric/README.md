@@ -48,3 +48,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0042](0042-light-of-the-sun-parry-bonus-is-consumed-by-the-next-melee-attack.md) | Light of the Sun's parry bonus is consumed by the next melee attack taken, parried or not; a spell leaves it (owner O-31) |
 | [0043](0043-valkyrs-calling-lands-on-its-stored-victim.md) | Valkyr's Calling's charge-back lands on its stored victim, whatever the selection (owner O-32, mentor D-302) |
 | [0044](0044-solar-eclipse-and-sunlight-follow-the-displayed-points.md) | Solar Eclipse 704931 and Sunlight 704911 drop the per-level points the tooltip does not display (owner ruling O-37, mentor D-305) |
+| [0045](0045-extra-spells-owner-rulings-and-fixes.md) | Sun Cleric extra spells owner rulings (`Q-sc-ex-1..9`) and settled server fixes (`572390`, `681160`, `807240`, `570125`, `807547`) |

@@ -96,6 +96,19 @@ BLADE_OF_FAITH_PERIOD_MS = 3000
 BLADE_OF_FAITH_DURATION_S = 30
 BLADE_OF_FAITH_TOTAL = '${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)}'
 BLADE_OF_FAITH_BASE_POINTS, BLADE_OF_FAITH_PER_LEVEL, BLADE_OF_FAITH_BASE_LEVEL = 205, 1.125, 58
+SUN_CLERIC = 27
+SUN_CLERIC_LINES = (94, 96, 97, 498)
+SKILLED_SUN_CLERIC = replace(LEVEL_60_TEMPLAR, skills=dict.fromkeys(SUN_CLERIC_LINES, LEVEL_60_SKILL),
+                             race=HUMAN, class_id=SUN_CLERIC)
+RADIANT_CASCADE = 502411
+RADIANT_CASCADE_BASE_POINTS, RADIANT_CASCADE_PER_LEVEL, RADIANT_CASCADE_BASE_LEVEL = 522, 1.7699999809265137, 58
+RADIANT_CASCADE_CHAIN_TARGETS = 4
+ILLUMINATION = 502429
+ILLUMINATION_BASE_POINTS = 1228
+SOLAR_INVOCATION_ASCENSION = 572157
+ASCENSION_BASE_POINTS, ASCENSION_PER_LEVEL, ASCENSION_BASE_LEVEL = 404, 8.12444019317627, 56
+DAYBREAK = 572035
+DAYBREAK_BASE_POINTS, DAYBREAK_PER_LEVEL, DAYBREAK_BASE_LEVEL = 617, 6.968999862670898, 58
 
 
 def displayed(readout, text):
@@ -381,6 +394,39 @@ class ClientDbcTooltipTest(unittest.TestCase):
         self.assertEqual(Tooltip(records, BATTLE_STANCE, LEVEL_60_TEMPLAR).read(description).unreadable, ['$d'])
         self.assertEqual(displayed(self.read(SCOURGEBANE_STRIKE), '$i'), Displayed('$i', 0, None, 'count'))
 
+    def test_uppercase_ppl_resolves_on_ascension_and_radiant_cascade(self):
+        ascension = self.read(SOLAR_INVOCATION_ASCENSION, SKILLED_SUN_CLERIC)
+        expected_ascension = (ASCENSION_BASE_POINTS + 1
+                              + 2 * ASCENSION_PER_LEVEL * (60 - ASCENSION_BASE_LEVEL))
+        heal = displayed(ascension, '${$m1+$PPL1+$SP*3.10}')
+        self.assertAlmostEqual(heal.value, expected_ascension, places=4)
+        self.assertEqual((heal.effect_index, heal.kind, heal.spell_id), (0, 'flat', SOLAR_INVOCATION_ASCENSION))
+
+        caster_with_bh = replace(SKILLED_SUN_CLERIC, bonus_healing=100.0)
+        cascade_default = read_tooltip(self.dbc, RADIANT_CASCADE, caster_with_bh)
+        self.assertEqual(cascade_default.unreadable, ['$x1'])
+        cascade = read_tooltip(self.dbc, RADIANT_CASCADE, caster_with_bh, standalone_chain_targets=True)
+        expected_cascade = (RADIANT_CASCADE_BASE_POINTS + 1
+                            + 2 * RADIANT_CASCADE_PER_LEVEL * (60 - RADIANT_CASCADE_BASE_LEVEL) + 100.0 * 0.141131)
+        self.assertAlmostEqual(displayed(cascade, '${$m1+$PPL1+$bh*0.141131}').value, expected_cascade, places=4)
+        self.assertEqual(displayed(cascade, '$x1'), Displayed('$x1', float(RADIANT_CASCADE_CHAIN_TARGETS), None,
+                                                              'count', None))
+        self.assertEqual(cascade.unreadable, [])
+
+    def test_bonus_healing_reads_both_cases_only_when_supplied(self):
+        self.assertEqual(self.read(ILLUMINATION, SKILLED_SUN_CLERIC).unreadable, ['${$m1+0+$bh*1.05}'])
+        self.assertEqual(self.read(DAYBREAK, SKILLED_SUN_CLERIC).unreadable, ['${$m1+0+$BH*0.595}'])
+        caster_with_bh = replace(SKILLED_SUN_CLERIC, bonus_healing=200.0)
+        illumination = self.read(ILLUMINATION, caster_with_bh)
+        self.assertAlmostEqual(displayed(illumination, '${$m1+0+$bh*1.05}').value,
+                               ILLUMINATION_BASE_POINTS + 1 + 200.0 * 1.05, places=4)
+        self.assertEqual(illumination.unreadable, [])
+        daybreak = self.read(DAYBREAK, caster_with_bh)
+        expected_daybreak = (DAYBREAK_BASE_POINTS + 1 + DAYBREAK_PER_LEVEL * (60 - DAYBREAK_BASE_LEVEL)
+                             + 200.0 * 0.595)
+        self.assertAlmostEqual(displayed(daybreak, '${$m1+0+$BH*0.595}').value, expected_daybreak, places=4)
+        self.assertEqual(daybreak.unreadable, [])
+
 
 SPELL_RECORD_BYTES = 936
 SMALL_RECORD_BYTES = 16
@@ -485,6 +531,13 @@ FIXTURE_SPELLS = {
     80: {'Description[enUS]': 'Picks one.\r\n@ext:@s:81:0@:ext@\r\n@ext:Note @s:82:0@ here:ext@'},
     81: {'Description[enUS]': 'Raises haste by $s1%.', 'EffectBasePoints[0]': 2, 'EffectDieSides[0]': 1},
     82: {'Description[enUS]': 'Lasts $d.', 'DurationIndex': 1},
+    83: {'Description[enUS]': 'Scales by ${$83m1+$83PPL1} and ${$m2+$PPL1}.',
+         'EffectBasePoints[0]': 10, 'EffectDieSides[0]': 1, 'EffectRealPointsPerLevel[0]': 2.0, 'BaseLevel': 10,
+         'EffectBasePoints[1]': 24, 'EffectDieSides[1]': 1},
+    84: {'Description[enUS]': 'Jumps to $x1 allies and $77X2 more; invalid $x and $x4.',
+         'EffectChainTarget[0]': 4},
+    85: {'Description[enUS]': 'Heals for ${$m1+$bh*0.5}, ${$m1+$BH*0.5}, and ${$m1+$Bh*0.5}.',
+         'EffectBasePoints[0]': 99, 'EffectDieSides[0]': 1},
 }
 FIXTURE_VARIABLES = {
     1: '$bonus=${$m1*2+$PL}\r\n',
@@ -693,6 +746,38 @@ class FixtureTooltipTest(unittest.TestCase):
             Displayed('${$m2+$ppl1}', 25.0, 1, 'flat', 10),
         ])
         self.assertEqual(readout.unreadable, [])
+
+    def test_uppercase_ppl_resolves_and_preserves_primary_effect_index(self):
+        readout = read_tooltip(self.dbc, 83, FIXTURE_CASTER)
+        per_level = 2.0 * (FIXTURE_CASTER.level - 10)
+        self.assertEqual(readout.values, [
+            Displayed('${$83m1+$83PPL1}', 11.0 + per_level, 0, 'flat', 83),
+            Displayed('${$m2+$PPL1}', 25.0 + per_level, 1, 'flat', 83),
+        ])
+        self.assertEqual(readout.unreadable, [])
+
+    def test_standalone_chain_target_tokens_are_opt_in_and_read_count(self):
+        default_readout = read_tooltip(self.dbc, 84, FIXTURE_CASTER)
+        self.assertEqual(default_readout.values, [])
+        self.assertEqual(default_readout.unreadable, ['$x1', '$77X2', '$x', '$x4'])
+        opt_in = read_tooltip(self.dbc, 84, FIXTURE_CASTER, standalone_chain_targets=True)
+        self.assertEqual(opt_in.values, [
+            Displayed('$x1', 4.0, None, 'count', None),
+            Displayed('$77X2', 3.0, None, 'count', None),
+        ])
+        self.assertEqual(opt_in.unreadable, ['$x', '$x4'])
+
+    def test_bonus_healing_resolves_both_bh_and_BH_when_supplied_and_rejects_mixed_case(self):
+        default_readout = read_tooltip(self.dbc, 85, FIXTURE_CASTER)
+        self.assertEqual(default_readout.values, [])
+        self.assertEqual(default_readout.unreadable, ['${$m1+$bh*0.5}', '${$m1+$BH*0.5}', '${$m1+$Bh*0.5}'])
+        healer = replace(FIXTURE_CASTER, bonus_healing=80.0)
+        readout = read_tooltip(self.dbc, 85, healer)
+        self.assertEqual(readout.values, [
+            Displayed('${$m1+$bh*0.5}', 140.0, 0, 'flat', 85),
+            Displayed('${$m1+$BH*0.5}', 140.0, 0, 'flat', 85),
+        ])
+        self.assertEqual(readout.unreadable, ['${$m1+$Bh*0.5}'])
 
 
 class StreamedTextTests(unittest.TestCase):

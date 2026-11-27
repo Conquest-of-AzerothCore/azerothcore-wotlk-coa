@@ -226,6 +226,14 @@ class ExpectedHitTest(unittest.TestCase):
         self.assertEqual(model.kind, 'weapon')
         self.assertEqual(model.hits_per_cast, 1)
 
+    def test_weapon_flat_effect_with_die_sides_convolves_its_roll_distribution(self):
+        model = expected_hit(argent_blade_readout(), ARGENT_BLADE_EFFECTS, caster(), walking_stick(), NO_MITIGATION,
+                             rolls={0: (568.0, 569.0, 570.0)}, percent_before_flat=True)
+        outcomes = [roll * 215 // 100 + flat for roll in range(80, 85) for flat in (568, 569, 570)]
+        mean, sigma = moments(outcomes)
+        self.assertAlmostEqual(model.mean, mean, places=9)
+        self.assertAlmostEqual(model.sigma, sigma, places=9)
+
     def test_class_tuning_and_armor_are_applied_after_the_hit_with_their_own_rounding(self):
         armor = expected_mitigation(PHYSICAL, ARMOR_528, 60)
         model = expected_hit(argent_blade_readout(), ARGENT_BLADE_EFFECTS, caster(), walking_stick(), armor,
