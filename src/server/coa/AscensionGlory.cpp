@@ -117,7 +117,13 @@ class ObjectiveTracker : public AllBattlegroundScript
 {
 public:
     ObjectiveTracker() : AllBattlegroundScript("AscensionGloryObjectives",
-        {ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_UPDATE_PLAYER_SCORE, ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_END_REWARD}) { }
+        {ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_UPDATE_PLAYER_SCORE, ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_END_REWARD,
+            ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_NODE_CAPTURED}) { }
+
+    void OnBattlegroundNodeCaptured(Battleground* bg, TeamId teamId) override
+    {
+        EarnForTeam(bg, teamId, NodeCaptureGlory);
+    }
 
     void OnBattlegroundEndReward(Battleground* bg, Player* player, TeamId winnerTeamId) override
     {
@@ -131,9 +137,14 @@ public:
         if (!glory)
             return;
 
-        TeamId const team = player->GetBgTeamId();
+        EarnForTeam(bg, player->GetBgTeamId(), glory);
+    }
+
+private:
+    static void EarnForTeam(Battleground* bg, TeamId teamId, uint32 glory)
+    {
         for (auto const& [guid, member] : bg->GetPlayers())
-            if (member->GetBgTeamId() == team)
+            if (member->GetBgTeamId() == teamId)
                 Earn(member, glory);
     }
 };
