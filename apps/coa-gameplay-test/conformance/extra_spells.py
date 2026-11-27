@@ -26,8 +26,13 @@ LINE_THREE_INTS = re.compile(r'\{\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\}')
 LINE_FIVE_INTS = re.compile(r'\{\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\}')
 LINE_TWO_INTS = re.compile(r'\{\s*(\d+)\s*,\s*(\d+)\s*\}')
 TRAINER_DELETE = re.compile(r'(?is)^DELETE\s+FROM\s+`?trainer_spell`?(?:\s+WHERE\s+(.*))?$')
+TRAINER_WRITE = re.compile(r'(?is)^(?:INSERT\s+(?:IGNORE\s+)?INTO|REPLACE\s+INTO)\s+`?trainer_spell`?\b')
 TRAINER_INSERT = re.compile(r'(?is)^(?:INSERT\s+(?:IGNORE\s+)?INTO|REPLACE\s+INTO)\s+`?trainer_spell`?'
                             r'\s*(?:\(([^)]*)\)\s*)?VALUES\b(.*)$')
+TRAINER_INSERT_SELECT = re.compile(
+    r'(?is)^(?:INSERT\s+(?:IGNORE\s+)?INTO|REPLACE\s+INTO)\s+`?trainer_spell`?'
+    r'\s*(?:\(([^)]*)\)\s*)?SELECT\s+(?:DISTINCT\s+)?(.*?)\s+FROM\s+`?trainer_spell`?'
+    r'(?:\s+WHERE\s+(.*?))?(?:\s+LIMIT\s+(\d+))?\s*$')
 SPELL_FIELDS = ['SpellName[enUS]', 'Rank[enUS]', 'Description[enUS]', 'Attributes']
 TOOLTIP_PREVIEW_CHARS = 180
 
@@ -53,16 +58,22 @@ def log_events(path: Path | None) -> tuple[Counter, Counter]:
     return casts, others
 
 
-def array_block(path: Path, name: str) -> str:
+def array_block(path: Path, name: str, required: bool = False) -> str:
     if not path.is_file():
+        if required:
+            raise ExtraSpellsError(f'required grant source file not found: {path}')
         return ''
     text = path.read_text(encoding='utf-8', errors='replace')
     match = re.search(rf'\b{re.escape(name)}\s*=\s*(.*?)\}};', text, re.S)
-    return match.group(1) if match else ''
+    if not match:
+        if required:
+            raise ExtraSpellsError(f'required array {name} not found in {path}')
+        return ''
+    return match.group(1)
 
 
-def class_spells_table(root: Path = REPOSITORY) -> dict[int, dict[int, int]]:
-    block = array_block(Path(root) / CUSTOM_CLASS_HEADER, 'ClassSpells')
+def class_spells_table(root: Path = REPOSITORY, required: bool = False) -> dict[int, dict[int, int]]:
+    block = array_block(Path(root) / CUSTOM_CLASS_HEADER, 'ClassSpells', required=required)
     found: dict[int, dict[int, int]] = {}
     for class_text, level_text, spell_text in LINE_THREE_INTS.findall(block):
         class_id, level, spell_id = int(class_text), int(level_text), int(spell_text)
@@ -71,8 +82,8 @@ def class_spells_table(root: Path = REPOSITORY) -> dict[int, dict[int, int]]:
     return found
 
 
-def live_baseline_spells(root: Path = REPOSITORY) -> dict[int, set[int]]:
-    block = array_block(Path(root) / LIVE_BASELINE_HEADER, 'Spells')
+def live_baseline_spells(root: Path = REPOSITORY, required: bool = False) -> dict[int, set[int]]:
+    block = array_block(Path(root) / LIVE_BASELINE_HEADER, 'Spells', required=required)
     found: dict[int, set[int]] = {}
     for class_text, race_text, spell_text in LINE_THREE_INTS.findall(block):
         if int(race_text) == 0:
@@ -80,8 +91,8 @@ def live_baseline_spells(root: Path = REPOSITORY) -> dict[int, set[int]]:
     return found
 
 
-def taught_abilities(root: Path = REPOSITORY) -> dict[int, dict[int, tuple[int, int]]]:
-    block = array_block(Path(root) / TAUGHT_ABILITY_HEADER, 'TaughtAbilities')
+def taught_abilities(root: Path = REPOSITORY, required: bool = False) -> dict[int, dict[int, tuple[int, int]]]:
+    block = array_block(Path(root) / TAUGHT_ABILITY_HEADER, 'TaughtAbilities', required=required)
     found: dict[int, dict[int, tuple[int, int]]] = {}
     for class_text, _, level_text, parent_text, spell_text in LINE_FIVE_INTS.findall(block):
         class_id, level, parent_id, spell_id = int(class_text), int(level_text), int(parent_text), int(spell_text)
@@ -91,8 +102,8 @@ def taught_abilities(root: Path = REPOSITORY) -> dict[int, dict[int, tuple[int, 
     return found
 
 
-def felsworn_rifts(root: Path = REPOSITORY) -> dict[int, int]:
-    block = array_block(Path(root) / COMPAT_SOURCE, 'FelswornHordeCapitalRifts')
+def felsworn_rifts(root: Path = REPOSITORY, required: bool = False) -> dict[int, int]:
+    block = array_block(Path(root) / COMPAT_SOURCE, 'FelswornHordeCapitalRifts', required=required)
     found: dict[int, int] = {}
     for spell_text, level_text in LINE_TWO_INTS.findall(block):
         spell_id, level = int(spell_text), int(level_text)
@@ -107,19 +118,32 @@ def sql_column_ids(text: str, column: str) -> set[int] | None:
     return {int(value) for value in re.findall(r'\d+', match.group(1) or match.group(2))}
 
 
-def apply_trainer_delete(active: dict[tuple[int, int], int], where_clause: str | None) -> None:
+def matching_trainer_keys(active: dict[tuple[int, int], int], where_clause: str | None) -> list[tuple[int, int]]:
     if where_clause is None:
-        active.clear()
-        return
+        return list(active)
+    matched: list[tuple[int, int]] = []
+    seen: set[tuple[int, int]] = set()
     for group in re.split(r'\bOR\b', where_clause, flags=re.I):
         trainers = sql_column_ids(group, 'TrainerId')
         spells = sql_column_ids(group, 'SpellId')
         if trainers is None and spells is None:
             continue
-        for key in list(active):
+        for key in active:
+            if key in seen:
+                continue
             trainer_id, spell_id = key
             if (trainers is None or trainer_id in trainers) and (spells is None or spell_id in spells):
-                del active[key]
+                seen.add(key)
+                matched.append(key)
+    return matched
+
+
+def apply_trainer_delete(active: dict[tuple[int, int], int], where_clause: str | None) -> None:
+    if where_clause is None:
+        active.clear()
+        return
+    for key in matching_trainer_keys(active, where_clause):
+        del active[key]
 
 
 def apply_trainer_insert(active: dict[tuple[int, int], int], columns_text: str | None, values_text: str) -> None:
@@ -138,9 +162,57 @@ def apply_trainer_insert(active: dict[tuple[int, int], int], columns_text: str |
             active[(trainer_id, spell_id)] = req_level
 
 
-def trainer_spells(root: Path = REPOSITORY) -> dict[int, dict[int, int]]:
+def resolve_select_int(expr: str, source_row: dict[str, int]) -> int:
+    token = expr.strip(' `\r\n\t')
+    lowered = token.lower()
+    if lowered in source_row:
+        return source_row[lowered]
+    try:
+        return int(token)
+    except ValueError as error:
+        raise ExtraSpellsError(f'unsupported trainer_spell SELECT expression: {expr!r}') from error
+
+
+def apply_trainer_insert_select(active: dict[tuple[int, int], int], columns_text: str | None,
+                                select_text: str, where_clause: str | None, limit_text: str | None) -> None:
+    columns = [col.strip(' `\r\n\t') for col in columns_text.split(',')] if columns_text else list(TRAINER_SPELL_COLUMNS)
+    expressions = [part.strip() for part in select_text.split(',')]
+    if len(expressions) != len(columns):
+        raise ExtraSpellsError(
+            f'trainer_spell SELECT column count ({len(expressions)}) does not match target ({len(columns)})')
+    fields = dict(zip(columns, expressions))
+    if 'TrainerId' not in fields or 'SpellId' not in fields:
+        raise ExtraSpellsError(f'trainer_spell SELECT missing TrainerId or SpellId in {columns!r}')
+    probe = {'trainerid': 0, 'spellid': 0, 'reqlevel': 0}
+    resolve_select_int(fields['TrainerId'], probe)
+    resolve_select_int(fields['SpellId'], probe)
+    if 'ReqLevel' in fields:
+        resolve_select_int(fields['ReqLevel'], probe)
+    matched = matching_trainer_keys(active, where_clause)
+    if limit_text is not None:
+        matched = matched[:int(limit_text)]
+    additions: list[tuple[int, int, int]] = []
+    for src_trainer_id, src_spell_id in matched:
+        source_row = {
+            'trainerid': src_trainer_id,
+            'spellid': src_spell_id,
+            'reqlevel': active[(src_trainer_id, src_spell_id)],
+        }
+        trainer_id = resolve_select_int(fields['TrainerId'], source_row)
+        spell_id = resolve_select_int(fields['SpellId'], source_row)
+        req_level = resolve_select_int(fields['ReqLevel'], source_row) if 'ReqLevel' in fields else 0
+        if TRAINER_CLASS_MIN <= trainer_id <= TRAINER_CLASS_MAX:
+            additions.append((trainer_id, spell_id, req_level))
+    for trainer_id, spell_id, req_level in additions:
+        active[(trainer_id, spell_id)] = req_level
+
+
+def trainer_spells(root: Path = REPOSITORY, required: bool = False) -> dict[int, dict[int, int]]:
     root = Path(root)
-    files = [root / BASE_TRAINER_SQL]
+    base_path = root / BASE_TRAINER_SQL
+    if required and not base_path.is_file():
+        raise ExtraSpellsError(f'required trainer SQL file not found: {base_path}')
+    files = [base_path]
     for directory in SQL_DIRECTORIES:
         folder = root / UPDATES_ROOT / 'updates' / directory
         if folder.is_dir():
@@ -162,6 +234,15 @@ def trainer_spells(root: Path = REPOSITORY) -> dict[int, dict[int, int]]:
             inserted = TRAINER_INSERT.match(statement)
             if inserted:
                 apply_trainer_insert(active, inserted.group(1), inserted.group(2))
+                continue
+            inserted_select = TRAINER_INSERT_SELECT.match(statement)
+            if inserted_select:
+                apply_trainer_insert_select(
+                    active, inserted_select.group(1), inserted_select.group(2),
+                    inserted_select.group(3), inserted_select.group(4))
+                continue
+            if TRAINER_WRITE.match(statement):
+                raise ExtraSpellsError(f'unsupported trainer_spell statement in {path}: {statement[:120]}')
     by_class: dict[int, dict[int, int]] = {}
     for (trainer_id, spell_id), req_level in active.items():
         class_id = trainer_id - TRAINER_CLASS_OFFSET
@@ -170,21 +251,22 @@ def trainer_spells(root: Path = REPOSITORY) -> dict[int, dict[int, int]]:
     return by_class
 
 
-def server_candidates(root: Path, class_id: int, level: int = CHARACTER_LEVEL) -> dict[int, list[str]]:
+def server_candidates(root: Path, class_id: int, level: int = CHARACTER_LEVEL,
+                      required: bool = False) -> dict[int, list[str]]:
     sources: dict[int, set[str]] = {}
-    for spell_id, req_level in class_spells_table(root).get(class_id, {}).items():
+    for spell_id, req_level in class_spells_table(root, required=required).get(class_id, {}).items():
         if req_level <= level:
             sources.setdefault(spell_id, set()).add(f'ClassSpells(L{req_level})')
-    for spell_id in live_baseline_spells(root).get(class_id, ()):
+    for spell_id in live_baseline_spells(root, required=required).get(class_id, ()):
         sources.setdefault(spell_id, set()).add('LiveBaseline')
-    for spell_id, (req_level, parent_id) in taught_abilities(root).get(class_id, {}).items():
+    for spell_id, (req_level, parent_id) in taught_abilities(root, required=required).get(class_id, {}).items():
         if req_level <= level:
             sources.setdefault(spell_id, set()).add(f'TaughtAbilities(L{req_level}, parent={parent_id})')
     if class_id == 14:
-        for spell_id, req_level in felsworn_rifts(root).items():
+        for spell_id, req_level in felsworn_rifts(root, required=required).items():
             if req_level <= level:
                 sources.setdefault(spell_id, set()).add(f'FelswornRifts(L{req_level})')
-    for spell_id, req_level in trainer_spells(root).get(class_id, {}).items():
+    for spell_id, req_level in trainer_spells(root, required=required).get(class_id, {}).items():
         if req_level <= level:
             sources.setdefault(spell_id, set()).add(f'trainer_spell(L{req_level})')
     return {spell_id: sorted(tags) for spell_id, tags in sorted(sources.items())}
@@ -279,7 +361,7 @@ def audit_extra_spells(class_file: dict, dbc_dir: Path, source_root: Path = REPO
     updates = source_root / UPDATES_ROOT / 'updates'
     pulled_ids = pulled_spells(records, covered_list, updates)
 
-    raw_candidates = server_candidates(source_root, class_id, level)
+    raw_candidates = server_candidates(source_root, class_id, level, required=True)
     collapsed: dict[int, set[str]] = {}
     for spell_id, srcs in raw_candidates.items():
         base = rank_to_first.get(spell_id, spell_id)

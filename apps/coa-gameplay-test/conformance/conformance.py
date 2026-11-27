@@ -606,7 +606,7 @@ def coverage_command(args) -> int:
 def ledger_command(args) -> int:
     class_file = load_class_file(args.class_id)
     dbc_dir = server_dbc_dir(args.dbc_dir or class_file.get('dbc_dir', DBC_DIR))
-    report = audit_extra_spells(class_file, dbc_dir, args.source_root)
+    report = audit_extra_spells(class_file, dbc_dir, args.source_root, PROGRESSION_HEADER)
     if report['unaccounted'] and not args.allow_unaccounted_extra:
         preview = ', '.join(f"{entry['spell']} {entry['name']}" for entry in report['unaccounted'][:10])
         suffix = f", ... ({len(report['unaccounted']) - 10} more)" if len(report['unaccounted']) > 10 else ''

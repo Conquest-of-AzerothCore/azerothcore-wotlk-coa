@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 import struct
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -64,9 +65,16 @@ def write_dbc_fixture(directory: Path, spells: list[dict[int, int | str]],
     return directory
 
 
-def write_source_tree(root: Path, *, progression: str = '', class_spells_h: str = '',
-                      live_baseline_h: str = '', taught_h: str = '', compat_cpp: str = '',
-                      base_sql: str = '', updates_world: dict[str, str] | None = None,
+DEFAULT_CLASS_SPELLS_H = 'inline constexpr std::array<ClassSpell, 0> ClassSpells = {};\n'
+DEFAULT_LIVE_BASELINE_H = 'inline constexpr std::array<Spell, 0> Spells = {};\n'
+DEFAULT_TAUGHT_H = 'inline constexpr std::array<TaughtAbility, 0> TaughtAbilities = {};\n'
+DEFAULT_COMPAT_CPP = 'constexpr std::array<FelswornRiftGrant, 0> FelswornHordeCapitalRifts = {};\n'
+
+
+def write_source_tree(root: Path, *, progression: str = '', class_spells_h: str = DEFAULT_CLASS_SPELLS_H,
+                      live_baseline_h: str = DEFAULT_LIVE_BASELINE_H, taught_h: str = DEFAULT_TAUGHT_H,
+                      compat_cpp: str = DEFAULT_COMPAT_CPP, base_sql: str = '',
+                      updates_world: dict[str, str] | None = None,
                       pending_world: dict[str, str] | None = None) -> Path:
     coa = root / 'src/server/coa'
     coa.mkdir(parents=True, exist_ok=True)
@@ -166,9 +174,57 @@ class SourceParsersTest(unittest.TestCase):
                 },
             )
             by_class = trainer_spells(root)
-            self.assertEqual(by_class, {24: {3001: 12, 3004: 20, 3005: 65}})
+            self.assertEqual(by_class, {24: {3001: 12, 3004: 20, 3005: 65, 3006: 1}})
             candidates = server_candidates(root, 24, level=60)
-            self.assertEqual(candidates, {3001: ['trainer_spell(L12)'], 3004: ['trainer_spell(L20)']})
+            self.assertEqual(candidates, {
+                3001: ['trainer_spell(L12)'],
+                3004: ['trainer_spell(L20)'],
+                3006: ['trainer_spell(L1)'],
+            })
+
+    def test_trainer_sql_replay_copies_columns_with_where_and_rejects_other_table(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = write_source_tree(
+                Path(tmp),
+                base_sql=(
+                    'INSERT INTO `trainer_spell` VALUES '
+                    '(900024, 3004, 10, 0, 0, 0, 0, 0, 20, 0),'
+                    '(900019, 3004, 10, 0, 0, 0, 0, 0, 20, 0),'
+                    '(900024, 3005, 10, 0, 0, 0, 0, 0, 30, 0);\n'
+                ),
+                pending_world={
+                    '2026_02_02_00_world.sql': (
+                        'INSERT INTO `trainer_spell` (`TrainerId`, `SpellId`, `MoneyCost`, `ReqSkillLine`, '
+                        '`ReqSkillRank`, `ReqAbility1`, `ReqAbility2`, `ReqAbility3`, `ReqLevel`, `VerifiedBuild`)\n'
+                        'SELECT `TrainerId`, 3007, 0, 0, 0, 0, 0, 0, 5, 0 FROM `trainer_spell` '
+                        'WHERE `SpellId` = 3004;\n'
+                    ),
+                },
+            )
+            self.assertEqual(trainer_spells(root), {24: {3004: 20, 3005: 30, 3007: 5}, 19: {3004: 20, 3007: 5}})
+
+        with tempfile.TemporaryDirectory() as tmp:
+            bad_root = write_source_tree(
+                Path(tmp),
+                pending_world={
+                    '2026_02_03_00_world.sql': (
+                        'INSERT INTO `trainer_spell` (`TrainerId`, `SpellId`, `ReqLevel`) '
+                        'SELECT `TrainerId`, `SpellId`, `ReqLevel` FROM `other_table`;\n'
+                    ),
+                },
+            )
+            with self.assertRaises(ExtraSpellsError):
+                trainer_spells(bad_root)
+
+    def test_importing_class_map_does_not_import_classes_module(self):
+        script = (
+            f'import sys; sys.path.insert(0, {str(HERE)!r}); '
+            'import class_map; '
+            'assert "classes" not in sys.modules, "classes imported at module load"; '
+            'assert "extra_spells" not in sys.modules, "extra_spells imported at module load"'
+        )
+        result = subprocess.run([sys.executable, '-c', script], capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_log_events_counts_casts_separately_from_other_events(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -275,6 +331,61 @@ class ValidationAndAuditTest(unittest.TestCase):
             self.assertIn('UNACCOUNTED\t552011', text)
             self.assertIn('UNCHAINED_RANK\t105', text)
 
+    def test_audit_extra_spells_raises_for_missing_source_root_files_and_arrays(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dbc_dir = write_dbc_fixture(
+                root / 'dbc',
+                spells=[{0: 100, 38: 1, 136: 'CA Spell'}],
+                advancements=[{0: 1, 5: 100, 26: 1, 32: 30}],
+                class_id=24,
+                class_type_id=30,
+            )
+            class_file = {'class_id': 24, 'name': 'synthetic', 'level': 60, 'extra_spells': []}
+
+            with self.assertRaises(ExtraSpellsError):
+                audit_extra_spells(class_file, dbc_dir, root / 'missing_root')
+
+            required_files = [
+                'src/server/coa/AscensionCustomClassData.h',
+                'src/server/coa/AscensionLiveBaselineData.h',
+                'src/server/coa/AscensionTaughtAbilityData.h',
+                'data/sql/base/db_world/trainer_spell.sql',
+            ]
+            for relative in required_files:
+                with self.subTest(missing_file=relative):
+                    tree = write_source_tree(root / f'file_{Path(relative).stem}')
+                    (tree / relative).unlink()
+                    with self.assertRaises(ExtraSpellsError):
+                        audit_extra_spells(class_file, dbc_dir, tree)
+
+            missing_arrays = [
+                ('class_spells_h', ''),
+                ('live_baseline_h', ''),
+                ('taught_h', ''),
+            ]
+            for field, value in missing_arrays:
+                with self.subTest(missing_array=field):
+                    tree = write_source_tree(root / f'array_{field}', **{field: value})
+                    with self.assertRaises(ExtraSpellsError):
+                        audit_extra_spells(class_file, dbc_dir, tree)
+
+            felsworn_dbc = write_dbc_fixture(
+                root / 'dbc_felsworn',
+                spells=[{0: 100, 38: 1, 136: 'CA Spell'}],
+                advancements=[{0: 1, 5: 100, 26: 1, 32: 20}],
+                class_id=14,
+                class_type_id=20,
+            )
+            felsworn_file = {'class_id': 14, 'name': 'felsworn', 'level': 60, 'extra_spells': []}
+            missing_compat = write_source_tree(root / 'missing_compat')
+            (missing_compat / 'src/server/coa/AscensionCompat.cpp').unlink()
+            with self.assertRaises(ExtraSpellsError):
+                audit_extra_spells(felsworn_file, felsworn_dbc, missing_compat)
+            empty_compat = write_source_tree(root / 'empty_compat', compat_cpp='')
+            with self.assertRaises(ExtraSpellsError):
+                audit_extra_spells(felsworn_file, felsworn_dbc, empty_compat)
+
 
 class ExtraSpellsCliAndGateTest(unittest.TestCase):
     def _fixture(self, tmp: str):
@@ -351,6 +462,36 @@ class ExtraSpellsCliAndGateTest(unittest.TestCase):
             self.assertEqual(allowed, 0)
             mock_ledger.assert_called_once()
             mock_write.assert_called_once_with(fake_written.entries, ledger_out)
+
+    def test_ledger_gate_uses_local_progression_header_for_non_default_source_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, dbc_dir, _, class_file = self._fixture(tmp)
+            (root / 'src/server/coa/AscensionSpellProgressionData.h').write_text(
+                '{ 24, 100, 500200, 10 },\n', encoding='utf-8')
+            local_progression = root / 'local_progression.h'
+            local_progression.write_text('', encoding='utf-8')
+            ledger_out = root / 'out_clauses.json'
+            with mock.patch.object(conformance, 'PROGRESSION_HEADER', local_progression), \
+                 mock.patch.object(conformance, 'load_class_file', return_value=class_file), \
+                 mock.patch.object(conformance, 'server_dbc_dir', return_value=dbc_dir), \
+                 mock.patch.object(conformance, 'ledger') as mock_ledger, \
+                 mock.patch('sys.stderr'), mock.patch('sys.stdout'):
+                code = conformance.main([
+                    'ledger', '--class', '24', '--out', str(ledger_out), '--source-root', str(root),
+                ])
+            self.assertEqual(code, 2)
+            mock_ledger.assert_not_called()
+
+    def test_audit_extra_cli_strict_fails_on_missing_source_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, dbc_dir, class_path, _ = self._fixture(tmp)
+            with mock.patch.object(batch_commands, 'server_dbc_dir', return_value=dbc_dir), \
+                 mock.patch('sys.stdout'), mock.patch('sys.stderr'):
+                code = conformance.main([
+                    'audit-extra', '--class', '24', '--class-file', str(class_path),
+                    '--dbc-dir', str(dbc_dir), '--source-root', str(root / 'does_not_exist'), '--strict',
+                ])
+            self.assertEqual(code, 2)
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), 'server DBCs unavailable')

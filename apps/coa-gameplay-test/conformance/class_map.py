@@ -6,8 +6,6 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from extra_spells import class_spells_table, felsworn_rifts, log_events, taught_abilities
-
 CLASS_IDS = range(12, 33)
 NUMBER = re.compile(r'(?<![\w.])\d{3,7}(?![\w.])')
 TOKEN = re.compile(r'\$\{[^}]*\}(?:\.[1-9])?|\$/\d+;\d*[A-Za-z]\d?|\$\*\d+;\d*[A-Za-z]\d?|\$<\w+>|\$\d*[A-Za-z]\d?')
@@ -148,7 +146,13 @@ def family_masks(text):
     return masks
 
 
+def log_events(path):
+    from extra_spells import log_events as read_log_events
+    return read_log_events(path)
+
+
 def base_candidates(root):
+    from extra_spells import class_spells_table, felsworn_rifts, taught_abilities
     found = defaultdict(dict)
     for class_id, spells in class_spells_table(root).items():
         found[class_id].update(spells)
