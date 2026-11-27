@@ -4,9 +4,7 @@
 --    - 704654 Ultra Instinct: non-refreshing -1s duration cut per crit (Q-bm-8, O-10).
 --    - 806182 Shadow Vigil: update target temporary threat modifiers on apply/remove (Q-bm-17, O-10).
 --    - 806274 Aortic Aegis: fan cast-rank Blood Veil to target's subgroup within 45 yd (Q-bm-22, O-10).
---    - 802313, 501662-501670, 572116 Bloodthorns & Greater Bloodthorns: restore base shield amount in
---      DoEffectCalcAmount to avoid double-dipping +0.035 SP in Unit::DealDamageShieldDamage (Q-bm-3, O-10).
---    - 804859 Trail of Blood: require target in Cursed Form (S-9).
+--    - 804857 Blood Trail: suppress Effect[1] periodic trigger of 804859 for Mortal Form allies (S-9).
 --    - 806212, 807780-807785 Aortic Assault: gate E2 Clotting detonation (806214) on owning 704115 (S-14).
 --    - 800782 Blood Howl: add minimum threat on empty threat list and call TauntUpdate (S-18).
 --    - 706605 Blood Feast: trigger Life's Essence (520312) burst on channel expiry when Arterial Bind (681077) is known.
@@ -24,7 +22,7 @@
 DELETE FROM `spell_script_names` WHERE `spell_id` IN (
     704654, 806182, 806274,
     802313, 501662, 501663, 501664, 501665, 501666, 501667, 501668, 501669, 501670, 572116,
-    804859,
+    804857, 804859,
     806212, 807780, 807781, 807782, 807783, 807784, 807785,
     800782, 706605, 680828
 ) AND `ScriptName` IN (
@@ -32,6 +30,7 @@ DELETE FROM `spell_script_names` WHERE `spell_id` IN (
     'aura_ascension_bloodmage_shadow_vigil',
     'aura_ascension_bloodmage_aortic_aegis',
     'aura_ascension_bloodmage_bloodthorns',
+    'aura_ascension_bloodmage_blood_trail',
     'spell_ascension_bloodmage_trail_of_blood',
     'aura_ascension_bloodmage_aortic_assault',
     'aura_ascension_bloodmage_blood_howl',
@@ -42,18 +41,7 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (704654, 'aura_ascension_bloodmage_ultra_instinct'),
 (806182, 'aura_ascension_bloodmage_shadow_vigil'),
 (806274, 'aura_ascension_bloodmage_aortic_aegis'),
-(802313, 'aura_ascension_bloodmage_bloodthorns'),
-(501662, 'aura_ascension_bloodmage_bloodthorns'),
-(501663, 'aura_ascension_bloodmage_bloodthorns'),
-(501664, 'aura_ascension_bloodmage_bloodthorns'),
-(501665, 'aura_ascension_bloodmage_bloodthorns'),
-(501666, 'aura_ascension_bloodmage_bloodthorns'),
-(501667, 'aura_ascension_bloodmage_bloodthorns'),
-(501668, 'aura_ascension_bloodmage_bloodthorns'),
-(501669, 'aura_ascension_bloodmage_bloodthorns'),
-(501670, 'aura_ascension_bloodmage_bloodthorns'),
-(572116, 'aura_ascension_bloodmage_bloodthorns'),
-(804859, 'spell_ascension_bloodmage_trail_of_blood'),
+(804857, 'aura_ascension_bloodmage_blood_trail'),
 (806212, 'aura_ascension_bloodmage_aortic_assault'),
 (807780, 'aura_ascension_bloodmage_aortic_assault'),
 (807781, 'aura_ascension_bloodmage_aortic_assault'),

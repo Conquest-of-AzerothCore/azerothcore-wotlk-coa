@@ -20,8 +20,11 @@ The owner ruled (`Q-bm-22` `align_live_both`, `O-10`): propagate cast-rank Blood
 
 - Add `aura_ascension_bloodmage_aortic_aegis` bound to `806274` (`DoCheckProc` verifying `IsBloodVeilRank` and
   `OnEffectProc` calling `PreventDefaultAction()` then iterating `targetPlayer->GetGroup()` members in
-  `targetPlayer->GetSubGroup()` within `45.0f` yd and casting `castInfo->Id` triggered). Chosen: handles both caster's
-  own subgroup and cross-subgroup raid targets while preserving cast rank and avoiding proc loops (`AttributesMask = 0`).
+  `targetPlayer->GetSubGroup()` within `45.0f` yd, checking `caster->IsFriendlyTo(member)`, and applying
+  `caster->AddAura(castInfo->Id, member)`). Chosen: handles both caster's own subgroup and cross-subgroup raid
+  targets, avoids clipping `45 yd` range around `targetPlayer` against Blood Veil's `30 yd` `RangeIndex = 4` from
+  `caster`, preserves the cast rank, still passes `caster` to `aura_ascension_blood_veil::Calculate`, and cannot re-proc
+  `806274`.
 - Patch `806275` DBC targeting only. Rejected: `806275` still hardcodes Rank 1 `504263` and cannot mirror the cast rank.
 
 ## Decision

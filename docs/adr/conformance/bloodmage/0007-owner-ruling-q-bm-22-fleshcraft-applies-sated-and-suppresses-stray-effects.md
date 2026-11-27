@@ -41,8 +41,8 @@ re-casting `801952` on Sated targets, and suppress stray `E1`/`E2`.
 ## Decision
 
 1. In `bloodmage_vitality_contracts::OnLoadSpellCustomAttr` (`src/server/coa/AscensionBloodmageVitality.cpp`):
-   - For `801952`, set `ExcludeTargetAuraSpell = 532125`, clear `Effects[EFFECT_1].Effect = SPELL_EFFECT_NONE`,
-     `Effects[EFFECT_2].Effect = SPELL_EFFECT_NONE`, `Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE`, and register
+   - For `801952`, set `ExcludeTargetAuraSpell = 532125`, clear `Effects[EFFECT_1].Effect = 0`,
+     `Effects[EFFECT_2].Effect = 0`, `Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE`, and register
      `801952` in `Ascension::ClientSpellPatches`.
    - For `532125`, set `info->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE`.
 2. In `spell_ascension_bloodmage_empowered::ModifyHit`, when `GetSpellInfo()->Id == 801952` and `GetHitUnit()` is

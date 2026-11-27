@@ -23,7 +23,7 @@ The owner confirmed `Q-bm-16` (`fix_all_o37`, `O-10`).
 ## Options
 
 - In `bloodmage_talent_contracts::OnLoadSpellCustomAttr` (`src/server/coa/AscensionBloodmageTalents.cpp`): clear `802496`
-  `Effects[EFFECT_2]` (`Effect = SPELL_EFFECT_NONE`, `ApplyAuraName = SPELL_AURA_NONE`), set
+  `Effects[EFFECT_2]` (`Effect = 0`, `ApplyAuraName = SPELL_AURA_NONE`), set
   `Effects[EFFECT_0].RealPointsPerLevel = 0.0f` for `561303`, `803326`, and `803392`, and OR `0x00200000` into `560072`
   `Effects[EFFECT_1].SpellClassMask[1]` (with `ClientSpellPatches`). Chosen: zero shared engine edits and exact mirror
   of `SPELL_CRIMSON_EXPEDITION` (`AscensionBloodmageTalents.cpp:1721-1724`).

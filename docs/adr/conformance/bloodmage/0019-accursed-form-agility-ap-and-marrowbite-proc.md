@@ -40,5 +40,5 @@ Server `Spell.dbc` (`SpellFamilyName = 26`):
 ## Consequences
 
 - Entering Accursed Form `562572` increases AP by `50%` of Agility without granting Dark Frenzy `804845`, and melee
-  auto-attacks and melee-class abilities apply Marrowbite `504553` (stacking up to 2 times for `-20%` healing taken).
+  auto-attacks and melee-class abilities apply Marrowbite `504553` (`-20%` healing taken per stack, `-40%` at 2 stacks).
 - Build and gameplay verification run in the coordinator's post-merge verification pass for Lots 1–3.

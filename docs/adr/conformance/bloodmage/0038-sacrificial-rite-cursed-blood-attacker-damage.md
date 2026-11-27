@@ -21,7 +21,7 @@ Four stacked defects prevented `573250` from damaging cursed attackers (`bloodma
 
 ## Options
 
-- Fix both `TargetA` fields in `bloodmage_secondary_contracts::OnLoadSpellCustomAttr` (`573250 Effect[1]` to `TARGET_UNIT_TARGET_ENEMY` plus `SPELL_ATTR0_CU_NEGATIVE_EFF1`, and `806163 Effect[0]` to `TARGET_UNIT_TARGET_ENEMY`), bind `aura_ascension_bloodmage_cursed_blood` on `573250` to intercept `EFFECT_1` procs and have `GetCaster()` cast `806163` at `GetTarget()`, and add `spell_proc` (`573250`, `ProcFlags = 69908` DONE damage only, `SpellTypeMask = 1`, `SpellPhaseMask = 2`, `DisableEffectsMask = 1`, `Chance = 100`, `Cooldown = 1000`), `spell_script_names`, and `spell_bonus_data` (`806163`, `0.5, 0, 0.1, 0`) in `rev_20261127_03_bloodmage_secondary_procs.sql`. Chosen: keeps `806163` attributed to the Bloodmage (`caster`) using Bloodmage's SP/AP, fires only when the cursed victim deals damage (`event.GetActor() == victim` and DONE-only `ProcFlags`), and avoids any stray `573250` aura on the Bloodmage.
+- Fix both `TargetA` fields in `bloodmage_secondary_contracts::OnLoadSpellCustomAttr` (`573250 Effect[1]` to `TARGET_UNIT_TARGET_ENEMY` plus `SPELL_ATTR0_CU_NEGATIVE_EFF1`, and `806163 Effect[0]` to `TARGET_UNIT_TARGET_ENEMY`), bind `aura_ascension_bloodmage_sacrificial_rite_cursed_blood` on `573250` to intercept `EFFECT_1` procs and have `GetCaster()` cast `806163` at `GetTarget()`, and add `spell_proc` (`573250`, `ProcFlags = 332116` DONE damage including melee, ranged, spell, and periodic damage, `SpellTypeMask = 1`, `SpellPhaseMask = 2`, `DisableEffectsMask = 1`, `Chance = 100`, `Cooldown = 1000`), `spell_script_names`, and `spell_bonus_data` (`806163`, `0.5, 0, 0.1, 0`) in `rev_20261127_03_bloodmage_secondary_procs.sql`. Chosen: keeps `806163` attributed to the Bloodmage (`caster`) using Bloodmage's SP/AP, avoids colliding with the pre-existing `aura_ascension_bloodmage_cursed_blood` script on `707435` in `AscensionBloodmageTalents.cpp`, fires only when the cursed victim deals damage (`event.GetActor() == victim` and DONE-only `ProcFlags`), and avoids any stray `573250` aura on the Bloodmage.
 - Leave `573250 Effect[1]` on `TARGET_UNIT_CASTER` and trigger from `TAKEN` damage on the Bloodmage. Rejected: contradicts the tooltip ("dealing damage now causes you to take ... Shadow Damage" against any target, not only the Bloodmage) and puts a debuff aura on the Bloodmage.
 
 ## Decision
@@ -29,10 +29,10 @@ Four stacked defects prevented `573250` from damaging cursed attackers (`bloodma
 1. In `src/server/coa/AscensionBloodmageSecondary.cpp`:
    - Add `SPELL_CURSED_BLOOD = 573250` and `SPELL_CURSED_BLOOD_DAMAGE = 806163` to `BloodmageSecondarySpells`.
    - In `bloodmage_secondary_contracts::OnLoadSpellCustomAttr`, set `TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY)` on `573250 Effect[1]` (with `SPELL_ATTR0_CU_NEGATIVE_EFF1`) and on `806163 Effect[0]`.
-   - Add and register `aura_ascension_bloodmage_cursed_blood` on `573250` (`DoCheckProc` requiring `event.GetActor() == GetTarget()` with live distinct caster and victim; `OnEffectProc` on `EFFECT_1, SPELL_AURA_PROC_TRIGGER_SPELL` calling `PreventDefaultAction()` and `caster->CastSpell(victim, SPELL_CURSED_BLOOD_DAMAGE, true)`).
+   - Add and register `aura_ascension_bloodmage_sacrificial_rite_cursed_blood` on `573250` (`DoCheckProc` requiring `event.GetActor() == GetTarget()` with live distinct caster and victim; `OnEffectProc` on `EFFECT_1, SPELL_AURA_PROC_TRIGGER_SPELL` calling `PreventDefaultAction()` and `caster->CastSpell(victim, SPELL_CURSED_BLOOD_DAMAGE, true)`).
 2. In `data/sql/updates/pending_db_world/rev_20261127_03_bloodmage_secondary_procs.sql`:
-   - Add `spell_proc` for `573250` (`ProcFlags = 69908`, `SpellTypeMask = 1`, `SpellPhaseMask = 2`, `DisableEffectsMask = 1`, `Chance = 100`, `Cooldown = 1000`).
-   - Add `spell_script_names` `(573250, 'aura_ascension_bloodmage_cursed_blood')`.
+   - Add `spell_proc` for `573250` (`ProcFlags = 332116`, `SpellTypeMask = 1`, `SpellPhaseMask = 2`, `DisableEffectsMask = 1`, `Chance = 100`, `Cooldown = 1000`).
+   - Add `spell_script_names` `(573250, 'aura_ascension_bloodmage_sacrificial_rite_cursed_blood')`.
    - Add `spell_bonus_data` `(806163, 0.5, 0, 0.1, 0, 'Bloodmage - Sacrificial Rite (Cursed Blood)')`.
 
 ## Consequences

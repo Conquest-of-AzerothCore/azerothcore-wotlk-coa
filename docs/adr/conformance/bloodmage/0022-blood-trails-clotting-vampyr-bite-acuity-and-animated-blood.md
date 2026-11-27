@@ -26,7 +26,11 @@ Five Bloodmage talent/ability defects verified against server `Spell.dbc` (`Spel
 - Implement all five in `src/server/coa/AscensionBloodmageTalents.cpp` + `rev_20261127_02_bloodmage_talents_scripts_procs.sql`:
   - Subscribe `ALLSPELLHOOK_ON_CAST` on `bloodmage_nightmare_casts` to remove `504105` on non-triggered casts matching
     `SpellFamilyFlags[0] & 0x60000`.
-  - Add `spell_ascension_bloodmage_trail_of_blood` (`CheckCast`) requiring `IsInCursedForm(GetExplTargetUnit())`.
+  - Add `aura_ascension_bloodmage_blood_trail` on `804857` (`OnEffectPeriodic`, `EFFECT_1`, `SPELL_AURA_PERIODIC_TRIGGER_SPELL`)
+    calling `PreventDefaultAction()` when `!IsInCursedForm(GetTarget())`. (Failing `OnCheckCast` on the triggered `804859`
+    spell instead would make `Spell.cpp:3631-3635` call `SetDuration(0)` on the non-passive periodic `804857` pool aura,
+    despawning the entire pool on the first tick any Mortal Form ally stands in it; suppressing at `AuraEffect::PeriodicTick`
+    skips only that target while keeping the pool alive for Cursed Form allies.)
   - Update `spell_proc` `504711` to `AttributesMask = 2` and cast `592015` via `CastCustomSpell` in
     `aura_ascension_bloodmage_animated_blood_leech::Proc`.
   - Set `AURA_INTERRUPT_FLAG_TAKE_DAMAGE` (+ `ClientSpellPatches`) on all 9 explicit Vampyr Bite IDs.
@@ -36,7 +40,7 @@ Five Bloodmage talent/ability defects verified against server `Spell.dbc` (`Spel
 ## Decision
 
 Apply all five fixes in `src/server/coa/AscensionBloodmageTalents.cpp` and register the companion `spell_script_names`
-(`804859`, `806212, 807780..807785`) and `spell_proc` (`504711` `AttributesMask = 2`) rows in
+(`804857`, `806212, 807780..807785`) and `spell_proc` (`504711` `AttributesMask = 2`) rows in
 `data/sql/updates/pending_db_world/rev_20261127_02_bloodmage_talents_scripts_procs.sql`.
 
 ## Consequences

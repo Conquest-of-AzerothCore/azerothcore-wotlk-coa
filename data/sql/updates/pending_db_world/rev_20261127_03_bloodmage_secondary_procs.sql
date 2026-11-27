@@ -15,24 +15,29 @@
 --
 -- 573250 / 806163 Sacrificial Rite (Cursed Blood):
 --   573250 carries Spell.dbc ProcFlags 0 and no spell_proc row, so Effect[1] (aura 42 triggering
---   806163) never fired when the cursed attacker dealt damage. ProcFlags 69908
---   (DONE_MELEE_AUTO_ATTACK 0x4 | DONE_SPELL_MELEE_DMG_CLASS 0x10 | DONE_SPELL_RANGED_DMG_CLASS
---   0x100 | DONE_SPELL_NONE_DMG_CLASS_NEG 0x1000 | DONE_SPELL_MAGIC_DMG_CLASS_NEG 0x10000),
+--   806163) never fired when the cursed attacker dealt damage. ProcFlags 332116
+--   (DONE_MELEE_AUTO_ATTACK 0x4 | DONE_SPELL_MELEE_DMG_CLASS 0x10 | DONE_RANGED_AUTO_ATTACK 0x40 |
+--   DONE_SPELL_RANGED_DMG_CLASS 0x100 | DONE_SPELL_NONE_DMG_CLASS_NEG 0x1000 |
+--   DONE_SPELL_MAGIC_DMG_CLASS_NEG 0x10000 | DONE_PERIODIC 0x40000),
 --   SpellTypeMask 1 (DAMAGE), SpellPhaseMask 2 (HIT), DisableEffectsMask 1 (excludes Effect[0]
 --   healing reduction), Chance 100, Cooldown 1000 (matching 806163's "Can only occur once per sec.")
---   fires Effect[1] solely when the cursed attacker deals damage. aura_ascension_bloodmage_cursed_blood
---   redirects the cast so the Bloodmage casts 806163 at the attacker, and spell_bonus_data adds the
---   tooltip's +0.5 SP and +0.1 AP scaling (${$806163m1+$806163ppl1+$sps*.5+$AP*.1}).
+--   fires Effect[1] solely when the cursed attacker deals damage.
+--   aura_ascension_bloodmage_sacrificial_rite_cursed_blood redirects the cast so the Bloodmage
+--   casts 806163 at the attacker, and spell_bonus_data adds the tooltip's +0.5 SP and +0.1 AP
+--   scaling (${$806163m1+$806163ppl1+$sps*.5+$AP*.1}).
 
 DELETE FROM `spell_proc` WHERE `SpellId` IN (806723, 706683, 573250);
 INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
 (806723, 0, 0, 0, 0, 0, 139944, 1, 2, 0, 0, 0, 0, 0, 3000, 0),
 (706683, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
-(573250, 0, 0, 0, 0, 0, 69908, 1, 2, 0, 0, 1, 0, 100, 1000, 0);
+(573250, 0, 0, 0, 0, 0, 332116, 1, 2, 0, 0, 1, 0, 100, 1000, 0);
 
-DELETE FROM `spell_script_names` WHERE `spell_id` = 573250 AND `ScriptName` = 'aura_ascension_bloodmage_cursed_blood';
+DELETE FROM `spell_script_names` WHERE `spell_id` = 573250 AND `ScriptName` IN (
+    'aura_ascension_bloodmage_cursed_blood',
+    'aura_ascension_bloodmage_sacrificial_rite_cursed_blood'
+);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
-(573250, 'aura_ascension_bloodmage_cursed_blood');
+(573250, 'aura_ascension_bloodmage_sacrificial_rite_cursed_blood');
 
 DELETE FROM `spell_bonus_data` WHERE `entry` = 806163;
 INSERT INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES

@@ -137,7 +137,7 @@ enum BloodmageTalentSpells : uint32
     SPELL_FEARMONGER = 501132,
     SPELL_SHADOW_VIGIL = 806182,
     SPELL_AORTIC_AEGIS = 806274,
-    SPELL_TRAIL_OF_BLOOD = 804859,
+    SPELL_BLOOD_TRAIL = 804857,
     SPELL_ANIMATED_BLOOD_HEAL = 592015,
     SPELL_BLOOD_MARK = 707624,
     SPELL_BLOOD_MARK_AURA = 707625,
@@ -1925,10 +1925,10 @@ class aura_ascension_bloodmage_aortic_aegis : public AuraScript
             Player* member = itr->GetSource();
             if (!member || member == targetPlayer || itr->getSubGroup() != subgroup)
                 continue;
-            if (!member->IsAlive() || !member->IsInMap(targetPlayer) ||
+            if (!member->IsAlive() || !member->IsInMap(targetPlayer) || !caster->IsFriendlyTo(member) ||
                 !targetPlayer->IsWithinDistInMap(member, AorticAegisRange))
                 continue;
-            caster->CastSpell(member, castInfo->Id, true);
+            caster->AddAura(castInfo->Id, member);
         }
     }
 
@@ -1940,37 +1940,26 @@ class aura_ascension_bloodmage_aortic_aegis : public AuraScript
     }
 };
 
-class aura_ascension_bloodmage_bloodthorns : public AuraScript
+class aura_ascension_bloodmage_blood_trail : public AuraScript
 {
-    PrepareAuraScript(aura_ascension_bloodmage_bloodthorns);
+    PrepareAuraScript(aura_ascension_bloodmage_blood_trail);
 
-    void RestoreBaseAmount(AuraEffect const* effect, int32& amount, bool&)
+    bool Validate(SpellInfo const* info) override
     {
-        if (effect)
-            amount = effect->GetOldAmount();
+        return info && info->Id == SPELL_BLOOD_TRAIL &&
+            info->Effects[EFFECT_1].IsAura(SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
+
+    void GuardCursedForm(AuraEffect const*)
+    {
+        if (!IsInCursedForm(GetTarget()))
+            PreventDefaultAction();
     }
 
     void Register() override
     {
-        DoEffectCalcAmount += AuraEffectCalcAmountFn(aura_ascension_bloodmage_bloodthorns::RestoreBaseAmount,
-            EFFECT_0, SPELL_AURA_DAMAGE_SHIELD);
-    }
-};
-
-class spell_ascension_bloodmage_trail_of_blood : public SpellScript
-{
-    PrepareSpellScript(spell_ascension_bloodmage_trail_of_blood);
-
-    SpellCastResult CheckCursedForm()
-    {
-        if (!IsInCursedForm(GetExplTargetUnit()))
-            return SPELL_FAILED_TARGET_AURASTATE;
-        return SPELL_CAST_OK;
-    }
-
-    void Register() override
-    {
-        OnCheckCast += SpellCheckCastFn(spell_ascension_bloodmage_trail_of_blood::CheckCursedForm);
+        OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_bloodmage_blood_trail::GuardCursedForm,
+            EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
     }
 };
 
@@ -2356,8 +2345,7 @@ void AddSC_AscensionBloodmageTalents()
     RegisterSpellScript(aura_ascension_bloodmage_ultra_instinct);
     RegisterSpellScript(aura_ascension_bloodmage_shadow_vigil);
     RegisterSpellScript(aura_ascension_bloodmage_aortic_aegis);
-    RegisterSpellScript(aura_ascension_bloodmage_bloodthorns);
-    RegisterSpellScript(spell_ascension_bloodmage_trail_of_blood);
+    RegisterSpellScript(aura_ascension_bloodmage_blood_trail);
     RegisterSpellScript(aura_ascension_bloodmage_aortic_assault);
     RegisterSpellScript(aura_ascension_bloodmage_blood_howl);
     RegisterSpellScript(aura_ascension_bloodmage_blood_feast);

@@ -6,7 +6,6 @@
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellAuraEffects.h"
-#include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
@@ -194,9 +193,9 @@ class aura_ascension_bloodmage_sacrificial_rite : public AuraScript
     }
 };
 
-class aura_ascension_bloodmage_cursed_blood : public AuraScript
+class aura_ascension_bloodmage_sacrificial_rite_cursed_blood : public AuraScript
 {
-    PrepareAuraScript(aura_ascension_bloodmage_cursed_blood);
+    PrepareAuraScript(aura_ascension_bloodmage_sacrificial_rite_cursed_blood);
 
     bool Validate(SpellInfo const* info) override
     {
@@ -223,8 +222,8 @@ class aura_ascension_bloodmage_cursed_blood : public AuraScript
 
     void Register() override
     {
-        DoCheckProc += AuraCheckProcFn(aura_ascension_bloodmage_cursed_blood::Check);
-        OnEffectProc += AuraEffectProcFn(aura_ascension_bloodmage_cursed_blood::TriggerDamage,
+        DoCheckProc += AuraCheckProcFn(aura_ascension_bloodmage_sacrificial_rite_cursed_blood::Check);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_bloodmage_sacrificial_rite_cursed_blood::TriggerDamage,
             EFFECT_1, SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 };
@@ -1032,7 +1031,7 @@ void AddSC_AscensionBloodmageSecondary()
     RegisterSpellScript(spell_ascension_bloodmage_bloodfang_bite);
     RegisterSpellScript(aura_ascension_bloodmage_bite_wound);
     RegisterSpellScript(aura_ascension_bloodmage_sacrificial_rite);
-    RegisterSpellScript(aura_ascension_bloodmage_cursed_blood);
+    RegisterSpellScript(aura_ascension_bloodmage_sacrificial_rite_cursed_blood);
     new bloodmage_secondary_casts();
     new bloodmage_kiss_periodic();
     new bloodmage_secondary_contracts();

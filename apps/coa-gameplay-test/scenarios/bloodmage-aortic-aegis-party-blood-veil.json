@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Aortic Aegis spreads Blood Veil to the party (#602)",
-  "contract": "Aortic Aegis 806274's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Aortic Aegis 806275, a single SPELL_EFFECT_TRIGGER_SPELL on Blood Veil 504263 with TargetA 33 (caster area party) and radius index 11. Spell.dbc gives 806274 ProcFlags 0 and no spell_proc row existed, so the aura was inert. The tooltip is 'Your Blood Veil now applies to the party members of the target' at ProcChance 101, i.e. always. Blood Veil is cast as rank 572279, the rank a level-80 character owns per AscensionSpellProgressionData.h; every rank carries SpellFamilyFlags (0, 536870912, 0), the bit the row's SpellFamilyMask1 names, and is DmgClass 1 with two beneficial aura 69 absorb effects, which is the PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS event the row carries. 806275 casts rank 1 (504263), so the party member receives 504263 while the direct target keeps rank 572279. The row deliberately leaves AttributesMask 0: without PROC_ATTR_TRIGGERED_CAN_PROC, Aura::GetProcEffectMask refuses to proc from the triggered re-cast, which is what stops the fan-out looping. The last assertion pins that: the third party member must receive Blood Veil exactly once.",
+  "name": "Aortic Aegis spreads cast-rank Blood Veil to the party (#602)",
+  "contract": "Aortic Aegis 806274 carries SPELL_AURA_PROC_TRIGGER_SPELL on Blood Veil casts, while the tooltip states 'Your Blood Veil now applies to the party members of the target'. Blood Veil is cast as rank 572279 (the level-80 rank per AscensionSpellProgressionData.h); per owner ruling Q-bm-22 (Bloodmage ADR 0017), aura_ascension_bloodmage_aortic_aegis intercepts 806274 procs and fans the cast rank (572279) directly to friendly alive subgroup members within 45 yd of the shielded target via AddAura (so rank 1 504263 is not applied and no proc loop can occur). The third party member must receive 572279 exactly once and not 504263.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -83,7 +83,7 @@
       "label": "Without the talent the party member gets nothing",
       "actor": "third",
       "metric": "aura",
-      "spell": 504263,
+      "spell": 572279,
       "caster": "bloodmage",
       "equals": 0
     },
@@ -105,10 +105,10 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the third party member now receives Blood Veil",
+      "label": "DISCRIMINATING: the third party member now receives cast-rank Blood Veil 572279",
       "actor": "third",
       "metric": "aura",
-      "spell": 504263,
+      "spell": 572279,
       "caster": "bloodmage",
       "equals": 1,
       "within_ms": 3000
@@ -118,9 +118,18 @@
       "label": "exactly once - no party fan-out loop",
       "actor": "third",
       "metric": "aura_stacks",
-      "spell": 504263,
+      "spell": 572279,
       "caster": "bloodmage",
       "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 Blood Veil 504263 is not applied",
+      "actor": "third",
+      "metric": "aura",
+      "spell": 504263,
+      "caster": "bloodmage",
+      "equals": 0
     }
   ]
 }

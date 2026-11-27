@@ -21,19 +21,19 @@ second time (`+0.070 * SP`), while also inflating `aura_amount` above the base v
 
 ## Options
 
-- Bind `aura_ascension_bloodmage_bloodthorns` to all 11 Bloodthorns spell IDs (`802313, 501662..501670, 572116`) with a
-  `DoEffectCalcAmount` handler (`EFFECT_0, SPELL_AURA_DAMAGE_SHIELD`) that restores `amount = effect->GetOldAmount();`
-  (saved at `SpellAuraEffects.cpp:609` prior to line `627`). Chosen: zero shared engine edits, keeps stored `aura_amount`
-  at base (`22` on R7 / `10` on R3), and lets `Unit::DealDamageShieldDamage` apply `+0.035 * SP` exactly once.
-- Edit `SpellAuraEffects.cpp:627` or `Unit.cpp:2367`. Rejected: modifies shared `ENGINE_FILES` affecting every class's
-  damage shields.
+- Restore `amount = effect->GetOldAmount();` in `bloodmage_vitality_scaling::OnAfterAuraEffectCalculateAmount`
+  (`src/server/coa/AscensionBloodmageVitality.cpp`) for Bloodthorns and Greater Bloodthorns
+  (`802313, 501662..501670, 572116`), where `SpellAuraEffects.cpp:609` saves the unscaled base amount prior to line
+  `627`. Chosen: zero shared engine edits, zero extra `spell_script_names` rows, keeps stored `aura_amount` at base
+  (`22` on R7 / `10` on R3), and lets `Unit::DealDamageShieldDamage` apply `+0.035 * SP` exactly once.
+- Edit `SpellAuraEffects.cpp:627` or `Unit.cpp:2367`, or register a separate per-spell `AuraScript`. Rejected: modifying
+  `ENGINE_FILES` affects every class's damage shields, and an extra per-spell `AuraScript` would duplicate
+  `bloodmage_vitality_scaling`.
 
 ## Decision
 
-1. Add `aura_ascension_bloodmage_bloodthorns` in `src/server/coa/AscensionBloodmageTalents.cpp` restoring
-   `amount = effect->GetOldAmount();` in `DoEffectCalcAmount`, registered in `AddSC_AscensionBloodmageTalents()`.
-2. Bind `802313, 501662..501670, 572116` to `'aura_ascension_bloodmage_bloodthorns'` in
-   `data/sql/updates/pending_db_world/rev_20261127_02_bloodmage_talents_scripts_procs.sql`.
+1. Restore `amount = effect->GetOldAmount();` for `802313, 501662..501670, 572116` (`EFFECT_0`) inside
+   `bloodmage_vitality_scaling::OnAfterAuraEffectCalculateAmount` in `src/server/coa/AscensionBloodmageVitality.cpp`.
 
 ## Consequences
 

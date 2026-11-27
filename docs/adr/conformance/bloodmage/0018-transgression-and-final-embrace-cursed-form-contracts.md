@@ -48,7 +48,9 @@ In `src/server/coa/AscensionBloodmageTalents.cpp`:
 ## Consequences
 
 - Transgression `801076` sets `GetShapeshiftForm() == 57` (`CREATURE_TYPE_DEMON`) while keeping weapons visible and
-  Mortal Form abilities castable.
+  Mortal Form abilities castable; because `SPELL_AURA_MOD_SHAPESHIFT` (`57`) occupies the standard shapeshift slot,
+  `801076` is mutually exclusive with other shapeshift forms (`525047` / `562572` / etc.) via standard WoW shapeshift
+  rules.
 - Final Embrace `524865` is blocked under any restricting Cursed Form (`802877`), keeps `#10242`'s `525047` link intact,
   and replaces all known Bloodfang Bite ranks with Crimson Maw `803388` for its duration (cleanly restoring on expiry,
   cancel, or death).
