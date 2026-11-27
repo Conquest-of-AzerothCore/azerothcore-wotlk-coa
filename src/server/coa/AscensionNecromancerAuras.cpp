@@ -31,7 +31,6 @@ enum WardSpells
 class aura_ascension_necromancer_lifecycle : public AuraScript
 {
     PrepareAuraScript(aura_ascension_necromancer_lifecycle);
-    int32 _cost = 0;
     int32 _harvestPlagueRoll = 0;
     bool _expired = false;
     bool First(AuraEffect const* effect) const
@@ -100,8 +99,6 @@ class aura_ascension_necromancer_lifecycle : public AuraScript
             GetAura()->SetScriptValue(801747, 1);
         if (id == 807796)
             _expired = false;
-        if (Named(GetSpellInfo(), 500217))
-            _cost = GetSpellInfo()->CalcPowerCost(player, GetSpellInfo()->GetSchoolMask());
         if (Named(GetSpellInfo(), 500968))
             _harvestPlagueRoll = HarvestPlagueRoll(player);
         if (GetTarget() != player)
@@ -233,8 +230,12 @@ class aura_ascension_necromancer_lifecycle : public AuraScript
         {
             Copy(player, GetTarget(), 500267, std::max(0, Amount(id, 1, player)));
             int32 percent = player->HasAura(302920) ? 50 : player->HasAura(302888) ? 25 : 0;
-            int32 paid = GetAura()->GetScriptValue(500217) ? int32(GetAura()->GetScriptValue(359505)) : _cost;
-            player->EnergizeBySpell(player, 500307, CalculatePct(paid, percent), Powers(GetSpellInfo()->PowerType));
+            SpellInfo const* blightInfo = GetSpellInfo();
+            int32 baseCost = int32(blightInfo->ManaCost) +
+                             int32(CalculatePct(player->GetCreateMana(), blightInfo->ManaCostPercentage));
+            if (percent && baseCost > 0)
+                player->EnergizeBySpell(player, 500307, CalculatePct(baseCost, percent),
+                                        Powers(blightInfo->PowerType));
         }
         if (Family(GetSpellInfo(), 0, 2) && expired && player->HasAura(560800))
             Summon(player, 805977, GetTarget(), GetTarget()->GetPosition());

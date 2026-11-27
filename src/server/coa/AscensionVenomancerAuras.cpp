@@ -287,27 +287,27 @@ class aura_ascension_venomancer_lifecycle : public AuraScript
                 Mushroom(player,*target);
             }
         }
-        if (Named(GetSpellInfo(),800870) && slot == 2)
+        if (Named(GetSpellInfo(), 800870) && slot == 2)
         {
             PreventDefaultAction();
             if (player->HasAura(681047))
             {
-                switch (target->getPowerType())
+                auto canRestore = [target](Powers power)
                 {
-                    case POWER_MANA:
-                        target->EnergizeBySpell(target,800874,CalculatePct(target->GetMaxPower(POWER_MANA),Amount(800874)),POWER_MANA);
-                        break;
-                    case POWER_ENERGY: case POWER_FOCUS:
-                        target->EnergizeBySpell(target,800874,Amount(800874,1),target->getPowerType());
-                        break;
-                    case POWER_RAGE:
-                        target->EnergizeBySpell(target,800874,Amount(800874,2),POWER_RAGE);
-                        break;
-                    case POWER_RUNIC_POWER:
-                        target->EnergizeBySpell(target,567591,Amount(567591),POWER_RUNIC_POWER);
-                        break;
-                    default: break;
-                }
+                    return target->GetMaxPower(power) > 0 &&
+                           (!target->IsPlayer() || target->CanReceivePowerFromSpell(power));
+                };
+                if (canRestore(POWER_MANA))
+                    target->EnergizeBySpell(target, 800874,
+                                            CalculatePct(target->GetMaxPower(POWER_MANA), Amount(800874)), POWER_MANA);
+                if (canRestore(POWER_ENERGY))
+                    target->EnergizeBySpell(target, 800874, Amount(800874, 1), POWER_ENERGY);
+                if (canRestore(POWER_FOCUS))
+                    target->EnergizeBySpell(target, 800874, Amount(800874, 1), POWER_FOCUS);
+                if (canRestore(POWER_RAGE))
+                    target->EnergizeBySpell(target, 800874, Amount(800874, 2), POWER_RAGE);
+                if (canRestore(POWER_RUNIC_POWER))
+                    target->EnergizeBySpell(target, 567591, Amount(567591), POWER_RUNIC_POWER);
             }
         }
         if (Named(GetSpellInfo(),800902) && slot == 1)
