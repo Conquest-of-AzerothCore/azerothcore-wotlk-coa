@@ -482,7 +482,8 @@ METRIC_EVIDENCE = {
                      'owned_creature_remaining_ms', 'block_value', 'school_prohibited', 'object_scale', 'rooted',
                      'carried_aura_count', 'unit_scale', 'melee_crit_taken_chance', 'display_of_creature'), STATE),
     'enemy_player_aura_duration_ms': READBACK,
-    **dict.fromkeys(('healing_power', 'swim_speed_rate', 'skill_bonus', 'mana_regen_interrupted'), STATE),
+    **dict.fromkeys(('healing_power', 'swim_speed_rate', 'skill_bonus', 'mana_regen_interrupted',
+                     'stealth_detection', 'reputation_gain', 'pet_entry', 'pet_health', 'reaction_to'), STATE),
     'combat_rating_bonus': STATE,
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
@@ -513,7 +514,7 @@ STATE_PROMISES = {
     'nearest_creature_distance': r'return\w*|teleport\w*',
     'track_creature_type': r'location|track\w*',
     'owned_creature_stat': r'stamina|strength|agility|intellect|spirit',
-    'display_id': r'transform\w*',
+    'display_id': r'transform\w*|take on the form|\bform\b',
     'owned_creature_display': r'transform\w*',
     'threat_per_damage': r'threat',
     'threat_multiplier': r'threat',
@@ -542,8 +543,13 @@ STATE_PROMISES = {
     'rooted': r'root\w*|unable to move',
     'unit_scale': r'size|scale',
     'melee_crit_taken_chance': rf'{CRIT_WORDS}|critically strike',
-    'display_of_creature': r'transform\w*',
+    'display_of_creature': r'transform\w*|take on the form|\bform\b',
     'carried_aura_count': r'empower\w*|steal(?:s|ing)?|stolen',
+    'stealth_detection': r'stealth detection|detect\w*.*stealth|stealth\w*',
+    'reputation_gain': r'reputation',
+    'pet_entry': r'hound|pet|summon\w*|dismiss\w*|bring\w* back',
+    'pet_health': r'dead|resurrect\w*|reviv\w*|bring\w* back|health',
+    'reaction_to': r'neutral|hostile|friendly|aggressive|reaction',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
 CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})

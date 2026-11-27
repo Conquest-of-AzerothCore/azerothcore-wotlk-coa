@@ -2029,5 +2029,46 @@ class DamageFromCasterAndLevelPointsTest(unittest.TestCase):
                              REFERENCE_TARGET, [], weapon_only=True, level_points=True)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class PlainWeaponAndDawnBladeHitTests(unittest.TestCase):
+    DAWN_BLADE = 574343
+    SABER_SLASH_FIRE = 680230
+
+    def witch_hunter(self, **extra) -> dict:
+        base = load_class_file(WITCH_HUNTER_CLASS_ID)
+        weapon_sets = {**base.get('spell_weapon_sets', {}), str(self.DAWN_BLADE): 'Inquisition',
+                       str(self.SABER_SLASH_FIRE): 'Inquisition'}
+        return {**base, 'spell_weapon_sets': weapon_sets, **extra}
+
+    def test_dawn_blade_in_weapon_school_hits_adds_normalized_weapon_damage_to_holyfire_part(self):
+        plain = reference_hit_model(self.witch_hunter(), self.DAWN_BLADE)
+        combined = reference_hit_model(self.witch_hunter(weapon_school_hits=[self.DAWN_BLADE]), self.DAWN_BLADE)
+        self.assertEqual(combined.kind, 'school')
+        self.assertIn('Weapon Damage', combined.displayed)
+        self.assertIn('${$m1+0+$spfi*0.15+$AP*0.15}', combined.displayed)
+        armed = armed_for(self.witch_hunter(), records_of(self.witch_hunter()), self.DAWN_BLADE)
+        weapon = weapon_profile(armed)
+        caster_stats = reference_caster(armed)
+        weapon_mean = (weapon.min_damage + weapon.max_damage) / 2 + caster_stats.ap / 14.0 * weapon.normalized_speed
+        self.assertAlmostEqual(combined.tooltip_mean - plain.tooltip_mean, weapon_mean, delta=0.05)
+
+    def test_saber_slash_fire_stays_unmodelled_until_opted_into_plain_weapon_hits(self):
+        with self.assertRaises(Unmodelled):
+            reference_hit_model(self.witch_hunter(), self.SABER_SLASH_FIRE)
+        model = reference_hit_model(self.witch_hunter(plain_weapon_hits=[self.SABER_SLASH_FIRE]), self.SABER_SLASH_FIRE)
+        self.assertEqual(model.kind, 'weapon')
+        self.assertEqual(model.displayed, ('Weapon Damage',))
+        armed = armed_for(self.witch_hunter(), records_of(self.witch_hunter()), self.SABER_SLASH_FIRE)
+        weapon = weapon_profile(armed)
+        caster_stats = reference_caster(armed)
+        expected = (weapon.min_damage + weapon.max_damage) / 2 + caster_stats.ap / 14.0 * weapon.normalized_speed
+        self.assertAlmostEqual(model.tooltip_mean, expected, delta=0.05)
+
+    def test_plain_weapon_hits_refuses_tokened_weapon_or_school_spells(self):
+        for bad in (680515, 501342):
+            with self.subTest(spell=bad), self.assertRaises(Unmodelled):
+                reference_hit_model(self.witch_hunter(plain_weapon_hits=[bad]), bad)
+
+
 if __name__ == '__main__':
     unittest.main()

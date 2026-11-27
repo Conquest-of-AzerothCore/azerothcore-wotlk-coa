@@ -63,6 +63,8 @@ HIT_ROLES = ('hit_mean', 'periodic_total')
 HIT_LOCATION = 'hit_location'
 HIT_LOCATION_KEYS = ('map', 'x', 'y', 'z', 'o')
 WEAPON_SCHOOL_PERCENTS = 'weapon_school_percents'
+PLAIN_WEAPON_HITS = 'plain_weapon_hits'
+PLAIN_WEAPON_DAMAGE_PHRASE = re.compile(r'(?<!%\s)\bWeapon Damage\b')
 DRAIN_MS = 3000
 MAX_SCENARIO_MS = 600000
 MAX_ACCELERATED_SCENARIO_MS = 3600000
@@ -427,17 +429,53 @@ def mitigated(distribution: Distribution, mitigation: MitigationModel) -> Distri
     return result
 
 
+def plain_weapon_hit(effects: Sequence[int], caster: CasterStats, weapon: WeaponProfile | None,
+                     description: str, rank_id: int) -> tuple[Distribution, float, list[str]]:
+    if weapon is None:
+        raise Unmodelled('weapon damage needs the weapon stats of the class file')
+    if not PLAIN_WEAPON_DAMAGE_PHRASE.search(description):
+        raise Unmodelled(f'{rank_id} tooltip shows no plain Weapon Damage phrase')
+    speed = weapon.normalized_speed if NORMALIZED_WEAPON_DMG in effects else weapon.speed_ms / 1000
+    bonus = caster.ap / ATTACK_POWER_PER_DPS * speed
+    roll = uniform(math.floor(weapon.min_damage + bonus), math.floor(weapon.max_damage + bonus))
+    tooltip_mean = (weapon.min_damage + weapon.max_damage) / 2 + bonus
+    return roll, tooltip_mean, ['Weapon Damage']
+
+
+def plain_school_weapon_part(readout: Readout, effects: Sequence[int], caster: CasterStats,
+                             weapon: WeaponProfile | None, description: str,
+                             rank_id: int) -> tuple[Distribution, float, list[str]] | None:
+    weapon_effects = [index for index, effect in enumerate(effects) if effect in WEAPON_EFFECTS]
+    if ([effects[index] for index in weapon_effects] != [NORMALIZED_WEAPON_DMG]
+            or SCHOOL_DAMAGE not in effects
+            or any(value.effect_index in weapon_effects for value in readout.values)):
+        return None
+    if not PLAIN_WEAPON_DAMAGE_PHRASE.search(description):
+        return None
+    return plain_weapon_hit(effects, caster, weapon, description, rank_id)
+
+
 def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterStats, weapon: WeaponProfile | None,
                  mitigation: MitigationModel, *, aura_names: Sequence[int] = (), modifiers: Sequence[Modifier] = (),
                  ticks: int = 1, rolls: Mapping[int, Sequence[float]] | None = None,
                  triggered: Mapping[int, Triggered] | None = None, records: Records | None = None,
                  rank_id: int = 0, percent_before_flat: bool = False,
                  weapon_part: tuple[Distribution, float, list[str]] | None = None,
-                 percent_part: float | None = None, taken: Sequence[Modifier] = ()) -> HitModel:
+                 percent_part: float | None = None, taken: Sequence[Modifier] = (),
+                 plain_weapon: bool = False, description: str = '') -> HitModel:
     names = tuple(aura_names) or (0,) * len(spell_effects)
     kind, indexes = hit_kind(spell_effects, names, triggered, readout)
     events = 1
-    if kind == 'weapon':
+    if plain_weapon:
+        if kind != 'weapon':
+            raise Unmodelled(f'{rank_id} is listed in {PLAIN_WEAPON_HITS}, which models a weapon hit, not {kind}')
+        weapon_effects = [index for index, effect in enumerate(spell_effects) if effect in WEAPON_EFFECTS]
+        if len(weapon_effects) != 1 or spell_effects[weapon_effects[0]] not in WEAPON_FLAT_EFFECTS:
+            raise Unmodelled(f'{rank_id} in {PLAIN_WEAPON_HITS} needs one flat weapon effect, not {list(spell_effects)}')
+        if any(value.effect_index == weapon_effects[0] for value in readout.values):
+            raise Unmodelled(f'{rank_id} shows a tooltip token on effect {weapon_effects[0]}, not plain Weapon Damage')
+        distribution, tooltip_mean, texts = plain_weapon_hit(spell_effects, caster, weapon, description, rank_id)
+    elif kind == 'weapon':
         distribution, tooltip_mean, texts = weapon_hit(readout, spell_effects, caster, weapon,
                                                         percent_before_flat=percent_before_flat)
     elif kind == TRIGGERED_WEAPON:
@@ -688,6 +726,7 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
     full_readout = read_tooltip(records.dbc, rank_id, caster)
     readout = full_readout if learned is None else Readout(
         [value for value in full_readout.values if value.spell_id != learned], full_readout.unreadable)
+    description = records.field('Spell', rank_id, 'Description[enUS]') or ''
     composite = None
     if rank_id in class_file.get('weapon_school_hits', ()):
         if learned is not None:
@@ -695,6 +734,9 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
         readout = with_literal_weapon_percent(class_file, records, rank_id, facts.effects, readout)
         readout, composite = script_weapon_part(readout, facts.effects, weapon_attacker(records, rank_id, caster),
                                                 weapon_profile(class_file))
+        if composite is None:
+            composite = plain_school_weapon_part(readout, facts.effects, weapon_attacker(records, rank_id, caster),
+                                                 weapon_profile(class_file), description, rank_id)
         if composite is None:
             raise Unmodelled(f'{rank_id} is listed as a weapon and school hit, but its tooltip shows no weapon value')
     chosen = rank_hit_effect(class_file, rank_id, check)
@@ -728,11 +770,12 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
     attacker = weapon_attacker(records, hit_spell, caster)
     weapon_part = composite if learned is None else learned_weapon_part(full_readout, facts.effects, attacker,
                                                                         weapon_profile(class_file), learned)
+    plain_weapon = rank_id in class_file.get(PLAIN_WEAPON_HITS, ())
     model = expected_hit(shown, facts.effects, attacker, weapon_profile(class_file), mitigation,
                          aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks, rolls=rolls,
                          triggered=triggered, records=records, rank_id=rank_id,
                          percent_before_flat=percent_before_flat, weapon_part=weapon_part,
-                         percent_part=percent_part)
+                         percent_part=percent_part, plain_weapon=plain_weapon, description=description)
     losses = {index: loss for index in indexes
               if kind in SCRIPT_HIT_KINDS and (loss := per_level_fraction(records, rank_id, index, caster.level))}
     if losses:
@@ -741,7 +784,8 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
                                   aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks,
                                   rolls=engine_rolls(shown, indexes, rolls, losses), triggered=triggered,
                                   records=records, rank_id=rank_id, percent_before_flat=percent_before_flat,
-                                  weapon_part=weapon_part, percent_part=percent_part)
+                                  weapon_part=weapon_part, percent_part=percent_part,
+                                  plain_weapon=plain_weapon, description=description)
         except Unmodelled:
             return RankHit(model, readout, facts, school_mask, indexes, duration, hit_spell)
         terms = ', '.join(f'effect {index} loses {loss:.6g}' for index, loss in losses.items())

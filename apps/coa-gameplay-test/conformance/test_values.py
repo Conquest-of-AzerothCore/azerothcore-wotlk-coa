@@ -1266,7 +1266,7 @@ class ValueReagentsTest(unittest.TestCase):
             [{'spell': 804777}],
             [{'spell': 804777, 'items': [[1210, 0]]}],
             [{'spell': 804777, 'items': [[True, 1]]}],
-            [{'spell': 804777, 'items': [[1210, 1]], 'destination_unit': 'dummy'}],
+            [{'spell': 804777, 'items': [[1210, 1]], 'destination_unit': 'ally'}],
             [{'spell': 804777, 'items': [[1210, 1]], 'extra': 1}],
             [{'spell': 804777, 'items': [[1210, 1]]}, {'spell': 804777, 'items': [[1210, 1]]}],
         )
@@ -1289,6 +1289,36 @@ class ValueReagentsTest(unittest.TestCase):
         self.assertEqual(cast_opt['destination_unit'], CASTER)
         self.assertIn({'action': 'add_item', 'actor': CASTER, 'item': 1210, 'count': 1}, sc_opt['steps'])
         self.assertNotIn({'action': 'add_item', 'actor': CASTER, 'item': 1210, 'count': 1}, sc_plain['steps'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_destination_dummy_routes_persistent_area_aura_to_dummy_and_waits_for_missile(self):
+        from values import MISSILE_WAIT_LABEL, VALUE_REAGENTS_KEY
+        witch_hunter = load_class_file(15)
+        caltrops = ClassSpell(503679, 'Caltrops', (503679,), 503679, 14, False)
+        with_opt = {**witch_hunter, VALUE_REAGENTS_KEY: [{'spell': 503679, 'destination_unit': TARGET}]}
+        scenario, expectations, _ = value_scenario(with_opt, caltrops, 503679)
+        self.assertEqual([creature['id'] for creature in scenario['creatures']], [TARGET])
+        cast = next(step for step in scenario['steps'] if step.get('action') == 'cast' and step.get('spell') == 503679)
+        self.assertEqual(cast['destination_unit'], TARGET)
+        self.assertTrue(any(step.get('label') == MISSILE_WAIT_LABEL for step in scenario['steps']))
+        aura_steps = [step for step in scenario['steps']
+                      if step.get('metric') in ('aura', 'aura_duration_ms') and step.get('spell') == 503679]
+        self.assertEqual(len(aura_steps), 2)
+        self.assertTrue(all(step['actor'] == TARGET for step in aura_steps))
+        dur_exp = next(exp for exp in expectations if exp.check == 'aura_duration_ms')
+        self.assertEqual(dur_exp.rule, 'read duration_ms')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_permanent_own_duration_reads_spell_duration_ms_even_with_cast_time(self):
+        witch_hunter = load_class_file(15)
+        infiltrate = ClassSpell(802281, 'Infiltrate', (802281,), 802281, 22, False)
+        scenario, expectations, _ = value_scenario(witch_hunter, infiltrate, 802281)
+        dur_exp = next(exp for exp in expectations if exp.check == 'spell_duration')
+        self.assertEqual(dur_exp.displayed, '$d')
+        self.assertEqual(dur_exp.rule, 'read permanent duration')
+        self.assertTrue(any(step.get('metric') == 'spell_duration_ms' and step.get('spell') == 802281
+                            for step in scenario['steps']))
+        self.assertFalse(any(exp.rule.startswith(UNREADABLE) and '$d' in exp.rule for exp in expectations))
 
 
 if __name__ == '__main__':
