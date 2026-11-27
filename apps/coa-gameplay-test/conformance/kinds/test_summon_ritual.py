@@ -1,8 +1,9 @@
+from types import SimpleNamespace
 import unittest
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
-from kinds.summon_ritual import summon_ritual_spec
+from kinds.summon_ritual import direct_summon_scenario, summon_ritual_spec
 from profile import CASTER, DBC_DIR, load_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
@@ -51,6 +52,19 @@ def seeded_direct_values(model: dict, drop=(), **overrides) -> dict:
     for key in drop:
         values.pop(reads[key], None)
     return values
+
+
+class DirectRitualLocationTest(unittest.TestCase):
+    def test_direct_ritual_uses_the_configured_origin(self):
+        origin = {'map': 1, 'x': 500.0, 'y': 600.0, 'z': 80.0}
+        distant = {**origin, 'x': 1000.0}
+        spec = summon_ritual_spec({**DIRECT_ENTRY, 'location': origin, 'faraway_location': distant})
+        scenario, _ = direct_summon_scenario(
+            {'name': 'Cultist', 'class_id': 25, 'race': 1, 'level': 60}, spec,
+            SimpleNamespace(quote=DIRECT_ENTRY['quote']), SimpleNamespace())
+        run.validate(scenario)
+        self.assertEqual(scenario['location'], origin)
+        self.assertIn({'action': 'teleport', 'actor': 'faraway', **distant}, scenario['steps'])
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')

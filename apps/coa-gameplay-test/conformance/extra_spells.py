@@ -22,17 +22,24 @@ TRAINER_SPELL_COLUMNS = ('TrainerId', 'SpellId', 'MoneyCost', 'ReqSkillLine', 'R
                          'ReqAbility1', 'ReqAbility2', 'ReqAbility3', 'ReqLevel', 'VerifiedBuild')
 CAST_EVENTS = frozenset({'SPELL_CAST_SUCCESS', 'SPELL_CAST_START'})
 WHITESPACE = re.compile(r'\s+')
-LINE_THREE_INTS = re.compile(r'\{\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\}')
-LINE_FIVE_INTS = re.compile(r'\{\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\}')
-LINE_TWO_INTS = re.compile(r'\{\s*(\d+)\s*,\s*(\d+)\s*\}')
+CPP_INT = re.compile(r"(?P<digits>(?:0[xX][0-9a-fA-F']+|0[bB][01']+|[0-9][0-9']*))"
+                     r"(?:[uU](?:ll|LL|[lL])?|(?:ll|LL|[lL])[uU]?)?")
 TRAINER_DELETE = re.compile(r'(?is)^DELETE\s+FROM\s+`?trainer_spell`?(?:\s+WHERE\s+(.*))?$')
-TRAINER_WRITE = re.compile(r'(?is)^(?:INSERT\s+(?:IGNORE\s+)?INTO|REPLACE\s+INTO)\s+`?trainer_spell`?\b')
-TRAINER_INSERT = re.compile(r'(?is)^(?:INSERT\s+(?:IGNORE\s+)?INTO|REPLACE\s+INTO)\s+`?trainer_spell`?'
+WRITE_MODE = r'(INSERT\s+IGNORE|INSERT|REPLACE)\s+INTO\s+'
+TRAINER_WRITE = re.compile(rf'(?is)^{WRITE_MODE}`?trainer_spell\b|^UPDATE\b.*?\btrainer_spell\b.*?\bSET\b')
+TRAINER_INSERT = re.compile(rf'(?is)^{WRITE_MODE}`?trainer_spell`?'
                             r'\s*(?:\(([^)]*)\)\s*)?VALUES\b(.*)$')
 TRAINER_INSERT_SELECT = re.compile(
-    r'(?is)^(?:INSERT\s+(?:IGNORE\s+)?INTO|REPLACE\s+INTO)\s+`?trainer_spell`?'
+    rf'(?is)^{WRITE_MODE}`?trainer_spell`?'
     r'\s*(?:\(([^)]*)\)\s*)?SELECT\s+(?:DISTINCT\s+)?(.*?)\s+FROM\s+`?trainer_spell`?'
     r'(?:\s+WHERE\s+(.*?))?(?:\s+LIMIT\s+(\d+))?\s*$')
+UNTRACKED_UPDATE = re.compile(r'(?is)^UPDATE\s+`?trainer_spell`?\s+SET\s+(.*?)\s+WHERE\s+(.+)$')
+UNTRACKED_ASSIGNMENT = re.compile(
+    r'(?i)`?(?:MoneyCost|ReqSkillLine|ReqSkillRank|ReqAbility[123]|VerifiedBuild)`?\s*=\s*[+-]?\d+')
+TRAINER_PREDICATE = re.compile(
+    r'(?i)\s*(?:(`TrainerId`|`SpellId`|TrainerId|SpellId)\s*'
+    r'(?:=\s*([+-]?\d+)|IN\s*\(\s*([+-]?\d+(?:\s*,\s*[+-]?\d+)*)\s*\))|'
+    r'(AND\b|OR\b|\(|\)))')
 SPELL_FIELDS = ['SpellName[enUS]', 'Rank[enUS]', 'Description[enUS]', 'Attributes']
 TOOLTIP_PREVIEW_CHARS = 180
 
@@ -72,30 +79,57 @@ def array_block(path: Path, name: str, required: bool = False) -> str:
     return match.group(1)
 
 
+def cpp_int(token: str) -> int:
+    match = CPP_INT.fullmatch(token)
+    if match is None:
+        raise ValueError(token)
+    digits = match['digits'].replace("'", '')
+    if digits[:2].lower() in ('0x', '0b'):
+        return int(digits, 0)
+    return int(digits, 8 if digits.startswith('0') else 10)
+
+
+def grant_rows(path: Path, name: str, width: int, required: bool):
+    block = re.sub(r'//[^\n]*|/\*.*?\*/', '', array_block(path, name, required), flags=re.S).strip() + '}'
+    if block == '}':
+        return
+    if block.startswith('{{') and block.endswith('}}'):
+        block = block[1:-1]
+    if not (block.startswith('{') and block.endswith('}')):
+        raise ExtraSpellsError(f'invalid initializer for {name} in {path}')
+    remaining = block[1:-1].strip()
+    while remaining:
+        match = re.match(r'\{([^{}]*)\}\s*(,|$)', remaining)
+        row = match[1].split(',') if match else []
+        try:
+            if len(row) != width:
+                raise ValueError
+            yield tuple(cpp_int(token.strip()) for token in row)
+        except ValueError as error:
+            raise ExtraSpellsError(f'unparseable row in {name} in {path}: {remaining[:120]}') from error
+        remaining = remaining[match.end():].strip()
+
+
 def class_spells_table(root: Path = REPOSITORY, required: bool = False) -> dict[int, dict[int, int]]:
-    block = array_block(Path(root) / CUSTOM_CLASS_HEADER, 'ClassSpells', required=required)
     found: dict[int, dict[int, int]] = {}
-    for class_text, level_text, spell_text in LINE_THREE_INTS.findall(block):
-        class_id, level, spell_id = int(class_text), int(level_text), int(spell_text)
+    for class_id, level, spell_id in grant_rows(Path(root) / CUSTOM_CLASS_HEADER, 'ClassSpells', 3, required):
         per_class = found.setdefault(class_id, {})
         per_class[spell_id] = min(per_class.get(spell_id, level), level)
     return found
 
 
 def live_baseline_spells(root: Path = REPOSITORY, required: bool = False) -> dict[int, set[int]]:
-    block = array_block(Path(root) / LIVE_BASELINE_HEADER, 'Spells', required=required)
     found: dict[int, set[int]] = {}
-    for class_text, race_text, spell_text in LINE_THREE_INTS.findall(block):
-        if int(race_text) == 0:
-            found.setdefault(int(class_text), set()).add(int(spell_text))
+    for class_id, race_id, spell_id in grant_rows(Path(root) / LIVE_BASELINE_HEADER, 'Spells', 3, required):
+        if race_id == 0:
+            found.setdefault(class_id, set()).add(spell_id)
     return found
 
 
 def taught_abilities(root: Path = REPOSITORY, required: bool = False) -> dict[int, dict[int, tuple[int, int]]]:
-    block = array_block(Path(root) / TAUGHT_ABILITY_HEADER, 'TaughtAbilities', required=required)
     found: dict[int, dict[int, tuple[int, int]]] = {}
-    for class_text, _, level_text, parent_text, spell_text in LINE_FIVE_INTS.findall(block):
-        class_id, level, parent_id, spell_id = int(class_text), int(level_text), int(parent_text), int(spell_text)
+    for class_id, _, level, parent_id, spell_id in grant_rows(
+            Path(root) / TAUGHT_ABILITY_HEADER, 'TaughtAbilities', 5, required):
         per_class = found.setdefault(class_id, {})
         if spell_id not in per_class or level < per_class[spell_id][0]:
             per_class[spell_id] = (level, parent_id)
@@ -103,39 +137,74 @@ def taught_abilities(root: Path = REPOSITORY, required: bool = False) -> dict[in
 
 
 def felsworn_rifts(root: Path = REPOSITORY, required: bool = False) -> dict[int, int]:
-    block = array_block(Path(root) / COMPAT_SOURCE, 'FelswornHordeCapitalRifts', required=required)
     found: dict[int, int] = {}
-    for spell_text, level_text in LINE_TWO_INTS.findall(block):
-        spell_id, level = int(spell_text), int(level_text)
+    for spell_id, level in grant_rows(Path(root) / COMPAT_SOURCE, 'FelswornHordeCapitalRifts', 2, required):
         found[spell_id] = min(found.get(spell_id, level), level)
     return found
-
-
-def sql_column_ids(text: str, column: str) -> set[int] | None:
-    match = re.search(rf'`?{column}`?\s*(?:=\s*(\d+)|IN\s*\(([^)]*)\))', text, re.I)
-    if not match:
-        return None
-    return {int(value) for value in re.findall(r'\d+', match.group(1) or match.group(2))}
 
 
 def matching_trainer_keys(active: dict[tuple[int, int], int], where_clause: str | None) -> list[tuple[int, int]]:
     if where_clause is None:
         return list(active)
-    matched: list[tuple[int, int]] = []
-    seen: set[tuple[int, int]] = set()
-    for group in re.split(r'\bOR\b', where_clause, flags=re.I):
-        trainers = sql_column_ids(group, 'TrainerId')
-        spells = sql_column_ids(group, 'SpellId')
-        if trainers is None and spells is None:
-            continue
-        for key in active:
-            if key in seen:
-                continue
-            trainer_id, spell_id = key
-            if (trainers is None or trainer_id in trainers) and (spells is None or spell_id in spells):
-                seen.add(key)
-                matched.append(key)
-    return matched
+    tokens = []
+    pos = 0
+    where_clause = where_clause.strip()
+    while pos < len(where_clause):
+        match = TRAINER_PREDICATE.match(where_clause, pos)
+        if not match:
+            raise ExtraSpellsError(f'unsupported trainer_spell WHERE: {where_clause!r}')
+        column, equals, members, operator = match.groups()
+        if operator:
+            tokens.append(operator.upper())
+        else:
+            index = 0 if column.strip('`').lower() == 'trainerid' else 1
+            values = {int(value) for value in (equals or members).split(',')}
+            tokens.append((index, values))
+        pos = match.end()
+
+    tokens = iter(tokens)
+    token = next(tokens, None)
+
+    def consume():
+        nonlocal token
+        current, token = token, next(tokens, None)
+        return current
+
+    def term():
+        current = consume()
+        if isinstance(current, tuple):
+            index, values = current
+            return lambda key: key[index] in values
+        if current == '(':
+            predicate = expression()
+            if consume() == ')':
+                return predicate
+        raise ExtraSpellsError(f'invalid trainer_spell WHERE: {where_clause!r}')
+
+    def conjunction():
+        parts = [term()]
+        while token == 'AND':
+            consume()
+            parts.append(term())
+        return lambda key: all(part(key) for part in parts)
+
+    def expression():
+        parts = [conjunction()]
+        while token == 'OR':
+            consume()
+            parts.append(conjunction())
+        return lambda key: any(part(key) for part in parts)
+
+    predicate = expression()
+    if token is not None:
+        raise ExtraSpellsError(f'invalid trainer_spell WHERE: {where_clause!r}')
+    return [key for key in active if predicate(key)]
+
+
+def write_trainer_row(active, mode, trainer_id, spell_id, req_level):
+    key = trainer_id, spell_id
+    if 'IGNORE' not in mode.upper() or key not in active:
+        active[key] = req_level
 
 
 def apply_trainer_delete(active: dict[tuple[int, int], int], where_clause: str | None) -> None:
@@ -146,7 +215,8 @@ def apply_trainer_delete(active: dict[tuple[int, int], int], where_clause: str |
         del active[key]
 
 
-def apply_trainer_insert(active: dict[tuple[int, int], int], columns_text: str | None, values_text: str) -> None:
+def apply_trainer_insert(active: dict[tuple[int, int], int], mode: str,
+                         columns_text: str | None, values_text: str) -> None:
     columns = [col.strip(' `\r\n\t') for col in columns_text.split(',')] if columns_text else list(TRAINER_SPELL_COLUMNS)
     for row in sql_rows(values_text):
         if len(row) != len(columns):
@@ -158,8 +228,7 @@ def apply_trainer_insert(active: dict[tuple[int, int], int], columns_text: str |
             req_level = int(fields.get('ReqLevel') or 0)
         except (KeyError, TypeError, ValueError):
             continue
-        if TRAINER_CLASS_MIN <= trainer_id <= TRAINER_CLASS_MAX:
-            active[(trainer_id, spell_id)] = req_level
+        write_trainer_row(active, mode, trainer_id, spell_id, req_level)
 
 
 def resolve_select_int(expr: str, source_row: dict[str, int]) -> int:
@@ -173,8 +242,9 @@ def resolve_select_int(expr: str, source_row: dict[str, int]) -> int:
         raise ExtraSpellsError(f'unsupported trainer_spell SELECT expression: {expr!r}') from error
 
 
-def apply_trainer_insert_select(active: dict[tuple[int, int], int], columns_text: str | None,
-                                select_text: str, where_clause: str | None, limit_text: str | None) -> None:
+def apply_trainer_insert_select(active: dict[tuple[int, int], int], mode: str,
+                                columns_text: str | None, select_text: str, where_clause: str | None,
+                                limit_text: str | None) -> None:
     columns = [col.strip(' `\r\n\t') for col in columns_text.split(',')] if columns_text else list(TRAINER_SPELL_COLUMNS)
     expressions = [part.strip() for part in select_text.split(',')]
     if len(expressions) != len(columns):
@@ -201,10 +271,9 @@ def apply_trainer_insert_select(active: dict[tuple[int, int], int], columns_text
         trainer_id = resolve_select_int(fields['TrainerId'], source_row)
         spell_id = resolve_select_int(fields['SpellId'], source_row)
         req_level = resolve_select_int(fields['ReqLevel'], source_row) if 'ReqLevel' in fields else 0
-        if TRAINER_CLASS_MIN <= trainer_id <= TRAINER_CLASS_MAX:
-            additions.append((trainer_id, spell_id, req_level))
+        additions.append((trainer_id, spell_id, req_level))
     for trainer_id, spell_id, req_level in additions:
-        active[(trainer_id, spell_id)] = req_level
+        write_trainer_row(active, mode, trainer_id, spell_id, req_level)
 
 
 def trainer_spells(root: Path = REPOSITORY, required: bool = False) -> dict[int, dict[int, int]]:
@@ -227,24 +296,24 @@ def trainer_spells(root: Path = REPOSITORY, required: bool = False) -> dict[int,
         for statement in sql_statements(text):
             if 'trainer_spell' not in statement.lower():
                 continue
-            deleted = TRAINER_DELETE.match(statement)
-            if deleted:
-                apply_trainer_delete(active, deleted.group(1))
-                continue
-            inserted = TRAINER_INSERT.match(statement)
-            if inserted:
-                apply_trainer_insert(active, inserted.group(1), inserted.group(2))
-                continue
-            inserted_select = TRAINER_INSERT_SELECT.match(statement)
-            if inserted_select:
-                apply_trainer_insert_select(
-                    active, inserted_select.group(1), inserted_select.group(2),
-                    inserted_select.group(3), inserted_select.group(4))
-                continue
-            if TRAINER_WRITE.match(statement):
-                raise ExtraSpellsError(f'unsupported trainer_spell statement in {path}: {statement[:120]}')
+            try:
+                if deleted := TRAINER_DELETE.fullmatch(statement):
+                    apply_trainer_delete(active, deleted[1])
+                elif inserted := TRAINER_INSERT.fullmatch(statement):
+                    apply_trainer_insert(active, *inserted.groups())
+                elif inserted_select := TRAINER_INSERT_SELECT.fullmatch(statement):
+                    apply_trainer_insert_select(active, *inserted_select.groups())
+                elif (updated := UNTRACKED_UPDATE.fullmatch(statement)) and all(
+                        UNTRACKED_ASSIGNMENT.fullmatch(assignment.strip()) for assignment in updated[1].split(',')):
+                    continue
+                elif TRAINER_WRITE.match(statement):
+                    raise ExtraSpellsError('unsupported trainer_spell statement')
+            except ExtraSpellsError as error:
+                raise ExtraSpellsError(f'{error} in {path}: {statement}') from error
     by_class: dict[int, dict[int, int]] = {}
     for (trainer_id, spell_id), req_level in active.items():
+        if not TRAINER_CLASS_MIN <= trainer_id <= TRAINER_CLASS_MAX:
+            continue
         class_id = trainer_id - TRAINER_CLASS_OFFSET
         per_class = by_class.setdefault(class_id, {})
         per_class[spell_id] = min(per_class.get(spell_id, req_level), req_level)
@@ -347,6 +416,23 @@ def audit_extra_spells(class_file: dict, dbc_dir: Path, source_root: Path = REPO
     header = resolve_progression_header(source_root, progression_header)
     dbc = dataset(dbc_dir)
     records = Records(dbc)
+    chains = progression_chains(dbc, header, class_id)
+    rank_to_first = {first: first for first in chains} | {
+        rank: first for first, chain in chains.items() for rank, _ in chain}
+    raw_candidates = server_candidates(source_root, class_id, level, required=True)
+    collapsed: dict[int, set[str]] = {}
+    for spell_id, srcs in raw_candidates.items():
+        base = rank_to_first.get(spell_id, spell_id)
+        collapsed.setdefault(base, set()).update(srcs)
+
+    source_ids = raw_candidates.keys() | collapsed.keys()
+    source_rows = rows_by_identity(dbc, 'Spell', source_ids, SPELL_FIELDS)
+    missing = {spell: set(raw_candidates.get(spell, ())) | collapsed.get(spell, set())
+               for spell in sorted(source_ids - source_rows.keys())}
+    if missing:
+        grants = '; '.join(f'{spell} ({", ".join(sorted(sources))})' for spell, sources in missing.items())
+        raise ExtraSpellsError(f'source-granted spells missing from Spell.dbc in {dbc_dir}: {grants}')
+
     ca_list = class_spells(dbc_dir, class_id, header, level)
     advancement_ids = {spell.spell_id for spell in ca_list}
     extra_ids = [entry['spell'] for entry in class_file.get('extra_spells', [])]
@@ -355,17 +441,8 @@ def audit_extra_spells(class_file: dict, dbc_dir: Path, source_root: Path = REPO
     covered_list = class_spells(dbc_dir, class_id, header, level, extra_spells=extra_ids)
     covered_base = {spell.spell_id for spell in covered_list}
     covered_ranks = {rank for spell in covered_list for rank in spell.ranks}
-    chains = progression_chains(dbc, header, class_id)
-    rank_to_first = {first: first for first in chains} | {
-        rank: first for first, chain in chains.items() for rank, _ in chain}
     updates = source_root / UPDATES_ROOT / 'updates'
     pulled_ids = pulled_spells(records, covered_list, updates)
-
-    raw_candidates = server_candidates(source_root, class_id, level, required=True)
-    collapsed: dict[int, set[str]] = {}
-    for spell_id, srcs in raw_candidates.items():
-        base = rank_to_first.get(spell_id, spell_id)
-        collapsed.setdefault(base, set()).update(srcs)
 
     covered_name_sources = sorted({spell.max_rank for spell in covered_list} | pulled_ids)
     candidate_ranks: dict[int, tuple[int, ...]] = {}
@@ -374,7 +451,7 @@ def audit_extra_spells(class_file: dict, dbc_dir: Path, source_root: Path = REPO
         all_ranks = (base,) + tuple(rank for rank, _ in chain)
         candidate_ranks[base] = all_ranks
     needed_ids = set(covered_name_sources) | {rank for ranks in candidate_ranks.values() for rank in ranks}
-    spell_rows = rows_by_identity(dbc, 'Spell', needed_ids, SPELL_FIELDS)
+    spell_rows = source_rows | rows_by_identity(dbc, 'Spell', needed_ids - source_ids, SPELL_FIELDS)
 
     covered_names: dict[str, list[int]] = {}
     for spell_id in covered_name_sources:
@@ -391,8 +468,6 @@ def audit_extra_spells(class_file: dict, dbc_dir: Path, source_root: Path = REPO
         if base in covered_base or base in covered_ranks or base in pulled_ids:
             covered_candidates += 1
             continue
-        if base not in spell_rows:
-            continue
         srcs = sorted(srcs_set)
         row = spell_rows[base]
         name = row['SpellName[enUS]'] or ''
@@ -405,7 +480,7 @@ def audit_extra_spells(class_file: dict, dbc_dir: Path, source_root: Path = REPO
         all_ranks = candidate_ranks[base]
         log_cast_count = sum(casts[rank] for rank in all_ranks)
         log_other_count = sum(others[rank] for rank in all_ranks)
-        if name and name in covered_names:
+        if base not in chains and name in covered_names and re.fullmatch(r'Rank\s+\d+', row['Rank[enUS]'] or '', re.I):
             unchained_ranks.append({
                 'spell': base, 'name': name, 'rank': row['Rank[enUS]'] or '',
                 'covered_as': covered_names[name], 'sources': srcs,

@@ -163,6 +163,7 @@ def direct_summon_scenario(class_file: dict, spec: SummonRitualSpec, entry, fact
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour summon ritual',
+        'location': spec.location.as_dict(),
         'contract': (f'Three grouped party members ({CASTER}, {FIRST}, {FARAWAY}) with {FARAWAY} teleported '
                      f'to {spec.faraway_location.as_dict()}. Control reads before casting {spec.spell} verify 0 '
                      f'ritual ({spec.ritual_entry}) objects and {METRIC} == 0 on {FARAWAY}. {CASTER} selects '

@@ -48823,7 +48823,9 @@
         4.5,
         5.0
       ],
-      "area_sum": true,
+      "area_sum": {
+        "additional_single_hits": 3
+      },
       "measure_actor": "caster",
       "cast_in_before": false,
       "cast_power": 2000,
@@ -48841,11 +48843,11 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 4,
+      "expected": 1,
       "tolerance": 0,
       "wait_ms": 1000,
       "expire_ms": 500,
-      "observe_source": "Spell.dbc 502141 Effect[0] TRIGGER_SPELL_WITH_VALUE 520334 -> 520332, EffectChainTarget[0] = 4 (primary + 3 jumps within 10 yd, AscensionCultistAbilities.cpp:591-642). Five enemies at 3.0..5.0 yd (all within 10 yd of primary): 0 hits before cast, 4 hits summed across all 5 dummies after 1 cast (proving primary + 3 additional targets, capped at 4)."
+      "observe_source": "The tooltip requires 3 additional nearby targets. Spell.dbc 502141 triggers damage spell 520332 via 520334. Read all 5 targets individually: zero hits before the cast, then one primary hit and exactly three single hits among the four eligible secondary enemies."
     },
     {
       "spell": 502141,
@@ -50904,12 +50906,6 @@
       "quote": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
       "trigger_spell": 801153,
       "target": "caster",
-      "cast_in_before": false,
-      "setup_in_before": true,
-      "setup_casts": [
-        801153
-      ],
-      "setup_wait_ms": 1600,
       "cast_power": 2000,
       "metric": "owned_creature_count",
       "fields": {
@@ -50921,7 +50917,25 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Spell.dbc 801153 uses SummonProperties 63 (shared Old God Tentacle totem slot 1): recasting 801153 with one 50272 active keeps owned_creature_count(50272) at 1."
+      "observe_source": "Spell.dbc 801153 uses SummonProperties 63 (shared Old God Tentacle totem slot 1): recasting 801153 with one 50272 active keeps owned_creature_count(50272) at 1.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_summon_count",
+            "fields": {
+              "entry": 50272
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "The first cast summons once; recasting while it is active must summon a replacement."
+          }
+        ]
+      }
     },
     {
       "spell": 801153,
@@ -51293,12 +51307,6 @@
       "quote": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
       "trigger_spell": 802042,
       "target": "caster",
-      "cast_in_before": false,
-      "setup_in_before": true,
-      "setup_casts": [
-        802042
-      ],
-      "setup_wait_ms": 1600,
       "cast_power": 2000,
       "metric": "owned_creature_count",
       "fields": {
@@ -51310,7 +51318,25 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Spell.dbc 802042 uses SummonProperties 63 (shared Old God Tentacle slot 1): recasting 802042 with one 500465 active keeps owned_creature_count(500465) at 1."
+      "observe_source": "Spell.dbc 802042 uses SummonProperties 63 (shared Old God Tentacle slot 1): recasting 802042 with one 500465 active keeps owned_creature_count(500465) at 1.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_summon_count",
+            "fields": {
+              "entry": 500465
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "The first cast summons once; recasting while it is active must summon a replacement."
+          }
+        ]
+      }
     },
     {
       "spell": 802042,
@@ -52789,7 +52815,7 @@
       "target": "ally",
       "measure_actor": "ally",
       "ally_arm": {
-        "allies": 1,
+        "allies": 2,
         "arms": [
           {
             "actors": [
@@ -52804,7 +52830,29 @@
             "expected": 1,
             "tolerance": 0,
             "source": "Confirms Whispers of Y'shaarj 561391 applied to ally in treatment while replacing 561386."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 572905,
+              "caster": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Whispers of C'Thun from the second Cultist remains on the ally after the first Cultist's replacement."
           }
+        ],
+        "ally_auras": [
+          [
+            572905,
+            1,
+            "ally",
+            "ally2"
+          ]
         ]
       },
       "metric": "aura",
@@ -52908,7 +52956,7 @@
       "target": "caster",
       "measure_actor": "ally",
       "ally_arm": {
-        "allies": 1,
+        "allies": 2,
         "arms": [
           {
             "actors": [
@@ -52923,7 +52971,29 @@
             "expected": 1,
             "tolerance": 0,
             "source": "Confirms Greater Whispers of Y'shaarj 561392 applied to ally in treatment while replacing 561387."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 572905,
+              "caster": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Whispers of C'Thun from the second Cultist remains on the ally after the first Cultist's replacement."
           }
+        ],
+        "ally_auras": [
+          [
+            572905,
+            1,
+            "ally",
+            "ally2"
+          ]
         ]
       },
       "metric": "aura",
@@ -53653,12 +53723,28 @@
       "cast_in_before": false,
       "target": "dummy",
       "dummy_distance": 5,
-      "area_dummies": [
-        7.0,
-        9.0,
-        25.0
-      ],
-      "area_sum": true,
+      "area_dummies": {
+        "placed": [
+          {
+            "dx": 7,
+            "dy": 0,
+            "before_expected": 0,
+            "expected": 1
+          },
+          {
+            "dx": 9,
+            "dy": 0,
+            "before_expected": 0,
+            "expected": 1
+          },
+          {
+            "dx": 25,
+            "dy": 0,
+            "before_expected": 0,
+            "expected": 0
+          }
+        ]
+      },
       "measure_actor": "caster",
       "phase_auras": [
         [
@@ -53675,12 +53761,12 @@
         "periodic": true
       },
       "before_expected": 0,
-      "expected": 3,
+      "expected": 1,
       "tolerance": 0,
       "wait_ms": 3500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "805180 Effect[0] SPELL_EFFECT_PERSISTENT_AREA_AURA (27), RadiusIndex 14 (8.0 yd) centered on dummy at 5 yd. area_dummies at 7 yd (2 yd from dummy), 9 yd (4 yd from dummy), and 25 yd (20 yd from dummy, outside 8 yd): after 1 tick (3500 ms), dummy + area0 + area1 each take 1 tick (sum 3), while area2 outside 8 yd takes 0."
+      "observe_source": "805180 Effect[0] is a persistent area aura with RadiusIndex 14 (8 yd), centered on the dummy at 5 yd. Read zero ticks without the trigger. After 3500 ms require one tick on the dummy and both in-range enemies at 7 and 9 yd, and zero on the out-of-range enemy at 25 yd."
     },
     {
       "spell": 803035,

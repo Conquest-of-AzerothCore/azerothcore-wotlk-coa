@@ -118,6 +118,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <set>
 #include <unordered_map>
@@ -917,6 +918,36 @@ private:
 
 bool AuraApplyCounter::_enabled = false;
 std::map<std::pair<ObjectGuid, uint32>, uint32> AuraApplyCounter::_counts;
+
+class UnownedFixtureSummons
+{
+public:
+    static void Begin(uint32 phase)
+    {
+        std::lock_guard lock(_mutex);
+        _byPhase.try_emplace(phase);
+    }
+
+    static void Record(Creature const* creature)
+    {
+        if (!creature || !creature->IsSummon() || !creature->GetSummonerGUID().IsEmpty())
+            return;
+        std::lock_guard lock(_mutex);
+        if (auto itr = _byPhase.find(creature->GetPhaseMask()); itr != _byPhase.end())
+            itr->second.insert(ProcCounter::OwnerOf(creature));
+    }
+
+    static std::set<ProcCounter::Owner> Take(uint32 phase)
+    {
+        std::lock_guard lock(_mutex);
+        auto entry = _byPhase.extract(phase);
+        return entry.empty() ? std::set<ProcCounter::Owner>{} : std::move(entry.mapped());
+    }
+
+private:
+    static inline std::mutex _mutex;
+    static inline std::map<uint32, std::set<ProcCounter::Owner>> _byPhase;
+};
 
 class SummonCounter
 {
@@ -2358,7 +2389,11 @@ class GameplayCase
 public:
     GameplayCase(std::string runId, std::string resultPath, uint32 phase = CoAGameplay::LanePhase(0),
         CoAGameplay::NameAllocator* names = nullptr) : _phase(phase), _runId(std::move(runId)),
-        _resultPath(std::move(resultPath)), _names(names), _admitted(Clock::now()) { }
+        _resultPath(std::move(resultPath)), _names(names), _admitted(Clock::now())
+    {
+        if (_phase > PHASEMASK_NORMAL)
+            UnownedFixtureSummons::Begin(_phase);
+    }
 
     void PlaceInBatch(std::string const& batchId, uint32 sequence, std::string const& clock, uint32 lane)
     {
@@ -2863,12 +2898,22 @@ private:
             if (Player* player = actor.session ? actor.session->GetPlayer() : nullptr)
                 if (Map* map = player->FindMap())
                     fixtureRoots[map];
+        std::map<Map*, std::vector<Creature*>> unowned;
+        for (auto const& [mapId, instanceId, guid] : UnownedFixtureSummons::Take(_phase))
+            if (Map* map = sMapMgr->FindMap(mapId, instanceId))
+                if (Creature* creature = map->GetCreature(guid))
+                    if (creature->IsSummon() && creature->GetSummonerGUID().IsEmpty()
+                        && fixtureRoots[map].insert(guid).second)
+                    {
+                        unowned[map].push_back(creature);
+                        units.insert(ProcCounter::OwnerOf(creature));
+                    }
         for (auto& [map, parents] : fixtureRoots)
         {
             FixtureSummonCollector collector;
             TypeContainerVisitor<FixtureSummonCollector, MapStoredObjectTypesContainer> visitor(collector);
             visitor.Visit(map->GetObjectsStore());
-            std::vector<Creature*> descendants;
+            std::vector<Creature*> descendants = std::move(unowned[map]);
             bool added;
             do
             {
@@ -2881,14 +2926,6 @@ private:
                         added = true;
                     }
             } while (added);
-            if (_phase > PHASEMASK_NORMAL)
-                for (Creature* creature : collector.summons)
-                    if (creature->GetSummonerGUID().IsEmpty() && creature->GetPhaseMask() == _phase
-                        && parents.insert(creature->GetGUID()).second)
-                    {
-                        descendants.push_back(creature);
-                        units.insert(ProcCounter::OwnerOf(creature));
-                    }
             for (auto creature = descendants.rbegin(); creature != descendants.rend(); ++creature)
                 (*creature)->DespawnOrUnsummon();
         }
@@ -9197,13 +9234,13 @@ private:
                 ? player->GetMap()->SummonCreature(step.get<uint32>("entry"), position)
                 : player->SummonCreature(step.get<uint32>("entry"), position, TEMPSUMMON_MANUAL_DESPAWN);
             Require(creature != nullptr, "Could not summon creature: " + id);
+            _targets.emplace(id, Target{ creature->GetMapId(), creature->GetInstanceId(), creature->GetGUID() });
             creature->SetPhaseMask(player->GetPhaseMask(), true);
             if (auto aiAction = step.get_optional<int32>("ai_action"))
             {
                 Require(creature->AI() != nullptr, "Summoned creature has no AI for its action");
                 creature->AI()->DoAction(*aiAction);
             }
-            _targets.emplace(id, Target{ creature->GetMapId(), creature->GetInstanceId(), creature->GetGUID() });
             record.put("result", creature->GetCreatureTemplate()->Entry);
         }
         else if (action == "pet_stance")
@@ -10844,6 +10881,7 @@ public:
     void OnCreatureAddWorld(Creature* creature) override
     {
         SummonCounter::Record(creature);
+        UnownedFixtureSummons::Record(creature);
         if (creature)
             TimelineRecorder::Record(creature, { 0, CoAGameplay::TimelineEventKind::Spawn, creature->GetGUID(),
                 ObjectGuid::Empty, creature->GetEntry(), 0, 0 });

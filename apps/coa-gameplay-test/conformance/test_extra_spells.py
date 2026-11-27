@@ -1,4 +1,5 @@
 import json
+import shlex
 from pathlib import Path
 import struct
 import subprocess
@@ -108,7 +109,7 @@ class SourceParsersTest(unittest.TestCase):
                     '}};\n'
                     'inline constexpr std::array<ClassSpell, 3> ClassSpells = {{\n'
                     '    { 24, 10, 1001 },\n'
-                    '    { 24, 5, 1001 },\n'
+                    '    { 24u, 0b101, 0x3E9UL },\n'
                     '    { 19, 1, 2001 },\n'
                     '}};\n'
                 ),
@@ -145,6 +146,38 @@ class SourceParsersTest(unittest.TestCase):
 
             c_14 = server_candidates(root, 14, level=60)
             self.assertIn(1006, c_14)
+
+    def test_present_malformed_cpp_row_is_not_skipped(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = write_source_tree(Path(tmp), class_spells_h='ClassSpells = {{{24u, 1, SPELL_ID}}};')
+            with self.assertRaisesRegex(ExtraSpellsError, r'ClassSpells.*AscensionCustomClassData.h.*SPELL_ID'):
+                class_spells_table(root, required=True)
+
+    def test_replays_current_grant_sources(self):
+        self.assertIn(535598, server_candidates(REPOSITORY, 14, required=True))
+
+    def test_trainer_replay_keeps_nonclass_sources_and_respects_write_mode_and_where(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            columns = '`trainer_spell` (`TrainerId`, `SpellId`, `ReqLevel`)'
+            root = write_source_tree(Path(tmp), base_sql=(
+                f'INSERT INTO {columns} VALUES (10, 100, 1), (10, 400, 4), '
+                '(20, 100, 2), (20, 200, 3), (900024, 100, 8);'
+                'DELETE FROM `trainer_spell` WHERE (TrainerId = 10 OR TrainerId = 20) AND SpellId = 100;'
+                f'INSERT IGNORE INTO {columns} SELECT 900024, SpellId, ReqLevel FROM `trainer_spell` '
+                'WHERE TrainerId = 20 AND SpellId IN (100, 200) OR TrainerId = 10;'
+                f'INSERT IGNORE INTO {columns} SELECT 900024, 200, ReqLevel FROM `trainer_spell` WHERE TrainerId = 10;'
+                f'INSERT IGNORE INTO {columns} VALUES (900024, 200, 5);'
+                f'REPLACE INTO {columns} SELECT 900024, 300, ReqLevel FROM `trainer_spell` WHERE TrainerId = 20;'
+                f'REPLACE INTO {columns} VALUES (900024, 100, 9);'
+            ))
+            self.assertEqual(trainer_spells(root), {24: {100: 9, 200: 3, 300: 3, 400: 4}})
+
+    def test_trainer_replay_reports_unsupported_update_with_source(self):
+        sql = 'UPDATE `trainer_spell` SET ReqLevel = 20 WHERE TrainerId = 900024'
+        with tempfile.TemporaryDirectory() as tmp:
+            root = write_source_tree(Path(tmp), pending_world={'rank.sql': sql + ';'})
+            with self.assertRaisesRegex(ExtraSpellsError, f'rank.sql: {sql}'):
+                trainer_spells(root)
 
     def test_trainer_sql_replay_handles_insert_replace_delete_and_select(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -268,6 +301,7 @@ class ValidationAndAuditTest(unittest.TestCase):
                     {0: 104, 38: 1, 136: 'Excluded Buff'},
                     {0: 6603, 38: 1, 136: 'Attack'},
                     {0: 105, 38: 1, 136: 'CA Base', 153: 'Rank 2'},
+                    {0: 108, 38: 1, 136: 'CA Base'},
                     {0: 106, 4: PASSIVE_ATTRIBUTE, 38: 1, 136: 'Unaccounted Passive'},
                     {0: 107, 4: PASSIVE_ATTRIBUTE, 38: 1, 136: 'Unaccounted Passive'},
                     {0: 552011, 4: PASSIVE_ATTRIBUTE, 38: 1, 136: 'Resilient Constitution'},
@@ -280,7 +314,7 @@ class ValidationAndAuditTest(unittest.TestCase):
                 root,
                 progression='{ 24, 100, 101, 10 },\n{ 24, 106, 107, 15 },\n',
                 class_spells_h=(
-                    'inline constexpr std::array<ClassSpell, 10> ClassSpells = {{\n'
+                    'inline constexpr std::array<ClassSpell, 11> ClassSpells = {{\n'
                     '    { 24, 1, 100 },\n'
                     '    { 24, 10, 101 },\n'
                     '    { 24, 1, 102 },\n'
@@ -288,6 +322,7 @@ class ValidationAndAuditTest(unittest.TestCase):
                     '    { 24, 1, 104 },\n'
                     '    { 24, 1, 6603 },\n'
                     '    { 24, 12, 105 },\n'
+                    '    { 24, 1, 108 },\n'
                     '    { 24, 1, 106 },\n'
                     '    { 24, 15, 107 },\n'
                     '    { 24, 1, 552011 },\n'
@@ -312,7 +347,7 @@ class ValidationAndAuditTest(unittest.TestCase):
                 'excluded': 1,
                 'stock_generic': 1,
                 'unchained_ranks': 1,
-                'unaccounted': 2,
+                'unaccounted': 3,
             })
             self.assertEqual([row['spell'] for row in report['excluded']], [104])
             self.assertEqual([row['spell'] for row in report['stock_generic']], [6603])
@@ -321,7 +356,7 @@ class ValidationAndAuditTest(unittest.TestCase):
                 'sources': ['ClassSpells(L12)'], 'log_casts': 2, 'log_other_events': 0,
             }])
             unaccounted = {row['spell']: row for row in report['unaccounted']}
-            self.assertEqual(set(unaccounted), {106, 552011})
+            self.assertEqual(set(unaccounted), {106, 108, 552011})
             self.assertEqual(unaccounted[106]['max_rank'], 107)
             self.assertEqual(unaccounted[106]['ranks'], 2)
             self.assertTrue(unaccounted[106]['passive'])
@@ -409,6 +444,38 @@ class ExtraSpellsCliAndGateTest(unittest.TestCase):
         class_path.write_text(json.dumps(class_file), encoding='utf-8')
         return root, dbc_dir, class_path, class_file
 
+    def test_audit_cli_diagnoses_invalid_documents_and_missing_logs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, dbc_dir, class_path, class_file = self._fixture(tmp)
+            command = ['audit-extra', '--class', '24', '--class-file', str(class_path)]
+            with mock.patch.object(batch_commands, 'server_dbc_dir', return_value=dbc_dir), \
+                 mock.patch('sys.stderr') as stderr:
+                for document in (None, [], {'class_id': None}, {'class_id': 24.5}, {'class_id': True}):
+                    with self.subTest(document=document):
+                        class_path.write_text(json.dumps(document), encoding='utf-8')
+                        stderr.reset_mock()
+                        self.assertEqual(conformance.main(command), 2)
+                        self.assertIn('No extra-spells audit:', stderr.write.call_args_list[0].args[0])
+                class_path.write_text(json.dumps(class_file), encoding='utf-8')
+                self.assertEqual(conformance.main(command + [
+                    '--source-root', str(root), '--log-events', str(root / 'missing.csv')]), 2)
+                self.assertIn('missing.csv', stderr.write.call_args_list[-2].args[0])
+
+    def test_missing_dbc_grant_stops_audit_and_ledger_even_with_override(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, dbc_dir, _, class_file = self._fixture(tmp)
+            write_source_tree(root, class_spells_h='ClassSpells = {{{24, 1, 999999u}}};')
+            with self.assertRaisesRegex(ExtraSpellsError, r'999999 \(ClassSpells\(L1\)\)'):
+                audit_extra_spells(class_file, dbc_dir, root)
+            with mock.patch.object(conformance, 'load_class_file', return_value=class_file), \
+                 mock.patch.object(conformance, 'server_dbc_dir', return_value=dbc_dir), \
+                 mock.patch.object(conformance, 'ledger') as ledger, mock.patch('sys.stderr'):
+                self.assertEqual(conformance.main([
+                    'ledger', '--class', '24', '--out', str(root / 'ledger.json'), '--source-root', str(root),
+                    '--allow-unaccounted-extra',
+                ]), 2)
+                ledger.assert_not_called()
+
     def test_audit_extra_cli_strict_and_non_strict_exit_codes(self):
         with tempfile.TemporaryDirectory() as tmp:
             root, dbc_dir, class_path, _ = self._fixture(tmp)
@@ -433,7 +500,7 @@ class ExtraSpellsCliAndGateTest(unittest.TestCase):
             self.assertEqual(json.loads(out_path.read_text(encoding='utf-8'))['counts']['unaccounted'], 1)
 
     def test_ledger_gate_refuses_unaccounted_and_allows_override(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(prefix='source root ') as tmp:
             root, dbc_dir, _, class_file = self._fixture(tmp)
             ledger_out = root / 'out_clauses.json'
             with mock.patch.object(conformance, 'load_class_file', return_value=class_file), \
@@ -446,7 +513,9 @@ class ExtraSpellsCliAndGateTest(unittest.TestCase):
                 self.assertEqual(refused, 2)
                 mock_ledger.assert_not_called()
                 self.assertFalse(ledger_out.exists())
-                fake_err.write.assert_called()
+                hint = fake_err.write.call_args_list[0].args[0].split('run ', 1)[1].split(' and add each')[0]
+                self.assertEqual(shlex.split(hint), ['conformance.py', 'audit-extra', '--class', '24',
+                                                    '--source-root', str(root), '--dbc-dir', str(dbc_dir)])
 
             fake_written = mock.Mock(entries=[{'spell': 100, 'kind': 'claim'}], unlabelled={})
             with mock.patch.object(conformance, 'load_class_file', return_value=class_file), \
@@ -460,7 +529,7 @@ class ExtraSpellsCliAndGateTest(unittest.TestCase):
                     '--allow-unaccounted-extra',
                 ])
             self.assertEqual(allowed, 0)
-            mock_ledger.assert_called_once()
+            mock_ledger.assert_called_once_with(class_file, dbc_dir, {}, updates=root / 'data/sql/updates')
             mock_write.assert_called_once_with(fake_written.entries, ledger_out)
 
     def test_ledger_gate_uses_local_progression_header_for_non_default_source_root(self):
