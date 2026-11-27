@@ -10,8 +10,10 @@ from profile import DBC_DIR
 
 SNAPSHOTS_DIR = Path(__file__).resolve().parent / 'snapshots'
 TOOL = 'apps/coa-gameplay-test/conformance/'
-FINISHED_CLASSES = {19: 'templar', 23: 'necromancer'}
-GENERATIONS = {19: {'all': [], 'stack': ['--stack']}, 23: {'all': []}}
+FINISHED_CLASSES = {13: 'witch_doctor', 14: 'felsworn', 15: 'witch_hunter', 19: 'templar',
+                    23: 'necromancer', 25: 'cultist', 27: 'sun_cleric'}
+GENERATIONS = {13: {'all': []}, 14: {'all': []}, 15: {'all': []}, 19: {'all': [], 'stack': ['--stack']},
+               23: {'all': []}, 25: {'all': []}, 27: {'all': []}}
 SHOWN = 20
 SCHEMA = 1
 
