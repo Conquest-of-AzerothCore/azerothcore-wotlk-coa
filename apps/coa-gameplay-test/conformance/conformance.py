@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
-from shlex import quote
+import shlex
 import subprocess
 import sys
 import time
@@ -612,16 +612,24 @@ def ledger_command(args) -> int:
     except ExtraSpellsError as error:
         print(f'Refusing ledger for class {args.class_id}: {error}', file=sys.stderr)
         return 2
+    recovery = (f'conformance.py audit-extra --class {args.class_id} '
+                f'--source-root {shlex.quote(str(args.source_root))} '
+                f'--dbc-dir {shlex.quote(str(dbc_dir))}')
+    if report['missing_dbc']:
+        preview = ', '.join(str(entry['spell']) for entry in report['missing_dbc'][:10])
+        suffix = f", ... ({len(report['missing_dbc']) - 10} more)" if len(report['missing_dbc']) > 10 else ''
+        print(f"Refusing ledger for class {args.class_id}: {len(report['missing_dbc'])} server-granted spells "
+              f"missing from Spell.dbc ({preview}{suffix}); run {recovery}", file=sys.stderr)
+        return 2
     if report['unaccounted'] and not args.allow_unaccounted_extra:
         preview = ', '.join(f"{entry['spell']} {entry['name']}" for entry in report['unaccounted'][:10])
         suffix = f", ... ({len(report['unaccounted']) - 10} more)" if len(report['unaccounted']) > 10 else ''
         print(f"Refusing ledger for class {args.class_id}: {len(report['unaccounted'])} unaccounted server-granted "
-              f"spells ({preview}{suffix}); run conformance.py audit-extra --class {args.class_id} "
-              f"--source-root {quote(str(args.source_root))} --dbc-dir {quote(str(dbc_dir))} and add each to "
+              f"spells ({preview}{suffix}); run {recovery} and add each to "
               f"extra_spells or excluded_extra_spells (or pass --allow-unaccounted-extra)", file=sys.stderr)
         return 2
-    written = ledger(class_file, dbc_dir, parse_text_bases(args.text_basis),
-                     updates=args.source_root / UPDATES_ROOT / 'updates')
+    updates = Path(args.source_root) / UPDATES_ROOT / 'updates'
+    written = ledger(class_file, dbc_dir, parse_text_bases(args.text_basis), updates)
     entries = written.entries
     clause_coverage(entries, [])
     write_ledger(entries, args.out)

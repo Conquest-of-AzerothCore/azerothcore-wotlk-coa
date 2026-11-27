@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Level 60 battlegrounds pay Battleground Spoils and the first win of the day 500 arena points",
-  "contract": "With Call to Arms off, one Alliance and one Horde level 60 player finish Warsong Gulch twice on the same day, Alliance winning both. The winner is paid Classic Battleground 60 (Win): Battleground Spoils (Win) 1175640 and 1000 of 375250, with 500 arena points for the first win of the day and 200 for the next. The loser is paid Classic Battleground 60 (Loss): Battleground Spoils (Loss) 1675640, 400 of 375250 and 100 arena points for each loss.",
+  "name": "Level 60 battlegrounds pay Battleground Spoils, 500 arena points per win, 200 per loss and 50 Glory per win",
+  "contract": "With Call to Arms off, one Alliance and one Horde level 60 player finish Warsong Gulch twice on the same day, Alliance winning both. The winner is paid Classic Battleground 60 (Win): Battleground Spoils (Win) 1175640, 1000 of 375250 and 500 arena points for every win; the loser is paid Classic Battleground 60 (Loss): Battleground Spoils (Loss) 1675640, 400 of 375250 and 200 arena points for every loss (live CoA quests 190005 and 190012: AscensionDB captures 2026-08-31 and 2026-09-04, SUB dump 2026-10-04, Rexxar WDB 2026-09-05). There is no first-win-of-the-day bonus. Each award is announced as \"You've received N Arena Points.\". Every player of the winning team gains 50 Glory per win, announced with the Glory still needed for the next rank; the losing team gains none.",
   "timeout_ms": 600000,
   "location": {
     "map": 0,
@@ -179,10 +179,38 @@
     },
     {
       "action": "assert",
-      "label": "The first win of the day pays 500 arena points",
+      "label": "A win pays 500 arena points",
       "actor": "alliance",
       "metric": "arena_points",
       "equals": 500,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The winner is told about the 500 arena points",
+      "actor": "alliance",
+      "metric": "system_message_contains",
+      "text": "You've received 500 Arena Points.",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The win adds 50 Glory",
+      "actor": "alliance",
+      "metric": "player_setting",
+      "source": "core.coa_glory",
+      "index": 0,
+      "equals": 50,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The win Glory is announced",
+      "actor": "alliance",
+      "metric": "system_message_contains",
+      "text": "You gained 50 Glory. 200 Glory needed to reach the next rank.",
+      "min": 1,
       "within_ms": 5000
     },
     {
@@ -205,10 +233,29 @@
     },
     {
       "action": "assert",
-      "label": "The loser gets 100 arena points",
+      "label": "A loss pays 200 arena points",
       "actor": "horde",
       "metric": "arena_points",
-      "equals": 100,
+      "equals": 200,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The loser is told about the 200 arena points",
+      "actor": "horde",
+      "metric": "system_message_contains",
+      "text": "You've received 200 Arena Points.",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A loss adds no Glory",
+      "actor": "horde",
+      "metric": "player_setting",
+      "source": "core.coa_glory",
+      "index": 0,
+      "equals": 0,
       "within_ms": 5000
     },
     {
@@ -416,10 +463,29 @@
     },
     {
       "action": "assert",
-      "label": "The second win of the day adds 200 arena points",
+      "label": "The second win of the day adds another 500 arena points",
       "actor": "alliance",
       "metric": "arena_points",
-      "equals": 700,
+      "equals": 1000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The second win adds another 50 Glory",
+      "actor": "alliance",
+      "metric": "player_setting",
+      "source": "core.coa_glory",
+      "index": 0,
+      "equals": 100,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The second win Glory is announced",
+      "actor": "alliance",
+      "metric": "system_message_contains",
+      "text": "You gained 50 Glory. 150 Glory needed to reach the next rank.",
+      "min": 1,
       "within_ms": 5000
     },
     {
@@ -433,10 +499,20 @@
     },
     {
       "action": "assert",
-      "label": "The second loss adds 100 arena points",
+      "label": "The second loss adds another 200 arena points",
       "actor": "horde",
       "metric": "arena_points",
-      "equals": 200,
+      "equals": 400,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The second loss adds no Glory",
+      "actor": "horde",
+      "metric": "player_setting",
+      "source": "core.coa_glory",
+      "index": 0,
+      "equals": 0,
       "within_ms": 5000
     }
   ]

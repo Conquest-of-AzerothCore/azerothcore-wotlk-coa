@@ -928,25 +928,54 @@ public:
         _byPhase.try_emplace(phase);
     }
 
+    static void TrackPhase(uint32 phase, uint32 newPhase)
+    {
+        if (newPhase <= PHASEMASK_NORMAL || newPhase == phase)
+            return;
+        std::lock_guard lock(_mutex);
+        if (auto itr = _byPhase.find(phase); itr != _byPhase.end())
+            itr->second.additionalPhases.insert(newPhase);
+    }
+
     static void Record(Creature const* creature)
     {
         if (!creature || !creature->IsSummon() || !creature->GetSummonerGUID().IsEmpty())
             return;
         std::lock_guard lock(_mutex);
-        if (auto itr = _byPhase.find(creature->GetPhaseMask()); itr != _byPhase.end())
-            itr->second.insert(ProcCounter::OwnerOf(creature));
+        uint32 const phase = creature->GetPhaseMask();
+        if (auto itr = _byPhase.find(phase); itr != _byPhase.end())
+        {
+            itr->second.summons.insert(ProcCounter::OwnerOf(creature));
+            return;
+        }
+        TrackedCase* owner = nullptr;
+        for (auto& [casePhase, tracked] : _byPhase)
+            if (tracked.additionalPhases.contains(phase))
+            {
+                if (owner)
+                    return;
+                owner = &tracked;
+            }
+        if (owner)
+            owner->summons.insert(ProcCounter::OwnerOf(creature));
     }
 
     static std::set<ProcCounter::Owner> Take(uint32 phase)
     {
         std::lock_guard lock(_mutex);
         auto entry = _byPhase.extract(phase);
-        return entry.empty() ? std::set<ProcCounter::Owner>{} : std::move(entry.mapped());
+        return entry.empty() ? std::set<ProcCounter::Owner>{} : std::move(entry.mapped().summons);
     }
 
 private:
+    struct TrackedCase
+    {
+        std::set<uint32> additionalPhases;
+        std::set<ProcCounter::Owner> summons;
+    };
+
     static inline std::mutex _mutex;
-    static inline std::map<uint32, std::set<ProcCounter::Owner>> _byPhase;
+    static inline std::map<uint32, TrackedCase> _byPhase;
 };
 
 class SummonCounter
@@ -8814,7 +8843,11 @@ private:
                 player->GetSession()->HandleOpenItemOpcode(request);
         }
         else if (action == "set_phase")
-            player->SetPhaseMask(step.get<uint32>("value", _phase), true);
+        {
+            uint32 const newPhase = step.get<uint32>("value", _phase);
+            UnownedFixtureSummons::TrackPhase(_phase, newPhase);
+            player->SetPhaseMask(newPhase, true);
+        }
         else if (action == "set_money")
             player->SetMoney(step.get<uint32>("value"));
         else if (action == "add_at_login_flag")

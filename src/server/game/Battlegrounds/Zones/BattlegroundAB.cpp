@@ -20,6 +20,7 @@
 #include "Creature.h"
 #include "GameGraveyard.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 #include "Util.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -78,6 +79,7 @@ void BattlegroundAB::PostUpdateImpl(uint32 diff)
                         _capturePointInfo[node]._captured = true;
 
                         CreateBanner(node, false);
+                        sScriptMgr->OnBattlegroundNodeCaptured(this, teamId);
                         NodeOccupied(node);
                         SendNodeUpdate(node);
 

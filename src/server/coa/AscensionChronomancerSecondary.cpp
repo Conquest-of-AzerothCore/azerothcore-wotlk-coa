@@ -449,14 +449,20 @@ class aura_ascension_aeon_rend : public AuraScript
 
     bool Validate(SpellInfo const*) override { return ValidateSpellInfo({SPELL_CHROMATIC_SHARD}); }
 
+    bool CheckProc(ProcEventInfo& event)
+    {
+        SpellInfo const* shard = event.GetSpellInfo();
+        return shard && IsChromaticShardRank(shard->Id);
+    }
+
     void Restrike(AuraEffect const* effect, ProcEventInfo& event)
     {
         PreventDefaultAction();
         Unit* target = event.GetActionTarget();
         SpellInfo const* shard = event.GetSpellInfo();
-        if (!target || !shard)
+        if (!target || !shard || !IsChromaticShardRank(shard->Id))
             return;
-        uint32 const shardRank = IsChromaticShardRank(shard->Id) ? shard->Id : uint32(SPELL_CHROMATIC_SHARD);
+        uint32 const shardRank = shard->Id;
         Unit* owner = GetTarget();
         owner->CastSpell(target, shardRank, true, nullptr, effect);
         if (Player* player = owner->ToPlayer(); player && !player->GetSpellCooldownDelay(shardRank))
@@ -465,6 +471,7 @@ class aura_ascension_aeon_rend : public AuraScript
 
     void Register() override
     {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_aeon_rend::CheckProc);
         OnEffectProc += AuraEffectProcFn(aura_ascension_aeon_rend::Restrike, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 };

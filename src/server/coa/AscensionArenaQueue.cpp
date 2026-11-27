@@ -7,6 +7,7 @@
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "AscensionCompatOpcodes.h"
+#include "AscensionConquest.h"
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
 #include "BattlegroundQueue.h"
@@ -1512,6 +1513,12 @@ namespace
             return false;
         }
     };
+}
+
+void AscensionConquest::AnnounceArenaPoints(Player* player, uint32 points)
+{
+    ChatHandler(player->GetSession()).PSendSysMessage(
+        "You've received {} Arena Points. Current Points: ({})", points, player->GetArenaPoints());
 }
 
 void AddAscensionArenaQueueScripts()

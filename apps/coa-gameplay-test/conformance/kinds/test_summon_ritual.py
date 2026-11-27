@@ -158,6 +158,16 @@ class DirectSummonRitualTests(unittest.TestCase):
         power_steps = [step for step in scenario['steps'] if step['action'] == 'set_power']
         self.assertEqual(power_steps, [{'action': 'set_power', 'actor': CASTER, 'power': 0, 'value': 5000}])
 
+    def test_direct_ritual_propagates_default_and_custom_location(self):
+        self.assertEqual(self.scenario['location'], {'map': 0, 'x': -9458.0, 'y': 42.0, 'z': 55.5})
+        custom_location = {'map': 1, 'x': 100.0, 'y': 200.0, 'z': 10.5}
+        custom_faraway = {'map': 1, 'x': 250.0, 'y': 350.0, 'z': 12.0}
+        scenario, _ = behaviour_scenario(load_class_file(25),
+                                         {**DIRECT_ENTRY, 'location': custom_location,
+                                          'faraway_location': custom_faraway})
+        run.validate(scenario)
+        self.assertEqual(scenario['location'], custom_location)
+
     def test_complete_direct_ritual_passes(self):
         self.assertEqual(self.judged().status, 'ok')
 

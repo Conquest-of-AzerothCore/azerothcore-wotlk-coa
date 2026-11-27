@@ -1,9 +1,7 @@
-from dataclasses import dataclass
 import unittest
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
-from metric_delta_options import area_sum
 from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
@@ -84,32 +82,6 @@ class AreaSumTests(unittest.TestCase):
         self.assertEqual(judged((0, 0, 0), (1, 0, 0)), 'alert')
         self.assertEqual(judged((0, 1, 0), (1, 1, 0)), 'alert')
         self.assertEqual(judged((0, 0, 0), (1, 1, None)), 'alert')
-
-
-@dataclass(frozen=True)
-class AreaVerdict:
-    status: str = 'ok'
-    explanation: str = ''
-
-
-class AreaSingleHitTests(unittest.TestCase):
-    def test_secondary_hits_must_land_on_three_distinct_recipients(self):
-        areas = ['area1', 'area2', 'area3', 'area4']
-        model = {'additional_single_hits': 3, 'areas': areas, 'before': 'before', 'after': 'after'}
-        values = {f'before {area}': 0 for area in areas}
-
-        def status(distribution, primary_status='ok'):
-            after = {f'after {area}': count for area, count in zip(areas, distribution) if count is not None}
-            return area_sum.verdict(AreaVerdict(primary_status), FakeRun(values | after), model).status
-
-        self.assertEqual(status([1, 1, 1, 0]), 'ok')
-        self.assertEqual(status([0, 1, 1, 1]), 'ok')
-        self.assertEqual(status([2, 1, 0, 0]), 'alert')
-        self.assertEqual(status([1, 1, 1, 1]), 'alert')
-        self.assertEqual(status([1, 1, 1, None]), 'unmeasured')
-        self.assertEqual(status([1, 1, 1, 0], primary_status='alert'), 'alert')
-        values['before area1'] = 1
-        self.assertEqual(status([1, 1, 1, 0]), 'alert')
 
 
 if __name__ == '__main__':
