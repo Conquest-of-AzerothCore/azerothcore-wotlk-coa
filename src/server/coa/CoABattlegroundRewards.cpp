@@ -3,6 +3,7 @@
  */
 
 #include "AllBattlegroundScript.h"
+#include "AscensionConquest.h"
 #include "Battleground.h"
 #include "CoABattlegroundRewardsPolicy.h"
 #include "ObjectMgr.h"
@@ -26,11 +27,9 @@ public:
         if (!quest)
             return;
 
-        uint32 const bonus = CoABattlegroundRewardsPolicy::FirstWinOfDayBonusFor(level, won,
-            player->SatisfyQuestDay(quest, false));
         player->RewardQuest(quest, 0, nullptr, false, true);
-        if (bonus)
-            player->ModifyArenaPoints(bonus);
+        if (int32 const arenaPoints = quest->GetRewArenaPoints(); arenaPoints > 0)
+            AscensionConquest::AnnounceArenaPoints(player, uint32(arenaPoints));
     }
 };
 

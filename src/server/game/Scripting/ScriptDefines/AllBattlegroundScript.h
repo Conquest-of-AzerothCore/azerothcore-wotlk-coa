@@ -45,6 +45,7 @@ enum AllBattlegroundHook
     ALLBATTLEGROUNDHOOK_CAN_ADD_GROUP_TO_MATCHING_POOL,
     ALLBATTLEGROUNDHOOK_GET_PLAYER_MATCHMAKING_RATING,
     ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_UPDATE_PLAYER_SCORE,
+    ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_NODE_CAPTURED,
     ALLBATTLEGROUNDHOOK_END
 };
 
@@ -157,6 +158,14 @@ public:
      * @param value The amount added to the score
      */
     virtual void OnBattlegroundUpdatePlayerScore(Battleground* /*bg*/, Player* /*player*/, uint32 /*type*/, uint32 /*value*/) { }
+
+    /**
+     * @brief This hook runs when a team completes the capture of a battleground node
+     *
+     * @param bg Contains information about the Battleground
+     * @param teamId The team that now owns the node
+     */
+    virtual void OnBattlegroundNodeCaptured(Battleground* /*bg*/, TeamId /*teamId*/) { }
 
     /**
      * @brief This hook runs before adding a group to the battleground matching pool

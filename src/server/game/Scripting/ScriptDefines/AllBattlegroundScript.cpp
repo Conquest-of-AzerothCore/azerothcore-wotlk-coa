@@ -114,6 +114,11 @@ void ScriptMgr::OnBattlegroundUpdatePlayerScore(Battleground* bg, Player* player
     CALL_ENABLED_HOOKS(AllBattlegroundScript, ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_UPDATE_PLAYER_SCORE, script->OnBattlegroundUpdatePlayerScore(bg, player, type, value));
 }
 
+void ScriptMgr::OnBattlegroundNodeCaptured(Battleground* bg, TeamId teamId)
+{
+    CALL_ENABLED_HOOKS(AllBattlegroundScript, ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_NODE_CAPTURED, script->OnBattlegroundNodeCaptured(bg, teamId));
+}
+
 bool ScriptMgr::CanAddGroupToMatchingPool(BattlegroundQueue* queue, GroupQueueInfo* group, uint32 poolPlayerCount, Battleground* bg, BattlegroundBracketId bracketId)
 {
     CALL_ENABLED_BOOLEAN_HOOKS(AllBattlegroundScript, ALLBATTLEGROUNDHOOK_CAN_ADD_GROUP_TO_MATCHING_POOL, !script->CanAddGroupToMatchingPool(queue, group, poolPlayerCount, bg, bracketId));
