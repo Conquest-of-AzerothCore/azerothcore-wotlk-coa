@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Blackrock Caverns: Corla's Nether Beams come from the netherdrake corpse, not from Corla (#13820)",
+  "contract": [
+    "#13820: Corla, Herald of Twilight 39679 drains the essence of the netherdrake corpse hanging above her room and",
+    "channels it into the kneeling Twilight Zealots 50284. Each beam is cast by a Nether Beam NPC 5011005, and the",
+    "soak line runs from that NPC to its zealot. The script summoned the beam NPCs on Corla herself, so the beams came",
+    "from the boss. Her out-of-combat Drain Essence already targets the corpse's invisible stalker 39842 (guid",
+    "6450039) at (573.60, 910.01, 180.34); the beam NPCs now stand there. The player waits beside the zealots, where",
+    "the issue was reported, 66.6 yd (2D) from the corpse point and about 14 yd from Corla. The nearest beam NPC must",
+    "be at the corpse distance; a beam on Corla would be about 14 yd away."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 645, "x": 582.5, "y": 976.0, "z": 155.4, "o": 1.5, "ignore_access": true},
+  "players": [
+    {"id": "player", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "The player joins world phase 1, where the dungeon spawns live",
+      "actor": "player", "value": 1 },
+    {"action": "set_health", "actor": "player", "value": 50000000, "maximum": 50000000},
+    { "action": "assert", "label": "CONTROL: two kneeling zealots on Normal", "actor": "player",
+      "metric": "nearby_creature_count", "entry": 50284, "equals": 2, "within_ms": 10000 },
+    { "action": "assert", "label": "DISCRIMINATING: the nearest Nether Beam stands at the netherdrake corpse",
+      "actor": "player", "metric": "nearest_creature_distance", "entry": 5011005, "radius": 100, "min": 63,
+      "max": 70, "within_ms": 5000 }
+  ]
+}

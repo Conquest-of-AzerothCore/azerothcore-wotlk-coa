@@ -224,6 +224,8 @@ std::array<Position, 3> const CorlaZealotPos =
     { 573.4844f, 978.5851f, 155.4369f, 1.570796f }
 } };
 
+Position const CorlaNetherDrakePos = { 573.602f, 910.006f, 180.339f, 0.0f };
+
 Position const LavaFountainPos = { 237.2951f, 784.7761f, 95.99241f };
 
 Position const LuckyPos = { 116.337f, 567.625f, 76.4501f, 3.49996f };
@@ -989,9 +991,7 @@ struct boss_coa_brc_corla : public BossAI
             if (!zealot)
                 continue;
             _zealots.push_back(zealot->GetGUID());
-            Position beamPos = me->GetPosition();
-            beamPos.m_positionZ += 2.0f;
-            if (Creature* beam = me->SummonCreature(NPC_NETHER_BEAM, beamPos, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* beam = me->SummonCreature(NPC_NETHER_BEAM, CorlaNetherDrakePos, TEMPSUMMON_MANUAL_DESPAWN))
                 beam->AI()->SetGUID(zealot->GetGUID(), 0);
         }
     }
