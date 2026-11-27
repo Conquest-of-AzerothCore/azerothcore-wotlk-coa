@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "name": "Class buffs: Fire Protection and Inscription: Fire count once for Fire resistance (#13208)",
+  "contract": [
+    "#13208: resistance buffs of different classes stack. Fire Protection rank 3 582535 (Guardian, class 18,",
+    "SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE Fire, base points 59: +60) and Inscription: Fire 561250 (Runemaster,",
+    "class 32, the same aura and amount) are two classes' Fire resistance buffs on one ally; the aura keeps",
+    "only the highest amount per school, so the resistance does not add up. Neither chain is in a CoA class",
+    "category, so a resistance buff keeps its other effects. Expected: on a grouped warrior ally both buffs",
+    "stay and Fire resistance rises by 60, not 120."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "runemaster",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "runemaster"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 582535
+    },
+    {
+      "action": "learn",
+      "actor": "runemaster",
+      "spell": 561250
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "resistance",
+      "save_as": "alone",
+      "school": 2
+    },
+    {
+      "action": "cast",
+      "label": "Fire Protection on the ally",
+      "actor": "guardian",
+      "spell": 582535,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Fire Protection",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 582535,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Fire Protection applies its DBC amount",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 582535,
+      "effect": 0,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "label": "Fire Protection raises Fire resistance by 60",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 60,
+      "max": 60,
+      "school": 2
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Inscription: Fire on the ally",
+      "actor": "runemaster",
+      "spell": 561250,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Inscription: Fire",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 561250,
+      "caster": "runemaster",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Fire Protection stays next to Inscription: Fire",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 582535,
+      "caster": "guardian",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the two buffs count once, Fire resistance rose by 60",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 60,
+      "max": 60,
+      "school": 2
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Fire Protection again on the ally",
+      "actor": "guardian",
+      "spell": 582535,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Fire Protection again",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 582535,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a refreshed Fire Protection leaves Inscription: Fire in place",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 561250,
+      "caster": "runemaster",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Fire resistance still rose by 60 only",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 60,
+      "max": 60,
+      "school": 2
+    }
+  ]
+}

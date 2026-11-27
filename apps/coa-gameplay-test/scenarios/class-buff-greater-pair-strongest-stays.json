@@ -1,0 +1,303 @@
+{
+  "schema": 1,
+  "name": "Class buffs: a weaker rank cannot replace a Greater resistance buff of the same family",
+  "contract": [
+    "Resistance buffs use SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE (aura 143), which the engine already counts once",
+    "per school (the highest amount), so they are in no cross-class category. Within one family, Greater and",
+    "ordinary forms keep the strongest buff, as the Necromancer Mandates do (#6086): spell_group 2106092 holds",
+    "Inscription: Fire 561248/561249/561250 and Greater 561251 (Runemaster, class 32), 2106093 holds Fire",
+    "Protection 582533 ranks and Greater 582536 (Guardian, class 18), both rule 4",
+    "(SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST). Amounts: rank 1 561248 base points 29 (+30), 561250 and both",
+    "Greater forms base points 59 (+60). Expected on a grouped warrior ally: a weaker cast from another caster",
+    "of the same class is refused and the Greater buff stays; an equal cast replaces it; a buff from another",
+    "class applies next to it. Fire resistance stays at +60."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rune_a",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    },
+    {
+      "id": "rune_b",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    },
+    {
+      "id": "guard_a",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "guard_b",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "rune_a",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "rune_a",
+      "target": "rune_b"
+    },
+    {
+      "action": "group",
+      "actor": "rune_a",
+      "target": "guard_a"
+    },
+    {
+      "action": "group",
+      "actor": "rune_a",
+      "target": "guard_b"
+    },
+    {
+      "action": "learn",
+      "actor": "rune_b",
+      "spell": 561251
+    },
+    {
+      "action": "learn",
+      "actor": "rune_a",
+      "spell": 561248
+    },
+    {
+      "action": "learn",
+      "actor": "guard_b",
+      "spell": 582536
+    },
+    {
+      "action": "learn",
+      "actor": "guard_a",
+      "spell": 582533
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "resistance",
+      "save_as": "alone",
+      "school": 2
+    },
+    {
+      "action": "cast",
+      "label": "Greater Inscription: Fire on the party",
+      "actor": "rune_b",
+      "spell": 561251
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Greater Inscription: Fire",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 561251,
+      "caster": "rune_b",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Greater Inscription: Fire raises Fire resistance by 60",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 60,
+      "max": 60,
+      "school": 2
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "A weaker Inscription: Fire from another Runemaster",
+      "actor": "rune_a",
+      "spell": 561248,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the weaker Inscription: Fire is refused",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 561248,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Greater Inscription: Fire stays",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 561251,
+      "caster": "rune_b",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fire resistance stays at 60 after the weaker cast",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 60,
+      "max": 60,
+      "school": 2
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rune_a",
+      "spell": 561250
+    },
+    {
+      "action": "cast",
+      "label": "An equal Inscription: Fire from another Runemaster",
+      "actor": "rune_a",
+      "spell": 561250,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "The equal Inscription: Fire applies",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 561250,
+      "caster": "rune_a",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The equal Inscription: Fire replaces the Greater one",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 561251,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Fire resistance stays at 60 after the equal cast",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 60,
+      "max": 60,
+      "school": 2
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Greater Fire Protection on the party",
+      "actor": "guard_b",
+      "spell": 582536
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Greater Fire Protection",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 582536,
+      "caster": "guard_b",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Inscription: Fire from another class stays next to it",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 561250,
+      "caster": "rune_a",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The engine counts only the highest Fire resistance: still 60",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 60,
+      "max": 60,
+      "school": 2
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "A weaker Fire Protection from another Guardian",
+      "actor": "guard_a",
+      "spell": 582533,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the weaker Fire Protection is refused",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 582533,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Greater Fire Protection stays",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 582536,
+      "caster": "guard_b",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fire resistance stays at 60 after the weaker Fire Protection",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 60,
+      "max": 60,
+      "school": 2
+    }
+  ]
+}

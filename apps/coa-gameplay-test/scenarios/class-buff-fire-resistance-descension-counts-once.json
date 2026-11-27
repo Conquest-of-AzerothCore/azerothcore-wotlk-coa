@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "Class buffs: Descension of Ragnaros and Fire Protection count once for Fire resistance",
+  "contract": [
+    "Class reviewer feedback 2026-11-22 (PR #13237): Descension of Ragnaros belongs with the Fire resistance",
+    "buffs, and Legionfel Pact stays out because of its curse and magic resistance. Descension of Ragnaros",
+    "1119901 (Pyromancer, class 24) is an endless raid area aura of SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE Fire,",
+    "+30; Fire Protection rank 3 582535 (Guardian, class 18) is the same aura, +60, for 30 minutes. The aura",
+    "keeps only the highest amount per school, so neither needs a spell_group and neither loses its aura.",
+    "Expected: on a grouped warrior ally Descension raises Fire resistance by 30, Fire Protection lifts it to",
+    "60 rather than 90, and both auras stay."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "pyromancer",
+      "race": 1,
+      "class": 24,
+      "level": 60
+    },
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "pyromancer",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "pyromancer",
+      "target": "guardian"
+    },
+    {
+      "action": "learn",
+      "actor": "pyromancer",
+      "spell": 1119901
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 582535
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "resistance",
+      "save_as": "alone",
+      "school": 2
+    },
+    {
+      "action": "cast",
+      "label": "The Pyromancer takes on Descension of Ragnaros",
+      "actor": "pyromancer",
+      "spell": 1119901
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Descension of Ragnaros aura reaches the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1119901,
+      "caster": "pyromancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Descension of Ragnaros raises Fire resistance by 30",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 30,
+      "max": 30,
+      "school": 2
+    },
+    {
+      "action": "cast",
+      "label": "Fire Protection on the ally",
+      "actor": "guardian",
+      "spell": 582535,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Fire Protection",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 582535,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Give the area aura updates time to try the ally again",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Descension of Ragnaros stays next to Fire Protection",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1119901,
+      "caster": "pyromancer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the two count once, Fire resistance rose by 60, not 90",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 60,
+      "max": 60,
+      "school": 2
+    }
+  ]
+}

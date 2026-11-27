@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "name": "Class buffs: support haste buffs replace each other, haste cooldowns and banners stay",
+  "contract": [
+    "Maintainer decision 2026-11-22 (PR #13237 review): a buff of five minutes or longer keeps one per stat",
+    "across classes; a shorter buff whose tooltip says it does not stack with similar effects is a support buff",
+    "and keeps one per stat among support buffs; every other shorter buff is a cooldown, has no CoA class",
+    "category and stacks with everything. Tailwind 804035 (Stormbringer, class 16, 15 seconds, raid area aura)",
+    "and Horn of Alacrity 806360 (Ranger, class 21, 30 seconds, party and raid members) give",
+    "SPELL_AURA_HASTE_SPELLS and SPELL_AURA_MOD_MELEE_RANGED_HASTE, base points 4: +5% each, and their tooltips",
+    "say they do not stack with similar effects: spell_group 2113008 (rule 1, SPELL_GROUP_STACK_RULE_EXCLUSIVE)",
+    "holds both. Hasten 801304 (Chronomancer, class 22) is a cooldown. Banner of Swiftness 500259 (Guardian,",
+    "class 18) keeps its raid area aura 800704 up without end, so it is an aura, and no other class has that",
+    "signature. Expected: on a grouped ally Horn of Alacrity replaces Tailwind, while Hasten and the Banner of",
+    "Swiftness aura stay beside Horn of Alacrity."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "stormbringer",
+      "race": 1,
+      "class": 16,
+      "level": 60
+    },
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    },
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "stormbringer"
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "ranger"
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "chronomancer"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 500259
+    },
+    {
+      "action": "learn",
+      "actor": "stormbringer",
+      "spell": 804035
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 806360
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 801304
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "The Guardian attaches the Banner of Swiftness",
+      "actor": "guardian",
+      "spell": 500259
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Banner of Swiftness aura reaches the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800704,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Give the Stormbringer Static",
+      "actor": "stormbringer",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "set_aura",
+      "label": "Meet the Tailwind caster aura requirement",
+      "actor": "stormbringer",
+      "spell": 681016,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Tailwind from the Stormbringer",
+      "actor": "stormbringer",
+      "spell": 804035
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Tailwind reaches the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 804035,
+      "caster": "stormbringer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "The Ranger sounds Horn of Alacrity",
+      "actor": "ranger",
+      "spell": 806360
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Horn of Alacrity reaches the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 806360,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Give the area aura updates time to settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: support haste buffs keep one, so Horn of Alacrity replaced Tailwind",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 804035,
+      "caster": "stormbringer",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hasten on the ally",
+      "actor": "chronomancer",
+      "spell": 801304,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Hasten",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 801304,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Give a replacement time to remove either aura",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Hasten leaves Horn of Alacrity in place",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 806360,
+      "caster": "ranger",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Horn of Alacrity leaves Hasten in place",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 801304,
+      "caster": "chronomancer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Banner of Swiftness aura stays beside the support buff and the cooldown",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800704,
+      "caster": "guardian",
+      "equals": 1
+    }
+  ]
+}

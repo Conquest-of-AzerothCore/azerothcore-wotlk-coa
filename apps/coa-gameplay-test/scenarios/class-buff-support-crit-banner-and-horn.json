@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "name": "Class buffs: Banner of Conquest and Horn of War are support crit buffs that replace each other",
+  "contract": [
+    "Class reviewer feedback 2026-11-22 (PR #13237): Horn of War, Focal Point, Fleshbending, Frozen Blades,",
+    "Banner of Conquest and Infused With Power are the 5% crit buffs of the support specs and keep one at a time.",
+    "Banner of Conquest 500264 (Guardian, class 18) is a 20 second raid area aura, SPELL_AURA_MOD_CRIT_PCT base",
+    "points 4: +5%, that the endless Banner of Conquest 500261 pulses; 500261's tooltip says it does not stack",
+    "with similar effects, and the generator lists 500264 as a support buff, so spell_group 2113005 (rule 1,",
+    "SPELL_GROUP_STACK_RULE_EXCLUSIVE) holds it beside Horn of War 800086 (Ranger, class 21, 30 seconds, +5%).",
+    "Expected: on a grouped ally Horn of War replaces the Banner of Conquest aura, and the banner's area updates",
+    "do not put it back while Horn of War lasts."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "ranger"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 500261
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 800086
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "The Guardian attaches the Banner of Conquest",
+      "actor": "guardian",
+      "spell": 500261
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Banner of Conquest aura reaches the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 500264,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "The Ranger sounds Horn of War",
+      "actor": "ranger",
+      "spell": 800086
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Horn of War reaches the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800086,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Give the banner's area aura updates time to try the ally again",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: support crit buffs keep one, so Horn of War replaced the Banner of Conquest aura",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 500264,
+      "caster": "guardian",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the banner does not push Horn of War off the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800086,
+      "caster": "ranger",
+      "equals": 1
+    }
+  ]
+}

@@ -41,6 +41,11 @@ SUITES = {
         'commands': [['tools/test_source.py'], ['tools/test_change_boundaries.py'], ['tools/test_registrations.py'],
                      ['tools/test_comments.py'], ['tools/test_verify_all.py']],
     },
+    'class-buffs': {
+        'paths': ['tools/coa_class_buffs.py', 'tools/test_coa_class_buffs.py',
+                  'data/sql/updates/pending_db_world/*.sql'],
+        'commands': [['tools/test_coa_class_buffs.py']],
+    },
     'molten-core-sql': {
         'paths': ['data/sql/updates/pending_db_world/*molten_core*.sql'],
         'commands': [['tools/test_molten_core_smart_scripts_base_entry.py'],

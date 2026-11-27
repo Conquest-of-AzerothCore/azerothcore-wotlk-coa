@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "name": "Class buffs: a combined haste buff coexists with a single spell haste aura",
+  "contract": [
+    "Control for the cross-class categories. Dark Presence 300957 (class 20, party area aura,",
+    "SPELL_AURA_HASTE_SPELLS base points 2: 3%) is in the spell haste aura category, spell_group 2113007.",
+    "Combat Symbiosis 805305 (Tinker, class 28, spell and melee haste, base points 19: 20% each) lasts 15",
+    "seconds and its tooltip does not say it fails to stack with similar effects, so it is a cooldown outside",
+    "every CoA class category and no group decides the pair. Expected: on a grouped ally both auras stay",
+    "applied."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "necromancer",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    },
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "necromancer",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "necromancer",
+      "target": "tinker"
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 805305
+    },
+    {
+      "action": "learn",
+      "actor": "necromancer",
+      "spell": 300957
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Dark Presence reaches the grouped ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300957,
+      "caster": "necromancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Dark Presence gives 3% spell haste",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 300957,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "cast",
+      "label": "Combat Symbiosis on the ally",
+      "actor": "tinker",
+      "spell": 805305,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Combat Symbiosis",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 805305,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Give the area aura updates time to drop Dark Presence",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the combined haste buff leaves the spell haste aura in place",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300957,
+      "caster": "necromancer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the spell haste aura leaves the combined haste buff in place",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 805305,
+      "caster": "tinker",
+      "equals": 1
+    }
+  ]
+}

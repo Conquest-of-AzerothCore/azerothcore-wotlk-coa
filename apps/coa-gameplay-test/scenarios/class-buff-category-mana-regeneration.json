@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "name": "Class buffs: Grove Instinct and Seal of Al'ar share the mana regeneration category",
+  "contract": [
+    "Grove Instinct 572810 (Primalist, class 31, SPELL_AURA_MOD_POWER_REGEN mana, base points 4: 5 mana per 5",
+    "seconds) and Seal of Al'ar 803649 (Pyromancer, class 24, SPELL_AURA_MOD_POWER_REGEN mana, base points 9:",
+    "10 mana per 5 seconds) are two classes' MP5 buffs on one ally. spell_group 2113013 (rule 1,",
+    "SPELL_GROUP_STACK_RULE_EXCLUSIVE) holds both chains; their other groups (103955, 2104883, 2110008) are not",
+    "shared. Expected: on a grouped ally each cast replaces the other, the weaker one included. The aura",
+    "amounts stand in for the regeneration total, which a warrior ally does not show."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    },
+    {
+      "id": "pyromancer",
+      "race": 1,
+      "class": 24,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "pyromancer"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 572810
+    },
+    {
+      "action": "learn",
+      "actor": "pyromancer",
+      "spell": 803649
+    },
+    {
+      "action": "cast",
+      "label": "Grove Instinct on the ally",
+      "actor": "primalist",
+      "spell": 572810,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Grove Instinct",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572810,
+      "caster": "primalist",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Grove Instinct applies its DBC amount",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 572810,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Seal of Al'ar on the ally",
+      "actor": "pyromancer",
+      "spell": 803649,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Seal of Al'ar",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803649,
+      "caster": "pyromancer",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Seal of Al'ar replaced Grove Instinct",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572810,
+      "caster": "primalist",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Grove Instinct again on the ally",
+      "actor": "primalist",
+      "spell": 572810,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Grove Instinct again",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572810,
+      "caster": "primalist",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the newest buff wins, so Grove Instinct replaced Seal of Al'ar",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803649,
+      "caster": "pyromancer",
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}
