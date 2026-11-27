@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Mercenary for Hire!: a High-Risk Mercenary and a same-faction War Mode player can fight each other",
-  "contract": "Mercenary for Hire! makes its user hostile to their own faction's War Mode and High-Risk players. Two Humans pick their rulesets in Stormwind with the ruleset spells, one War Mode and one High-Risk, and the High-Risk player takes up Mercenary for Hire!. They can attack each other in Stormwind and in Elwynn Forest.",
+  "contract": "Issue #12191. Mercenary for Hire! makes its user hostile to their own faction's War Mode and High-Risk players outside safe zones. Two Humans pick their rulesets in Stormwind with the ruleset spells, one War Mode and one High-Risk, and the High-Risk player takes up Mercenary for Hire!. Stormwind's safe zone keeps them from attacking each other; in Elwynn Forest they can fight.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -100,20 +100,20 @@
     },
     {
       "action": "assert",
-      "label": "In Stormwind the Mercenary can attack the War Mode player",
+      "label": "In Stormwind's safe zone the Mercenary cannot attack the War Mode player",
       "actor": "mercenary",
       "metric": "can_attack",
       "target": "warmode",
-      "equals": 1,
+      "equals": 0,
       "within_ms": 3000
     },
     {
       "action": "assert",
-      "label": "and the War Mode player can attack the Mercenary",
+      "label": "and the War Mode player cannot attack the Mercenary",
       "actor": "warmode",
       "metric": "can_attack",
       "target": "mercenary",
-      "equals": 1
+      "equals": 0
     },
     {
       "action": "teleport",
