@@ -9698,14 +9698,24 @@ def fall_damage_scenario(class_file: dict, spec: FallDamageSpec) -> tuple[dict, 
 
     aura_label = fall_damage_label(spec, 'with', 'aura')
     group = [{'action': 'group', 'actor': CASTER, 'target': ALLY}] if spec.receiver == ALLY else []
-    steps = (base_steps(class_file) + group
-             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}]
-             + landing('without')
-             + cast_gate_power_step(facts) + required_aura_steps(facts)
-             + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': CASTER},
-                {'action': 'wait', 'ms': FALL_DAMAGE_AURA_SETTLE_MS},
-                measurement(aura_label, spec.receiver, 'aura', spell=spec.cast_spell)]
-             + landing('with'))
+    if facts.passive:
+        steps = (base_steps(class_file) + group
+                 + landing('without')
+                 + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell},
+                    {'action': 'wait', 'ms': FALL_DAMAGE_AURA_SETTLE_MS},
+                    measurement(aura_label, spec.receiver, 'aura', spell=spec.cast_spell)]
+                 + landing('with'))
+        delivery = f'learning passive {spec.cast_spell} puts its aura on it'
+    else:
+        steps = (base_steps(class_file) + group
+                 + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}]
+                 + landing('without')
+                 + cast_gate_power_step(facts) + required_aura_steps(facts)
+                 + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': CASTER},
+                    {'action': 'wait', 'ms': FALL_DAMAGE_AURA_SETTLE_MS},
+                    measurement(aura_label, spec.receiver, 'aura', spell=spec.cast_spell)]
+                 + landing('with'))
+        delivery = f'a real cast of {spec.cast_spell} puts its aura on it'
     players = [player_fixture(class_file)] + ([{**player_fixture(class_file), 'id': ALLY}]
                                               if spec.receiver == ALLY else [])
     scenario = {
@@ -9713,7 +9723,7 @@ def fall_damage_scenario(class_file: dict, spec: FallDamageSpec) -> tuple[dict, 
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour fall damage'
                 + (f' {spec.label_suffix}' if spec.label_suffix else ''),
         'contract': f'The {spec.receiver} lands from {spec.height:g} yd at {FIXTURE_MAX_HEALTH} maximum health, '
-                    f'once before and once after a real cast of {spec.cast_spell} puts its aura on it. The landing '
+                    f'once before and once after {delivery}. The landing '
                     f'is harness-simulated: the fall action feeds the server\'s own landing handler '
                     f'(Player::HandleFall) a MovementInfo, as a client MSG_MOVE_FALL_LAND would. The health lost with '
                     f'the aura must be below the health lost without it, proving the "{spec.quote}" clause.',

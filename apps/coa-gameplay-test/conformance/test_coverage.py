@@ -14,7 +14,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_IMMUNITY,
                         BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA,
                         BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_THREAT_SLOPE, CONDITION_CONTRAST,
-                        LEARNED_CONTRAST)
+                        LEARNED_CONTRAST, OWN_CAST_CONTRAST)
 from compare import DATA_ONLY, NOT_MEASURED, Verdict, evaluate, judge_behaviour, observed, read_verdicts, write_verdicts
 from conformance import DIFF_EXIT, main
 from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, CONTRAST_PROOF, COVERAGE_FILE, DATA, EFFECTIVENESS_OF, EVENT, EVIDENCE, K3,
@@ -518,6 +518,23 @@ class EvidenceStatusTest(unittest.TestCase):
 
     def test_the_point_distance_rows_leave_the_unit_distance_rows_alone(self):
         self.assertEqual(STATE_PROMISES['distance_2d'], r'location|hook\w*|pull\w*')
+
+    def test_teleport_coordinates_and_viewpoint_entry_are_promised_states(self):
+        for metric in ('map_id', 'position_y', 'position_z'):
+            label = f'535595 behaviour_metric_delta {metric}'
+            self.assertEqual(METRIC_EVIDENCE[metric], STATE)
+            verdicts = [judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=OWN_CAST_CONTRAST)]
+            promised = claim('Break open a rift through the nether, teleporting group members to Stormwind.', label)
+            unpromised = claim('Increases your armor by 285.', label)
+            self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+            self.assertEqual(evidence_of([unpromised], verdicts)[0], [DATA])
+        label = '532229 behaviour_metric_delta viewpoint'
+        self.assertEqual(METRIC_EVIDENCE['viewpoint_entry'], STATE)
+        verdicts = [judged(label, BEHAVIOUR_METRIC_DELTA, 'viewpoint_entry', contrast=OWN_CAST_CONTRAST)]
+        promised = claim('bind your vision to it', label)
+        unpromised = claim('Increases your armor by 285.', label)
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([unpromised], verdicts)[0], [DATA])
         self.assertEqual(METRIC_EVIDENCE['distance_2d'], STATE)
 
     def test_spell_damage_promises_the_spell_power_stat(self):

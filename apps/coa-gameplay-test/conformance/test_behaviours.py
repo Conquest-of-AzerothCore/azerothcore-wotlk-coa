@@ -11329,6 +11329,29 @@ class FallDamageTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
+    def test_a_passive_spell_learns_between_the_without_and_with_landings(self):
+        felsworn = load_class_file(14)
+        entry = {
+            'spell': 520591, 'name': 'Fel Finesse', 'kind': 'fall_damage', 'variant': 'landing',
+            'label_suffix': 'landing', 'quote': 'Reduces damage from falling.', 'cast_spell': 520591,
+            'height': 30, 'receiver': CASTER,
+        }
+        scenario, expectations = behaviour_scenario(felsworn, entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        falls = [index for index, step in enumerate(steps) if step['action'] == 'fall']
+        learns = [index for index, step in enumerate(steps) if step.get('action') == 'learn' and step.get('spell') == 520591]
+        casts = cast_indices(steps, 520591)
+        self.assertEqual(len(falls), 2)
+        self.assertEqual(len(learns), 1)
+        self.assertEqual(casts, [])
+        self.assertLess(falls[0], learns[0])
+        self.assertLess(learns[0], falls[1])
+        self.assertTrue(all(steps[index]['actor'] == CASTER and steps[index]['height'] == 30 for index in falls))
+        self.assertIn('learning passive 520591', scenario['contract'])
+        self.assertEqual([expectation.check for expectation in expectations],
+                         ['behaviour_fall_damage', 'behaviour_cast_condition'])
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CostGateRemovalLimitTests(unittest.TestCase):
