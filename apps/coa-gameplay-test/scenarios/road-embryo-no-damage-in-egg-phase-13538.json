@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Road to De Other Side: the Chimeric Embryo takes no damage during its egg phase",
+  "contract": "Issue #13538: while the Chimeric Embryo (162716) is unattackable in its egg phase, guardians and pets that already held it as their victim and damage over time kept hurting it. Its intermission only set the unattackable flags. Expected: during the egg phase it takes no damage at all, the way Drak'math takes none while sunk. Checked with the priest's Shadow Word: Pain, set to 5000 per tick, which takes the Embryo below half health and keeps ticking through the phase.",
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8914.0, "y": -133.0, "z": 80.6},
+  "players": [
+    {"id": "priest", "race": 1, "class": 5, "level": 60}
+  ],
+  "steps": [
+    {"action": "teleport", "label": "priest enters Road to De Other Side on the Embryo arena", "actor": "priest", "map": 937, "x": 304.429, "y": -206.081, "z": 341.841, "ignore_access": true},
+    {"action": "assert", "label": "SETUP: priest is in Road to De Other Side", "actor": "priest", "metric": "map_id", "equals": 937, "within_ms": 10000},
+    {"action": "set_health", "actor": "priest", "value": 50000000, "maximum": 50000000},
+    {"action": "summon", "label": "the Chimeric Embryo rises beside the priest", "actor": "priest", "as": "embryo", "entry": 162716, "distance": 8},
+    {"action": "wait", "label": "the Embryo wakes and becomes attackable", "ms": 5000},
+    {"action": "attack_nearby", "label": "the priest pulls the Embryo", "actor": "priest", "entry": 162716},
+    {"action": "wait", "ms": 1000},
+    {"action": "set_health_pct", "label": "the Embryo is just above half health", "actor": "priest", "target": "embryo", "pct": 51},
+    {"action": "set_aura", "label": "the priest's Shadow Word: Pain ticks on the Embryo for 5000 every 3 s", "actor": "priest", "spell": 10894, "stacks": 1, "caster": "priest", "amount": 5000, "target": "embryo"},
+    {"action": "assert", "label": "SETUP: Shadow Word: Pain is on the Embryo", "actor": "embryo", "metric": "aura", "spell": 10894, "equals": 1, "within_ms": 2000, "caster": "priest"},
+    {"action": "assert", "label": "SETUP: a tick takes the Embryo below half health and it starts its egg phase (unattackable)", "actor": "priest", "metric": "can_attack", "target": "embryo", "equals": 0, "within_ms": 15000},
+    {"action": "wait", "ms": 500},
+    {"action": "snapshot", "actor": "embryo", "metric": "health", "save_as": "egg_phase_start"},
+    {"action": "wait", "label": "two more ticks of Shadow Word: Pain", "ms": 7000},
+    {"action": "assert", "label": "CONTROL: Shadow Word: Pain is still on the Embryo", "actor": "embryo", "metric": "aura", "spell": 10894, "equals": 1, "caster": "priest"},
+    {"action": "assert", "label": "CONTROL: the Embryo is still in its egg phase", "actor": "priest", "metric": "can_attack", "target": "embryo", "equals": 0},
+    {"action": "assert", "label": "DISCRIMINATING: the damage over time does not hurt the Embryo during its egg phase", "actor": "embryo", "metric": "health", "relative_to": "egg_phase_start", "min": 0}
+  ]
+}

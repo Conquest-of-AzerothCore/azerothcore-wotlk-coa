@@ -223,6 +223,11 @@ struct boss_coa_chimeric_embryo : public ScriptedAI
 
     void DamageTaken(Unit* , uint32& damage, DamageEffectType , SpellSchoolMask ) override
     {
+        if (_phase == Phase::Eggs)
+        {
+            damage = 0;
+            return;
+        }
         if (_phase == Phase::Ground && !_intermissions && !_eggPhasePending && me->HealthBelowPctDamaged(50, damage))
             _eggPhasePending = true;
     }
