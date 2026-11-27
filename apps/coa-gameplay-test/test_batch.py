@@ -360,7 +360,7 @@ SHIPPED_EXCLUSIVE = {'bloodforged-high-risk-drop', 'coa-prestige-chromie-spawns'
                      'battleground-wide-bracket-catch-up', 'battleground-wide-bracket-pet-catch-up',
                      'battleground-wide-bracket-combat-level',
                      'battleground-wide-bracket-derived-scaling', 'battleground-wide-bracket-output-scaling',
-                     'battleground-wide-bracket-gear-catch-up',
+                     'battleground-wide-bracket-gear-catch-up', 'battleground-templar-tuning',
                      'necromancer-life-for-power-battleground-catch-up',
                      'crows-cache-mercenary-wall-12720', 'crows-cache-carrier-cannot-hide-12720',
                      'crows-cache-carrier-drops-12720'}

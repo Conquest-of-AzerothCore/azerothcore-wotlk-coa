@@ -1,0 +1,1044 @@
+{
+  "schema": 1,
+  "name": "Templar battleground tuning scales Templar damage, healing, absorbs, Dampening and lifted tuning auras",
+  "contract": "A level 12 Human Templar (low_templar, class 19) and a level 29 Human Templar (top_templar, class 19) of the Alliance enter a Warsong Gulch of the 10-29 bracket against two level 29 Undead Necromancers (enemy, enemy2, class 23). Before entering, low_templar carries its own-level class tuning amounts (CoA Aura - Templar Class [Passive PVP] 887107 effect 0 = -10, CoA Aura - Templar Class [Passive] 887007 effect 2 = 0) and Tome of Light 805422 grants an unreduced absorb shield equal to 1.00x its maximum health (then cleared before queueing). Inside Warsong Gulch with PvP - Battleground - Dampening 74411 (-20% healing done and absorb amount) active, low_templar's tuning auras recalculate to bracket top level 29 (-17 on 887107 effect 0 and -7 on 887007 effect 2, matching top_templar). Ten casts of Damage 100 (TEST) 2653 verify Templar BG damage scaling on level-29 top_templar against Necromancer enemy (887107 0.83 x 887111 taken 1.10 = 91, CoA.Battleground.Templar.DamageScale 0.80 -> 73, Resilient Constitution 552011 0.50 -> 36 per non-critical hit) while the non-Templar control enemy against top_templar keeps the full 45 per non-critical hit (887111 0.90 x 552011 0.50, untouched by Templar scaling). Ten self-casts of fixed direct heal Priest Training 504809 (50 base x ScalingBase(29) 0.323891 = 16, zero SP) at 1 health confirm CoA.Battleground.Templar.HealingScale (0.50) alongside 887007 (0.93) and Dampening 74411 (0.80) gives 6 per non-critical heal instead of unscaled 11 or PvE 14; Argent Blade 804929 against enemy (no Mortal Strike) triggers self-heal 807414 for 0.80 (Dampening 74411) x 0.50 (HealingScale) = 0.40x of argent_damage ([0.38, 0.42]); and Tome of Light 805422 on top_templar grants an absorb equal to 0.80 (Dampening 74411) x 0.50 (AbsorbScale) = 0.40x its maximum health ([0.39, 0.41]). When low_templar leaves Warsong Gulch, 887107 effect 0 reverts to -10 and 887007 effect 2 reverts to 0.",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "low_templar",
+      "race": 1,
+      "class": 19,
+      "level": 12,
+      "allow_regeneration": false
+    },
+    {
+      "id": "top_templar",
+      "race": 1,
+      "class": 19,
+      "level": 29,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 200,
+      "allow_regeneration": false
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 23,
+      "level": 29,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy2",
+      "race": 5,
+      "class": 23,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Outside BG, low_templar 887107 effect 0 is own-level -10",
+      "actor": "low_templar",
+      "metric": "aura_amount",
+      "spell": 887107,
+      "effect": 0,
+      "equals": -10,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Outside BG, low_templar 887007 effect 2 is own-level 0",
+      "actor": "low_templar",
+      "metric": "aura_amount",
+      "spell": 887007,
+      "effect": 2,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Outside BG, top_templar 887107 effect 0 is level-29 -17",
+      "actor": "top_templar",
+      "metric": "aura_amount",
+      "spell": 887107,
+      "effect": 0,
+      "equals": -17,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Outside BG, top_templar 887007 effect 2 is level-29 -7",
+      "actor": "top_templar",
+      "metric": "aura_amount",
+      "spell": 887007,
+      "effect": 2,
+      "equals": -7,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "low_templar",
+      "metric": "max_health",
+      "save_as": "low_templar_pve_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "top_templar",
+      "metric": "max_health",
+      "save_as": "top_templar_health"
+    },
+    {
+      "action": "learn",
+      "actor": "low_templar",
+      "spell": 805422
+    },
+    {
+      "action": "cast",
+      "label": "low_templar casts Tome of Light 805422 outside BG",
+      "actor": "low_templar",
+      "spell": 805422,
+      "target": "low_templar"
+    },
+    {
+      "action": "assert",
+      "label": "Outside BG, Tome of Light 805422 shield equals 1.00x max health",
+      "actor": "low_templar",
+      "metric": "aura_amount",
+      "spell": 805422,
+      "effect": 1,
+      "ratio_to": "low_templar_pve_health",
+      "min": 0.99,
+      "max": 1.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear Tome of Light 805422 before joining BG",
+      "actor": "low_templar",
+      "spell": 805422,
+      "stacks": 0
+    },
+    {
+      "action": "client_packet",
+      "actor": "low_templar",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top_templar",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "enemy",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "enemy2",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "low_templar is invited to 10-29 Warsong Gulch",
+      "actor": "low_templar",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top_templar is invited to 10-29 Warsong Gulch",
+      "actor": "top_templar",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "enemy is invited to 10-29 Warsong Gulch",
+      "actor": "enemy",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "enemy2 is invited to 10-29 Warsong Gulch",
+      "actor": "enemy2",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "low_templar",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "low_templar"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "low_templar enters Warsong Gulch",
+      "actor": "low_templar",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "top_templar",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "top_templar"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "top_templar enters Warsong Gulch",
+      "actor": "top_templar",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "enemy",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "enemy"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "enemy enters Warsong Gulch",
+      "actor": "enemy",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "enemy2",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "enemy2"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "enemy2 enters Warsong Gulch",
+      "actor": "enemy2",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Warsong Gulch is in progress",
+      "actor": "low_templar",
+      "metric": "battleground_status",
+      "equals": 3,
+      "within_ms": 180000
+    },
+    {
+      "action": "teleport",
+      "label": "low_templar meets everyone outdoors",
+      "actor": "low_templar",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top_templar meets everyone outdoors",
+      "actor": "top_templar",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "enemy meets everyone outdoors",
+      "actor": "enemy",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "enemy2 meets everyone outdoors",
+      "actor": "enemy2",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "low_templar loses Honorless Target",
+      "actor": "low_templar",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "top_templar loses Honorless Target",
+      "actor": "top_templar",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "enemy loses Honorless Target",
+      "actor": "enemy",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "enemy2 loses Honorless Target",
+      "actor": "enemy2",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Warsong Gulch applies Dampening 74411 to top_templar",
+      "actor": "top_templar",
+      "metric": "aura",
+      "spell": 74411,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Inside BG, lifted low_templar 887107 effect 0 equals bracket-top -17",
+      "actor": "low_templar",
+      "metric": "aura_amount",
+      "spell": 887107,
+      "effect": 0,
+      "equals": -17,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Inside BG, lifted low_templar 887007 effect 2 equals bracket-top -7",
+      "actor": "low_templar",
+      "metric": "aura_amount",
+      "spell": 887007,
+      "effect": 2,
+      "equals": -7,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_health",
+      "label": "enemy gets high health to survive all casts",
+      "actor": "enemy",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "top_templar",
+      "spell": 2653
+    },
+    {
+      "action": "learn",
+      "actor": "top_templar",
+      "spell": 504809
+    },
+    {
+      "action": "learn",
+      "actor": "top_templar",
+      "spell": 804929
+    },
+    {
+      "action": "learn",
+      "actor": "top_templar",
+      "spell": 805422
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 2653
+    },
+    {
+      "action": "add_item",
+      "actor": "top_templar",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "top_templar",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 2653,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 2653,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 2653,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 2653,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 2653,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 2653,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 2653,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 2653,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 2653,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 2653,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "stop_attack",
+      "actor": "top_templar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "top_templar",
+      "metric": "spell_damage_count",
+      "save_as": "templar_dmg_hits",
+      "spell": 2653,
+      "target": "enemy",
+      "critical": false
+    },
+    {
+      "action": "assert",
+      "label": "top_templar lands at least one non-critical 2653 hit on enemy",
+      "actor": "top_templar",
+      "metric": "spell_damage_count",
+      "spell": 2653,
+      "target": "enemy",
+      "critical": false,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "top_templar non-critical 2653 hit on enemy is scaled by Templar DamageScale 0.80 to 36",
+      "actor": "top_templar",
+      "metric": "spell_damage_total",
+      "spell": 2653,
+      "target": "enemy",
+      "critical": false,
+      "ratio_to": "templar_dmg_hits",
+      "min": 35.5,
+      "max": 36.5
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2653,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2653,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2653,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2653,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2653,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2653,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2653,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2653,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2653,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2653,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "save_as": "enemy_dmg_hits",
+      "spell": 2653,
+      "target": "top_templar",
+      "critical": false
+    },
+    {
+      "action": "assert",
+      "label": "Non-Templar enemy lands at least one non-critical 2653 hit on top_templar",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "spell": 2653,
+      "target": "top_templar",
+      "critical": false,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Non-Templar enemy 2653 damage stays unscaled by Templar BG tuning at 45",
+      "actor": "enemy",
+      "metric": "spell_damage_total",
+      "spell": 2653,
+      "target": "top_templar",
+      "critical": false,
+      "ratio_to": "enemy_dmg_hits",
+      "min": 44.5,
+      "max": 45.5
+    },
+    {
+      "action": "set_health",
+      "label": "top_templar is set to 1 health before healing checks",
+      "actor": "top_templar",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 504809,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 504809,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 504809,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 504809,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 504809,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 504809,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 504809,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 504809,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 504809,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "top_templar",
+      "spell": 504809,
+      "target": "top_templar"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "top_templar",
+      "metric": "spell_heal_count",
+      "save_as": "templar_direct_heals",
+      "spell": 504809,
+      "target": "top_templar",
+      "critical": false
+    },
+    {
+      "action": "assert",
+      "label": "top_templar lands at least one non-critical 504809 direct heal",
+      "actor": "top_templar",
+      "metric": "spell_heal_count",
+      "spell": 504809,
+      "target": "top_templar",
+      "critical": false,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Direct heal 504809 is halved by Templar HealingScale 0.50 on top of 887007 and Dampening",
+      "actor": "top_templar",
+      "metric": "spell_heal_total",
+      "spell": 504809,
+      "target": "top_templar",
+      "critical": false,
+      "ratio_to": "templar_direct_heals",
+      "min": 5.5,
+      "max": 6.5
+    },
+    {
+      "action": "set_health",
+      "label": "top_templar returns to 1 health before Argent Blade",
+      "actor": "top_templar",
+      "value": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "top_templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "top_templar casts Argent Blade 804929 on enemy without Mortal Strike",
+      "actor": "top_templar",
+      "spell": 804929,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "top_templar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "top_templar",
+      "metric": "spell_damage_total",
+      "save_as": "top_argent_damage",
+      "spell": 804929,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Argent Blade self-heal 807414 equals 0.40x damage (Dampening 0.80 x Templar HealingScale 0.50)",
+      "actor": "top_templar",
+      "metric": "spell_heal_total",
+      "spell": 807414,
+      "target": "top_templar",
+      "ratio_to": "top_argent_damage",
+      "min": 0.38,
+      "max": 0.42
+    },
+    {
+      "action": "cast",
+      "label": "top_templar casts Tome of Light 805422 inside Warsong Gulch",
+      "actor": "top_templar",
+      "spell": 805422,
+      "target": "top_templar"
+    },
+    {
+      "action": "assert",
+      "label": "Inside BG, Tome of Light 805422 shield equals 0.40x max health (Dampening 0.80 x AbsorbScale 0.50)",
+      "actor": "top_templar",
+      "metric": "aura_amount",
+      "spell": 805422,
+      "effect": 1,
+      "ratio_to": "top_templar_health",
+      "min": 0.39,
+      "max": 0.41,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "label": "low_templar leaves Warsong Gulch back to Elwynn",
+      "actor": "low_templar",
+      "ignore_access": true,
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6
+    },
+    {
+      "action": "assert",
+      "label": "low_templar leaves Warsong Gulch",
+      "actor": "low_templar",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "After leaving BG, low_templar 887107 effect 0 reverts to -10",
+      "actor": "low_templar",
+      "metric": "aura_amount",
+      "spell": 887107,
+      "effect": 0,
+      "equals": -10,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "After leaving BG, low_templar 887007 effect 2 reverts to 0",
+      "actor": "low_templar",
+      "metric": "aura_amount",
+      "spell": 887007,
+      "effect": 2,
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -434,6 +434,34 @@ CoA.Battleground.WideBrackets.GearCatchUp.Enable = 1
 CoA.Battleground.WideBrackets.GearCatchUp.Scale = 1.0
 
 ###################################################################################################
+# BATTLEGROUND CLASS TUNING
+#
+#    CoA.Battleground.Templar.DamageScale
+#        Description: Multiplier applied to Templar player and summon damage against players and
+#                     their pets inside battlegrounds (non-arena); excludes potions, and derived
+#                     damage copies (Retribution 525028, Deliverance 801456) inherit the scaled
+#                     source hit without scaling twice. Applies on startup and .reload config.
+#        Default:     0.80
+
+CoA.Battleground.Templar.DamageScale = 0.80
+
+#    CoA.Battleground.Templar.HealingScale
+#        Description: Multiplier applied to Templar healing (direct heals, HoTs, percent-health
+#                     heals, health leeches and copied heals; excludes potions) on friendly players
+#                     and their pets inside battlegrounds. Applies on startup and .reload config.
+#        Default:     0.50
+
+CoA.Battleground.Templar.HealingScale = 0.50
+
+#    CoA.Battleground.Templar.AbsorbScale
+#        Description: Multiplier applied to Templar absorb shields (such as Tome of Light and
+#                     Staffguard; excludes potions) on friendly players and their pets inside
+#                     battlegrounds. Applies on startup and .reload config.
+#        Default:     0.50
+
+CoA.Battleground.Templar.AbsorbScale = 0.50
+
+###################################################################################################
 # RATED SOLO ARENA
 #
 #    RatedSoloArena.RoleBalanceWaitSeconds
