@@ -848,11 +848,12 @@ public:
             .OnPlayerLevelChanged(player, oldLevel);
     }
 
-    void OnPlayerGiveXP(
+    void OnPlayerGiveXPWithGroupAverage(
         Player* player,
         uint32& amount,
         Unit* victim,
-        uint8 xpSource) override
+        uint8 xpSource,
+        double groupAverageLevel) override
     {
         if (!ManastormModuleConfig::Enabled())
             return;
@@ -862,7 +863,8 @@ public:
                 player,
                 amount,
                 victim,
-                xpSource);
+                xpSource,
+                groupAverageLevel);
     }
 
     bool OnPlayerPassedQuestKilledMonsterCredit(

@@ -27,8 +27,9 @@ kill XP and newly earned floor XP. It is reloadable; floor XP already earned kee
     no penalty up to a `20`-level gap, then a progressive `((50 - gap) / 30)^1.5` reduction down to `0.0` at
     a `50`-level gap, and `0.0` for the entire group whenever any member reaches `MaxPlayerLevel` (even for
     a `MaxPlayerLevel - 1` member). Peak member count and highest level persist if a carry leaves mid-stage.
-  - On kill XP in mixed-level groups, `KillGroupLevelShareCap = min(1.0, averageStageLevel / playerLevel)`
-    caps the core `KillRewarder` `playerLevel / aliveSumLevel` share surplus so pairing a high-level character
+  - On kill XP in mixed-level groups, `KillGroupLevelShareCap = min(1.0, groupAverageLevel / playerLevel)`
+    uses the same alive group members as the core reward (the killer and those within reward distance).
+    It caps the core `KillRewarder` `playerLevel / aliveSumLevel` share surplus so pairing a high-level character
     with low-level characters cannot yield more kill XP than a same-level group.
 - **Dual-pool combat contribution (`N >= 2`):** Members earn full contribution (`1.0`) when either their
   real creature HP damage share or their cross-player effective healing share reaches `40% / N`, ramping

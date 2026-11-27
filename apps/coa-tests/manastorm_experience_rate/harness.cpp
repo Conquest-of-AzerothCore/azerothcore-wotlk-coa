@@ -178,7 +178,7 @@ struct ManastormMgr
             ? candidate
             : nullptr;
     }
-    void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource);
+    void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource, double groupAverageLevel);
     void OnHeal(Unit* healer, Unit* receiver, uint32 gain);
 };
 
@@ -315,9 +315,9 @@ void SetRate(char const* value)
     ManastormModuleConfig::Load(true);
 }
 
-uint32 KillXP(ManastormMgr& mgr, Player& player, Creature& creature, uint32 amount)
+uint32 KillXP(ManastormMgr& mgr, Player& player, Creature& creature, uint32 amount, double groupAverageLevel = 0)
 {
-    mgr.OnPlayerGiveXP(&player, amount, &creature, 0);
+    mgr.OnPlayerGiveXP(&player, amount, &creature, 0, groupAverageLevel);
     return amount;
 }
 
@@ -447,7 +447,7 @@ int main()
     soloRun.SetState(ManastormRunState::Active);
 
     uint32 questXP = 1000;
-    mgr.OnPlayerGiveXP(&player, questXP, nullptr, 0);
+    mgr.OnPlayerGiveXP(&player, questXP, nullptr, 0, 0.0);
     CHECK(questXP == 1000);
     creature.mapId = 1;
     CHECK(KillXP(mgr, player, creature, 1000) == 1000);
@@ -603,10 +603,12 @@ int main()
     Player highMember({ 301 }, 55, 0, 43, 9, &privateMap);
     Player lowMember({ 302 }, 10, 0, 43, 9, &privateMap);
     mgr.run = &reverseBoost;
-    CHECK(KillXP(mgr, highMember, creature, 1000) == 104);
-    CHECK(KillXP(mgr, lowMember, creature, 1000) == 20);
+    CHECK(KillXP(mgr, highMember, creature, 1000, 19.0) == 104);
+    CHECK(KillXP(mgr, lowMember, creature, 1000, 19.0) == 20);
+    CHECK(KillXP(mgr, highMember, creature, 1000, 32.5) == 177);
+    CHECK(KillXP(mgr, highMember, creature, 1000) == 300);
 
-    ManastormRun carryLeave = MakeRun({ 101, 102 }, 500, 60);
+    ManastormRun carryLeave = MakeRun({ 101, 102 }, 500, 59);
     carryLeave.SetMemberXPBaseline(101, 499, 60);
     carryLeave.SetMemberXPBaseline(102, 0, 59);
     carryLeave.RecordMemberDamageDealt(101, 20000);

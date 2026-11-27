@@ -205,7 +205,8 @@ void KillRewarder::_RewardXP(Player* player, float rate)
         });
 
         // 4.2.3. Give XP to player.
-        sScriptMgr->OnPlayerGiveXP(player, xp, _victim, PlayerXPSource::XPSOURCE_KILL);
+        double const groupAverageLevel = _group && _count ? double(_aliveSumLevel) / _count : 0.0;
+        sScriptMgr->OnPlayerGiveXP(player, xp, _victim, PlayerXPSource::XPSOURCE_KILL, groupAverageLevel);
         player->GiveXP(xp, _victim, _groupRate);
         if (Pet* pet = player->GetPet())
             // 4.2.4. If player has pet, reward pet with XP (100% for single player, 50% for group case).
