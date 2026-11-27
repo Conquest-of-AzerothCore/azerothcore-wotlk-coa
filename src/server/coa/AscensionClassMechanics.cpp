@@ -1647,6 +1647,17 @@ void HandleAscensionClassMechanicsAuraRemove(Player* player, std::uint32_t spell
         return;
     }
 
+    if (player->getClass() == CLASS_GUARDIAN && !removedByDeath && player->IsAlive() && !player->IsCharmed())
+        if (SpellInfo const* removed = sSpellMgr->GetSpellInfo(spellId))
+            if (removed->HasAura(SPELL_AURA_MOD_CHARM) || removed->HasAura(SPELL_AURA_MOD_POSSESS) ||
+                removed->HasAura(SPELL_AURA_AOE_CHARM))
+                for (uint32 formationId : GUARDIAN_FORMATIONS)
+                    if (player->HasAura(formationId))
+                    {
+                        ApplyGuardianFormation(player, formationId);
+                        return;
+                    }
+
     if (player->getClass() == CLASS_RANGER && spellId == SPELL_RANGER_ELUDE)
     {
         player->RemoveAurasDueToSpell(SPELL_RANGER_ELUDE_EFFECTS);

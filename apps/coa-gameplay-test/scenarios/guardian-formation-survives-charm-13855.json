@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Guardian: Line Formation's stance returns when a creature's charm ends (#13855)",
+  "contract": [
+    "#13855: a Guardian charmed by Jammal'an the Prophet (Hex of Jammal'an 12483, MOD_CHARM, 15 s) came back without",
+    "their formation bar. Line Formation 803130 stays on the Guardian, but its helper 803151 is a shapeshift aura, and",
+    "Unit::SetCharmedBy strips every shapeshift aura from a charmed player. Nothing put the helper back, so the",
+    "formation was active with none of its effects or bar. The Guardian takes Line Formation in the Temple of",
+    "Atal'Hakkar, Jammal'an is summoned and forced to cast 12483 on them with '.cast back' after a native selection,",
+    "as in the Manastorm Jammal'an charm scenario. While charmed the helper is gone; once the charm ends the helper",
+    "must be back with the formation still active."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8914, "y": -133, "z": 80.6},
+  "players": [
+    {"id": "guardian", "race": 1, "class": 18, "level": 60, "security": 2, "allow_regeneration": false}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login state settle", "ms": 3000},
+    {"action": "learn", "actor": "guardian", "spell": 803130},
+    {"action": "set_power", "actor": "guardian", "power": 3, "value": 100},
+    {"action": "cast", "actor": "guardian", "spell": 803130},
+    { "action": "assert", "label": "CONTROL: Line Formation is active", "actor": "guardian", "metric": "aura",
+      "spell": 803130, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTROL: its stance helper applies", "actor": "guardian", "metric": "aura",
+      "spell": 803151, "equals": 1, "within_ms": 1000 },
+    { "action": "teleport", "label": "Enter the Temple of Atal'Hakkar", "actor": "guardian", "map": 109,
+      "x": -466.795, "y": 272.863, "z": -90.447, "o": 0 },
+    { "action": "assert", "label": "CONTROL: inside the dungeon", "actor": "guardian", "metric": "map_id",
+      "equals": 109, "within_ms": 10000 },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_health", "actor": "guardian", "value": 100000000, "maximum": 100000000},
+    { "action": "assert", "label": "CONTROL: the formation survives the teleport", "actor": "guardian",
+      "metric": "aura", "spell": 803151, "equals": 1 },
+    {"action": "summon", "actor": "guardian", "entry": 5710, "as": "jammalan", "distance": 4},
+    {"action": "wait", "label": "Let the boss's spawn events settle", "ms": 2000},
+    { "action": "assert", "label": "Jammal'an's out-of-combat immune-to-PC window has cleared", "actor": "guardian",
+      "metric": "nearby_creature_can_attack", "entry": 5710, "equals": 1, "within_ms": 8000 },
+    {"action": "attack_nearby", "actor": "guardian", "entry": 5710},
+    {"action": "select_nearby", "actor": "guardian", "entry": 5710},
+    {"action": "command", "actor": "guardian", "command": ".cast back 12483 triggered"},
+    { "action": "assert", "label": "CONTROL: Jammal'an's Hex charms the Guardian", "actor": "guardian",
+      "metric": "charmed", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: the charm strips the stance helper", "actor": "guardian",
+      "metric": "aura", "spell": 803151, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "The charm ends after its 15 s", "actor": "guardian", "metric": "charmed",
+      "equals": 0, "within_ms": 20000 },
+    { "action": "assert", "label": "DISCRIMINATING: Line Formation's stance helper is back after the charm",
+      "actor": "guardian", "metric": "aura", "spell": 803151, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "Line Formation itself is still active", "actor": "guardian", "metric": "aura",
+      "spell": 803130, "equals": 1 }
+  ]
+}
