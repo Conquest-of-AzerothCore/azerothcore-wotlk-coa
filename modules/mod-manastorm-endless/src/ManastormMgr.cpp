@@ -3,6 +3,7 @@
 #include "ManastormMgr.h"
 #include "ManastormPotionClient.h"
 #include "AscensionManastormGadgets.h"
+#include "AscensionRunemasterEchoes.h"
 
 #include "ObjectAccessor.h"
 #include "Creature.h"
@@ -6528,7 +6529,10 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         auto const recovery = run->StageRecoveries.find(player->GetGUID().GetCounter());
         if (recovery != run->StageRecoveries.end() &&
             recovery->second.DestinationInstanceId == run->GetInstanceId())
+        {
             player->RemoveAllSpellCooldown();
+            ResetAscensionRunemasterEchoesCooldown(player);
+        }
         else
             for (auto const& gadget : Ascension::Manastorm::Gadgets)
                 if (!gadget.passive && player->HasSpell(gadget.spell) &&
