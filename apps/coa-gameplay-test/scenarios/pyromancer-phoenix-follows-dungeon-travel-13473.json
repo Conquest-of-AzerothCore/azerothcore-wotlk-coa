@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Phoenix follows across dungeon and map teleports (#13473)",
+  "contract": [
+    "Issue #13473: Phoenix Egg (800796) summons Phoenix (50258) with SummonProperties 1561 (SUMMON_CATEGORY_PET, a controllable Guardian) through AscensionPyromancer::Summon. Because Summon() omitted the creating spellId when calling Map::SummonCreature, UNIT_CREATED_BY_SPELL stayed 0, so AscensionGuardianTravel::Arrive rejected recreation on map changes (SummonSpellAllowsHere(player, 0) returned false) and the Phoenix despawned on every dungeon transition.",
+    "With spellId 800796 recorded on the summon, Phoenix travels with the Pyromancer when entering a dungeon (Orgrimmar map 1 -> Ragefire Chasm map 389 via area trigger 2230), exiting it (area trigger 2226 -> map 1), and teleporting across maps (map 1 -> map 0). Needs CoA.Guardians.FollowTravel = 1 (the default in coa.conf.dist).",
+    "Expected: after initial cast and after each of the three map transitions, owned_creature_count for entry 50258 is 1 and pet_entry is 50258. Before the fix, owned_creature_count and pet_entry drop to 0 on the first dungeon entry."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 1818.4,
+    "y": -4427.26,
+    "z": -10.4478,
+    "o": 4.0
+  },
+  "players": [
+    {
+      "id": "pyro",
+      "race": 2,
+      "class": 24,
+      "level": 80,
+      "security": 0
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 800796
+    },
+    {
+      "action": "cast",
+      "label": "Summon Phoenix with Phoenix Egg (800796)",
+      "actor": "pyro",
+      "spell": 800796,
+      "destination": {
+        "x": 1816.4,
+        "y": -4427.26,
+        "z": -10.4478
+      }
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Phoenix (50258) is owned",
+      "actor": "pyro",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Phoenix (50258) is active controllable pet",
+      "actor": "pyro",
+      "metric": "pet_entry",
+      "equals": 50258,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let Phoenix enter FollowOwner motion",
+      "ms": 1500
+    },
+    {
+      "action": "area_trigger",
+      "label": "Enter Ragefire Chasm (map 1 -> map 389)",
+      "actor": "pyro",
+      "id": 2230
+    },
+    {
+      "action": "assert",
+      "label": "Arrived in Ragefire Chasm (map 389)",
+      "actor": "pyro",
+      "metric": "map_id",
+      "equals": 389,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Phoenix survives dungeon entry",
+      "actor": "pyro",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Phoenix remains active pet after dungeon entry",
+      "actor": "pyro",
+      "metric": "pet_entry",
+      "equals": 50258,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "label": "Step to Ragefire Chasm exit portal",
+      "actor": "pyro",
+      "map": 389,
+      "x": 2.58,
+      "y": -0.0136,
+      "z": -13.3668,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "area_trigger",
+      "label": "Exit Ragefire Chasm (map 389 -> map 1)",
+      "actor": "pyro",
+      "id": 2226
+    },
+    {
+      "action": "assert",
+      "label": "Arrived back in Orgrimmar (map 1)",
+      "actor": "pyro",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Phoenix survives dungeon exit (recreated summon kept spellId)",
+      "actor": "pyro",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Phoenix remains active pet after dungeon exit",
+      "actor": "pyro",
+      "metric": "pet_entry",
+      "equals": 50258,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "label": "Teleport across maps to Eastern Kingdoms (map 1 -> map 0)",
+      "actor": "pyro",
+      "map": 0,
+      "x": 1676,
+      "y": 1678,
+      "z": 121,
+      "o": 1.25
+    },
+    {
+      "action": "assert",
+      "label": "Arrived in Eastern Kingdoms (map 0)",
+      "actor": "pyro",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Phoenix survives cross-map teleport",
+      "actor": "pyro",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Phoenix remains active pet after cross-map teleport",
+      "actor": "pyro",
+      "metric": "pet_entry",
+      "equals": 50258,
+      "within_ms": 5000
+    }
+  ]
+}

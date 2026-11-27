@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Blackrock Caverns: Corla's Nether Beams come from the netherdrake corpse, not from Corla (#13820)",
+  "contract": [
+    "#13820: Corla, Herald of Twilight 39679 drains the essence of the netherdrake corpse hanging above her room and",
+    "channels it into the kneeling Twilight Zealots 50284. Each beam is cast by a Nether Beam NPC 5011005, and the",
+    "soak line runs from that NPC to its zealot. The script summoned the beam NPCs on Corla herself, so the beams came",
+    "from the boss. Her out-of-combat Drain Essence already targets the corpse's invisible stalker 39842 (guid",
+    "6450039) at (573.60, 910.01, 180.34); the beam NPCs now stand there. The player waits beside the zealots, where",
+    "the issue was reported, about 66 yd (2D) from the corpse point and about 14 yd from Corla. The nearest beam NPC must",
+    "be at the corpse distance; a beam on Corla would be about 14 yd away. After engaging Corla, the player stands",
+    "on the beam line just in front of the east zealot, close enough in 2D but outside the old 3D prefilter.",
+    "The player's Evolution stacks prove that they intercepted the beam."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 645, "x": 580.0, "y": 976.0, "z": 155.4, "o": 1.5, "ignore_access": true},
+  "players": [
+    {"id": "player", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "The player joins world phase 1, where the dungeon spawns live",
+      "actor": "player", "value": 1 },
+    {"action": "set_health", "actor": "player", "value": 50000000, "maximum": 50000000},
+    { "action": "assert", "label": "CONTROL: two kneeling zealots on Normal", "actor": "player",
+      "metric": "nearby_creature_count", "entry": 50284, "equals": 2, "within_ms": 10000 },
+    { "action": "assert", "label": "DISCRIMINATING: the nearest Nether Beam stands at the netherdrake corpse",
+      "actor": "player", "metric": "nearest_creature_distance", "entry": 5011005, "radius": 100, "min": 63,
+      "max": 70, "within_ms": 5000 },
+    {"action": "relocate", "actor": "player", "dx": -6.555, "dy": 11.688},
+    {"action": "attack_nearby", "actor": "player", "entry": 39679, "radius": 8},
+    { "action": "assert", "label": "CONTROL: the player is in combat", "actor": "player", "metric": "combat",
+      "equals": 1, "within_ms": 5000 },
+    {"action": "relocate", "label": "Stand just in front of the east zealot", "actor": "player",
+      "dx": 11.425, "dy": -5.788},
+    { "action": "assert", "label": "DISCRIMINATING: the player intercepts the beam from the floor", "actor": "player",
+      "metric": "aura_stacks", "spell": 5011069, "min": 1, "within_ms": 3000 }
+  ]
+}

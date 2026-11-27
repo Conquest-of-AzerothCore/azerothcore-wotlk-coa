@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Blackrock Caverns: Crepuscular Veil from several Shadows of Obsidius builds one stack of 4 (#13822)",
+  "contract": [
+    "#13822: each Shadow of Obsidius 40817 carries Crepuscular Veil 5011188, which on every landed melee hit applies",
+    "Crepuscular Veil 5011092 (-20 % healing taken, StackAmount 4) to its target. Each Shadow's copy was a separate",
+    "aura, and a new copy from another Shadow replaced the previous one, so with two or three Shadows on the same",
+    "player the debuff kept falling back to one stack. With SPELL_ATTR0_CU_SINGLE_AURA_STACK every Shadow adds to the",
+    "same aura. Three Shadows are summoned on GM Island, away from Obsidius, and the player hits each one so that all",
+    "three turn on the player (their DamageTaken hook gives the attacker the threat). The three Shadows swing in",
+    "turn, so on the broken tree no Shadow lands four hits in a row; the shared stack must reach 4 within 15 s.",
+    "Hit and expertise ratings make the player's swings land."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": 16226.2, "y": 16257.0, "z": 13.2, "o": 0},
+  "players": [
+    {"id": "target", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"action": "set_health", "actor": "target", "value": 50000000, "maximum": 50000000},
+    {"action": "summon", "actor": "target", "entry": 40817, "as": "shadow1", "distance": 3},
+    {"action": "summon", "actor": "target", "entry": 40817, "as": "shadow2", "distance": 3},
+    {"action": "summon", "actor": "target", "entry": 40817, "as": "shadow3", "distance": 3},
+    {"action": "wait", "ms": 1000},
+    { "action": "assert", "label": "CONTROL: three Shadows of Obsidius", "actor": "target",
+      "metric": "nearby_creature_count", "entry": 40817, "equals": 3 },
+    {"action": "attack", "actor": "target", "target": "shadow1"},
+    {"action": "wait", "ms": 2500},
+    {"action": "attack", "actor": "target", "target": "shadow2"},
+    {"action": "wait", "ms": 2500},
+    {"action": "attack", "actor": "target", "target": "shadow3"},
+    { "action": "assert", "label": "CONTROL: a Shadow's hit applies Crepuscular Veil", "actor": "target",
+      "metric": "aura", "spell": 5011092, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Shadows build one Crepuscular Veil stack of 4",
+      "actor": "target", "metric": "aura_stacks", "spell": 5011092, "equals": 4, "within_ms": 15000 }
+  ]
+}

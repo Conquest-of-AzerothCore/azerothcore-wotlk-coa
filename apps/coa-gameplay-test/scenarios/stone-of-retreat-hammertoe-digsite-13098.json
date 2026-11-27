@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Stone of Retreat: Hammertoe Digsite lands at the Explorers' League camp (#13098)",
+  "contract": [
+    "#13098: spell 1777074 says Returns you to Hammertoe Digsite in the Badlands. Its spell_target_position row copied",
+    "the spawn of Hammertoe Grez inside the Uldaman entry cave (-6065.44, -3022.03), among hostile Shadowforge dwarves.",
+    "Ascension's client teleport pin for 1777074 (TeleportLocations.lua, sor-hammertoe-digsite) is the Explorers'",
+    "League camp at (-6615.76, -3412.74, 279.27), beside Prospector Ryedol and Sigrun Ironhew. An Alliance player learns",
+    "the spell from item 1780039 through the native item-use handler, casts it, and must land within 10 yd of the camp",
+    "point; the cave point is 675 yd away."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "alliance", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "add_item", "actor": "alliance", "item": 1780039},
+    {"action": "use_item", "actor": "alliance", "item": 1780039, "spell": 55884},
+    {"action": "assert", "actor": "alliance", "metric": "knows_spell", "spell": 1777074, "equals": 1,
+     "within_ms": 3000},
+    {"action": "wait", "ms": 2000},
+    {"action": "cast", "actor": "alliance", "spell": 1777074, "target": "alliance"},
+    {"action": "assert", "actor": "alliance", "metric": "map_id", "equals": 0, "within_ms": 15000},
+    {"action": "assert", "label": "DISCRIMINATING: lands at the digsite camp, not in the Uldaman cave",
+     "actor": "alliance", "metric": "point_distance_2d", "x": -6615.76, "y": -3412.74, "max": 10,
+     "within_ms": 15000}
+  ]
+}

@@ -224,6 +224,8 @@ std::array<Position, 3> const CorlaZealotPos =
     { 573.4844f, 978.5851f, 155.4369f, 1.570796f }
 } };
 
+Position const CorlaNetherDrakePos = { 573.602f, 910.006f, 180.339f, 0.0f };
+
 Position const LavaFountainPos = { 237.2951f, 784.7761f, 95.99241f };
 
 Position const LuckyPos = { 116.337f, 567.625f, 76.4501f, 3.49996f };
@@ -324,12 +326,19 @@ void DealUnmitigatedDamage(Unit* caster, Unit* target, uint32 spellId, uint32 va
     caster->SendSpellNonMeleeDamageLog(&damage);
 }
 
-std::vector<Player*> PlayersNear(WorldObject const* center, float range)
+enum class PlayerRange
+{
+    Spatial,
+    Planar,
+};
+
+std::vector<Player*> PlayersNear(WorldObject const* center, float range, PlayerRange mode = PlayerRange::Spatial)
 {
     std::vector<Player*> out;
     for (auto const& ref : center->GetMap()->GetPlayers())
         if (Player* player = ref.GetSource())
-            if (player->IsAlive() && !player->IsGameMaster() && center->GetExactDist(player) <= range)
+            if (player->IsAlive() && !player->IsGameMaster() &&
+                (mode == PlayerRange::Planar ? center->GetExactDist2d(player) : center->GetExactDist(player)) <= range)
                 out.push_back(player);
     return out;
 }
@@ -989,9 +998,7 @@ struct boss_coa_brc_corla : public BossAI
             if (!zealot)
                 continue;
             _zealots.push_back(zealot->GetGUID());
-            Position beamPos = me->GetPosition();
-            beamPos.m_positionZ += 2.0f;
-            if (Creature* beam = me->SummonCreature(NPC_NETHER_BEAM, beamPos, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* beam = me->SummonCreature(NPC_NETHER_BEAM, CorlaNetherDrakePos, TEMPSUMMON_MANUAL_DESPAWN))
                 beam->AI()->SetGUID(zealot->GetGUID(), 0);
         }
     }
@@ -1231,7 +1238,7 @@ private:
 
         Unit* target = zealot;
         float best = me->GetExactDist2d(zealot);
-        for (Player* player : PlayersNear(me, best + 2.0f))
+        for (Player* player : PlayersNear(me, best + 2.0f, PlayerRange::Planar))
         {
             float const dist = me->GetExactDist2d(player);
             if (dist >= best)
@@ -1497,7 +1504,7 @@ struct boss_coa_brc_beauty : public BossAI
     void SummonedCreatureDies(Creature* summon, Unit* killer) override
     {
         BossAI::SummonedCreatureDies(summon, killer);
-        if (summon->GetEntry() == NPC_RUNTY && me->IsAlive())
+        if (me->IsAlive() && !me->HasAura(SPELL_BERSERK))
             DoCastSelf(SPELL_BERSERK, true);
     }
 
