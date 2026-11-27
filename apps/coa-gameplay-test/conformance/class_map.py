@@ -6,6 +6,8 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from extra_spells import class_spells_table, felsworn_rifts, log_events, taught_abilities
+
 CLASS_IDS = range(12, 33)
 NUMBER = re.compile(r'(?<![\w.])\d{3,7}(?![\w.])')
 TOKEN = re.compile(r'\$\{[^}]*\}(?:\.[1-9])?|\$/\d+;\d*[A-Za-z]\d?|\$\*\d+;\d*[A-Za-z]\d?|\$<\w+>|\$\d*[A-Za-z]\d?')
@@ -147,21 +149,19 @@ def family_masks(text):
 
 
 def base_candidates(root):
-    text = (root / 'src/server/coa/AscensionCustomClassData.h').read_text(encoding='utf-8')
-    block = text[text.index('ClassSpells ='):text.index('LegacyGeneratedClassSpells')]
     found = defaultdict(dict)
-    for class_id, level, spell in BASE_ROW.findall(block):
-        found[int(class_id)][int(spell)] = int(level)
+    for class_id, spells in class_spells_table(root).items():
+        found[class_id].update(spells)
+    for class_id, spells in taught_abilities(root).items():
+        per_class = found[class_id]
+        for spell_id, (required_level, _) in spells.items():
+            per_class[spell_id] = min(per_class.get(spell_id, required_level), required_level)
+    rifts = felsworn_rifts(root)
+    if rifts:
+        per_class = found[14]
+        for spell_id, required_level in rifts.items():
+            per_class[spell_id] = min(per_class.get(spell_id, required_level), required_level)
     return found
-
-
-def log_events(path):
-    casts, others = Counter(), Counter()
-    if path and path.exists():
-        for line in path.read_text(encoding='utf-8').splitlines():
-            event, spell, count = line.rsplit(',', 2)
-            (casts if event in CAST_EVENTS else others)[int(spell)] += int(count)
-    return casts, others
 
 
 def class_file_spells(payload):

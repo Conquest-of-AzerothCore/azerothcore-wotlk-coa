@@ -17,6 +17,7 @@ from coverage import (COVERAGE_FILE, EvidenceError, clause_coverage, clause_cove
                       load_clauses, load_consumption, write_coverage, write_fragment)
 from diff import IMPACT_FILE, diff_directories, write_impact
 from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
+from extra_spells import REPOSITORY, ExtraSpellsError, audit_extra_spells
 from packets import PacketError, write_packets
 from passives import passive_scenario
 from hits import (CLOSED, REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, floored_casts,
@@ -501,13 +502,22 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
 def scaffold_command(args) -> int:
     if args.out.exists():
         raise ValueError(f'{args.out} already exists; scaffold into a new file')
-    class_file = scaffold_class(args.class_id, server_dbc_dir(args.dbc_dir), args.config, args.mysql,
+    dbc_dir = server_dbc_dir(args.dbc_dir)
+    class_file = scaffold_class(args.class_id, dbc_dir, args.config, args.mysql,
                                 level=args.level, shared_defines=args.shared_defines,
                                 live_baseline=args.live_baseline)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open('x', encoding='utf-8') as stream:
         stream.write(json.dumps(class_file, indent=2) + '\n')
     print(f'{args.out}: scaffolded class {class_file["class_id"]} ({class_file["name"]})')
+    try:
+        report = audit_extra_spells(class_file, dbc_dir)
+    except (ExtraSpellsError, ValueError, OSError):
+        return 0
+    unaccounted = report['counts']['unaccounted']
+    if unaccounted:
+        print(f'{args.out}: {unaccounted} unaccounted server-granted spells; run conformance.py audit-extra '
+              f'--class {class_file["class_id"]} --class-file {args.out} before ledger')
     return 0
 
 
@@ -596,6 +606,14 @@ def coverage_command(args) -> int:
 def ledger_command(args) -> int:
     class_file = load_class_file(args.class_id)
     dbc_dir = server_dbc_dir(args.dbc_dir or class_file.get('dbc_dir', DBC_DIR))
+    report = audit_extra_spells(class_file, dbc_dir, args.source_root)
+    if report['unaccounted'] and not args.allow_unaccounted_extra:
+        preview = ', '.join(f"{entry['spell']} {entry['name']}" for entry in report['unaccounted'][:10])
+        suffix = f", ... ({len(report['unaccounted']) - 10} more)" if len(report['unaccounted']) > 10 else ''
+        print(f"Refusing ledger for class {args.class_id}: {len(report['unaccounted'])} unaccounted server-granted "
+              f"spells ({preview}{suffix}); run conformance.py audit-extra --class {args.class_id} and add each to "
+              f"extra_spells or excluded_extra_spells (or pass --allow-unaccounted-extra)", file=sys.stderr)
+        return 2
     written = ledger(class_file, dbc_dir, parse_text_bases(args.text_basis))
     entries = written.entries
     clause_coverage(entries, [])
@@ -851,6 +869,10 @@ def main(argv=None) -> int:
     ledgering.add_argument('--text-basis', dest='text_basis', action='append',
                            help='<spell>=<basis> of a spell read from coa_client_spell_description: owner_ruling, '
                                 'live_source, text_correction or align_to_server; required for each such spell')
+    ledgering.add_argument('--source-root', dest='source_root', type=Path, default=REPOSITORY,
+                           help='the source tree to read grant tables and SQL from')
+    ledgering.add_argument('--allow-unaccounted-extra', dest='allow_unaccounted_extra', action='store_true',
+                           help='bypass the pre-ledger unaccounted extra_spells gate')
     from cycle import add_cycle_arguments, cycle_command
     add_cycle_arguments(commands.add_parser('cycle', help="run the integrator's fixed steps of a merged pair from a "
                                                          'cycle file: gate, digests, generate, source stage, pair, '

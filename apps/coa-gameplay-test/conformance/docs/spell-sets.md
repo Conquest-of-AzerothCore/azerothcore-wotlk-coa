@@ -20,12 +20,20 @@
   from the same header and `required_level` the `Spell.dbc` `BaseLevel` of the base spell. A listed spell already in
   the set, listed twice or missing from `Spell.dbc` is an error. `generate` passes the class file's `extra_spells`;
   passive reference spells keep the `CharacterAdvancement` set.
+- `conformance.py audit-extra` audits `extra_spells` and `excluded_extra_spells` against server-granted class spells
+  across `AscensionCompatData::ClassSpells`, `AscensionLiveBaseline::Spells` (`RaceId == 0`),
+  `AscensionTaughtAbilityData.h`, `FelswornHordeCapitalRifts`, and `trainer_spell` SQL (`ReqLevel <= level`), separating
+  covered `@s:<id>:` pull-ins, `STOCK_GENERIC_SPELLS` (excluding `552011`), same-name `unchained_ranks`, and remaining
+  `unaccounted` candidates; `conformance.py ledger` refuses while `unaccounted` is non-empty unless
+  `--allow-unaccounted-extra` is passed
+  ([ADR 1327](../../../../docs/adr/1327-conformance-audit-extra-spells-before-ledger.md)).
 
 ### Extra class spells
 
 A class file's `extra_spells` entry is `{"spell", "name", "citation"}`: the base spell id, its name and the citation of
 one Ascension combat log event of the owner's private Ascension combat log archive where a player casts a rank of it
 or holds its aura ([ADR 0016](../../../docs/adr/0016-conformance-class-spells-beyond-character-advancement.md) D2).
+Intentional omissions from server grant tables go in `excluded_extra_spells` as `{"spell", "name", "reason"}`.
 The citation is `<date> <time>, spell <logged id> <name>, Ascension combat log, private archive`, without character
 names or raw lines, because the archive is private; the full lines stay in the gitignored
 `.agents/plans/class-conformance-2/templar/extra-spells-evidence.md`. The log does not store a class, so the event

@@ -84,7 +84,10 @@
   runs `coverage.clause_coverage` on the ledger; `buckets.py`: `bucket_document(coverage, manifest, class_file,
   sources, source_name, family, records, settled, standing, inputs)` turns that audit into the bucket file of
   `sample` and `packets`; `aura354.py`: `aura354_rows(class_map, class_id)` lists a class's aura-354 spells and flags
-  those without class code; `batch_commands.py` registers the three as `audit`, `buckets` and `aura354` (see
+  those without class code; `extra_spells.py`: `audit_extra_spells(class_file, dbc_dir, source_root)` audits
+  server-granted spells from `ClassSpells`, `LiveBaseline`, `TaughtAbilities`, `FelswornHordeCapitalRifts`, and
+  `trainer_spell` SQL against `extra_spells` and `excluded_extra_spells`; `batch_commands.py` registers `audit`,
+  `buckets`, `aura354` and `audit-extra` (see
   [Coverage audit and bucket file](generate-and-compare.md#coverage-audit-and-bucket-file)).
 - `ledger.py`: `ledger(class_file, dbc_dir, text_bases)` writes a class's first clause ledger from the tooltips of
   its class spell set (`raw_clauses` cuts each tooltip, `clause_label_lists` maps its `$` tokens to the value
