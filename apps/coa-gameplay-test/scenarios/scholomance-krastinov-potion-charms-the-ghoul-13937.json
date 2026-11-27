@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "name": "Scholomance: Krastinov's Ghoulish Potion charms the player it turns into a ghoul",
+  "contract": "Doctor Theolen Krastinov (11261) throws Krastinov's Ghoulish Potion (92624) at a damage dealer: a ghoul transform and a charm for 10 s (tooltip: 'Ghoulified. Charmed for 10 seconds.'). The charm effect carries the base value 1, which the core reads as the highest level it may charm, so no player was ever charmed and the ghoul kept full control (#13937). Expected: the damage dealer who gets the potion is charmed and loses control while Krastinov keeps fighting the tank, and gets control back when the potion ends. The group setup follows the potion targeting scenario: tank, healer and damage dealer by specialization, grouped in Stormwind and teleported into one Scholomance instance.",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 18,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "healer",
+      "race": 1,
+      "class": 31,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters finish logging in",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "healer joins tank's group",
+      "actor": "tank",
+      "target": "healer"
+    },
+    {
+      "action": "group",
+      "label": "dps joins tank's group",
+      "actor": "tank",
+      "target": "dps"
+    },
+    {
+      "action": "specialization",
+      "label": "tank takes specialization 21",
+      "actor": "tank",
+      "id": 21
+    },
+    {
+      "action": "specialization",
+      "label": "healer takes specialization 58",
+      "actor": "healer",
+      "id": 58
+    },
+    {
+      "action": "specialization",
+      "label": "dps takes specialization 10",
+      "actor": "dps",
+      "id": 10
+    },
+    {
+      "action": "teleport",
+      "label": "tank enters the dungeon",
+      "actor": "tank",
+      "map": 289,
+      "x": 175.3,
+      "y": -91.0,
+      "z": 70.86,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: tank is inside the dungeon",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 289,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "healer enters the dungeon",
+      "actor": "healer",
+      "map": 289,
+      "x": 175.3,
+      "y": -91.0,
+      "z": 70.86,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: healer is inside the dungeon",
+      "actor": "healer",
+      "metric": "map_id",
+      "equals": 289,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "dps enters the dungeon",
+      "actor": "dps",
+      "map": 289,
+      "x": 175.3,
+      "y": -91.0,
+      "z": 70.86,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: dps is inside the dungeon",
+      "actor": "dps",
+      "metric": "map_id",
+      "equals": 289,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "set_health",
+      "actor": "healer",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "summon",
+      "label": "Summon the boss in the group's instance",
+      "actor": "tank",
+      "entry": 11261,
+      "as": "krastinov",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "label": "Let the boss's spawn events settle",
+      "ms": 6000
+    },
+    {
+      "action": "encounter_start",
+      "actor": "tank",
+      "boss_entry": 11261,
+      "radius": 8
+    },
+    {
+      "action": "attack",
+      "label": "The tank engages first and keeps top threat",
+      "actor": "tank",
+      "target": "krastinov"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Krastinov is in combat",
+      "actor": "krastinov",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "The tank builds a threat lead",
+      "ms": 3000
+    },
+    {
+      "action": "attack",
+      "label": "healer joins the threat list",
+      "actor": "healer",
+      "target": "krastinov"
+    },
+    {
+      "action": "attack",
+      "label": "dps joins the threat list",
+      "actor": "dps",
+      "target": "krastinov"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "healer"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "dps"
+    },
+    {
+      "action": "assert",
+      "label": "The damage dealer drinks the Ghoulish Potion",
+      "actor": "dps",
+      "metric": "aura",
+      "spell": 92624,
+      "equals": 1,
+      "within_ms": 45000
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "The ghoul is charmed by Krastinov",
+      "actor": "dps",
+      "metric": "charmed",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The charmed player has lost control of the character",
+      "actor": "dps",
+      "metric": "controls_self",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Krastinov keeps fighting the tank",
+      "actor": "krastinov",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The charm ends with the potion after 10 s",
+      "actor": "dps",
+      "metric": "charmed",
+      "equals": 0,
+      "within_ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "The player controls the character again",
+      "actor": "dps",
+      "metric": "controls_self",
+      "equals": 1
+    }
+  ]
+}

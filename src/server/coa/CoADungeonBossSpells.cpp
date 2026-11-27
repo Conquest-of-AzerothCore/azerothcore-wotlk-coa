@@ -570,6 +570,28 @@ private:
     std::unordered_map<uint32, uint32> _radius;
 };
 
+class CoAKrastinovGhoulishPotionCharm final : public GlobalScript
+{
+public:
+    CoAKrastinovGhoulishPotionCharm() : GlobalScript("CoAKrastinovGhoulishPotionCharm",
+        { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (!info || info->Id != SpellKrastinovGhoulishPotion)
+            return;
+        for (SpellEffectInfo& effect : info->Effects)
+            if (effect.ApplyAuraName == SPELL_AURA_MOD_CHARM)
+            {
+                effect.BasePoints = 0;
+                effect.DieSides = 0;
+            }
+    }
+
+private:
+    static constexpr uint32 SpellKrastinovGhoulishPotion = 92624;
+};
+
 class spell_coa_summon_hearty_heart : public SpellScript
 {
     PrepareSpellScript(spell_coa_summon_hearty_heart);
@@ -657,4 +679,5 @@ void AddSC_CoADungeonBossSpells()
     RegisterSpellScript(spell_coa_mothers_milk_spray);
     RegisterSpellScript(spell_coa_mothers_milk_debuff);
     new CoADungeonBossSpellReach();
+    new CoAKrastinovGhoulishPotionCharm();
 }
