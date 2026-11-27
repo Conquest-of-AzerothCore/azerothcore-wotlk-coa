@@ -1,0 +1,1218 @@
+{
+  "schema": 1,
+  "name": "Chronomancer: Aeon Rend does not proc from Shifting Chaos AoE (#14022)",
+  "contract": [
+    "Issue #14022 reports Aeon Rend (583248) proccing from Shifting Chaos AoE (801269) after #13614 added",
+    "PROC_ATTR_TRIGGERED_CAN_PROC (AttributesMask 2) to 583248. Because SpellInfo::IsAffected matches any set bit",
+    "in SpellFamilyMask and 801269 carries SpellFamilyFlags[1] = 0x1000 (4096) shared with Chromatic Shard,",
+    "every Shifting Chaos AoE hit could proc Aeon Rend, casting Chromatic Shard and re-triggering Shifting Chaos",
+    "in an exponential loop on clustered dummies.",
+    "Fix: drop SpellFamilyMask1 to 0 on 583248 (keeping SpellFamilyMask2 = 33554432 = 0x02000000, unique to",
+    "Chromatic Shard ranks, and AttributesMask = 2 for Time Loop #13614) and guard aura_ascension_aeon_rend",
+    "with DoCheckProc checking IsChromaticShardRank.",
+    "Phase 1 fires 10 Anomaly Spikes (503826) into 6 clustered dummies within 8 yd (~60 Shifting Chaos 801269 hits,",
+    "P(0 procs) < 3.2e-8 pre-fix) and verifies 0 Aeon Rend procs and 0 Chromatic Shard casts.",
+    "Phase 2 fires 40 owned Chromatic Shard rank 9 (567544) casts with Shifting Chaos active ((0.75)^40 < 1.1e-5)",
+    "and verifies Aeon Rend still procs between 1 and 40 times without looping through Shifting Chaos."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy1",
+      "owner": "chronomancer",
+      "entry": 3444,
+      "health": 5000000,
+      "distance": 8,
+      "stationary": true
+    },
+    {
+      "id": "dummy2",
+      "owner": "chronomancer",
+      "entry": 3444,
+      "health": 5000000,
+      "distance": 8.5,
+      "stationary": true
+    },
+    {
+      "id": "dummy3",
+      "owner": "chronomancer",
+      "entry": 3444,
+      "health": 5000000,
+      "distance": 9,
+      "stationary": true
+    },
+    {
+      "id": "dummy4",
+      "owner": "chronomancer",
+      "entry": 3444,
+      "health": 5000000,
+      "distance": 9.5,
+      "stationary": true
+    },
+    {
+      "id": "dummy5",
+      "owner": "chronomancer",
+      "entry": 3444,
+      "health": 5000000,
+      "distance": 10,
+      "stationary": true
+    },
+    {
+      "id": "dummy6",
+      "owner": "chronomancer",
+      "entry": 3444,
+      "health": 5000000,
+      "distance": 10.5,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 583248
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 706059
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 503826
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 567544,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 801292,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 583248,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 706059,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 503826,
+      "target": "dummy1",
+      "label": "Phase 1: Anomaly Spike 1 of 10"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 503826,
+      "target": "dummy1",
+      "label": "Phase 1: Anomaly Spike 2 of 10"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 503826,
+      "target": "dummy1",
+      "label": "Phase 1: Anomaly Spike 3 of 10"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 503826,
+      "target": "dummy1",
+      "label": "Phase 1: Anomaly Spike 4 of 10"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 503826,
+      "target": "dummy1",
+      "label": "Phase 1: Anomaly Spike 5 of 10"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 503826,
+      "target": "dummy1",
+      "label": "Phase 1: Anomaly Spike 6 of 10"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 503826,
+      "target": "dummy1",
+      "label": "Phase 1: Anomaly Spike 7 of 10"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 503826,
+      "target": "dummy1",
+      "label": "Phase 1: Anomaly Spike 8 of 10"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 503826,
+      "target": "dummy1",
+      "label": "Phase 1: Anomaly Spike 9 of 10"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 503826,
+      "target": "dummy1",
+      "label": "Phase 1: Anomaly Spike 10 of 10"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 1500,
+      "label": "Let Anomaly Spike missiles and Shifting Chaos AoE hits resolve"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 503826,
+      "min": 10,
+      "label": "SETUP: all 10 Anomaly Spike casts hit dummy1"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 801269,
+      "min": 50,
+      "max": 60,
+      "label": "SETUP: Shifting Chaos AoE replicated across the 6 clustered dummies (bounded [50, 60])"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_proc_count",
+      "spell": 583248,
+      "equals": 0,
+      "label": "DISCRIMINATING (#14022): Shifting Chaos AoE does not proc Aeon Rend"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "equals": 0,
+      "label": "DISCRIMINATING (#14022): no rank-1 Chromatic Shard restrike casts from Shifting Chaos"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 567544,
+      "equals": 0,
+      "label": "DISCRIMINATING (#14022): no Chromatic Shard casts triggered during Phase 1"
+    },
+    {
+      "action": "spell_mod_mutant",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "op": 10,
+      "percent": -100,
+      "label": "Phase 2: make Chromatic Shard rank 9 instant for 40-cast trial"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 1 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 2 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 3 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 4 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 5 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 6 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 7 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 8 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 9 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 10 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 11 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 12 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 13 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 14 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 15 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 16 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 17 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 18 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 19 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 20 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 21 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 22 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 23 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 24 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 25 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 26 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 27 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 28 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 29 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 30 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 31 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 32 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 33 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 34 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 35 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 36 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 37 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 38 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 39 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy1",
+      "label": "Phase 2: Chromatic Shard rank 9 cast 40 of 40"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "wait",
+      "ms": 1500,
+      "label": "Let final Chromatic Shard restrike and Shifting Chaos AoE resolve"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0,
+      "label": "All 40 Chromatic Shard casts succeeded"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_proc_count",
+      "spell": 583248,
+      "min": 1,
+      "max": 40,
+      "label": "DISCRIMINATING (#14022): Aeon Rend procs from real Chromatic Shards (40 casts, P(0)=1.0e-5) without looping through Shifting Chaos"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "equals": 0,
+      "label": "DISCRIMINATING (#14022): Aeon Rend does not fall back to rank 1 Chromatic Shard"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 801269,
+      "min": 250,
+      "max": 540,
+      "label": "SETUP: Shifting Chaos AoE fired throughout Phase 2 across the 6 clustered dummies (bounded [250, 540])"
+    }
+  ]
+}
