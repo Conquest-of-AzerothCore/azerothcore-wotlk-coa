@@ -118,6 +118,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <set>
 #include <unordered_map>
@@ -917,6 +918,65 @@ private:
 
 bool AuraApplyCounter::_enabled = false;
 std::map<std::pair<ObjectGuid, uint32>, uint32> AuraApplyCounter::_counts;
+
+class UnownedFixtureSummons
+{
+public:
+    static void Begin(uint32 phase)
+    {
+        std::lock_guard lock(_mutex);
+        _byPhase.try_emplace(phase);
+    }
+
+    static void TrackPhase(uint32 phase, uint32 newPhase)
+    {
+        if (newPhase <= PHASEMASK_NORMAL || newPhase == phase)
+            return;
+        std::lock_guard lock(_mutex);
+        if (auto itr = _byPhase.find(phase); itr != _byPhase.end())
+            itr->second.additionalPhases.insert(newPhase);
+    }
+
+    static void Record(Creature const* creature)
+    {
+        if (!creature || !creature->IsSummon() || !creature->GetSummonerGUID().IsEmpty())
+            return;
+        std::lock_guard lock(_mutex);
+        uint32 const phase = creature->GetPhaseMask();
+        if (auto itr = _byPhase.find(phase); itr != _byPhase.end())
+        {
+            itr->second.summons.insert(ProcCounter::OwnerOf(creature));
+            return;
+        }
+        TrackedCase* owner = nullptr;
+        for (auto& [casePhase, tracked] : _byPhase)
+            if (tracked.additionalPhases.contains(phase))
+            {
+                if (owner)
+                    return;
+                owner = &tracked;
+            }
+        if (owner)
+            owner->summons.insert(ProcCounter::OwnerOf(creature));
+    }
+
+    static std::set<ProcCounter::Owner> Take(uint32 phase)
+    {
+        std::lock_guard lock(_mutex);
+        auto entry = _byPhase.extract(phase);
+        return entry.empty() ? std::set<ProcCounter::Owner>{} : std::move(entry.mapped().summons);
+    }
+
+private:
+    struct TrackedCase
+    {
+        std::set<uint32> additionalPhases;
+        std::set<ProcCounter::Owner> summons;
+    };
+
+    static inline std::mutex _mutex;
+    static inline std::map<uint32, TrackedCase> _byPhase;
+};
 
 class SummonCounter
 {
@@ -2358,7 +2418,11 @@ class GameplayCase
 public:
     GameplayCase(std::string runId, std::string resultPath, uint32 phase = CoAGameplay::LanePhase(0),
         CoAGameplay::NameAllocator* names = nullptr) : _phase(phase), _runId(std::move(runId)),
-        _resultPath(std::move(resultPath)), _names(names), _admitted(Clock::now()) { }
+        _resultPath(std::move(resultPath)), _names(names), _admitted(Clock::now())
+    {
+        if (_phase > PHASEMASK_NORMAL)
+            UnownedFixtureSummons::Begin(_phase);
+    }
 
     void PlaceInBatch(std::string const& batchId, uint32 sequence, std::string const& clock, uint32 lane)
     {
@@ -2859,12 +2923,26 @@ private:
         for (auto const& [id, target] : _targets)
             if (Map* map = sMapMgr->FindMap(target.map, target.instance))
                 fixtureRoots[map].insert(target.guid);
+        for (auto const& [id, actor] : _actors)
+            if (Player* player = actor.session ? actor.session->GetPlayer() : nullptr)
+                if (Map* map = player->FindMap())
+                    fixtureRoots[map];
+        std::map<Map*, std::vector<Creature*>> unowned;
+        for (auto const& [mapId, instanceId, guid] : UnownedFixtureSummons::Take(_phase))
+            if (Map* map = sMapMgr->FindMap(mapId, instanceId))
+                if (Creature* creature = map->GetCreature(guid))
+                    if (creature->IsSummon() && creature->GetSummonerGUID().IsEmpty()
+                        && fixtureRoots[map].insert(guid).second)
+                    {
+                        unowned[map].push_back(creature);
+                        units.insert(ProcCounter::OwnerOf(creature));
+                    }
         for (auto& [map, parents] : fixtureRoots)
         {
             FixtureSummonCollector collector;
             TypeContainerVisitor<FixtureSummonCollector, MapStoredObjectTypesContainer> visitor(collector);
             visitor.Visit(map->GetObjectsStore());
-            std::vector<Creature*> descendants;
+            std::vector<Creature*> descendants = std::move(unowned[map]);
             bool added;
             do
             {
@@ -8765,7 +8843,11 @@ private:
                 player->GetSession()->HandleOpenItemOpcode(request);
         }
         else if (action == "set_phase")
-            player->SetPhaseMask(step.get<uint32>("value", _phase), true);
+        {
+            uint32 const newPhase = step.get<uint32>("value", _phase);
+            UnownedFixtureSummons::TrackPhase(_phase, newPhase);
+            player->SetPhaseMask(newPhase, true);
+        }
         else if (action == "set_money")
             player->SetMoney(step.get<uint32>("value"));
         else if (action == "add_at_login_flag")
@@ -9185,13 +9267,13 @@ private:
                 ? player->GetMap()->SummonCreature(step.get<uint32>("entry"), position)
                 : player->SummonCreature(step.get<uint32>("entry"), position, TEMPSUMMON_MANUAL_DESPAWN);
             Require(creature != nullptr, "Could not summon creature: " + id);
+            _targets.emplace(id, Target{ creature->GetMapId(), creature->GetInstanceId(), creature->GetGUID() });
             creature->SetPhaseMask(player->GetPhaseMask(), true);
             if (auto aiAction = step.get_optional<int32>("ai_action"))
             {
                 Require(creature->AI() != nullptr, "Summoned creature has no AI for its action");
                 creature->AI()->DoAction(*aiAction);
             }
-            _targets.emplace(id, Target{ creature->GetMapId(), creature->GetInstanceId(), creature->GetGUID() });
             record.put("result", creature->GetCreatureTemplate()->Entry);
         }
         else if (action == "pet_stance")
@@ -10832,6 +10914,7 @@ public:
     void OnCreatureAddWorld(Creature* creature) override
     {
         SummonCounter::Record(creature);
+        UnownedFixtureSummons::Record(creature);
         if (creature)
             TimelineRecorder::Record(creature, { 0, CoAGameplay::TimelineEventKind::Spawn, creature->GetGUID(),
                 ObjectGuid::Empty, creature->GetEntry(), 0, 0 });

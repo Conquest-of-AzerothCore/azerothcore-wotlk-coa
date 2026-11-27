@@ -813,6 +813,59 @@ class CompareTest(unittest.TestCase):
             self.assertNotIn('trigger_with_value', verdict.detail or {})
             self.assertIn('read with the measured stats', verdict.explanation)
 
+    def test_a_rolled_effect_142_carrier_is_judged_on_its_unpowered_roll(self):
+        text = '${$m1+0+$AP*0.2}'
+
+        def tokens(caster, forced):
+            base_val = forced[2] if forced is not None else 245
+            return [Displayed(text, base_val + caster.ap * 0.2, 0, 'flat')]
+
+        label = '1001 effect_value e0 #0'
+        reads = [236 + i for i in range(19)] * 2
+        item = expectation(label, 'effect_value', text, 'read flat', 0, {'samples': len(reads)})
+        reader = FakeTooltips(tokens, points={(RANK, 0): (235, 19)}, fields={(RANK, 'Effect[0]'): 142})
+        steps = [assert_step(label if idx == 0 else f'{label} sample {idx}', str(val))
+                 for idx, val in enumerate(reads)]
+        verdict = self.value_run([item], [text], steps, reader)[label]
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.expected, 245.0)
+        detail = verdict.detail['trigger_with_value']
+        self.assertAlmostEqual(detail['power_term'], 313 * 0.2)
+        self.assertIn('SpellEffects.cpp:1862-1868', verdict.explanation)
+
+    def test_a_rolled_effect_142_carrier_holding_power_term_in_calc_value_alerts(self):
+        text = '${$m1+0+$AP*0.2}'
+
+        def tokens(caster, forced):
+            base_val = forced[2] if forced is not None else 245
+            return [Displayed(text, base_val + caster.ap * 0.2, 0, 'flat')]
+
+        label = '1001 effect_value e0 #0'
+        reads = [round(236 + i + 313 * 0.2) for i in range(19)] * 2
+        item = expectation(label, 'effect_value', text, 'read flat', 0, {'samples': len(reads)})
+        reader = FakeTooltips(tokens, points={(RANK, 0): (235, 19)}, fields={(RANK, 'Effect[0]'): 142})
+        steps = [assert_step(label if idx == 0 else f'{label} sample {idx}', str(val))
+                 for idx, val in enumerate(reads)]
+        verdict = self.value_run([item], [text], steps, reader)[label]
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_a_rolled_non_142_effect_keeps_full_token_and_alerts_without_power(self):
+        text = '${$m1+0+$AP*0.2}'
+
+        def tokens(caster, forced):
+            base_val = forced[2] if forced is not None else 245
+            return [Displayed(text, base_val + caster.ap * 0.2, 0, 'flat')]
+
+        label = '1001 effect_value e0 #0'
+        reads = [236 + i for i in range(19)] * 2
+        item = expectation(label, 'effect_value', text, 'read flat', 0, {'samples': len(reads)})
+        reader = FakeTooltips(tokens, points={(RANK, 0): (235, 19)}, fields={(RANK, 'Effect[0]'): 2})
+        steps = [assert_step(label if idx == 0 else f'{label} sample {idx}', str(val))
+                 for idx, val in enumerate(reads)]
+        verdict = self.value_run([item], [text], steps, reader)[label]
+        self.assertEqual(verdict.status, 'alert')
+        self.assertNotIn('trigger_with_value', verdict.detail or {})
+
     def test_a_base_roll_only_token_whose_hit_labels_are_not_in_the_comparison_is_an_alert(self):
         verdict = self.base_roll_verdict()
         self.assertEqual(verdict.status, 'alert')

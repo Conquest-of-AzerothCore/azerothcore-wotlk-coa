@@ -5455,5 +5455,942 @@
       "807879 behaviour_metric_delta 6th_held"
     ],
     "kind": "claim"
+  },
+  {
+    "spell": 502141,
+    "clause": "Set C’thun’s Gaze upon an enemy or ally, jumping to 3 additional nearby targets,",
+    "labels": [
+      "502141 behaviour_metric_delta jump_enemies",
+      "502141 behaviour_metric_delta jump_allies"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502141,
+    "clause": "dealing ${$m1+0+$sps*0.5+$AP*0.2} Shadow damage to enemies or healing allies for ${$m2+0+$bh*0.665+$AP*0.1}$?s706188[ and revealing stealthed enemies within $807344d][].",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$sps*0.5+$AP*0.2} Shadow damage to enemies",
+        "labels": [
+          "502141 behaviour_metric_delta damage_base",
+          "502141 behaviour_metric_delta damage_sp",
+          "502141 behaviour_metric_delta damage_ap"
+        ]
+      },
+      {
+        "claim": "or healing allies for ${$m2+0+$bh*0.665+$AP*0.1}",
+        "labels": [
+          "502141 behaviour_metric_delta heal_base",
+          "502141 behaviour_metric_delta heal_sp",
+          "502141 behaviour_metric_delta heal_ap"
+        ]
+      },
+      {
+        "claim": "$?s706188[ and revealing stealthed enemies within $807344d][]",
+        "labels": [
+          "502141 behaviour_metric_delta reveal_held",
+          "502141 behaviour_metric_delta reveal_gone"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 574325,
+    "clause": "Envelop an ally in eldritch magic, healing for ${$m1+0+$bh*.56+$AP*.12}.",
+    "labels": [
+      "574325 behaviour_metric_delta heal_base",
+      "574325 behaviour_metric_delta heal_sp",
+      "574325 behaviour_metric_delta heal_ap"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500723,
+    "clause": "Taunts enemies within $a1 yds for $d,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Taunts enemies within $a1 yds",
+        "labels": [
+          "500723 effect_radius e0 #0",
+          "500723 aggro_redirect range primary after",
+          "500723 aggro_redirect range extra1 after",
+          "500723 aggro_redirect edge primary after",
+          "500723 aggro_redirect edge extra1 after"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "500723 aura_duration_ms #1",
+          "500723 behaviour_metric_delta taunt_duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 500723,
+    "clause": "and significantly increases threat generation for $500717d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and significantly increases threat generation",
+        "labels": [
+          "500723 behaviour_metric_delta threat_buff",
+          "500723 behaviour_metric_delta threat_live"
+        ]
+      },
+      {
+        "claim": "for $500717d.",
+        "labels": [
+          "500723 spell_duration 500717 #2",
+          "500723 behaviour_metric_delta threat_buff_duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 520151,
+    "clause": "Devour $m1 harmful magic effect on a friendly target,",
+    "labels": [
+      "520151 effect_value e0 #0",
+      "520151 behaviour_dispel_count magic_dispel no_cast magic",
+      "520151 behaviour_dispel_count magic_dispel no_cast curse",
+      "520151 behaviour_dispel_count magic_dispel cast magic",
+      "520151 behaviour_dispel_count magic_dispel cast curse"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520151,
+    "clause": "dispelling it and healing you for ${$520152m1+$SP*.175}.",
+    "labels": [
+      "520151 effect_value 520152e0 #1",
+      "520151 behaviour_metric_delta heal_no_debuff",
+      "520151 behaviour_metric_delta heal_base",
+      "520151 behaviour_metric_delta heal_sp"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 620614,
+    "clause": "Induce dread upon nearby enemies, reducing the attack power of all enemies within $a1 yds by $s1 for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reducing the attack power of all enemies ... by $s1",
+        "labels": [
+          "620614 effect_value e0 #1",
+          "620614 aura_amount e0 #1",
+          "620614 behaviour_metric_delta ap_reduction"
+        ]
+      },
+      {
+        "claim": "within $a1 yds",
+        "labels": [
+          "620614 effect_radius e0 #0",
+          "620614 behaviour_metric_delta radius_area"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "620614 aura_duration_ms #2",
+          "620614 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 800368,
+    "clause": "Isolate yourself or an ally, reducing all threat by $s2% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Isolate yourself or an ally, reducing all threat by $s2%",
+        "labels": [
+          "800368 effect_value e1 #0",
+          "800368 aura_amount e1 #0",
+          "800368 behaviour_metric_delta self_threat",
+          "800368 behaviour_metric_delta ally_threat"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "800368 aura_duration_ms #1",
+          "800368 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 504904,
+    "clause": "Blast an enemy with overwhelming void power, dealing ${$m1+0+$SP*1} Shadow damage",
+    "labels": [
+      "504904 effect_value e0 #0",
+      "504904 hit_mean",
+      "504904 behaviour_metric_delta damage_sp"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504904,
+    "clause": "and draining 20 Insanity.",
+    "labels": [
+      "504904 behaviour_metric_delta drain_20",
+      "504904 behaviour_metric_delta gate_19"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502182,
+    "clause": "Generates 10 Insanity",
+    "labels": [
+      "502182 behaviour_metric_delta insanity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502182,
+    "clause": "Inflicts ${$m1+0+$sps*0.714} Shadow damage to an enemy.",
+    "labels": [
+      "502182 hit_mean",
+      "502182 behaviour_metric_delta damage_sp"
+    ],
+    "kind": "claim",
+    "reason": "502182 effect_value e0 #0 is measured-only (rolled sample budget cap); the damage formula is behaviour-proven by 502182 hit_mean and 502182 behaviour_metric_delta damage_sp."
+  },
+  {
+    "spell": 801153,
+    "clause": "Summon a Tentacle of the Old Gods near you for $d.",
+    "labels": [
+      "801153 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801153,
+    "clause": "It will seek an enemy out, dealing ${$804999m1*$<scalingbp>+$sps*0.08+$AP*0.03} Shadow Damage every $801151t1 sec, scaling with spell power and attack power.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "It will seek an enemy out, dealing ${$804999m1*$<scalingbp>+$sps*0.08+$AP*0.03} Shadow Damage",
+        "labels": [
+          "801153 effect_value 804999e0 #1",
+          "801153 behaviour_metric_delta damage_base"
+        ]
+      },
+      {
+        "claim": "every $801151t1 sec",
+        "labels": [
+          "801153 behaviour_metric_delta period_tick1",
+          "801153 behaviour_metric_delta period_tick2"
+        ]
+      },
+      {
+        "claim": "scaling with spell power and attack power.",
+        "labels": [
+          "801153 behaviour_metric_delta damage_sp",
+          "801153 behaviour_metric_delta damage_ap"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 801153,
+    "clause": "While above 60 Insanity, the mana cost of this spell is removed.",
+    "labels": [
+      "801153 behaviour_metric_delta mana_cost_at_60",
+      "801153 behaviour_metric_delta mana_cost_above_60"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801153,
+    "clause": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+    "labels": [
+      "801153 behaviour_metric_delta max_one",
+      "801153 behaviour_metric_delta replaces_yshaarj"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801157,
+    "clause": "Removes the Madness debuff from you or an allied Cultist, resetting the target's Insanity to 0.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Removes the Madness debuff from you, resetting the target's Insanity to 0.",
+        "labels": [
+          "801157 behaviour_metric_delta self_restore",
+          "801157 behaviour_metric_delta refused_without_madness"
+        ]
+      },
+      {
+        "claim": "or an allied Cultist, resetting the target's Insanity to 0.",
+        "labels": [
+          "801157 behaviour_metric_delta ally_restore"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 803599,
+    "clause": "Brings a dead player back to life with $s1 health",
+    "labels": [
+      "803599 effect_value e0 #0",
+      "803599 behaviour_cast_combat peaceful health"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803599,
+    "clause": "and $q1 mana.",
+    "labels": [
+      "803599 behaviour_cast_combat peaceful mana"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803599,
+    "clause": "Cannot be cast when in combat.",
+    "labels": [
+      "803599 behaviour_cast_combat peaceful refusal"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802042,
+    "clause": "Summon a Tentacle of Yogg-Saron near you for $d.",
+    "labels": [
+      "802042 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802042,
+    "clause": "Allies within $802045a1 yds receive $802045s2% increased healing",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Allies within $802045a1 yds",
+        "labels": [
+          "802042 effect_radius 802045e0 #1",
+          "802042 behaviour_metric_delta radius_edge"
+        ]
+      },
+      {
+        "claim": "receive $802045s2% increased healing",
+        "labels": [
+          "802042 effect_value 802045e1 #2",
+          "802042 behaviour_hit_ratio healing_received"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 802042,
+    "clause": "and $802045s3% reduced spell pushback.",
+    "labels": [
+      "802042 effect_value 802045e2 #3",
+      "802042 behaviour_metric_delta pushback"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802042,
+    "clause": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+    "labels": [
+      "802042 behaviour_metric_delta max_one",
+      "802042 behaviour_metric_delta replaces_yshaarj"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802575,
+    "clause": "Regain your sanity, reducing your Insanity by 20",
+    "labels": [
+      "802575 behaviour_metric_delta drain_20",
+      "802575 behaviour_metric_delta gate_19"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802575,
+    "clause": "and restoring $s2% of your missing mana.",
+    "labels": [
+      "802575 effect_value e1 #0",
+      "802575 behaviour_metric_delta missing_mana_1000",
+      "802575 behaviour_metric_delta missing_mana_500",
+      "802575 behaviour_metric_delta missing_mana_full"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802575,
+    "clause": "Usable while casting or channeling.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Usable while casting",
+        "labels": [
+          "802575 behaviour_metric_delta while_casting"
+        ]
+      },
+      {
+        "claim": "or channeling.",
+        "labels": [
+          "802575 behaviour_metric_delta while_channeling"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 804275,
+    "clause": "Channel for $d,",
+    "labels": [
+      "804275 aura_duration_ms #0",
+      "804275 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804275,
+    "clause": "generating 5 Insanity",
+    "labels": [
+      "804275 behaviour_metric_delta insanity_per_tick"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804275,
+    "clause": "and regenerating $804277s1% of your maximum mana every $t1 sec$?s524879[,][, but increase damage taken by $804277s3%.]",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and regenerating $804277s1% of your maximum mana",
+        "labels": [
+          "804275 effect_value 804277e0 #1",
+          "804275 behaviour_metric_delta mana_regen"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "804275 aura_amplitude_ms #2",
+          "804275 behaviour_metric_delta tick_count",
+          "804275 behaviour_metric_delta period_early"
+        ]
+      },
+      {
+        "claim": "but increase damage taken by $804277s3%.",
+        "labels": [
+          "804275 behaviour_hit_ratio damage_taken"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 808038,
+    "clause": "Unleashes eldritch power at the target, dealing ${$808045m1+$SPS*0.4641} Shadow damage to an enemy or healing an ally for ${$808052m1+$BH*0.416018},",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$808045m1+$SPS*0.4641} Shadow damage to an enemy",
+        "labels": [
+          "808038 effect_value 808045e0 #0",
+          "808038 behaviour_metric_delta damage_base",
+          "808038 behaviour_metric_delta damage_sp"
+        ]
+      },
+      {
+        "claim": "or healing an ally for ${$808052m1+$BH*0.416018},",
+        "labels": [
+          "808038 behaviour_metric_delta heal_base",
+          "808038 behaviour_metric_delta heal_sp"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 808038,
+    "clause": "draining 20 Insanity.",
+    "labels": [
+      "808038 behaviour_metric_delta drain_20_enemy",
+      "808038 behaviour_metric_delta drain_20_ally",
+      "808038 behaviour_metric_delta gate_19"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561386,
+    "clause": "Gift an ally with the madness of N'Zoth, increasing total stats by $s1% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Gift an ally with the madness of N'Zoth, increasing total stats by $s1% (Strength, Agility, Stamina, Intellect, Spirit)",
+        "labels": [
+          "561386 aura_amount e0 #0",
+          "561386 behaviour_metric_delta stats_ally"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "561386 aura_duration_ms #1",
+          "561386 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "reason": "561386 effect_value e0 #0 is not_measured (aura_ascension_cultist_lifecycle DoEffectCalcAmount hook); applied amount is proven by 561386 aura_amount e0 #0 and behaviour_metric_delta stats_ally."
+  },
+  {
+    "spell": 561387,
+    "clause": "Gift party and raid members with the madness of N'zoth, increasing total stats by $s1% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Gift party and raid members with the madness of N'zoth, increasing total stats by $s1% (Strength, Agility, Stamina, Intellect, Spirit)",
+        "labels": [
+          "561387 aura_amount e0 #0",
+          "561387 behaviour_metric_delta stats_raid"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "561387 aura_duration_ms #1",
+          "561387 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "reason": "561387 effect_value e0 #0 is not_measured (aura_ascension_cultist_lifecycle DoEffectCalcAmount hook); applied amount is proven by 561387 aura_amount e0 #0 and behaviour_metric_delta stats_raid."
+  },
+  {
+    "spell": 561391,
+    "clause": "Gift an ally with the madness of Y'shaarj, restoring $s1 mana every 5 seconds for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Gift an ally with the madness of Y'shaarj, restoring $s1 mana every 5 seconds (mana regeneration)",
+        "labels": [
+          "561391 aura_amount e0 #0",
+          "561391 behaviour_metric_delta mp5_ally"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "561391 aura_duration_ms #1",
+          "561391 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "reason": "561391 effect_value e0 #0 is not_measured (aura_ascension_cultist_lifecycle DoEffectCalcAmount hook); applied amount is proven by 561391 aura_amount e0 #0 and behaviour_metric_delta mp5_ally."
+  },
+  {
+    "spell": 561391,
+    "clause": "Players may only have one Whisper on them per Cultist at any one time.",
+    "kind": "claim",
+    "labels": [
+      "561391 behaviour_metric_delta whisper_exclusivity"
+    ]
+  },
+  {
+    "spell": 561392,
+    "clause": "Gift nearby allies with the madness of Y'shaarj, restoring $s1 mana every 5 seconds for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Gift nearby allies with the madness of Y'shaarj, restoring $s1 mana every 5 seconds (mana regeneration)",
+        "labels": [
+          "561392 aura_amount e0 #0",
+          "561392 behaviour_metric_delta mp5_raid"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "561392 aura_duration_ms #1",
+          "561392 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "reason": "561392 effect_value e0 #0 is not_measured (aura_ascension_cultist_lifecycle DoEffectCalcAmount hook); applied amount is proven by 561392 aura_amount e0 #0 and behaviour_metric_delta mp5_raid."
+  },
+  {
+    "spell": 561392,
+    "clause": "Players may only have one Whisper on them per Cultist at any one time.",
+    "kind": "claim",
+    "labels": [
+      "561392 behaviour_metric_delta whisper_exclusivity"
+    ]
+  },
+  {
+    "spell": 572637,
+    "clause": "Destabilizes magic used against the targeted party member.",
+    "kind": "claim",
+    "labels": [
+      "572637 behaviour_metric_delta single_target_ally"
+    ]
+  },
+  {
+    "spell": 572637,
+    "clause": "Reduces all spell damage taken by $S1%",
+    "kind": "claim",
+    "labels": [
+      "572637 aura_amount e0 #0",
+      "572637 behaviour_metric_delta spell_damage_taken",
+      "572637 behaviour_metric_delta physical_damage_control"
+    ],
+    "reason": "572637 effect_value e0 #0 is not_measured (aura_ascension_cultist_lifecycle DoEffectCalcAmount hook); applied amount is proven by 572637 aura_amount e0 #0 and behaviour_metric_delta spell_damage_taken/physical_damage_control."
+  },
+  {
+    "spell": 572637,
+    "clause": "and reduces all healing taken by $S2%.",
+    "kind": "claim",
+    "labels": [
+      "572637 aura_amount e1 #1",
+      "572637 behaviour_hit_ratio healing_taken"
+    ],
+    "reason": "572637 effect_value e1 #1 is not_measured (aura_ascension_cultist_lifecycle DoEffectCalcAmount hook); applied amount is proven by 572637 aura_amount e1 #1 and behaviour_hit_ratio healing_taken."
+  },
+  {
+    "spell": 572905,
+    "clause": "Gift an ally with the madness of C'thun, increasing spell power by $s1 for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Gift an ally with the madness of C'thun, increasing spell power by $s1",
+        "labels": [
+          "572905 aura_amount e0 #0",
+          "572905 behaviour_metric_delta sp_ally"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "572905 aura_duration_ms #1",
+          "572905 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "reason": "572905 effect_value e0 #0 is not_measured (aura_ascension_cultist_lifecycle DoEffectCalcAmount hook); applied amount is proven by 572905 aura_amount e0 #0 and behaviour_metric_delta sp_ally."
+  },
+  {
+    "spell": 573067,
+    "clause": "Gift nearby allies with the madness of C'thun, increasing spell power by $s1 for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Gift nearby allies with the madness of C'thun, increasing spell power by $s1",
+        "labels": [
+          "573067 aura_amount e0 #0",
+          "573067 behaviour_metric_delta sp_raid"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "573067 aura_duration_ms #1",
+          "573067 behaviour_expiry duration"
+        ]
+      }
+    ],
+    "reason": "573067 effect_value e0 #0 is not_measured (aura_ascension_cultist_lifecycle DoEffectCalcAmount hook); applied amount is proven by 573067 aura_amount e0 #0 and behaviour_metric_delta sp_raid."
+  },
+  {
+    "spell": 803035,
+    "clause": "Assume a powerful Presence, giving damage dealt a $h% chance to curse the ground for $807632d,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Assume a powerful Presence, giving damage dealt a $h% chance to curse the ground",
+        "labels": [
+          "803035 behaviour_metric_delta proc_rate"
+        ]
+      },
+      {
+        "claim": "for $807632d,",
+        "labels": [
+          "803035 spell_duration 807632 #1",
+          "803035 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 803035,
+    "clause": "dealing ${$807632m1+$807632ppl1+$SP*.135+$AP*.075} Shadow damage every $807632t1 sec to enemies within.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$807632m1+$807632ppl1+$SP*.135+$AP*.075} Shadow damage",
+        "labels": [
+          "803035 effect_value 807632e0 #2",
+          "803035 behaviour_metric_delta damage_base",
+          "803035 behaviour_metric_delta damage_sp",
+          "803035 behaviour_metric_delta damage_ap"
+        ]
+      },
+      {
+        "claim": "every $807632t1 sec",
+        "labels": [
+          "803035 behaviour_metric_delta tick_interval"
+        ]
+      },
+      {
+        "claim": "to enemies within.",
+        "labels": [
+          "803035 behaviour_metric_delta aoe_enemies"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 803035,
+    "clause": "@ext:You may only have 1 Presence active at a time. :ext@",
+    "kind": "claim",
+    "labels": [
+      "803035 behaviour_exclusivity"
+    ]
+  },
+  {
+    "spell": 803037,
+    "clause": "Assume a dark Presence, giving damage dealt a $h% chance to summon Tentacles on your back that attack a nearby enemy for $500707d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Assume a dark Presence, giving damage dealt a $h% chance",
+        "labels": [
+          "803037 behaviour_metric_delta proc_rate"
+        ]
+      },
+      {
+        "claim": "to summon Tentacles on your back that attack a nearby enemy",
+        "labels": [
+          "803037 behaviour_metric_delta tentacle_attacks"
+        ]
+      },
+      {
+        "claim": "for $500707d.",
+        "labels": [
+          "803037 spell_duration 500707 #1",
+          "803037 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 803037,
+    "clause": "@ext:You may only have 1 Presence active at a time. :ext@",
+    "kind": "claim",
+    "labels": [
+      "803037 behaviour_exclusivity"
+    ]
+  },
+  {
+    "spell": 803082,
+    "clause": "Assume a crazed Presence, giving damage dealt a $h% chance to deal ${$803083m2+$803083ppl2+$SP*0.18} Shadow damage to your target",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Assume a crazed Presence, giving damage dealt a $h% chance",
+        "labels": [
+          "803082 behaviour_metric_delta proc_rate"
+        ]
+      },
+      {
+        "claim": "to deal ${$803083m2+$803083ppl2+$SP*0.18} Shadow damage to your target",
+        "labels": [
+          "803082 effect_value 803083e1 #1",
+          "803082 behaviour_metric_delta damage_base",
+          "803082 behaviour_metric_delta damage_sp"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 803082,
+    "clause": "and reduce their casting speed by $803083s1% for $803083d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and reduce their casting speed by $803083s1%",
+        "labels": [
+          "803082 effect_value 803083e0 #2",
+          "803082 behaviour_metric_delta cast_speed_slow"
+        ]
+      },
+      {
+        "claim": "for $803083d.",
+        "labels": [
+          "803082 spell_duration 803083 #3",
+          "803082 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 803082,
+    "clause": "@ext:You may only have 1 Presence active at a time. :ext@",
+    "kind": "claim",
+    "labels": [
+      "803082 behaviour_exclusivity"
+    ]
+  },
+  {
+    "spell": 803339,
+    "clause": "Assume an unholy Presence, giving damage dealt a $h% chance to increase your haste by $803340s1% for $803340d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Assume an unholy Presence, giving damage dealt a $h% chance",
+        "labels": [
+          "803339 behaviour_metric_delta proc_rate"
+        ]
+      },
+      {
+        "claim": "to increase your haste (spell haste and attack speed) by $803340s1%",
+        "labels": [
+          "803339 effect_value 803340e0 #1",
+          "803339 behaviour_metric_delta melee_haste",
+          "803339 behaviour_metric_delta spell_haste"
+        ]
+      },
+      {
+        "claim": "for $803340d.",
+        "labels": [
+          "803339 spell_duration 803340 #2",
+          "803339 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 803339,
+    "clause": "@ext:You may only have 1 Presence active at a time. :ext@",
+    "kind": "claim",
+    "labels": [
+      "803339 behaviour_exclusivity"
+    ]
+  },
+  {
+    "spell": 804412,
+    "clause": "Attempt to drive an enemy mad, taunting the target for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Attempt to drive an enemy mad, taunting the target",
+        "labels": [
+          "804412 aggro_redirect primary after",
+          "804412 aggro_redirect extra1 after"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "804412 aura_duration_ms #0",
+          "804412 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 804777,
+    "clause": "Summons a Ritual Stone at the target location.",
+    "kind": "claim",
+    "labels": [
+      "804777 behaviour_metric_delta gossip_ritual"
+    ]
+  },
+  {
+    "spell": 804777,
+    "clause": "You and your allies can interact with the Ritual Stone to begin channeling their life force into it.",
+    "kind": "claim",
+    "labels": [
+      "804777 behaviour_metric_delta gossip_ritual"
+    ]
+  },
+  {
+    "spell": 804777,
+    "clause": "When 10 allies are channeling,",
+    "kind": "claim",
+    "labels": [
+      "804777 behaviour_metric_delta gossip_ritual"
+    ]
+  },
+  {
+    "spell": 804777,
+    "clause": "the stone will be destroyed to bring forth a hostile Faceless Destroyer into the world for $804779d.",
+    "kind": "claim",
+    "labels": [
+      "804777 spell_duration 804779 #0",
+      "804777 behaviour_metric_delta gossip_ritual"
+    ]
+  },
+  {
+    "spell": 807725,
+    "clause": "You become enveloped with twilight magic, increasing your threat generated by $s1%, doubled for Shadow spells and abilities.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing your threat generated by $s1%,",
+        "labels": [
+          "807725 effect_value e0 #0",
+          "807725 aura_amount e0 #0",
+          "807725 behaviour_metric_delta threat_mult_physical",
+          "807725 behaviour_metric_delta threat_physical_control",
+          "807725 behaviour_metric_delta threat_physical_stance"
+        ]
+      },
+      {
+        "claim": "doubled for Shadow spells and abilities (threat).",
+        "labels": [
+          "807725 behaviour_metric_delta threat_mult_shadow",
+          "807725 behaviour_metric_delta threat_shadow_control",
+          "807725 behaviour_metric_delta threat_shadow_stance"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 1119892,
+    "clause": "Gives $s1 additional Shadow resistance to all party",
+    "kind": "claim",
+    "labels": [
+      "1119892 effect_value e0 #0",
+      "1119892 aura_amount e0 #0",
+      "1119892 behaviour_metric_delta resist_raid"
+    ]
+  },
+  {
+    "spell": 1119892,
+    "clause": "and raid members within $a1 yards.",
+    "promise_of": "Gives $s1 additional Shadow resistance to all party",
+    "kind": "claim",
+    "labels": [
+      "1119892 effect_radius e0 #1",
+      "1119892 behaviour_metric_delta resist_raid"
+    ]
+  },
+  {
+    "spell": 1119892,
+    "clause": "Does not stack with similar effects.",
+    "promise_of": "Gives $s1 additional Shadow resistance to all party",
+    "kind": "claim",
+    "labels": [
+      "1119892 behaviour_metric_delta non_stacking"
+    ]
+  },
+  {
+    "spell": 1200011,
+    "clause": "Places a summoning obelisk from the old gods, allowing you and another ally to summon party and raid members to your current location.",
+    "kind": "claim",
+    "labels": [
+      "1200011 behaviour_metric_delta summon_ritual"
+    ]
   }
 ]

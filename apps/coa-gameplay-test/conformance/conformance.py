@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
 import time
@@ -17,7 +18,7 @@ from coverage import (COVERAGE_FILE, EvidenceError, clause_coverage, clause_cove
                       load_clauses, load_consumption, write_coverage, write_fragment)
 from diff import IMPACT_FILE, diff_directories, write_impact
 from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
-from extra_spells import REPOSITORY, ExtraSpellsError, audit_extra_spells
+from extra_spells import REPOSITORY, UPDATES_ROOT, ExtraSpellsError, audit_extra_spells
 from packets import PacketError, write_packets
 from passives import passive_scenario
 from hits import (CLOSED, REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, floored_casts,
@@ -606,15 +607,29 @@ def coverage_command(args) -> int:
 def ledger_command(args) -> int:
     class_file = load_class_file(args.class_id)
     dbc_dir = server_dbc_dir(args.dbc_dir or class_file.get('dbc_dir', DBC_DIR))
-    report = audit_extra_spells(class_file, dbc_dir, args.source_root, PROGRESSION_HEADER)
+    try:
+        report = audit_extra_spells(class_file, dbc_dir, args.source_root, PROGRESSION_HEADER)
+    except ExtraSpellsError as error:
+        print(f'Refusing ledger for class {args.class_id}: {error}', file=sys.stderr)
+        return 2
+    recovery = (f'conformance.py audit-extra --class {args.class_id} '
+                f'--source-root {shlex.quote(str(args.source_root))} '
+                f'--dbc-dir {shlex.quote(str(dbc_dir))}')
+    if report['missing_dbc']:
+        preview = ', '.join(str(entry['spell']) for entry in report['missing_dbc'][:10])
+        suffix = f", ... ({len(report['missing_dbc']) - 10} more)" if len(report['missing_dbc']) > 10 else ''
+        print(f"Refusing ledger for class {args.class_id}: {len(report['missing_dbc'])} server-granted spells "
+              f"missing from Spell.dbc ({preview}{suffix}); run {recovery}", file=sys.stderr)
+        return 2
     if report['unaccounted'] and not args.allow_unaccounted_extra:
         preview = ', '.join(f"{entry['spell']} {entry['name']}" for entry in report['unaccounted'][:10])
         suffix = f", ... ({len(report['unaccounted']) - 10} more)" if len(report['unaccounted']) > 10 else ''
         print(f"Refusing ledger for class {args.class_id}: {len(report['unaccounted'])} unaccounted server-granted "
-              f"spells ({preview}{suffix}); run conformance.py audit-extra --class {args.class_id} and add each to "
+              f"spells ({preview}{suffix}); run {recovery} and add each to "
               f"extra_spells or excluded_extra_spells (or pass --allow-unaccounted-extra)", file=sys.stderr)
         return 2
-    written = ledger(class_file, dbc_dir, parse_text_bases(args.text_basis))
+    updates = Path(args.source_root) / UPDATES_ROOT / 'updates'
+    written = ledger(class_file, dbc_dir, parse_text_bases(args.text_basis), updates)
     entries = written.entries
     clause_coverage(entries, [])
     write_ledger(entries, args.out)

@@ -93,9 +93,18 @@ def audit_extra_command(args) -> int:
     try:
         class_file = (json.loads(args.class_file.read_text(encoding='utf-8'))
                       if args.class_file else load_class_file(args.class_id))
-        if int(class_file.get('class_id', -1)) != args.class_id:
+        source_label = args.class_file or f'class {args.class_id}'
+        if not isinstance(class_file, dict):
+            raise ExtraSpellsError(f'{source_label} must contain a JSON object, got {type(class_file).__name__}')
+        raw_class_id = class_file.get('class_id')
+        if type(raw_class_id) is not int or raw_class_id <= 0:
             raise ExtraSpellsError(
-                f'{args.class_file} has class_id {class_file.get("class_id")}, expected {args.class_id}')
+                f'{source_label} has invalid class_id {raw_class_id!r}, expected {args.class_id}')
+        if raw_class_id != args.class_id:
+            raise ExtraSpellsError(
+                f'{source_label} has class_id {raw_class_id}, expected {args.class_id}')
+        if args.log_events is not None and not args.log_events.is_file():
+            raise ExtraSpellsError(f'log events CSV not found: {args.log_events}')
         dbc_dir = server_dbc_dir(args.dbc_dir or class_file.get('dbc_dir', DBC_DIR))
         report = audit_extra_spells(class_file, dbc_dir, args.source_root, log_events_path=args.log_events)
     except (ExtraSpellsError, DbcSetMismatch, ValueError, KeyError, OSError) as error:
@@ -104,7 +113,7 @@ def audit_extra_command(args) -> int:
     print('\n'.join(audit_extra_lines(report)))
     if args.out:
         print(write_json(args.out, report))
-    return FAILED if args.strict and report['unaccounted'] else 0
+    return FAILED if report['missing_dbc'] or (args.strict and report['unaccounted']) else 0
 
 
 def add_batch_commands(commands) -> dict:
