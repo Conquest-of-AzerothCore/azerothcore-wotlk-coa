@@ -16,3 +16,6 @@ and short of the far dummy), and the same reads judge it. The unhooked mover is 
 
 The verdict stamps its own metric, `chase_travel_ratio`, which the kind module registers as `event` (ADR 0615):
 an ok ratio is behaviour evidence; `distance_2d` itself stays a state read (ADR 0584).
+
+Optional `target_entry`, `cast_power`, omitted `raises`, and `expected_ratio: 0` (ADR 1328) support direct crowd-control
+halts (such as stuns restricted to a creature type) where the afflicted mover covers 0 yd against the control mover.

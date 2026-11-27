@@ -716,8 +716,17 @@ class ExpressionParser:
         self.tooltip = tooltip
         self.tokens = tokens
         self.position = 0
-        self.effect_index = None
+        self.first_effect_index = None
+        self.effect_indices: set[int] = set()
         self.spell_id = None
+
+    @property
+    def effect_index(self) -> int | None:
+        if len(self.effect_indices) > 1:
+            return None
+        if len(self.effect_indices) == 1:
+            return next(iter(self.effect_indices))
+        return self.first_effect_index
 
     def peek(self) -> str | None:
         if self.position < len(self.tokens):
@@ -769,9 +778,13 @@ class ExpressionParser:
         if token.group('name') and not token.group('spell') and token.group('name') in EXPRESSION_FUNCTIONS:
             return self.function(token.group('name'))
         if token.group('name'):
-            value, effect_index, spell_id = self.tooltip.math_variable(token.group('spell'), token.group('name'))
-            if self.effect_index is None:
-                self.effect_index = effect_index
+            name = token.group('name')
+            value, effect_index, spell_id = self.tooltip.math_variable(token.group('spell'), name)
+            if effect_index is not None:
+                if self.first_effect_index is None:
+                    self.first_effect_index = effect_index
+                if name[:-1] != 'ppl':
+                    self.effect_indices.add(effect_index)
             if self.spell_id is None:
                 self.spell_id = spell_id
             return value

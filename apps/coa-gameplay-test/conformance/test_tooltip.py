@@ -682,6 +682,18 @@ class FixtureTooltipTest(unittest.TestCase):
         self.assertEqual(readout.values, [])
         self.assertEqual(readout.unreadable, ['${$m1+$SP*0.5))}'])
 
+    def test_multi_effect_expression_drops_effect_index_while_single_effect_keeps_it(self):
+        tooltip = Tooltip(Records(self.dbc), 10, FIXTURE_CASTER)
+        readout = tooltip.read('Base $s2%, single ${$m1+1}%, diff ${$m1-$m2}%, same ${$m1+$m1}%, ppl ${$m2+$ppl1}.')
+        self.assertEqual(readout.values, [
+            Displayed('$s2', 25.0, 1, 'percent', 10),
+            Displayed('${$m1+1}', 101.0, 0, 'percent', 10),
+            Displayed('${$m1-$m2}', 75.0, None, 'percent', 10),
+            Displayed('${$m1+$m1}', 200.0, 0, 'percent', 10),
+            Displayed('${$m2+$ppl1}', 25.0, 1, 'flat', 10),
+        ])
+        self.assertEqual(readout.unreadable, [])
+
 
 class StreamedTextTests(unittest.TestCase):
     def updates(self, files: dict[str, str]) -> Path:
