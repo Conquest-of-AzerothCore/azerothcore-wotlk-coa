@@ -1497,7 +1497,7 @@ struct boss_coa_brc_beauty : public BossAI
     void SummonedCreatureDies(Creature* summon, Unit* killer) override
     {
         BossAI::SummonedCreatureDies(summon, killer);
-        if (summon->GetEntry() == NPC_RUNTY && me->IsAlive())
+        if (me->IsAlive() && !me->HasAura(SPELL_BERSERK))
             DoCastSelf(SPELL_BERSERK, true);
     }
 

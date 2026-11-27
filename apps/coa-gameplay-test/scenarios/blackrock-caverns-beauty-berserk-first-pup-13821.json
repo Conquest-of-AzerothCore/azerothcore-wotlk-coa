@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Blackrock Caverns: Beauty goes Berserk when the first of her pups dies (#13821)",
+  "contract": [
+    "#13821: Beauty 39700 fights with her pups Lucky 40008, Spot 40011 and Runty 40015. The script cast Berserk",
+    "5011079 only when Runty died. In an Ascension combat log from 2026-08-22, Beauty gained Berserk right after",
+    "Spot, the first pup, died, while Lucky and Runty were still alive. The player engages Beauty in her room on",
+    "Normal, kills Spot, and Beauty must gain Berserk with Lucky and Runty alive. CONTROL: no Berserk before a pup",
+    "dies."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 645, "x": 111.5, "y": 588.9, "z": 76.9, "o": 3.5, "ignore_access": true},
+  "players": [
+    {"id": "tank", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "The player joins world phase 1, where the dungeon spawns live", "actor": "tank",
+      "value": 1 },
+    {"action": "set_health", "actor": "tank", "value": 50000000, "maximum": 50000000},
+    { "action": "assert", "label": "CONTROL: Spot is in the room", "actor": "tank", "metric": "nearby_creature_count",
+      "entry": 40011, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "CONTROL: Runty is in the room", "actor": "tank", "metric": "nearby_creature_count",
+      "entry": 40015, "equals": 1, "within_ms": 5000 },
+    {"action": "attack_nearby", "actor": "tank", "entry": 39700},
+    { "action": "assert", "label": "CONTROL: the fight started", "actor": "tank", "metric": "combat", "equals": 1,
+      "within_ms": 5000 },
+    {"action": "wait", "ms": 1000},
+    { "action": "assert", "label": "CONTROL: no Berserk while every pup lives", "actor": "tank",
+      "metric": "nearby_creature_aura_count", "entry": 39700, "spell": 5011079, "equals": 0 },
+    {"action": "attack_nearby", "actor": "tank", "entry": 40011, "kill": true},
+    { "action": "assert", "label": "DISCRIMINATING: Beauty goes Berserk after the first pup dies", "actor": "tank",
+      "metric": "nearby_creature_aura_count", "entry": 39700, "spell": 5011079, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Runty is still alive", "actor": "tank", "metric": "nearby_creature_count",
+      "entry": 40015, "equals": 1 },
+    { "action": "assert", "label": "Lucky is still alive", "actor": "tank", "metric": "nearby_creature_count",
+      "entry": 40008, "equals": 1 }
+  ]
+}
