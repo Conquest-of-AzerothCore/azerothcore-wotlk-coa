@@ -410,7 +410,7 @@ class spell_ascension_runemaster_water_engraving : public SpellScript
         PreventHitDefaultEffect(effIndex);
         Unit* caster = GetCaster();
         Unit* target = GetHitUnit();
-        if (!target || target == caster || !target->IsAlive() || !target->HasActivePowerType(POWER_MANA))
+        if (!target || target == caster || !target->IsAlive() || !target->CanLosePowerToSpell(POWER_MANA))
             return;
         int32 const limit = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), GetEffectValue()));
         _drained = -target->ModifyPower(POWER_MANA, -limit);

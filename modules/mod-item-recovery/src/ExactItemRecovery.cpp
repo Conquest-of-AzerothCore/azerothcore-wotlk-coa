@@ -216,7 +216,7 @@ char const* Restore(Player* player, uint64 id, bool deleted)
     if (player->CanStoreItem(NULL_BAG, NULL_SLOT, destinations, item.get(), false) != EQUIP_ERR_OK)
         return "NOT_ENOUGH_SPACE";
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-    MailDraft draft("Recovered item", "Your recovered item is enclosed.");
+    MailDraft draft(ITEM_RECOVERY_MAIL_SUBJECT, "Your recovered item is enclosed.");
     item->SaveToDB(trans);
     draft.AddItem(item.release());
     auto staged = draft.StageMailTo(trans, player->GetGUID().GetCounter(), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM));

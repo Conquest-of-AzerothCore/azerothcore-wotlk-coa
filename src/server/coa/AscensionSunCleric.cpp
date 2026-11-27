@@ -347,6 +347,15 @@ void Eclipse(Player* player, Unit* target, uint32 amount)
     if (player->HasAura(704579) && !IsBoss(target))
         Cast(player, target, 505342);
 }
+void EclipseHeal(Player* player, Unit* target, uint32 amount)
+{
+    if (!amount || !target || !player->IsValidAssistTarget(target))
+        return;
+    if (AuraEffect* effect = target->GetAuraEffect(505370, EFFECT_0, player->GetGUID()))
+        effect->SetAmount(int32(std::min<uint64>(INT32_MAX, uint64(std::max(0, effect->GetAmount())) + amount)));
+    else
+        Copy(player, target, 505370, amount);
+}
 bool Daytime()
 {
     time_t now = time_t(GameTime::GetGameTime().count());

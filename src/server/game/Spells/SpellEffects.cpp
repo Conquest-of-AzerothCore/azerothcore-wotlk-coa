@@ -498,7 +498,7 @@ void Spell::EffectAscensionRestoreBaseManaPct(SpellEffIndex /*effIndex*/)
         return;
     }
 
-    if (unitTarget->IsPlayer() && !unitTarget->HasActivePowerType(POWER_MANA) &&
+    if (unitTarget->IsPlayer() && !unitTarget->CanReceivePowerFromSpell(POWER_MANA) &&
         !m_spellInfo->HasAttribute(SPELL_ATTR7_ONLY_IN_SPELLBOOK_UNTIL_LEARNED))
         return;
 

@@ -223,20 +223,21 @@ class aura_ascension_sun_cleric_event : public AuraScript
                     std::max(0, Amount(504877,0,player));
                 Mana(player, mana);
             }
-            if (id == 807435)
+            if (id == 807435 && target)
             {
-                Unit* enemy = damage ? target : player->GetVictim();
-                if (enemy && player->IsValidAttackTarget(enemy))
+                bool marked = target->HasAura(damage ? 505340 : 505370, player->GetGUID());
+                if (damage && player->IsValidAttackTarget(target))
+                    Eclipse(player, target, CalculatePct(amount, Amount(id)));
+                else if (!damage && player->IsValidAssistTarget(target))
+                    EclipseHeal(player, target, CalculatePct(amount, Amount(807437)));
+                else
+                    marked = false;
+                if (fulfillment && marked)
                 {
-                    bool marked = enemy->HasAura(505340, player->GetGUID());
-                    Eclipse(player, enemy, CalculatePct(amount, Amount(id)));
-                    if (fulfillment && marked)
-                    {
-                        int32 pct = Amount(807444,1);
-                        if (player->HasAura(704579))
-                            pct = CalculatePct(pct, 100 + Amount(704579,1));
-                        Copy(player, target, damage ? 807215 : 803816, CalculatePct(amount,pct));
-                    }
+                    int32 pct = Amount(807444,1);
+                    if (player->HasAura(704579))
+                        pct = CalculatePct(pct, 100 + Amount(704579,1));
+                    Copy(player, target, damage ? 807215 : 803816, CalculatePct(amount,pct));
                 }
             }
             if (id == 807547)

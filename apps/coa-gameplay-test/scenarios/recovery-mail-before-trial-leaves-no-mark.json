@@ -1,0 +1,299 @@
+{
+  "schema": 1,
+  "name": "Item Recovery and Worldforged refund mail taken before a trial do not block starting it",
+  "contract": [
+    "Taking mail before a trial marks the character OUTSIDE_MAIL, which blocks a non-prestige trial, unless the",
+    "take is exempt. The challenge exempts Item Recovery and Worldforged refund mail (sender-less GM-stationery",
+    "mail with ITEM_RECOVERY_MAIL_SUBJECT or WORLDFORGED_REFUND_MAIL_SUBJECT), so recovering one's own item must",
+    "not stop a later trial. Expected: a fresh level-1 character that takes a Silverleaf from Item Recovery mail",
+    "and a Mageroyal from Worldforged refund mail still starts Hardcore (challenge 54, a non-prestige trial) with",
+    "start code 0. A second fresh character that takes an Earthroot from the same mail with another subject",
+    "(boss loot, challenge rewards) is refused with CHALLENGE_START_CONDITIONS_NOT_MET (8) and told it has",
+    "taken items or money from the mailbox, so only the subject separates the two outcomes."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "clean",
+      "name": "Coasrecclean",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    },
+    {
+      "id": "marked",
+      "name": "Coasrecmark",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "system_mail",
+      "label": "Item Recovery mails the clean character a Silverleaf",
+      "actor": "clean",
+      "item": 765,
+      "kind": "recovery"
+    },
+    {
+      "action": "system_mail",
+      "label": "A Worldforged refund mails the clean character a Mageroyal",
+      "actor": "clean",
+      "item": 785,
+      "kind": "refund"
+    },
+    {
+      "action": "system_mail",
+      "label": "Other sender-less server mail carries an Earthroot to the marked character",
+      "actor": "marked",
+      "item": 2449,
+      "kind": "server"
+    },
+    {
+      "action": "assert",
+      "actor": "clean",
+      "metric": "mail_has_item",
+      "item": 765,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "clean",
+      "metric": "mail_has_item",
+      "item": 785,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "marked",
+      "metric": "mail_has_item",
+      "item": 2449,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "clean",
+      "entry": 142119
+    },
+    {
+      "action": "client_packet",
+      "label": "The challenge hook passes the Item Recovery take before any trial",
+      "actor": "clean",
+      "opcode": 582,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 765
+        },
+        {
+          "mail_item_guid": 765
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The mailbox hands over the Silverleaf",
+      "actor": "clean",
+      "opcode": 582,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 765
+        },
+        {
+          "mail_item_guid": 765
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "clean",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "The Item Recovery take succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "clean",
+      "metric": "item_count",
+      "item": 765,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "The challenge hook passes the Worldforged refund take before any trial",
+      "actor": "clean",
+      "opcode": 582,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 785
+        },
+        {
+          "mail_item_guid": 785
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The mailbox hands over the Mageroyal",
+      "actor": "clean",
+      "opcode": 582,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 785
+        },
+        {
+          "mail_item_guid": 785
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "clean",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "The Worldforged refund take succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "clean",
+      "metric": "item_count",
+      "item": 785,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "marked",
+      "entry": 142119
+    },
+    {
+      "action": "client_packet",
+      "label": "The challenge hook passes the other server mail take before any trial",
+      "actor": "marked",
+      "opcode": 582,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 2449
+        },
+        {
+          "mail_item_guid": 2449
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The mailbox hands over the Earthroot",
+      "actor": "marked",
+      "opcode": 582,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 2449
+        },
+        {
+          "mail_item_guid": 2449
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "marked",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "The other server mail take succeeds outside a trial"
+    },
+    {
+      "action": "assert",
+      "actor": "marked",
+      "metric": "item_count",
+      "item": 2449,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "start_challenge",
+      "label": "DISCRIMINATING: the clean character starts Hardcore",
+      "actor": "clean",
+      "challenge": 54,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "label": "Item Recovery and refund mail leave no outside-interaction mark",
+      "actor": "clean",
+      "metric": "challenge_start_code",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "start_challenge",
+      "label": "Control: the marked character starts Hardcore",
+      "actor": "marked",
+      "challenge": 54,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "label": "Other server mail blocks the trial as CONDITIONS_NOT_MET",
+      "actor": "marked",
+      "metric": "challenge_start_code",
+      "equals": 8,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The refusal names the mailbox",
+      "actor": "marked",
+      "metric": "system_message_contains",
+      "text": "taken items or money from the mailbox",
+      "equals": 1
+    }
+  ]
+}

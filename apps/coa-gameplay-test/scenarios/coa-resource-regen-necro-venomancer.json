@@ -1,0 +1,622 @@
+{
+  "schema": 1,
+  "name": "Necromancer, Venomancer and Runemaster resource regeneration and mana interactions",
+  "contract": [
+    "Verifies S1/S2/V1 (Effect 166 Replenish Mana 1584868 and Enduring Exoskeleton 503953 on Necromancer and Beetle Form Venomancer),",
+    "S3 (negative SPELL_AURA_MOD_POWER_REGEN_PERCENT does not slow out-of-combat Runic Power decay),",
+    "N1 (Tears of Lordaeron 705752 triggers 705753 on Crypt Swarm 800343 crits instead of 706424),",
+    "N6 (Living Dead 302920 refunds 50% of Blight 500217 base mana cost even when free under Bone King 707176),",
+    "V2 (Ritual Healing 681047 + Shadra's Prayer 502947 restores both Mana and Runic Power on a Necromancer), and",
+    "RM2 (Weapon Engraving: Water 653261 drains Mana from a Necromancer via CanLosePowerToSpell)."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "necro",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    },
+    {
+      "id": "venom",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "rm",
+      "race": 2,
+      "class": 32,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "necro",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let characters settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "rm",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "rm",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 653261
+    },
+    {
+      "action": "set_power",
+      "label": "S3: seed Runic Power out of combat for baseline decay",
+      "actor": "necro",
+      "power": 6,
+      "value": 800
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "power",
+      "power": 6,
+      "save_as": "rp_base_start"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "power",
+      "power": 6,
+      "relative_to": "rp_base_start",
+      "save_as": "rp_base_delta"
+    },
+    {
+      "action": "assert",
+      "label": "S3: baseline out-of-combat Runic Power decays",
+      "actor": "necro",
+      "metric": "power",
+      "power": 6,
+      "relative_to": "rp_base_start",
+      "max": -20
+    },
+    {
+      "action": "set_aura",
+      "label": "S3: apply -10% regen debuff (653262) out of combat",
+      "actor": "necro",
+      "spell": 653262,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 800
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "power",
+      "power": 6,
+      "save_as": "rp_debuff_start"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "S3: negative regen percent aura does not slow out-of-combat RP decay",
+      "actor": "necro",
+      "metric": "power",
+      "power": 6,
+      "relative_to": "rp_debuff_start",
+      "ratio_to": "rp_base_delta",
+      "min": 0.95,
+      "max": 1.05
+    },
+    {
+      "action": "set_aura",
+      "actor": "necro",
+      "spell": 653262,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "label": "S1+S2: lower Necromancer Mana before Replenish Mana (Effect 166)",
+      "actor": "necro",
+      "power": 0,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "power",
+      "power": 0,
+      "save_as": "necro_mana_s1"
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 1584868
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 1584868
+    },
+    {
+      "action": "assert",
+      "label": "S1+S2: Replenish Mana restores Necromancer Mana despite Runic Power display power",
+      "actor": "necro",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "necro_mana_s1",
+      "min": 150,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "N1: learn Tears of Lordaeron and Crypt Swarm",
+      "actor": "necro",
+      "spell": 705752
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500965
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "spell_energize_total",
+      "spell": 705753,
+      "power": 0,
+      "save_as": "tears_mana0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "spell_energize_total",
+      "spell": 705753,
+      "power": 6,
+      "save_as": "tears_rp0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "spell_energize_count",
+      "spell": 706424,
+      "save_as": "tears_dot0"
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500965,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "N1: Crypt Swarm 800343 critical hit lands",
+      "actor": "necro",
+      "metric": "spell_damage_count",
+      "spell": 800343,
+      "target": "target",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "N1: Tears of Lordaeron restores Mana via direct proc 705753",
+      "actor": "necro",
+      "metric": "spell_energize_total",
+      "spell": 705753,
+      "power": 0,
+      "relative_to": "tears_mana0",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "N1: Tears of Lordaeron restores Runic Power via direct proc 705753",
+      "actor": "necro",
+      "metric": "spell_energize_total",
+      "spell": 705753,
+      "power": 6,
+      "relative_to": "tears_rp0",
+      "min": 90,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let Crypt Swarm channel finish before Blight",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "N1: periodic proc 706424 does not fire for Crypt Swarm",
+      "actor": "necro",
+      "metric": "spell_energize_count",
+      "spell": 706424,
+      "relative_to": "tears_dot0",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "N6: learn Living Dead rank 2 and Blight",
+      "actor": "necro",
+      "spell": 302920
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500217
+    },
+    {
+      "action": "snapshot",
+      "label": "N6: record Blight base mana cost before Bone King makes it free",
+      "actor": "necro",
+      "metric": "spell_power_cost",
+      "spell": 500217,
+      "save_as": "blight_base_cost"
+    },
+    {
+      "action": "set_aura",
+      "actor": "necro",
+      "spell": 707176,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "spell_energize_total",
+      "spell": 500307,
+      "save_as": "blight_refund0"
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500217,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "N6: Blight applies to target under Bone King free cast",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 500217,
+      "caster": "necro",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Wait for Blight 20s duration to expire",
+      "ms": 20500
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 500217,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "N6: Living Dead refunds 50% of Blight base mana cost on expiry",
+      "actor": "necro",
+      "metric": "spell_energize_total",
+      "spell": 500307,
+      "relative_to": "blight_refund0",
+      "ratio_to": "blight_base_cost",
+      "min": 0.49,
+      "max": 0.51,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "S1+S2+V1: Venomancer enters Beetle Form and procs Enduring Exoskeleton",
+      "actor": "venom",
+      "spell": 803183
+    },
+    {
+      "action": "learn",
+      "actor": "venom",
+      "spell": 503953
+    },
+    {
+      "action": "cast",
+      "actor": "venom",
+      "spell": 803183
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "aura",
+      "spell": 803183,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "power_type",
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "venom",
+      "power": 0,
+      "value": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "venom",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "venom",
+      "metric": "power",
+      "power": 0,
+      "save_as": "venom_mana0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "venom",
+      "metric": "power",
+      "power": 1,
+      "save_as": "venom_rage0"
+    },
+    {
+      "action": "cast",
+      "actor": "venom",
+      "spell": 503953
+    },
+    {
+      "action": "assert",
+      "label": "V1: Enduring Exoskeleton grants Rage in Beetle Form",
+      "actor": "venom",
+      "metric": "power",
+      "power": 1,
+      "relative_to": "venom_rage0",
+      "min": 20,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "S1+S2+V1: Enduring Exoskeleton restores Effect 166 Mana in Beetle Form",
+      "actor": "venom",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "venom_mana0",
+      "min": 20,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Leave Beetle Form before casting Shadra's Prayer",
+      "actor": "venom",
+      "spell": 803183,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "power_type",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Wait out Beetle Form GCD before Shadra's Prayer",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "label": "V2: Venomancer casts Shadra's Prayer with Ritual Healing on Necromancer",
+      "actor": "venom",
+      "spell": 681047
+    },
+    {
+      "action": "learn",
+      "actor": "venom",
+      "spell": 502947
+    },
+    {
+      "action": "set_power",
+      "actor": "venom",
+      "power": 0,
+      "value": 1200
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "spell_energize_total",
+      "spell": 800874,
+      "save_as": "ritual_mana0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "spell_energize_total",
+      "spell": 567591,
+      "save_as": "ritual_rp0"
+    },
+    {
+      "action": "cast",
+      "actor": "venom",
+      "spell": 502947,
+      "target": "necro"
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 502947,
+      "caster": "venom",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Wait for Shadra's Prayer slot 2 tick (8999 ms)",
+      "ms": 9500
+    },
+    {
+      "action": "assert",
+      "label": "V2: Ritual Healing restores Mana on Necromancer",
+      "actor": "necro",
+      "metric": "spell_energize_total",
+      "spell": 800874,
+      "relative_to": "ritual_mana0",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "V2: Ritual Healing also restores Runic Power on Necromancer",
+      "actor": "necro",
+      "metric": "spell_energize_total",
+      "spell": 567591,
+      "relative_to": "ritual_rp0",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "pvp",
+      "label": "RM2: enable PvP so opposing-faction Runemaster can drain Necromancer Mana",
+      "actor": "necro",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "rm",
+      "enabled": true
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "can_attack",
+      "target": "necro",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "power",
+      "power": 0,
+      "save_as": "necro_mana_drain0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_energize_total",
+      "spell": 653261,
+      "power": 0,
+      "save_as": "rm_water_drain0"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 653261,
+      "target": "necro"
+    },
+    {
+      "action": "assert",
+      "label": "RM2: Weapon Engraving Water 653261 energizes Runemaster from drained Necromancer Mana",
+      "actor": "rm",
+      "metric": "spell_energize_total",
+      "spell": 653261,
+      "power": 0,
+      "relative_to": "rm_water_drain0",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "RM2: Weapon Engraving Water drains Mana from Necromancer",
+      "actor": "necro",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "necro_mana_drain0",
+      "max": -10,
+      "within_ms": 2000
+    }
+  ]
+}

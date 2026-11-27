@@ -51,6 +51,11 @@ inline bool Heartseeking(SpellInfo const* info)
 {
     return Family(info, 1, 2048);
 }
+inline bool CoilingShot(SpellInfo const* info)
+{
+    return info && info->SpellFamilyName == 21 &&
+           (info->Id == 500082 || (info->Id >= 520197 && info->Id <= 520203 && info->Id != 520200));
+}
 inline bool Quickdraw(SpellInfo const* info)
 {
     return Family(info, 0, 64) && info->Id != 807527;

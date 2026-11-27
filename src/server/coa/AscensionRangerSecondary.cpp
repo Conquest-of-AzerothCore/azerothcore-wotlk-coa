@@ -121,6 +121,9 @@ public:
             info->ExcludeTargetAuraSpell = 570167;
         if (info->Id == 801935)
             info->UseRangedAttackPowerForDamage = true;
+        if (info->Id == 705039 && info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT &&
+            info->Effects[EFFECT_0].MiscValue == POWER_FOCUS)
+            info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_INCREASE_ENERGY;
         for (uint32 id : AdvantageCompanions)
             if (info->Id == id)
             {
