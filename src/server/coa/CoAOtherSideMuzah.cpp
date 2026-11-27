@@ -451,7 +451,7 @@ private:
     {
         float const angle = frand(0.0f, 2.0f * float(M_PI));
         float const reachOut = 80.0f;
-        Position wall = me->GetFirstCollisionPosition(ArenaCenter.GetPositionX(), ArenaCenter.GetPositionY(), ArenaCenter.GetPositionZ() + 2.0f,
+        Position wall = CoAOtherSide::FirstCollision(me, ArenaCenter.GetPositionX(), ArenaCenter.GetPositionY(), ArenaCenter.GetPositionZ() + 2.0f,
             ArenaCenter.GetPositionX() + reachOut * std::cos(angle), ArenaCenter.GetPositionY() + reachOut * std::sin(angle));
         float const reach = std::max(0.0f, ArenaCenter.GetExactDist2d(&wall) - WallGap);
         Position const spot = GroundAt(me, ArenaCenter.GetPositionX() + reach * std::cos(angle), ArenaCenter.GetPositionY() + reach * std::sin(angle));
@@ -469,7 +469,7 @@ private:
         for (Unit* player : players)
         {
             float const angle = frand(0.0f, 2.0f * float(M_PI));
-            Position wall = me->GetFirstCollisionPosition(ArenaCenter.GetPositionX(), ArenaCenter.GetPositionY(), ArenaCenter.GetPositionZ() + 2.0f,
+            Position wall = CoAOtherSide::FirstCollision(me, ArenaCenter.GetPositionX(), ArenaCenter.GetPositionY(), ArenaCenter.GetPositionZ() + 2.0f,
                 ArenaCenter.GetPositionX() + 80.0f * std::cos(angle), ArenaCenter.GetPositionY() + 80.0f * std::sin(angle));
             float const reach = std::max(0.0f, ArenaCenter.GetExactDist2d(&wall) - WallGap);
             Position spot = GroundAt(me, ArenaCenter.GetPositionX() + reach * std::cos(angle), ArenaCenter.GetPositionY() + reach * std::sin(angle));

@@ -4017,6 +4017,12 @@ private:
             return unit->GetExactDist2d(GetUnit(step.get<std::string>("target")));
         if (metric == "point_distance_2d")
             return unit->GetExactDist2d(step.get<float>("x"), step.get<float>("y"));
+        if (metric == "point_line_of_sight")
+        {
+            Require(sWorld->getBoolConfig(CONFIG_VMAP_ENABLE_LOS)
+                && VMAP::VMapFactory::createOrGetVMapMgr()->isLineOfSightCalcEnabled(), "VMap line of sight is disabled");
+            return unit->IsWithinLOS(step.get<float>("x"), step.get<float>("y"), step.get<float>("z")) ? 1.0 : 0.0;
+        }
         if (metric == "cast_remaining_ms")
         {
             for (CurrentSpellTypes type : {CURRENT_GENERIC_SPELL, CURRENT_CHANNELED_SPELL})

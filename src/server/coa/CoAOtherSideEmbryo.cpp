@@ -403,7 +403,7 @@ private:
 
     Position WallFrom(Position const& from, float angle, float reach = 60.0f, float lift = 2.0f) const
     {
-        Position const wall = me->GetFirstCollisionPosition(from.GetPositionX(), from.GetPositionY(), from.GetPositionZ() + lift,
+        Position const wall = CoAOtherSide::FirstCollision(me, from.GetPositionX(), from.GetPositionY(), from.GetPositionZ() + lift,
             from.GetPositionX() + reach * std::cos(angle), from.GetPositionY() + reach * std::sin(angle));
         float const limit = from.GetExactDist2d(&wall);
         float last = 0.0f;

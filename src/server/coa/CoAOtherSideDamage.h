@@ -67,6 +67,16 @@ namespace CoAOtherSide
                 return uint32(entry->SpellID[0]);
         return spellId;
     }
+
+    inline Position FirstCollision(WorldObject const* source, float startX, float startY, float startZ, float destX, float destY)
+    {
+        float x = destX;
+        float y = destY;
+        float z = startZ;
+        if (!source->GetMap()->CheckCollisionAndGetValidCoords(source, startX, startY, startZ, x, y, z, false))
+            return { startX, startY, startZ, 0.0f };
+        return { x, y, z, 0.0f };
+    }
 }
 
 #endif

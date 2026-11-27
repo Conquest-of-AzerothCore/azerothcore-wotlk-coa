@@ -72,7 +72,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'sent_mana_regen', 'sent_mana_regen_interrupted',
     'moving', 'spline_remaining_ms', 'spline_speed', 'water_walk', 'in_water', 'terrain_in_water', 'ground_height',
     'forced_forward', 'distance_2d',
-    'point_distance_2d', 'cast_remaining_ms', 'cast_pushback_ms',
+    'point_distance_2d', 'point_line_of_sight', 'cast_remaining_ms', 'cast_pushback_ms',
     'melee_damage_count', 'melee_damage_total',
     'pet_power', 'pet_max_power', 'spell_energize_count', 'spell_energize_total',
     'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'lfg_dungeon_disabled', 'lfg_lock_status', 'lfg_state',
@@ -568,7 +568,7 @@ def validate_placement_metric(step, where, player_ids):
         require(step['actor'] in player_ids, f'{where}: point placement metric needs a player')
         number(step.get('map'), f'{where}.map', 0, 2**31 - 1, True)
         number(step.get('z'), f'{where}.z', -17000, 17000)
-    elif metric == 'spawn_distance':
+    elif metric in {'spawn_distance', 'point_line_of_sight'}:
         require('map' not in step, f'{where}: map only applies to point placement metrics')
         number(step.get('z'), f'{where}.z', -17000, 17000)
     else:
@@ -1551,7 +1551,7 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric == 'has_aura_state':
                 require('target' in step, f'{where}: {metric} metric needs target')
                 number(step.get('aura_state'), f'{where}.aura_state', 0, 32, True)
-            if metric in {'point_distance_2d', 'spawn_distance'} or metric in POINT_PLACEMENT_METRICS:
+            if metric in {'point_distance_2d', 'point_line_of_sight', 'spawn_distance'} or metric in POINT_PLACEMENT_METRICS:
                 for key in ('x', 'y'):
                     number(step.get(key), f'{where}.{key}', -17000, 17000)
             elif 'x' in step or 'y' in step:

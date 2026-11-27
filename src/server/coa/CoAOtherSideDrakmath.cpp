@@ -360,7 +360,7 @@ private:
 
     Position WallFrom(Position const& from, float angle) const
     {
-        return me->GetFirstCollisionPosition(from.GetPositionX(), from.GetPositionY(), from.GetPositionZ() + 2.0f,
+        return CoAOtherSide::FirstCollision(me, from.GetPositionX(), from.GetPositionY(), from.GetPositionZ() + 2.0f,
             from.GetPositionX() + 40.0f * std::cos(angle), from.GetPositionY() + 40.0f * std::sin(angle));
     }
 

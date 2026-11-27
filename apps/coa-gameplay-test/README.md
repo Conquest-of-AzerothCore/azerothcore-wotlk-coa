@@ -757,6 +757,8 @@ next swing (0 when ready). `aura_amplitude_ms` reads an aura effect's periodic i
 `spline_speed` reads its movement velocity in yards per second. Both return zero for a finalized spline.
 `distance_2d` requires `target` and measures horizontal center distance.
 `point_distance_2d` requires `x` and `y` and measures the horizontal distance from the unit to that point on its map.
+`point_line_of_sight` requires `x`, `y` and `z` and is 1 when the unit has line of sight to that point, otherwise 0. It needs
+`vmap.enableLOS = 1` and fails "VMap line of sight is disabled" otherwise.
 `forced_forward` reads the server's force-movement flag; it does not simulate client movement or navigation.
 `cast_remaining_ms` requires `spell` and returns its active cast/channel timer, or zero when inactive.
 `cast_pushback_ms` reads the player's cumulative native cast-delay notifications, excluding elapsed cast time.
