@@ -9,11 +9,25 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "AscensionManastormProtocol.h"
 using uint8 = uint8_t;
 using uint32 = uint32_t;
 using uint64 = uint64_t;
 using Guid = uint32;
-struct ObjectGuid { using LowType = uint32; uint32 value; uint32 GetCounter() const { return value; } operator uint32() const { return value; } };
+struct ObjectGuid {
+    using LowType = uint32;
+    uint32 value;
+    ObjectGuid(uint32 guid) : value(guid) {}
+    uint32 GetCounter() const { return value; }
+    uint64 GetRawValue() const { return value; }
+    operator uint32() const { return value; }
+};
+namespace ManastormNativeOpcode { using Ascension::Manastorm::ProgressUpdate; }
+struct WorldPacket {
+    std::vector<uint64> fields;
+    WorldPacket(uint32, uint32) {}
+    WorldPacket& operator<<(uint64 field) { fields.push_back(field); return *this; }
+};
 namespace ManastormModuleConfig
 {
     bool enabled = true;
@@ -55,6 +69,12 @@ struct Player {
     void* duel = nullptr;
     Group* group = nullptr;
     uint32 notices = 0;
+    std::unordered_map<Guid, std::vector<uint64>> progressUpdates;
+    Player const* GetSession() const { return online ? this : nullptr; }
+    void SendDirectMessage(WorldPacket const* packet)
+    {
+        progressUpdates[Guid(packet->fields.front())] = {packet->fields.begin() + 1, packet->fields.end()};
+    }
     ObjectGuid GetGUID() const { return {guid}; }
     Group* GetGroup() const { return group; }
     uint32 GetLevel() const { return level; }
@@ -75,11 +95,30 @@ struct Group {
     Guid leader = 1;
     std::vector<MemberSlot> members;
     bool IsLeader(Guid guid) const { return leader == guid; }
+    ObjectGuid GetLeaderGUID() const { return leader; }
+    void BroadcastPacket(WorldPacket const* packet, bool, int = -1, ObjectGuid ignore = 0) const;
     uint32 GetMembersCount() const { return uint32(members.size()); }
     auto const& GetMemberSlots() const { return members; }
 };
 std::unordered_map<Guid, Player*> players;
 namespace ObjectAccessor { Player* FindConnectedPlayer(Guid guid) { auto i = players.find(guid); return i == players.end() ? nullptr : i->second; } }
+void Group::BroadcastPacket(WorldPacket const* packet, bool, int, ObjectGuid ignore) const
+{
+    for (auto const& member : members)
+        if (auto* player = ObjectAccessor::FindConnectedPlayer(member.guid); player && player->online && member.guid != ignore)
+            player->SendDirectMessage(packet);
+}
+bool NativeEnabled() { return true; }
+bool LoadProgress(Player* player, Ascension::Manastorm::Progress& progress)
+{
+    if (player->best)
+        progress[3].push_back(player->best);
+    return true;
+}
+struct ManastormClientBridge {
+    void SendProgression(Player* player) const;
+    void SendGroupProgression(Group* group) const;
+};
 struct ScriptMgr { bool OnPlayerCanEnterManastorm(Player* player) { return !player->challenge; } } scripts;
 auto* sScriptMgr = &scripts;
 struct ManastormMgr {
@@ -88,15 +127,15 @@ struct ManastormMgr {
 };
 uint8 ManastormModeForMemberCount(uint32 n) { return uint8(std::min(n, 4u)); }
 uint8 ManastormGetTrackBit(bool endgame) { return endgame ? 2 : 1; }
-struct ManastormProgressionSnapshot { uint32 best = 0; };
+struct ManastormProgressionSnapshot { uint32 BestCompletedDepth = 0, PendingIntroDepth = 0; };
 namespace ManastormProgression {
     bool LoadSnapshot(Guid guid, uint8, bool, ManastormProgressionSnapshot& value, std::string&) {
         Player* player = ObjectAccessor::FindConnectedPlayer(guid);
         if (!player) return false;
-        value.best = player->best;
+        value.BestCompletedDepth = player->best;
         return true;
     }
-    bool IsDepthEnterable(ManastormProgressionSnapshot const& value, uint32 depth) { return depth == 1 || depth <= value.best; }
+    bool IsDepthEnterable(ManastormProgressionSnapshot const& value, uint32 depth);
 }
 struct Field { uint32 value = 0; template<class T> T Get() const { return T(value); } };
 struct Result { std::array<Field,2> fields; Field* Fetch() { return fields.data(); } };
@@ -160,13 +199,29 @@ int main() {
     }
     others[0].best = 1;
     check(ValidateEnter(&leader,1) == nullptr, "Leader 100/member 1 can enter depth 1");
-    check(ValidateEnter(&leader,100) == nullptr, "Leader progress alone unlocks depth 100 for a less-progressed member");
+    check(ValidateEnter(&leader,101) == nullptr, "Leader progress alone unlocks depth 101 for a less-progressed member");
     others[0].best = 0;
-    check(ValidateEnter(&leader,100) == nullptr, "Member without any progress follows the leader");
+    check(ValidateEnter(&leader,101) == nullptr, "Member without any progress follows the leader");
+    ManastormClientBridge bridge;
+    bridge.SendGroupProgression(&group);
+    check(leader.progressUpdates.count(others[0].guid) == 1 &&
+          leader.progressUpdates.at(others[0].guid) == leader.progressUpdates.at(leader.guid),
+          "Leader receives the leader's queue progress in the new member's slot");
+    check(others[0].progressUpdates.at(others[0].guid) != leader.progressUpdates.at(leader.guid),
+          "New member receives their own actual progression");
+    bridge.SendProgression(&others[0]);
+    check(leader.progressUpdates.at(others[0].guid) == leader.progressUpdates.at(leader.guid),
+          "Member progress updates do not replace the leader's queue progress");
+    group.leader = others[0].guid;
+    bridge.SendGroupProgression(&group);
+    check(others[0].progressUpdates.at(leader.guid) == others[0].progressUpdates.at(others[0].guid) &&
+          leader.progressUpdates.at(others[0].guid) == others[0].progressUpdates.at(others[0].guid),
+          "Passing leadership changes the queue and restores actual progress for the old leader");
+    group.leader = leader.guid;
     others[0].best = 1;
     leader.best = 1;
     others[1].best = 100;
-    check(ValidateEnter(&leader,100) != nullptr, "Member progress cannot unlock a depth the leader has not reached");
+    check(ValidateEnter(&leader,101) != nullptr, "Member progress cannot unlock a depth the leader has not reached");
     leader.best = 100;
     others[1].best = 100;
     others[0].online = false;
