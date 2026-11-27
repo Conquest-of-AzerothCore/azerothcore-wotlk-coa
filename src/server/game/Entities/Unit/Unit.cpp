@@ -9305,7 +9305,8 @@ int32 Unit::HealBySpell(HealInfo& healInfo, bool critical)
 {
     uint32 heal = LocalLevelScaling::HealReceivedFor(healInfo.GetHealer(), healInfo.GetTarget(),
         healInfo.GetSpellInfo(), healInfo.GetHeal());
-    sScriptMgr->ModifyHealReceived(this, healInfo.GetTarget(), heal, healInfo.GetSpellInfo());
+    Unit* recipient = healInfo.GetTarget();
+    sScriptMgr->ModifyHealReceived(this, recipient, heal, healInfo.GetSpellInfo(), recipient);
     healInfo.SetHeal(heal);
 
     // calculate heal absorb and reduce healing

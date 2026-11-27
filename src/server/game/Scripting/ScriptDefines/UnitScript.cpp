@@ -88,9 +88,10 @@ void ScriptMgr::ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo, Aura
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_RESOLVE_SPELL_CAST, script->ResolveSpellCast(caster, spellInfo, triggeredByAura));
 }
 
-void ScriptMgr::ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const* spellInfo)
+void ScriptMgr::ModifyHealReceived(Unit* first, Unit* second, uint32& heal, SpellInfo const* spellInfo, Unit* recipient)
 {
-    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_MODIFY_HEAL_RECEIVED, script->ModifyHealReceived(target, healer, heal, spellInfo));
+    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_MODIFY_HEAL_RECEIVED,
+        script->ModifyHealReceivedFor(recipient ? recipient : first, first, second, heal, spellInfo));
 }
 
 uint32 ScriptMgr::DealDamage(Unit* AttackerUnit, Unit* pVictim, uint32 damage, DamageEffectType damagetype,

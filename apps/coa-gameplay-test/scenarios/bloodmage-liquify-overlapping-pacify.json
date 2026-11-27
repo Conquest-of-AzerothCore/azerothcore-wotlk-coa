@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Liquify and Slither each keep melee pacified until removed",
+  "contract": "Liquify 806310 forbids attacks while active. Slither 500947 independently uses aura 60 (pacify and silence). Removing either aura while the other is active must leave melee blocked; removing both must restore swings. The 1900 ms weapon delay lets each check observe a full swing window before the remaining aura expires.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "bloodmage", "entry": 36, "level": 60, "health": 100000, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "add_item", "actor": "bloodmage", "item": 25 },
+    { "action": "equip", "actor": "bloodmage", "item": 25, "slot": 15 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 500947, "stacks": 1 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 806310, "stacks": 1 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 500947, "stacks": 0 },
+    { "action": "attack", "actor": "bloodmage", "target": "dummy" },
+    { "action": "wait", "ms": 2300 },
+    { "action": "assert", "actor": "bloodmage", "metric": "aura", "spell": 806310, "equals": 1 },
+    {
+      "action": "assert", "label": "Liquify still suppresses swings after Slither is removed",
+      "actor": "bloodmage", "metric": "melee_attack_count", "equals": 0
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 806310, "stacks": 0 },
+    {
+      "action": "assert", "label": "With both auras gone, the same attack can swing",
+      "actor": "bloodmage", "metric": "melee_attack_count", "min": 1, "within_ms": 2500
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 500947, "stacks": 1 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 806310, "stacks": 1 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 806310, "stacks": 0 },
+    { "action": "snapshot", "actor": "bloodmage", "metric": "melee_attack_count", "save_as": "before_slither" },
+    { "action": "attack", "actor": "bloodmage", "target": "dummy" },
+    { "action": "wait", "ms": 2300 },
+    { "action": "assert", "actor": "bloodmage", "metric": "aura", "spell": 500947, "equals": 1 },
+    {
+      "action": "assert", "label": "Slither still suppresses swings after Liquify is removed",
+      "actor": "bloodmage", "metric": "melee_attack_count", "relative_to": "before_slither", "equals": 0
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 500947, "stacks": 0 },
+    {
+      "action": "assert", "label": "Removing Slither releases its pacify",
+      "actor": "bloodmage", "metric": "melee_attack_count", "relative_to": "before_slither", "min": 1,
+      "within_ms": 2500
+    }
+  ]
+}

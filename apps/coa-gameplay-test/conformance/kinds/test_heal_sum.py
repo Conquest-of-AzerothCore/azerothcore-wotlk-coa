@@ -122,10 +122,27 @@ class HealSumTests(unittest.TestCase):
             {**SPLASH_ENTRY, 'creatures': [{'id': 'c1', 'entry': 631, 'distance': 40}]},
             {**ECHO_ENTRY, 'checks': [{**ECHO_ENTRY['checks'][0], 'band_reason': ''}]},
             {**ECHO_ENTRY, 'checks': [{**ECHO_ENTRY['checks'][0], 'on': 'nobody'}]},
-            {**ECHO_ENTRY, 'casts': [{'spell': BREW, 'target': 'nobody', 'watch_ms': 4000}]}]
+            {**ECHO_ENTRY, 'casts': [{'spell': BREW, 'target': 'nobody', 'watch_ms': 4000}]},
+            {**SPLASH_ENTRY, 'checks': [{**SPLASH_ENTRY['checks'][0], 'at_least': 14}]},
+            {**SPLASH_ENTRY, 'checks': [{**SPLASH_ENTRY['checks'][0], 'at_least': 18, 'at_most': 20}]},
+            {**ECHO_ENTRY, 'checks': [{**ECHO_ENTRY['checks'][0], 'at_least': 0, 'at_most': 1}]}]
         for entry in bad:
             with self.subTest(entry=entry), self.assertRaises(ValueError):
                 scenario_of(entry)
+
+    def test_cap_range_accepts_bounds_and_rejects_outside_range(self):
+        ranged = {**SPLASH_ENTRY, 'checks': [{**SPLASH_ENTRY['checks'][0],
+                                              'expected': 18, 'at_least': 16, 'at_most': 20}]}
+        _, [expectation] = scenario_of(ranged)
+        units = expectation.model['units']
+        within = {unit: 2 for unit in units}
+        low_edge = {unit: (2 if index < 7 else 1) for index, unit in enumerate(units)}
+        too_low = {unit: (2 if index < 6 else 1) for index, unit in enumerate(units)}
+        too_high = {unit: (3 if index < 3 else 2) for index, unit in enumerate(units)}
+        self.assertEqual(judged(expectation, counts({'treatment': within}, SPLASH)).status, 'ok')
+        self.assertEqual(judged(expectation, counts({'treatment': low_edge}, SPLASH)).status, 'ok')
+        self.assertEqual(judged(expectation, counts({'treatment': too_low}, SPLASH)).status, 'alert')
+        self.assertEqual(judged(expectation, counts({'treatment': too_high}, SPLASH)).status, 'alert')
 
 
 if __name__ == '__main__':

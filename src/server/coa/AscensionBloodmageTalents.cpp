@@ -18,7 +18,9 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
+#include "ThreatManager.h"
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <list>
 #include <utility>
@@ -108,7 +110,42 @@ enum BloodmageTalentSpells : uint32
     SPELL_DARK_FRENZY = 704644,
     SPELL_DARK_FRENZY_GCD = 804845,
     SPELL_CRIMSON_SCION_INSTANT = 806425,
-    SPELL_SATURATING_SUTURES_COST = 504137
+    SPELL_SATURATING_SUTURES_COST = 504137,
+    SPELL_TALDARAMS_TORMENT_ENERGIZE_RAGE = 582765,
+    SPELL_THE_COUNCIL_ASSEMBLED = 504103,
+    SPELL_ATHERANNS_ACUITY = 504105,
+    SPELL_RED_THIRST = 520493,
+    SPELL_SANGUINE_RUPTURE_ENERGIZE = 802496,
+    SPELL_CURSED_GROUND_BLEED = 561303,
+    SPELL_BLOOD_BURST = 803326,
+    SPELL_HEMATOMA = 803392,
+    SPELL_ULTRA_INSTINCT = 704654,
+    SPELL_ULTRA_INSTINCT_BUFF = 504166,
+    SPELL_CORRUPTED_BLOOD_DEBUFF = 532623,
+    SPELL_FINAL_EMBRACE = 524865,
+    SPELL_FINAL_EMBRACE_SHAPESHIFT = 525047,
+    SPELL_CRIMSON_MAW = 803388,
+    SPELL_ACCURSED_FORM_AGILITY = 804699,
+    SPELL_BLOOD_BOND = 504627,
+    SPELL_BLOODWELL_ERUPTION = 560072,
+    SPELL_HEART_RUPTURER = 680685,
+    SPELL_DARKFALLEN_LAMENT = 680828,
+    SPELL_DARKFALLEN_LAMENT_HEAL = 524180,
+    SPELL_THE_CUP_RUNNETH_OVER = 807544,
+    SPELL_GORE_BARRAGE = 807345,
+    SPELL_DARK_BLOOD_RANK_1 = 804807,
+    SPELL_DARK_BLOOD_RANK_2 = 807919,
+    SPELL_FEARMONGER = 501132,
+    SPELL_SHADOW_VIGIL = 806182,
+    SPELL_AORTIC_AEGIS = 806274,
+    SPELL_BLOOD_TRAIL = 804857,
+    SPELL_ANIMATED_BLOOD_HEAL = 592015,
+    SPELL_BLOOD_MARK = 707624,
+    SPELL_BLOOD_MARK_AURA = 707625,
+    SPELL_BLOOD_HOWL = 800782,
+    SPELL_BLOOD_FEAST = 706605,
+    SPELL_ARTERIAL_BIND = 681077,
+    SPELL_LIFES_ESSENCE = 520312
 };
 
 constexpr uint32 NPC_BLOOD_ORB = 315303;
@@ -140,6 +177,14 @@ void SyncDarkFrenzy(Player* player)
 constexpr uint32 SanguineRuptureMinimumTargets = 5;
 
 constexpr uint32 BloodboltClassMask1 = 0x00020000;
+constexpr uint32 SanguineRuptureDamageClassMask1 = 0x00200000;
+constexpr uint32 AcuityConsumerClassMask0 = 0x00060000;
+constexpr int32 AscensionBloodmageBonusMultiplierMod = 40;
+constexpr int32 ShapeshiftFormCursed = 57;
+constexpr uint32 DarkfallenLamentMaxTargets = 12;
+constexpr uint32 BloodBondThreatRedirectPercent = 10;
+constexpr float AorticAegisRange = 45.0f;
+constexpr int32 UltraInstinctDurationCutMs = 1000;
 
 enum AscensionRawCombatSelector : int32
 {
@@ -157,10 +202,26 @@ constexpr float BloodVeilSpiritScale = 1.5f;
 constexpr float BloodVeilAttackPowerScale = 0.75f;
 constexpr uint32 BloodVeilRanks[] = {504263, 572277, 572278, 572279};
 constexpr uint32 SlaughterhouseOfferingRanks[] = {1108459, 1108463, 1108493};
+constexpr uint32 BloodfangBiteRanks[] = {800156, 501695, 501696, 501697, 503613, 503614, 503615, 572549, 572550, 572551};
+constexpr uint32 VampyrBiteRanks[] = {801563, 801564, 803581, 803582, 803583, 803584, 803585, 803586, 803587};
 
 bool IsCursedForm(uint32 id)
 {
     return std::find(std::begin(CursedForms), std::end(CursedForms), id) != std::end(CursedForms);
+}
+
+bool IsInCursedForm(Unit const* target)
+{
+    if (!target)
+        return false;
+    if (target->HasAura(SPELL_CURSED_FORM_REQUIREMENT) ||
+        target->HasAura(SPELL_CURSED_FORM_REQUIREMENT_2) ||
+        target->HasAura(SPELL_FINAL_EMBRACE_SHAPESHIFT))
+        return true;
+    for (uint32 id : CursedForms)
+        if (target->HasAura(id))
+            return true;
+    return false;
 }
 
 bool IsBloodVeilRank(uint32 id)
@@ -170,7 +231,13 @@ bool IsBloodVeilRank(uint32 id)
 
 bool IsSlaughterhouseOfferingRank(uint32 id)
 {
-    return std::find(std::begin(SlaughterhouseOfferingRanks), std::end(SlaughterhouseOfferingRanks), id) != std::end(SlaughterhouseOfferingRanks);
+    return std::find(std::begin(SlaughterhouseOfferingRanks), std::end(SlaughterhouseOfferingRanks), id) !=
+        std::end(SlaughterhouseOfferingRanks);
+}
+
+bool IsVampyrBiteRank(uint32 id)
+{
+    return std::find(std::begin(VampyrBiteRanks), std::end(VampyrBiteRanks), id) != std::end(VampyrBiteRanks);
 }
 
 bool BloodScentTarget(Unit const* player, Unit const* target)
@@ -202,6 +269,11 @@ public:
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& amount) override
     {
         amount = BloodScentDamage(target, attacker, amount);
+        if (attacker && target && amount)
+            if (Player* player = attacker->ToPlayer(); player && player->getClass() == CLASS_SON_OF_ARUGAL)
+                if (AuraEffect const* corrupted =
+                    target->GetAuraEffect(SPELL_CORRUPTED_BLOOD_DEBUFF, EFFECT_0, player->GetGUID()))
+                    AddPct(amount, corrupted->GetAmount());
     }
 
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& amount, SpellInfo const* info) override
@@ -466,6 +538,58 @@ void ClearHunterAndHuntedReactivation(Player* player)
     player->removeSpell(SPELL_BLOODGALE, SPEC_MASK_ALL, true);
 }
 
+void ApplyFinalEmbraceCrimsonMaw(Player* player)
+{
+    if (!player)
+        return;
+    if (player->GetSpellMap().find(SPELL_CRIMSON_MAW) == player->GetSpellMap().end())
+        player->learnSpell(SPELL_CRIMSON_MAW, true);
+    for (uint32 rank : BloodfangBiteRanks)
+        if (player->HasSpell(rank))
+            player->SetTemporarySpellReplacement(rank, SPELL_CRIMSON_MAW);
+}
+
+void ClearFinalEmbraceCrimsonMaw(Player* player)
+{
+    if (!player)
+        return;
+    for (uint32 rank : BloodfangBiteRanks)
+        if (player->GetTemporarySpellReplacement(rank) == SPELL_CRIMSON_MAW)
+            player->SetTemporarySpellReplacement(rank, 0);
+    if (auto itr = player->GetSpellMap().find(SPELL_CRIMSON_MAW);
+        itr != player->GetSpellMap().end() && itr->second->State == PLAYERSPELL_TEMPORARY)
+        player->removeSpell(SPELL_CRIMSON_MAW, SPEC_MASK_ALL, true);
+}
+
+void SyncMarkAura(Player* player, uint32 auraId, bool apply)
+{
+    if (!player)
+        return;
+    if (apply)
+        player->CastSpell(player, auraId, true);
+    else
+        player->RemoveAurasDueToSpell(auraId, player->GetGUID());
+}
+
+void CleanseBloodmoonPower(Player* player)
+{
+    if (!player || !player->HasAura(SPELL_BLOODMOON_POWER))
+        return;
+    std::vector<std::pair<uint32, ObjectGuid>> remove;
+    for (auto const& pair : player->GetAppliedAuras())
+    {
+        AuraApplication const* app = pair.second;
+        Aura const* applied = app ? app->GetBase() : nullptr;
+        SpellInfo const* info = applied ? applied->GetSpellInfo() : nullptr;
+        if (!applied || !info || app->IsPositive() || applied->IsPassive() || applied->GetDuration() <= 0 ||
+            applied->GetId() == SPELL_LIQUIFY || info->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES))
+            continue;
+        remove.emplace_back(applied->GetId(), applied->GetCasterGUID());
+    }
+    for (auto const& [id, casterGuid] : remove)
+        player->RemoveAura(id, casterGuid);
+}
+
 class bloodmage_talent_events : public UnitScript
 {
 public:
@@ -490,7 +614,19 @@ public:
             player->CastSpell(player, SPELL_ETERNAL_CURSE_TANK_STANCE, true);
         }
         if (aura->GetId() == SPELL_DARK_MARK)
-            player->CastSpell(player, SPELL_DARK_MARK_AURA, true);
+            SyncMarkAura(player, SPELL_DARK_MARK_AURA, true);
+        if (aura->GetId() == SPELL_BLOOD_MARK)
+            SyncMarkAura(player, SPELL_BLOOD_MARK_AURA, true);
+        if (aura->GetId() == SPELL_FINAL_EMBRACE)
+            ApplyFinalEmbraceCrimsonMaw(player);
+        if (aura->GetId() == SPELL_ACCURSED_FORM)
+            player->CastSpell(player, SPELL_ACCURSED_FORM_AGILITY, true);
+        if (aura->GetId() == SPELL_LIQUIFY)
+        {
+            player->SetUnitFlag(UNIT_FLAG_PACIFIED);
+            if (aura->GetCasterGUID() == player->GetGUID())
+                CleanseBloodmoonPower(player);
+        }
         if ((aura->GetId() == SPELL_TRANSGRESSION || aura->GetId() == SPELL_TRANSGRESSION_VAMPIRIC_FANG) &&
             aura->GetCasterGUID() == player->GetGUID() && player->HasAura(SPELL_CRIMSON_TERROR))
             if (Aura* spiritPower = player->AddAura(SPELL_TRANSGRESSION_SPIRIT_POWER, player))
@@ -537,7 +673,16 @@ public:
             player->RemoveAurasDueToSpell(SPELL_ETERNAL_CURSE_TANK_STANCE);
         }
         if (aura->GetId() == SPELL_DARK_MARK)
-            player->RemoveAurasDueToSpell(SPELL_DARK_MARK_AURA, player->GetGUID());
+            SyncMarkAura(player, SPELL_DARK_MARK_AURA, false);
+        if (aura->GetId() == SPELL_BLOOD_MARK)
+            SyncMarkAura(player, SPELL_BLOOD_MARK_AURA, false);
+        if (aura->GetId() == SPELL_FINAL_EMBRACE)
+            ClearFinalEmbraceCrimsonMaw(player);
+        if (aura->GetId() == SPELL_ACCURSED_FORM)
+            player->RemoveAurasDueToSpell(SPELL_ACCURSED_FORM_AGILITY);
+        if (aura->GetId() == SPELL_LIQUIFY && !player->HasAura(SPELL_LIQUIFY) &&
+            !player->HasPacifyAura() && !player->HasPacifySilenceAura())
+            player->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
         if (aura->GetId() == SPELL_TRANSGRESSION || aura->GetId() == SPELL_TRANSGRESSION_VAMPIRIC_FANG)
             player->RemoveAurasDueToSpell(SPELL_TRANSGRESSION_SPIRIT_POWER, player->GetGUID());
         if (aura->GetId() == SPELL_NIGHTMARE_TALENT)
@@ -549,16 +694,6 @@ public:
         if (aura->GetId() == SPELL_LIQUIFY && aura->GetCasterGUID() == player->GetGUID() &&
             player->HasAura(SPELL_VAMPIRIC_POOLS))
             player->CastSpell(player, SPELL_VAMPIRIC_POOLS_LEECH, true);
-        if (aura->GetId() == SPELL_LIQUIFY && aura->GetCasterGUID() == player->GetGUID() &&
-            player->HasAura(SPELL_BLOODMOON_POWER))
-        {
-            std::vector<uint32> remove;
-            for (auto const& pair : player->GetAppliedAuras())
-                if (!pair.second->IsPositive() && pair.second->GetBase()->GetSpellInfo()->Dispel != DISPEL_NONE)
-                    remove.push_back(pair.second->GetBase()->GetId());
-            for (uint32 id : remove)
-                player->RemoveAurasDueToSpell(id);
-        }
         if (aura->GetId() == SPELL_ACCURSED_FORM && aura->GetCasterGUID() == player->GetGUID() &&
             player->HasAura(SPELL_SANGUINE_SCRIPTURE))
             player->CastSpell(player, SPELL_SANGUINE_SCRIPTURE_BUFF, true);
@@ -584,7 +719,9 @@ public:
             player->RemoveAurasDueToSpell(form);
         SyncCursedFormRequirement(player);
         player->RemoveAurasDueToSpell(SPELL_DARK_FRENZY_GCD);
+        player->RemoveAurasDueToSpell(SPELL_ACCURSED_FORM_AGILITY);
         ClearHunterAndHuntedReactivation(player);
+        ClearFinalEmbraceCrimsonMaw(player);
     }
 };
 
@@ -829,7 +966,8 @@ class aura_ascension_bloodmage_animated_blood_leech : public AuraScript
 
     bool Validate(SpellInfo const* info) override
     {
-        return info->Id == SPELL_ANIMATED_BLOOD_LEECH && info->Effects[EFFECT_0].IsAura(AuraType(354));
+        return info->Id == SPELL_ANIMATED_BLOOD_LEECH && info->Effects[EFFECT_0].IsAura(AuraType(354)) &&
+            ValidateSpellInfo({SPELL_ANIMATED_BLOOD_HEAL});
     }
 
     bool Check(ProcEventInfo& event)
@@ -850,7 +988,8 @@ class aura_ascension_bloodmage_animated_blood_leech : public AuraScript
         if (!owner)
             return;
         if (int32 heal = BloodmageProcShare(effect, event))
-            Unit::DealHeal(owner, owner, uint32(heal));
+            actor->CastCustomSpell(SPELL_ANIMATED_BLOOD_HEAL, SPELLVALUE_BASE_POINT0, heal, owner,
+                TRIGGERED_FULL_MASK);
     }
 
     void Register() override
@@ -952,10 +1091,6 @@ class aura_ascension_bloodmage_coagulation : public AuraScript
     }
 };
 
-constexpr uint32 SPELL_TALDARAMS_TORMENT_ENERGIZE_RAGE = 582765;
-constexpr uint32 SPELL_THE_COUNCIL_ASSEMBLED = 504103;
-constexpr uint32 SPELL_ATHERANNS_ACUITY = 504105;
-
 class aura_ascension_bloodmage_taldarams_torment : public AuraScript
 {
     PrepareAuraScript(aura_ascension_bloodmage_taldarams_torment);
@@ -963,6 +1098,33 @@ class aura_ascension_bloodmage_taldarams_torment : public AuraScript
     bool Validate(SpellInfo const*) override
     {
         return ValidateSpellInfo({SPELL_TALDARAMS_TORMENT_ENERGIZE_RAGE, SPELL_ATHERANNS_ACUITY});
+    }
+
+    void CalcPeriodic(AuraEffect const*, bool&, int32& amplitude)
+    {
+        Unit* caster = GetCaster();
+        Player* owner = caster ? caster->GetSpellModOwner() : nullptr;
+        AuraEffect const* fearmonger = owner ? owner->GetAuraEffect(SPELL_FEARMONGER, EFFECT_0) : nullptr;
+        if (!fearmonger || amplitude <= 0)
+            return;
+        int32 const modifier = fearmonger->GetAmount();
+        if (modifier <= -100 || modifier >= 100)
+            return;
+        double const target = std::round(double(amplitude) * 100.0 / (100.0 - modifier));
+        amplitude = int32(std::ceil(target * 100.0 / (100.0 + modifier)));
+    }
+
+    void EnablePeriodicCrit(AuraEffect const* effect, AuraEffectHandleModes)
+    {
+        Unit* caster = GetCaster();
+        Player* modOwner = caster ? caster->GetSpellModOwner() : nullptr;
+        if (!modOwner)
+            return;
+        SpellInfo const* info = GetSpellInfo();
+        float crit = modOwner->SpellDoneCritChance(nullptr, info, info->GetSchoolMask(), BASE_ATTACK, true);
+        if (Unit* target = GetTarget())
+            crit = target->SpellTakenCritChance(caster, info, info->GetSchoolMask(), crit, BASE_ATTACK, true);
+        const_cast<AuraEffect*>(effect)->SetCritChance(std::max(0.0f, crit));
     }
 
     void Tick(AuraEffect const*)
@@ -979,6 +1141,10 @@ class aura_ascension_bloodmage_taldarams_torment : public AuraScript
 
     void Register() override
     {
+        DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(aura_ascension_bloodmage_taldarams_torment::CalcPeriodic,
+            EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_bloodmage_taldarams_torment::EnablePeriodicCrit,
+            EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
         OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_bloodmage_taldarams_torment::Tick,
             EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
     }
@@ -1063,11 +1229,29 @@ class aura_ascension_bloodmage_blood_bond : public AuraScript
             caster->RemoveAurasDueToSpell(SPELL_BLOOD_BOND_SPEED, GetCasterGUID());
     }
 
+    void ApplyRedirect(AuraEffect const*, AuraEffectHandleModes)
+    {
+        if (Unit* caster = GetCaster())
+            if (Unit* target = GetTarget(); target && target != caster)
+                target->GetThreatMgr().RegisterRedirectThreat(GetId(), caster->GetGUID(),
+                    BloodBondThreatRedirectPercent);
+    }
+
+    void RemoveRedirect(AuraEffect const*, AuraEffectHandleModes)
+    {
+        if (Unit* target = GetTarget())
+            target->GetThreatMgr().UnregisterRedirectThreat(GetId(), GetCasterGUID());
+    }
+
     void Register() override
     {
         DoCheckProc += AuraCheckProcFn(aura_ascension_bloodmage_blood_bond::Check);
         OnEffectProc += AuraEffectProcFn(aura_ascension_bloodmage_blood_bond::Proc, EFFECT_0,
             SPELL_AURA_PROC_TRIGGER_SPELL);
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_bloodmage_blood_bond::ApplyRedirect, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_bloodmage_blood_bond::RemoveRedirect, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
         OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_bloodmage_blood_bond::Speed, EFFECT_1,
             SPELL_AURA_PERIODIC_TRIGGER_SPELL);
     }
@@ -1627,7 +1811,8 @@ public:
 class bloodmage_nightmare_casts : public AllSpellScript
 {
 public:
-    bloodmage_nightmare_casts() : AllSpellScript("bloodmage_nightmare_casts", {ALLSPELLHOOK_ON_BEFORE_EFFECTS}) { }
+    bloodmage_nightmare_casts() : AllSpellScript("bloodmage_nightmare_casts",
+        {ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST}) { }
 
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
@@ -1646,6 +1831,240 @@ public:
             return;
         player->ModifyHealth(-cost);
         spell->SetScriptValue(AscensionBloodmage::NightmareTalent, uint64(increase));
+    }
+
+    void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
+    {
+        Player* player = caster ? caster->ToPlayer() : nullptr;
+        if (player && player->getClass() == CLASS_SON_OF_ARUGAL && info && !spell->IsTriggered() &&
+            info->SpellFamilyName == 26 && (info->SpellFamilyFlags[0] & AcuityConsumerClassMask0))
+            player->RemoveAurasDueToSpell(SPELL_ATHERANNS_ACUITY);
+    }
+};
+
+class aura_ascension_bloodmage_ultra_instinct : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_ultra_instinct);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({SPELL_ULTRA_INSTINCT_BUFF});
+    }
+
+    void HandleProc(AuraEffect const*, ProcEventInfo&)
+    {
+        PreventDefaultAction();
+        Unit* owner = GetTarget();
+        if (!owner)
+            return;
+        if (Aura* buff = owner->GetAura(SPELL_ULTRA_INSTINCT_BUFF))
+        {
+            int32 const remaining = buff->GetDuration();
+            if (remaining <= UltraInstinctDurationCutMs)
+            {
+                buff->Remove();
+                return;
+            }
+            buff->ModStackAmount(1);
+            buff->SetDuration(remaining - UltraInstinctDurationCutMs);
+            return;
+        }
+        owner->CastSpell(owner, SPELL_ULTRA_INSTINCT_BUFF, true);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(aura_ascension_bloodmage_ultra_instinct::HandleProc,
+            EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+class aura_ascension_bloodmage_shadow_vigil : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_shadow_vigil);
+
+    void SyncThreat(AuraEffect const*, AuraEffectHandleModes)
+    {
+        if (Unit* target = GetTarget(); target && target->IsAlive() && target->IsPlayer())
+            target->GetThreatMgr().UpdateMyTempModifiers();
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_bloodmage_shadow_vigil::SyncThreat,
+            EFFECT_0, SPELL_AURA_MOD_TOTAL_THREAT, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_bloodmage_shadow_vigil::SyncThreat,
+            EFFECT_0, SPELL_AURA_MOD_TOTAL_THREAT, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+    }
+};
+
+class aura_ascension_bloodmage_aortic_aegis : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_aortic_aegis);
+
+    bool Check(ProcEventInfo& event)
+    {
+        return event.GetActor() == GetTarget() && event.GetSpellInfo() &&
+            IsBloodVeilRank(event.GetSpellInfo()->Id) && event.GetActionTarget();
+    }
+
+    void HandleProc(AuraEffect const*, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        Unit* caster = GetTarget();
+        Unit* shieldTarget = event.GetActionTarget();
+        SpellInfo const* castInfo = event.GetSpellInfo();
+        if (!caster || !shieldTarget || !castInfo)
+            return;
+        Player* targetPlayer = shieldTarget->ToPlayer();
+        Group* group = targetPlayer ? targetPlayer->GetGroup() : nullptr;
+        if (!group)
+            return;
+        uint8 const subgroup = targetPlayer->GetSubGroup();
+        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+        {
+            Player* member = itr->GetSource();
+            if (!member || member == targetPlayer || itr->getSubGroup() != subgroup)
+                continue;
+            if (!member->IsAlive() || !member->IsInMap(targetPlayer) || !caster->IsFriendlyTo(member) ||
+                !targetPlayer->IsWithinDistInMap(member, AorticAegisRange))
+                continue;
+            caster->AddAura(castInfo->Id, member);
+        }
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_bloodmage_aortic_aegis::Check);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_bloodmage_aortic_aegis::HandleProc,
+            EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+class aura_ascension_bloodmage_blood_trail : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_blood_trail);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        return info && info->Id == SPELL_BLOOD_TRAIL &&
+            info->Effects[EFFECT_1].IsAura(SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
+
+    void GuardCursedForm(AuraEffect const*)
+    {
+        if (!IsInCursedForm(GetTarget()))
+            PreventDefaultAction();
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_bloodmage_blood_trail::GuardCursedForm,
+            EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
+};
+
+class aura_ascension_bloodmage_aortic_assault : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_aortic_assault);
+
+    void GuardClotting(AuraEffect const*)
+    {
+        Unit* target = GetTarget();
+        if (!target || !target->HasAura(SPELL_CLOTTING))
+            PreventDefaultAction();
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_bloodmage_aortic_assault::GuardClotting,
+            EFFECT_2, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
+};
+
+class aura_ascension_bloodmage_blood_howl : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_blood_howl);
+
+    void ApplyTaunt(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetTarget();
+        if (caster && target && target->CanHaveThreatList() && !target->IsFriendlyTo(caster))
+        {
+            if (target->GetThreatMgr().GetThreat(caster) <= 0.0f)
+                target->GetThreatMgr().AddThreat(caster, 1.0f, GetSpellInfo(), true, true);
+            target->GetThreatMgr().TauntUpdate();
+        }
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_bloodmage_blood_howl::ApplyTaunt,
+            EFFECT_0, SPELL_AURA_MOD_TAUNT, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+class aura_ascension_bloodmage_blood_feast : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_blood_feast);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({SPELL_ARTERIAL_BIND, SPELL_LIFES_ESSENCE});
+    }
+
+    void Burst(AuraEffect const*, AuraEffectHandleModes)
+    {
+        if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+            return;
+        Unit* target = GetTarget();
+        if (!target || !target->IsAlive() || !target->IsInWorld())
+            return;
+        Player* player = target->ToPlayer();
+        if (!player || (!player->HasSpell(SPELL_ARTERIAL_BIND) && !player->HasAura(SPELL_ARTERIAL_BIND)))
+            return;
+        target->CastSpell(target, SPELL_LIFES_ESSENCE, true);
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_bloodmage_blood_feast::Burst,
+            EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+class aura_ascension_bloodmage_darkfallen_lament : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_darkfallen_lament);
+
+    void SetImmunity(bool apply)
+    {
+        Unit* target = GetTarget();
+        if (!target)
+            return;
+        target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SILENCE, apply);
+        target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, apply);
+        target->ApplySpellImmune(GetId(), IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, apply);
+        target->ApplySpellImmune(GetId(), IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, apply);
+    }
+
+    void Apply(AuraEffect const*, AuraEffectHandleModes)
+    {
+        SetImmunity(true);
+    }
+
+    void Remove(AuraEffect const*, AuraEffectHandleModes)
+    {
+        SetImmunity(false);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_bloodmage_darkfallen_lament::Apply,
+            EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_bloodmage_darkfallen_lament::Remove,
+            EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
@@ -1739,6 +2158,122 @@ public:
             info->AttributesCu |= SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED;
         }
 
+        if (info->Id == SPELL_RED_THIRST)
+        {
+            info->Effects[EFFECT_1].RadiusEntry = info->Effects[EFFECT_0].RadiusEntry;
+            info->Effects[EFFECT_2].RadiusEntry = info->Effects[EFFECT_0].RadiusEntry;
+        }
+
+        if (info->Id == SPELL_SANGUINE_RUPTURE_ENERGIZE &&
+            info->Effects[EFFECT_2].IsAura(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE))
+        {
+            info->Effects[EFFECT_2].Effect = 0;
+            info->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE;
+        }
+
+        if (info->Id == SPELL_CURSED_GROUND_BLEED || info->Id == SPELL_BLOOD_BURST || info->Id == SPELL_HEMATOMA)
+            info->Effects[EFFECT_0].RealPointsPerLevel = 0.0f;
+
+        if (info->Id == SPELL_ULTRA_INSTINCT_BUFF)
+        {
+            info->Effects[EFFECT_1].BasePoints = 2;
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+
+        if (info->Id == SPELL_CORRUPTED_BLOOD_DEBUFF)
+        {
+            info->Effects[EFFECT_0].SpellClassMask = flag96();
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+
+        if (info->Id == SPELL_TRANSGRESSION)
+        {
+            info->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
+            info->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_SHAPESHIFT;
+            info->Effects[EFFECT_1].MiscValue = ShapeshiftFormCursed;
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+
+        if (info->Id == SPELL_FINAL_EMBRACE)
+        {
+            info->ExcludeCasterAuraSpell = AscensionBloodmage::CursedForm;
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+
+        if (IsVampyrBiteRank(info->Id))
+        {
+            info->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+
+        if (info->Id == SPELL_ACCURSED_FORM_AGILITY)
+        {
+            info->Effects[EFFECT_0].Effect = 0;
+            info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_NONE;
+            info->Effects[EFFECT_0].Amplitude = 0;
+        }
+
+        if (info->Id == SPELL_BLOOD_BOND)
+        {
+            info->AttributesCu &= ~SPELL_ATTR0_CU_FORCE_AURA_SAVING;
+            info->AttributesCu |= SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED;
+        }
+
+        if (info->Id == SPELL_BLOODWELL_ERUPTION &&
+            info->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER &&
+            info->Effects[EFFECT_1].MiscValue == SPELLMOD_CRITICAL_CHANCE)
+        {
+            info->Effects[EFFECT_1].SpellClassMask[1] |= SanguineRuptureDamageClassMask1;
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+
+        if (info->Id == SPELL_HEART_RUPTURER &&
+            info->Effects[EFFECT_0].IsAura(SPELL_AURA_ADD_PCT_MODIFIER) &&
+            info->Effects[EFFECT_0].MiscValue == SPELLMOD_DAMAGE)
+        {
+            info->Effects[EFFECT_0].SpellClassMask[1] |= SanguineRuptureDamageClassMask1;
+            info->Effects[EFFECT_1].Effect = 0;
+            info->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+
+        if (info->Id == SPELL_DARKFALLEN_LAMENT_HEAL)
+            info->MaxAffectedTargets = DarkfallenLamentMaxTargets;
+
+        if (info->Id == SPELL_THE_CUP_RUNNETH_OVER &&
+            info->Effects[EFFECT_1].IsAura(SPELL_AURA_ADD_PCT_MODIFIER) &&
+            info->Effects[EFFECT_1].MiscValue == AscensionBloodmageBonusMultiplierMod)
+            info->Effects[EFFECT_1].MiscValue = SPELLMOD_BONUS_MULTIPLIER;
+
+        if (info->Id == SPELL_BLOOD_PLAGUE)
+        {
+            flag96 const mask(0, 1, 16384);
+            info->Effects[EFFECT_0].SpellClassMask = mask;
+            info->Effects[EFFECT_1].SpellClassMask = mask;
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+
+        if (info->Id == SPELL_GORE_BARRAGE &&
+            info->Effects[EFFECT_0].IsAura(SPELL_AURA_ADD_PCT_MODIFIER) &&
+            info->Effects[EFFECT_0].MiscValue == SPELLMOD_COST)
+        {
+            info->Effects[EFFECT_0].SpellClassMask = flag96(0xD1168841u, 0xA8012A05u, 0x90E315B8u);
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+
+        if (info->Id == SPELL_ETERNAL_CURSE_TANK_STANCE &&
+            info->Effects[EFFECT_2].IsAura(SPELL_AURA_ADD_PCT_MODIFIER) &&
+            info->Effects[EFFECT_2].MiscValue == SPELLMOD_THREAT)
+            info->Effects[EFFECT_2].SpellClassMask = flag96(0x91168840u, 0x88012A05u, 0x906311B0u);
+
+        if ((info->Id == SPELL_DARK_BLOOD_RANK_1 || info->Id == SPELL_DARK_BLOOD_RANK_2) &&
+            info->Effects[EFFECT_0].IsAura(SPELL_AURA_ADD_PCT_MODIFIER) &&
+            info->Effects[EFFECT_0].MiscValue == SPELLMOD_COST)
+        {
+            info->Effects[EFFECT_0].SpellClassMask = flag96(0x01400800u, 0x00800605u, 0x000A6880u);
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+
         if (info->Id != SPELL_VAMPIRIC_POOLS_LEECH ||
             info->Effects[EFFECT_0].Effect != SPELL_EFFECT_HEALTH_LEECH)
             return;
@@ -1817,6 +2352,14 @@ void AddSC_AscensionBloodmageTalents()
     RegisterCreatureAI(npc_ascension_bloodmage_blood_orb);
     RegisterSpellScript(spell_ascension_bloodmage_blood_orb_pickup);
     RegisterSpellScript(spell_ascension_bloodmage_sanguine_mend);
+    RegisterSpellScript(aura_ascension_bloodmage_ultra_instinct);
+    RegisterSpellScript(aura_ascension_bloodmage_shadow_vigil);
+    RegisterSpellScript(aura_ascension_bloodmage_aortic_aegis);
+    RegisterSpellScript(aura_ascension_bloodmage_blood_trail);
+    RegisterSpellScript(aura_ascension_bloodmage_aortic_assault);
+    RegisterSpellScript(aura_ascension_bloodmage_blood_howl);
+    RegisterSpellScript(aura_ascension_bloodmage_blood_feast);
+    RegisterSpellScript(aura_ascension_bloodmage_darkfallen_lament);
 }
 
 void AddSC_AscensionBloodmageInfuse()

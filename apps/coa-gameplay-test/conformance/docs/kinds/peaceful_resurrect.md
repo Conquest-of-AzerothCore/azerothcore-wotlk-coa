@@ -15,3 +15,11 @@ control, the accepted cast and the amount; `refusal` on both arms (combat 0 and 
 spell without the attribute or without a resurrect effect is refused at generation.
 
 Witch Doctor: Reclaim Soul 803624 (clauses 459, 460, 461).
+
+`SPELL_EFFECT_RESURRECT` (effect 18, ADR 1323): alongside `SPELL_EFFECT_RESURRECT_NEW` (113, flat amounts), `peaceful_resurrect`
+accepts effect 18 (`RESURRECT_EFFECTS = frozenset({18, 113})` in `behaviours.py`). For effect 18 the scenario also reads
+`max_health` and `max_power` (power 0, mana) on `ALLY` after resurrection and compares `health_peaceful` /
+`mana_peaceful` against `CalculatePct(max, BasePoints + DieSides)` without silently clamping percentages above 100%, so
+oversized DBC percentage values (such as Vampyr Bite 803585's 820%) alert honestly instead of false-passing at full
+health/mana. A zero maximum pool (for example mana on a non-mana ally) returns `unmeasured`; optional `ally_class`
+(12..32) selects a CoA class for `ALLY`. Effect 113 scenarios remain byte-identical.

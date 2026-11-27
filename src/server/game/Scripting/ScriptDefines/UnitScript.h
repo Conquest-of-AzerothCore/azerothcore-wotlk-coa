@@ -118,8 +118,12 @@ public:
     virtual void ModifySpellEffectBaseValue(Unit const* /*caster*/, SpellInfo const* /*spellInfo*/,
         uint8 /*effectIndex*/, float& /*value*/) { }
 
-    // Called when Heal is Recieved
-    virtual void ModifyHealReceived(Unit* /*target*/, Unit* /*healer*/, uint32& /*heal*/, SpellInfo const* /*spellInfo*/) { }
+    virtual void ModifyHealReceived(Unit* /*first*/, Unit* /*second*/, uint32& /*heal*/, SpellInfo const* /*spellInfo*/) { }
+    virtual void ModifyHealReceivedFor(Unit* /*recipient*/, Unit* first, Unit* second, uint32& heal,
+        SpellInfo const* spellInfo)
+    {
+        ModifyHealReceived(first, second, heal, spellInfo);
+    }
 
     //Called when Damage is Dealt
     virtual uint32 DealDamage(Unit* /*AttackerUnit*/, Unit* /*pVictim*/, uint32 damage,

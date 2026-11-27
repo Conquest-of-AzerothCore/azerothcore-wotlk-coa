@@ -6,7 +6,6 @@
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellAuraEffects.h"
-#include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
@@ -14,6 +13,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdlib>
 #include <limits>
 #include <list>
 #include <unordered_map>
@@ -25,11 +25,13 @@ enum BloodmageSecondarySpells : uint32
 {
     SPELL_SACRIFICIAL_RITE = 800785,
     SPELL_SACRIFICIAL_RITE_HEALING = 800786,
+    SPELL_CURSED_BLOOD = 573250,
+    SPELL_CURSED_BLOOD_DAMAGE = 806163,
     SPELL_VEINBURST = 504260,
     SPELL_REAVE = 800490,
-    SPELL_REAVE_BLEED = 802883,
+    SPELL_REAVE_BLEED = 805612,
     SPELL_REAVE_EXECUTE = 802884,
-    SPELL_REAVE_BACK = 805612,
+    SPELL_REAVE_BACK = 802883,
     SPELL_HEMOBURST = 572855,
     SPELL_HEMOTURGY = 572856,
     SPELL_CURSED_FORM = 562720,
@@ -37,6 +39,7 @@ enum BloodmageSecondarySpells : uint32
     SPELL_VAMPYRS_KISS = 504275,
     SPELL_VAMPYRS_KISS_COPY = 504785,
     SPELL_BLACK_HEART = 680731,
+    SPELL_BLACK_HEART_ENERGIZE = 681031,
     SPELL_NIGHT_HUNTER = 704659,
     SPELL_BLOOD_FEAST_RESTORE = 706608,
     SPELL_ROTCLAW = 804197,
@@ -68,7 +71,18 @@ enum BloodmageSecondarySpells : uint32
     SPELL_RUNNING_WILD_JOURNEYMAN = 520575,
     SPELL_BITE_WOUND = 706654,
     SPELL_BITE_WOUND_PERCENT = 532612,
-    SPELL_CALL_OF_THE_DARKWING = 801958
+    SPELL_CALL_OF_THE_DARKWING = 801958,
+    SPELL_MONSTROUS_HOWL = 804811,
+    SPELL_BLOODSORES_DEBUFF = 805592,
+    SPELL_BLOOD_LORD_R1 = 704636,
+    SPELL_BLOOD_LORD_R2 = 707866,
+    SPELL_SANGUINE_RUPTURE_DAMAGE = 800775,
+    SPELL_WRETCHED = 504284,
+    SPELL_FESTERING_MAW = 706683,
+    SPELL_FESTERING_MAW_CDR = 706718,
+    SPELL_SHADOW_STRENGTH = 801960,
+    SPELL_SHADOW_STRENGTH_DAMAGE = 536277,
+    SPELL_BLOOD_CRAVING = 800780
 };
 
 constexpr uint32 TORTURE_MINIMUM_THIRST_STACKS = 9;
@@ -111,7 +125,7 @@ class aura_ascension_bloodmage_bite_wound : public AuraScript
     bool Validate(SpellInfo const* info) override
     {
         return info->Id == SPELL_BITE_WOUND && info->Effects[EFFECT_0].IsAura(SPELL_AURA_DUMMY) &&
-            ValidateSpellInfo({SPELL_BITE_WOUND_PERCENT});
+            ValidateSpellInfo({SPELL_BITE_WOUND_PERCENT, SPELL_FESTERING_MAW, SPELL_FESTERING_MAW_CDR});
     }
 
     bool Check(ProcEventInfo& event)
@@ -136,6 +150,8 @@ class aura_ascension_bloodmage_bite_wound : public AuraScript
             heal = caster->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, HEAL);
             HealInfo healing(caster, caster, heal, GetSpellInfo(), GetSpellInfo()->GetSchoolMask());
             caster->HealBySpell(healing);
+            if (caster->HasAura(SPELL_FESTERING_MAW))
+                caster->CastSpell(caster, SPELL_FESTERING_MAW_CDR, true);
         }
     }
 
@@ -174,6 +190,41 @@ class aura_ascension_bloodmage_sacrificial_rite : public AuraScript
     {
         AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_bloodmage_sacrificial_rite::GrantHealing,
             EFFECT_0, SPELL_AURA_MOD_MELEE_RANGED_HASTE, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+class aura_ascension_bloodmage_sacrificial_rite_cursed_blood : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_sacrificial_rite_cursed_blood);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        return info && info->Id == SPELL_CURSED_BLOOD &&
+            info->Effects[EFFECT_1].IsAura(SPELL_AURA_PROC_TRIGGER_SPELL) &&
+            ValidateSpellInfo({SPELL_CURSED_BLOOD_DAMAGE});
+    }
+
+    bool Check(ProcEventInfo& event)
+    {
+        Unit* victim = GetTarget();
+        Unit* caster = GetCaster();
+        return victim && caster && victim != caster && victim->IsAlive() && caster->IsAlive() &&
+            event.GetActor() == victim;
+    }
+
+    void TriggerDamage(AuraEffect const*, ProcEventInfo&)
+    {
+        PreventDefaultAction();
+        if (Unit* caster = GetCaster())
+            if (Unit* victim = GetTarget(); victim && caster->IsAlive() && victim->IsAlive())
+                caster->CastSpell(victim, SPELL_CURSED_BLOOD_DAMAGE, true);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_bloodmage_sacrificial_rite_cursed_blood::Check);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_bloodmage_sacrificial_rite_cursed_blood::TriggerDamage,
+            EFFECT_1, SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 };
 
@@ -219,8 +270,30 @@ class bloodmage_secondary_casts : public AllSpellScript
 {
 public:
     bloodmage_secondary_casts() : AllSpellScript("bloodmage_secondary_casts",
-        {ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_CALCULATED_TARGET, ALLSPELLHOOK_ON_CRIT_CHANCE,
-            ALLSPELLHOOK_ON_HIT_RESULT, ALLSPELLHOOK_ON_SUCCESSFUL_INTERRUPT}) { }
+        {ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_CALCULATED_TARGET,
+            ALLSPELLHOOK_ON_CRIT_CHANCE, ALLSPELLHOOK_ON_HIT_RESULT, ALLSPELLHOOK_ON_SUCCESSFUL_INTERRUPT,
+            ALLSPELLHOOK_ON_GLOBAL_COOLDOWN}) { }
+
+    void OnSpellBeforeEffects(Spell* spell, Unit*, SpellInfo const* info) override
+    {
+        Player* player = Bloodmage(spell);
+        if (!player || spell->IsTriggered() || info->StartRecoveryTime != 1500)
+            return;
+        if (AuraEffect const* howl = player->GetAuraEffect(SPELL_MONSTROUS_HOWL, EFFECT_0, player->GetGUID()))
+            if (howl->IsAffectedOnSpell(info))
+            {
+                int32 overriddenGcd = CalculatePct(int32(info->StartRecoveryTime), 100 + howl->GetAmount());
+                spell->SetScriptValue(SPELL_MONSTROUS_HOWL, uint64(std::max(overriddenGcd, 0)));
+            }
+    }
+
+    void OnSpellGlobalCooldown(Spell* spell, int32& duration) override
+    {
+        if (!Bloodmage(spell))
+            return;
+        if (uint64 saved = spell->GetScriptValue(SPELL_MONSTROUS_HOWL))
+            duration = std::min(duration, int32(saved));
+    }
 
     void OnSpellSuccessfulInterrupt(Spell* spell, Unit*) override
     {
@@ -242,6 +315,11 @@ public:
             player->CastSpell(player, SPELL_DARK_ESSENCE_HEAL, true);
         if (IsBloodmoonBlast(info->Id))
             player->CastSpell(player, SPELL_BLOOD_RITUALS_HEAL, true);
+        if (RankOf(info->Id, SPELL_VAMPYRS_KISS) && player->HasAura(SPELL_BLACK_HEART))
+            player->CastSpell(player, SPELL_BLACK_HEART_ENERGIZE, true);
+        if (player->HasAura(SPELL_SHADOW_STRENGTH) && info->Id != SPELL_BLOOD_CRAVING &&
+            (info->SpellFamilyFlags[2] & (128u | 2048u | 131072u)))
+            player->CastSpell(player, SPELL_SHADOW_STRENGTH_DAMAGE, true);
         if (!player->HasAura(SPELL_NIGHT_HUNTER))
             return;
         if (RankOf(info->Id, SPELL_VEINBURST))
@@ -312,9 +390,26 @@ public:
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32 damage, uint32, bool) override
     {
         Player* player = Bloodmage(spell);
-        if (!player || spell->IsTriggered() || !target || miss != SPELL_MISS_NONE)
+        if (!player || !target || miss != SPELL_MISS_NONE)
             return;
-        uint32 id = spell->GetSpellInfo()->Id;
+        SpellInfo const* info = spell->GetSpellInfo();
+        if (info->SpellFamilyName == 26 &&
+            (info->Id == SPELL_SANGUINE_RUPTURE_DAMAGE || (info->SpellFamilyFlags[1] & 0x2000)))
+        {
+            if (Aura* sore = target->GetAura(SPELL_BLOODSORES_DEBUFF, player->GetGUID()))
+            {
+                int32 keepChance = 0;
+                if (AuraEffect const* lord = player->GetAuraEffect(SPELL_BLOOD_LORD_R2, EFFECT_0))
+                    keepChance = std::abs(lord->GetAmount());
+                else if (AuraEffect const* lord = player->GetAuraEffect(SPELL_BLOOD_LORD_R1, EFFECT_0))
+                    keepChance = std::abs(lord->GetAmount());
+                if (!keepChance || !roll_chance_i(keepChance))
+                    sore->Remove();
+            }
+        }
+        if (spell->IsTriggered())
+            return;
+        uint32 id = info->Id;
         if (target == player && (id == SPELL_CURSED_FORM || id == SPELL_ACCURSED_FORM))
             player->RemoveAurasDueToSpell(SPELL_HEMOTURGY);
         if (target == player || player->IsFriendlyTo(target))
@@ -345,6 +440,7 @@ public:
             player->RemoveAurasDueToSpell(SPELL_BLOOD_THIRST);
             player->RemoveAurasDueToSpell(SPELL_INSATIABLE);
             player->RemoveAurasDueToSpell(SPELL_INSATIABLE_STACK);
+            player->RemoveAurasDueToSpell(SPELL_WRETCHED);
             if (extendTransgression)
                 player->CastSpell(player, SPELL_TORTURE_DURATION, true);
         }
@@ -399,11 +495,7 @@ public:
                 if (Player* player = unit->ToPlayer(); player && player->getClass() == CLASS_SON_OF_ARUGAL &&
                     player->IsAlive() && player->IsInWorld() && player->InSamePhase(target) && target->IsAlive() &&
                     player->IsValidAttackTarget(target))
-                {
                     CopyDamage(player, target, SPELL_VAMPYRS_KISS_COPY, damage / 4);
-                    if (player->HasAura(SPELL_BLACK_HEART))
-                        player->ModifyPower(POWER_RAGE, int32(player->GetMaxPower(POWER_RAGE)) / 5);
-                }
     }
 };
 
@@ -417,6 +509,8 @@ public:
     {
         if (!info || info->SpellFamilyName != 26)
             return;
+        if (info->Id == SPELL_REAVE || (info->Id >= 802463 && info->Id <= 802469))
+            info->AscensionFlatAfterWeaponPercent = true;
         if (info->Id == SPELL_REAVE_BLEED || info->Id == SPELL_REAVE_EXECUTE || info->Id == SPELL_REAVE_BACK ||
             info->Id == SPELL_VAMPYRS_KISS_COPY)
         {
@@ -426,6 +520,13 @@ public:
             info->AscensionInheritsResolvedAmount = true;
             info->Effects[EFFECT_0].BonusMultiplier = 0.0f;
         }
+        if (info->Id == SPELL_CURSED_BLOOD)
+        {
+            info->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+            info->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
+        }
+        if (info->Id == SPELL_CURSED_BLOOD_DAMAGE)
+            info->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
         if (info->Id == SPELL_THIRST_FOR_BLOOD &&
             info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_DUMMY && info->Effects[EFFECT_0].Amplitude)
             info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
@@ -902,12 +1003,15 @@ class aura_ascension_bloodmage_shadow_colony : public AuraScript
         if (ally->GetHealthPct() >= bloodmage->GetHealthPct())
             return;
 
-        float const amount = enemy->GetThreatMgr().GetThreat(ally) * 0.5f;
-        if (amount <= 0.0f)
-            return;
+        float threat = float(bloodmage->GetLevel()) * 10.0f;
+        float const allyThreat = enemy->GetThreatMgr().GetThreat(ally);
+        if (allyThreat > 0.0f)
+        {
+            enemy->GetThreatMgr().ModifyThreatByPercent(ally, -50);
+            threat += allyThreat * 0.5f;
+        }
 
-        enemy->GetThreatMgr().ModifyThreatByPercent(ally, -50);
-        enemy->GetThreatMgr().AddThreat(bloodmage, amount, GetSpellInfo(), true, true);
+        enemy->GetThreatMgr().AddThreat(bloodmage, threat, GetSpellInfo(), true, true);
     }
 
     void Register() override
@@ -927,6 +1031,7 @@ void AddSC_AscensionBloodmageSecondary()
     RegisterSpellScript(spell_ascension_bloodmage_bloodfang_bite);
     RegisterSpellScript(aura_ascension_bloodmage_bite_wound);
     RegisterSpellScript(aura_ascension_bloodmage_sacrificial_rite);
+    RegisterSpellScript(aura_ascension_bloodmage_sacrificial_rite_cursed_blood);
     new bloodmage_secondary_casts();
     new bloodmage_kiss_periodic();
     new bloodmage_secondary_contracts();

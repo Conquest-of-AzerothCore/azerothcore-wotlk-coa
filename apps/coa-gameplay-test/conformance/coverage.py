@@ -447,7 +447,7 @@ METRIC_EVIDENCE = {
                      'pet_melee_crits', 'pet_melee_plain_count', 'pet_melee_hits',
                      'pet_melee_blocked', 'health', 'owned_creature_avoided_count', 'owned_creature_attack_count',
                      'owned_creature_health', 'server_packets', 'server_packet_u32',
-                     'owned_creature_spell_cast_count'),
+                     'owned_creature_spell_cast_count', 'summon_pending'),
                     EVENT),
     **dict.fromkeys(('spell_modifier', 'spell_power_cost', 'spell_effect_value', 'spell_max_stacks',
                      'spell_cast_time_ms', 'spell_duration_ms', 'spell_effect_radius', 'spell_max_range',

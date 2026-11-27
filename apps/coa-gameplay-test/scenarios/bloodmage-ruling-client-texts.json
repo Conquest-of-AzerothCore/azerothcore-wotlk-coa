@@ -1,0 +1,386 @@
+{
+  "schema": 1,
+  "name": "Bloodmage client texts apply the 2026-11-26 O-10 owner rulings",
+  "contract": [
+    "Owner ruling O-10 (2026-11-26, Bloodmage ADRs 0039, 0040, 0041): coa_client_spell_description updates ten",
+    "Bloodmage client tooltip groups (53 rows) in rev_20261127_04_bloodmage_client_texts.sql: Lunge 500126",
+    "(Q-bm-1: drops $804866 and $AP*0.2), Dark Liturgy 800781/501623-572575 (Q-bm-2: drops bounce decay),",
+    "Bloodthorns 802313/501662-501670/572116 (Q-bm-3: drops 0.5 s ICD sentence), Hematoma 803392 (Q-bm-4: drops",
+    "Rage sentence), Vampyr's Kiss 504275-504281 (Q-bm-6: $681031s1% 20% Rage), Cursed Blood 681792 (Q-bm-11:",
+    "drops spell power scaling phrase), Clotting 704115 (Q-bm-12: +$AP*0.6), Corrupted Blood 532623 ToolTip",
+    "(Q-bm-13: Damage taken from the Bloodmage increased), Transgression 801076 / Hemoglobe 524907 / Crimson Feast",
+    "804602 (Q-bm-23: token and typo fixes), and Bloodmoon Blast / Sanguine Rupture / Animated Blood (Q-bm-24:",
+    "replaces broken $?s500107/$?s807489/$?s560259/$570744s1 conditionals with 92112/92113/561196). Vampyr Bite",
+    "803585 is explicitly excluded per Q-bm-7 ('leave') and preserves '$s1%'."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and the 5 s login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-1: Lunge 500126 uses ${$m2+$ppl2}",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500126,
+      "text": "dealing ${$m2+$ppl2} Physical Damage,",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-1: Lunge 500126 drops $AP*0.2",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500126,
+      "text": "$AP*0.2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-2: Dark Liturgy 572575 drops per-target decay phrase",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572575,
+      "text": "bouncing to up to $i nearby allies.@s:706624:0@",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-2: Dark Liturgy 572575 no longer mentions healing for less",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572575,
+      "text": "healing for less for each target struck",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-3: Bloodthorns 501667 keeps +0.035 SP and drops half-second ICD",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 501667,
+      "text": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-3: Bloodthorns 501667 no longer states 0.5 s ICD",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 501667,
+      "text": "every half a second",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-3: Greater Bloodthorns 572116 keeps DBC ToolTip",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572116,
+      "text": "Causes ${$w1} Shadow damage to attackers.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-3: Greater Bloodthorns 572116 no longer states 0.5 s ICD",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572116,
+      "text": "every half a second",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-4: Hematoma 803392 drops Rage generation sentence",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803392,
+      "text": "stacking $803392u times.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-4: Hematoma 803392 no longer mentions Rage",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803392,
+      "text": "Generates Rage based on damage dealt.",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-6: Vampyr's Kiss 504281 references $681031s1% (20%)",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504281,
+      "text": "and instantly regenerate $681031s1% of your maximum Rage",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-6: Vampyr's Kiss 504281 no longer references $805912s1%",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504281,
+      "text": "$805912s1%",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-11: Cursed Blood 681792 states Increases the damage dealt of Bloodbolt",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 681792,
+      "text": "Increases the damage dealt of |cffffffffBloodbolt|r, |cffffffffBloodmoon Blast|r, and |cffffffffCrimson Tide|r by $s2%.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-11: Cursed Blood 681792 drops spell power scaling phrase",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 681792,
+      "text": "and spell power scaling",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-12: Clotting 704115 uses +$AP*0.6",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 704115,
+      "text": "${$806214m1*$<scalingbp>+$AP*0.6} Physical damage.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-12: Clotting 704115 drops +$AP*0.5",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 704115,
+      "text": "+$AP*0.5",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-13: Corrupted Blood 532623 ToolTip uses Bloodmage-wide phrasing",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 532623,
+      "text": "Damage taken from the Bloodmage increased by ${$w1}%.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-13: Corrupted Blood 532623 drops Veinbursts and Vital Shreds",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 532623,
+      "text": "Veinbursts and Vital Shreds",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-23: Transgression 801076 points to $560073s2% Spirit SP",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 801076,
+      "text": "granting spell damage equal to $560073s2% of your Spirit",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-23: Transgression 801076 no longer writes $s1% of your Spirit",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 801076,
+      "text": "equal to $s1% of your Spirit",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-23: Hemoglobe 524907 Description uses $/10;s3 Rage",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 524907,
+      "text": "and $/10;s3 Rage every $t3 sec.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-23: Hemoglobe 524907 ToolTip uses $/10;s3 Rage",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 524907,
+      "text": "and $/10;s3 Rage every $t1 sec.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-23: Hemoglobe 524907 drops $/10;t3 and $/10;s2 typos",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 524907,
+      "text": "$/10;t3",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-23: Hemoglobe 524907 drops $/10;s2 typo",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 524907,
+      "text": "$/10;s2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-23: Crimson Feast 804602 uses $t1 seconds",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 804602,
+      "text": "Every $t1 seconds you remain in a |cffa966f0Cursed Form|r",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-23: Crimson Feast 804602 drops $/1000;T1",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 804602,
+      "text": "$/1000;T1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-24: Bloodmoon Blast 501614 uses $?s92112 and $?s92113",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 501614,
+      "text": "$?s92112[, and 1 stack of |cffffffffThirst|r.@s:706613:0@][.]$?s92113[",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-24: Bloodmoon Blast 501614 drops $?s500107",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 501614,
+      "text": "$?s500107",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-24: Sanguine Rupture 572907 uses $?s92112",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572907,
+      "text": "$?s92112[",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-24: Sanguine Rupture 572907 drops $?s500107",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572907,
+      "text": "$?s500107",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-24: Animated Blood 573357 uses $?s561196 and 561196s1",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 573357,
+      "text": "$?s561196[ \r\n\r\nDuration increased by $/1000;561196s1 sec per stack of |cFFFFFFFFThirst|r.][]",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Q-bm-24: Animated Blood 573357 drops $?s560259",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 573357,
+      "text": "$?s560259",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL (Q-bm-7 leave): Vampyr Bite 803585 preserves $s1% (820%) in client text stream",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803585,
+      "text": "Brings a dead player back to life with $s1% health and mana.",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}
