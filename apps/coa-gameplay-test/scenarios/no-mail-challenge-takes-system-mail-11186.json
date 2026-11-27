@@ -9,7 +9,7 @@
     "answers MAIL_OK (0) for a Silverleaf from the Postmaster, a Mageroyal from a Recruit-A-Friend reward mail, a",
     "Briarthorn a game master sends with .send items and a Swiftthistle sent with .send items from the console, and",
     "the items land in the bags, while a Peacebloom mailed by another character and an Earthroot in other",
-    "sender-less GM-stationery mail (boss loot, item recovery) stay refused with MAIL_ERR_INTERNAL_ERROR (6)."
+    "sender-less GM-stationery mail (boss loot, challenge rewards) stay refused with MAIL_ERR_INTERNAL_ERROR (6)."
   ],
   "timeout_ms": 90000,
   "location": {

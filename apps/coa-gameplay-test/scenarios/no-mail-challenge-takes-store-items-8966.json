@@ -3,8 +3,13 @@
   "name": "A no-mail challenge still lets the hero take store items from the mailbox (#8966)",
   "contract": [
     "Reports #5573 and #8966: during a trial that forbids mail, Bazaar and Vanity Store items sent from another character cannot be taken.",
-    "Store items are the Vanity Collection's items and Bazaar Tokens; Potion of Experience 818046 is one, Peacebloom 2447 is not.",
-    "Expected: under Bloodbath (challenge 15, NO_MAIL) the challenge packet hook passes the potion's CMSG_MAIL_TAKE_ITEM and the hero receives it, while the Peacebloom take is refused with MAIL_ERR_INTERNAL_ERROR and stays in the mail."
+    "Store items are the Vanity Collection's items and Bazaar Tokens (975001), which are exempt in code whatever a",
+    "realm puts in its Vanity table; Peacebloom 2447 is not a store item. Expected: under Bloodbath (challenge 15,",
+    "NO_MAIL) the challenge packet hook passes CMSG_MAIL_TAKE_ITEM for seven Bazaar Tokens the sender mails and the",
+    "hero gains exactly those seven, while the Peacebloom take is refused with MAIL_ERR_INTERNAL_ERROR and stays in",
+    "the mail. The account's Daily Login Reward may also mail 200 tokens to the hero. The mail fields pick the",
+    "newest mail carrying the item, which is the sender's, and the gain is read against a snapshot, so that mail",
+    "does not change the result."
   ],
   "timeout_ms": 90000,
   "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
@@ -19,17 +24,17 @@
     { "action": "assert", "actor": "hero", "metric": "challenge_start_code", "equals": 0 },
 
     { "action": "summon_gameobject", "actor": "sender", "entry": 142119 },
-    { "action": "add_item", "actor": "sender", "item": 818046 },
+    { "action": "add_item", "actor": "sender", "item": 975001, "count": 7 },
     { "action": "add_item", "actor": "sender", "item": 2447 },
-    { "action": "client_packet", "label": "Mail the Potion of Experience to the hero", "actor": "sender",
+    { "action": "client_packet", "label": "Mail seven Bazaar Tokens to the hero", "actor": "sender",
       "opcode": 568, "consumed": false,
       "fields": [
         { "gameobject_guid": 142119 }, { "string": "Coastorehero" }, { "string": "Store item" },
-        { "string": "Potion of Experience" }, { "u32": 41 }, { "u32": 0 }, { "u8": 1 }, { "u8": 0 },
-        { "item_guid": 818046 }, { "u32": 0 }, { "u32": 0 }, { "u64": 0 }, { "u8": 0 }
+        { "string": "Bazaar Tokens" }, { "u32": 41 }, { "u32": 0 }, { "u8": 1 }, { "u8": 0 },
+        { "item_guid": 975001 }, { "u32": 0 }, { "u32": 0 }, { "u64": 0 }, { "u8": 0 }
       ] },
     { "action": "assert", "actor": "sender", "metric": "server_packet_u32", "opcode": 569, "index": 2,
-      "equals": 0, "label": "The potion mail is accepted" },
+      "equals": 0, "label": "The token mail is accepted" },
     { "action": "client_packet", "label": "Mail the Peacebloom to the hero", "actor": "sender",
       "opcode": 568, "consumed": false,
       "fields": [
@@ -41,21 +46,23 @@
       "equals": 0, "label": "The Peacebloom mail is accepted" },
 
     { "action": "relog", "actor": "hero" },
-    { "action": "assert", "actor": "hero", "metric": "mail_has_item", "item": 818046, "equals": 1,
+    { "action": "assert", "actor": "hero", "metric": "mail_has_item", "item": 975001, "min": 1,
       "within_ms": 1000 },
     { "action": "assert", "actor": "hero", "metric": "mail_has_item", "item": 2447, "equals": 1 },
     { "action": "summon_gameobject", "actor": "hero", "entry": 142119 },
+    { "action": "snapshot", "label": "Tokens the hero carries before the take", "actor": "hero",
+      "metric": "item_count", "item": 975001, "save_as": "tokens" },
 
-    { "action": "client_packet", "label": "DISCRIMINATING: the challenge hook passes the potion take",
+    { "action": "client_packet", "label": "DISCRIMINATING: the challenge hook passes the token take",
       "actor": "hero", "opcode": 582, "early": false, "consumed": false,
-      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 818046 }, { "mail_item_guid": 818046 } ] },
-    { "action": "client_packet", "label": "The mailbox hands over the potion", "actor": "hero",
+      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 975001 }, { "mail_item_guid": 975001 } ] },
+    { "action": "client_packet", "label": "The mailbox hands over the tokens", "actor": "hero",
       "opcode": 582, "consumed": false,
-      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 818046 }, { "mail_item_guid": 818046 } ] },
+      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 975001 }, { "mail_item_guid": 975001 } ] },
     { "action": "assert", "actor": "hero", "metric": "server_packet_u32", "opcode": 569, "index": 2,
-      "equals": 0, "label": "The potion take succeeds" },
-    { "action": "assert", "actor": "hero", "metric": "item_count", "item": 818046, "equals": 1,
-      "within_ms": 1000 },
+      "equals": 0, "label": "The token take succeeds" },
+    { "action": "assert", "label": "The hero gains the seven mailed tokens", "actor": "hero",
+      "metric": "item_count", "item": 975001, "relative_to": "tokens", "equals": 7, "within_ms": 1000 },
 
     { "action": "client_packet", "label": "Control: the challenge refuses the Peacebloom take", "actor": "hero",
       "opcode": 582, "early": false, "consumed": true,

@@ -65,6 +65,8 @@ enum MailStationery
 };
 
 inline constexpr char RECRUIT_A_FRIEND_REWARD_MAIL_SUBJECT[] = "Recruit-A-Friend reward";
+inline constexpr char ITEM_RECOVERY_MAIL_SUBJECT[] = "Recovered item";
+inline constexpr char WORLDFORGED_REFUND_MAIL_SUBJECT[] = "Worldforged refund";
 
 enum MailState
 {

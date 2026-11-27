@@ -161,7 +161,7 @@ char const* Restore(Player* player, Offer const& offer)
     if (!persisted)
         return "UNKNOWN";
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-    MailDraft draft("Worldforged refund", "Your Worldforged exchange is enclosed.");
+    MailDraft draft(WORLDFORGED_REFUND_MAIL_SUBJECT, "Your Worldforged exchange is enclosed.");
     refunded->SaveToDB(trans);
     draft.AddItem(refunded.release());
     uint32 remaining = offer.runes;
