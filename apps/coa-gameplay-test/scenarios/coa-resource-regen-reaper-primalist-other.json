@@ -580,6 +580,39 @@
       "metric": "max_power",
       "power": 2,
       "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "RG1: non-100 Focus baseline (0 on Guardian) distinguishes flat +20 from +20%",
+      "actor": "guardian",
+      "metric": "max_power",
+      "power": 2,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 705039
+    },
+    {
+      "action": "assert",
+      "label": "RG1: Endurance Training adds flat +20 Focus on a 0 baseline (broken +20% stays 0)",
+      "actor": "guardian",
+      "metric": "max_power",
+      "power": 2,
+      "equals": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 705039
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "max_power",
+      "power": 2,
+      "equals": 0
     }
   ]
 }

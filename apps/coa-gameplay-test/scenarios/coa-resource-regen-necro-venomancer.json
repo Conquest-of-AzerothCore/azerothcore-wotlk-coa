@@ -276,6 +276,11 @@
       "within_ms": 2000
     },
     {
+      "action": "wait",
+      "label": "Let Crypt Swarm channel finish before Blight",
+      "ms": 3500
+    },
+    {
       "action": "assert",
       "label": "N1: periodic proc 706424 does not fire for Crypt Swarm",
       "actor": "necro",
@@ -283,11 +288,6 @@
       "spell": 706424,
       "relative_to": "tears_dot0",
       "equals": 0
-    },
-    {
-      "action": "wait",
-      "label": "Let Crypt Swarm channel finish before Blight",
-      "ms": 3500
     },
     {
       "action": "learn",
@@ -299,6 +299,14 @@
       "action": "learn",
       "actor": "necro",
       "spell": 500217
+    },
+    {
+      "action": "snapshot",
+      "label": "N6: record Blight base mana cost before Bone King makes it free",
+      "actor": "necro",
+      "metric": "spell_power_cost",
+      "spell": 500217,
+      "save_as": "blight_base_cost"
     },
     {
       "action": "set_aura",
@@ -355,7 +363,9 @@
       "metric": "spell_energize_total",
       "spell": 500307,
       "relative_to": "blight_refund0",
-      "min": 100,
+      "ratio_to": "blight_base_cost",
+      "min": 0.49,
+      "max": 0.51,
       "within_ms": 2000
     },
     {

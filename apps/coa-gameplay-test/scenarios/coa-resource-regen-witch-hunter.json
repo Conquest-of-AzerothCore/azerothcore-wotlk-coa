@@ -164,6 +164,7 @@
       "metric": "spell_damage_count",
       "spell": 805754,
       "target": "target_crit",
+      "critical": true,
       "save_as": "hs_hits0"
     },
     {
@@ -179,17 +180,19 @@
       "metric": "spell_damage_count",
       "spell": 805754,
       "target": "target_crit",
+      "critical": true,
       "relative_to": "hs_hits0",
       "equals": 1,
       "within_ms": 6000
     },
     {
       "action": "assert",
-      "label": "W2: Heartseeking Bolt RewardRage includes weaponSpeedHitFactor",
+      "label": "W2: Heartseeking Bolt crit RewardRage includes 2800ms weaponSpeedHitFactor (215-245)",
       "actor": "wh_crit",
       "metric": "power",
       "power": 1,
-      "min": 120,
+      "min": 215,
+      "max": 245,
       "within_ms": 2000
     },
     {
@@ -249,18 +252,27 @@
       "within_ms": 2000
     },
     {
+      "action": "stop_attack",
+      "actor": "wh"
+    },
+    {
+      "action": "snapshot",
+      "actor": "wh",
+      "metric": "spell_energize_count",
+      "spell": 521239,
+      "relative_to": "deadeye_cnt0",
+      "save_as": "deadeye_cnt_delta"
+    },
+    {
       "action": "assert",
-      "label": "W3: Deadeye Energize Rage grants flat 2-9 Rage per proc",
+      "label": "W3: Deadeye Energize Rage 521239 grants 20-98 stored Rage (2.0-9.8 Rage) per proc",
       "actor": "wh",
       "metric": "spell_energize_total",
       "spell": 521239,
       "relative_to": "deadeye_tot0",
+      "ratio_to": "deadeye_cnt_delta",
       "min": 20,
-      "within_ms": 2000
-    },
-    {
-      "action": "stop_attack",
-      "actor": "wh"
+      "max": 98
     }
   ]
 }
