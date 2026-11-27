@@ -4406,11 +4406,11 @@
     },
     {
       "spell": 501667,
-      "name": "Bloodthorns (0.5 sec ICD held below 450 ms)",
+      "name": "Bloodthorns (no 0.5 s ICD: strikes 380 ms apart both fire shield packets)",
       "kind": "metric_delta",
-      "variant": "icd_held",
-      "label_suffix": "icd_held",
-      "quote": "Can occur only once every half a second.",
+      "variant": "no_icd",
+      "label_suffix": "no_icd",
+      "quote": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
       "trigger_spell": 60235,
       "target": "caster",
       "setup_casts": [
@@ -4487,98 +4487,6 @@
         ]
       },
       "before_expected": 0,
-      "expected": 1,
-      "tolerance": 0,
-      "metric": "server_packets",
-      "fields": {
-        "opcode": 591
-      },
-      "void_on_cast_failure": true,
-      "observe_source": "Lower bracket of 500 ms ICD ('Can occur only once every half a second.'): passive striker (reaction 0, no auto-attacks) casts two instant DmgClass=2 Physical SPELL_ATTR0_NO_ACTIVE_DEFENSE strikes (34580 then 23583) with striker & caster hit fixture 803393 (+100% hit) and caster_avoidance dodge/parry 0% plus 823764 on caster; ally_arm checks 34580 landed unblocked (1 before, 2 cumulative after) and second_strike checks present==1 packet before 23583 plus 1 landed 23583 log per phase. Nominal waits after 60235: after_trigger_ms 10 + strike.wait_ms 340 + second_strike.wait_ms 20 + wait_ms 10 = 380 ms, guarded by game_time [360, 449] ms (< 450 ms = -10% of 500 ms). Expected: 0 packets in control, exactly 1 (tolerance 0) in treatment \u2014 rejects 0 ms (current unfixed server fires 2) and 250 ms ICDs (340 ms inter-strike gap > 250 ms fires 2). Paired with icd_reopen. Reference search 2026-11-26: see shield_hits."
-    },
-    {
-      "spell": 501667,
-      "name": "Bloodthorns (0.5 sec ICD reopens above 550 ms)",
-      "kind": "metric_delta",
-      "variant": "icd_reopen",
-      "label_suffix": "icd_reopen",
-      "quote": "Can occur only once every half a second.",
-      "trigger_spell": 60235,
-      "target": "caster",
-      "setup_casts": [
-        501667
-      ],
-      "setup_target": "caster",
-      "setup_only_after": true,
-      "setup_wait_ms": 1600,
-      "strike": {
-        "spell": 34580,
-        "health": 100000,
-        "max_health": 100000,
-        "count": 1,
-        "wait_ms": 560,
-        "after_trigger_ms": 10,
-        "reaction": 0
-      },
-      "second_strike": {
-        "spell": 23583,
-        "present": 1,
-        "wait_ms": 20
-      },
-      "caster_avoidance": {
-        "dodge": 0,
-        "parry": 0
-      },
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          803393,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          803393,
-          1,
-          "striker",
-          "striker"
-        ]
-      ],
-      "ally_arm": {
-        "allies": 0,
-        "arms": [
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_damage_count",
-            "fields": {
-              "spell": 34580,
-              "caster": "striker",
-              "target": "caster",
-              "blocked": false
-            },
-            "before_expected": 1,
-            "expected": 2,
-            "tolerance": 0,
-            "source": "Confirms Strike #1 (34580, SPELL_ATTR0_NO_ACTIVE_DEFENSE) landed unblocked once in control (1) and once in treatment (cumulative 2)."
-          }
-        ]
-      },
-      "wait_ms": 10,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          560,
-          680
-        ]
-      },
-      "before_expected": 0,
       "expected": 2,
       "tolerance": 0,
       "metric": "server_packets",
@@ -4586,7 +4494,7 @@
         "opcode": 591
       },
       "void_on_cast_failure": true,
-      "observe_source": "Upper bracket of 500 ms ICD ('Can occur only once every half a second.'): same passive-striker guaranteed-hit two-strike setup as icd_held (reaction 0, 34580 then 23583, 803393 on caster & striker, 823764 on caster, dodge/parry 0%, ally_arm 34580 unblocked count 1/2, second_strike present==1 & 23583 log count 1/1). Nominal waits after 60235: after_trigger_ms 10 + strike.wait_ms 560 + second_strike.wait_ms 20 + wait_ms 10 = 600 ms, guarded by game_time [560, 680] ms (> 550 ms = +10% of 500 ms and < 700 ms). Expected: 0 packets in control, exactly 2 (tolerance 0) in treatment \u2014 rejects >= 700 ms, 1000 ms, and one-shot ICDs. Together with icd_held, brackets the 500 ms ICD inside +-10%. Reference search 2026-11-26: see shield_hits."
+      "observe_source": "Owner ruling Q-bm-3 (sp_only_edit_text, 2026-11-26, Bloodmage ADR 0015): rev_20261127_04 removes 'Can occur only once every half a second.' from Bloodthorns 501667. Passive striker hits twice inside 380 ms (34580 then 23583, game_time [360, 449] ms) and 501667 fires both shield packets (2 in treatment vs 0 in control, confirming no 0.5 s ICD)."
     },
     {
       "spell": 572116,
@@ -4816,11 +4724,11 @@
     },
     {
       "spell": 572116,
-      "name": "Greater Bloodthorns (0.5 sec ICD held below 450 ms)",
+      "name": "Greater Bloodthorns (no 0.5 s ICD: strikes 380 ms apart both fire shield packets)",
       "kind": "metric_delta",
-      "variant": "icd_held",
-      "label_suffix": "icd_held",
-      "quote": "Can occur only once every half a second.",
+      "variant": "no_icd",
+      "label_suffix": "no_icd",
+      "quote": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
       "trigger_spell": 60235,
       "target": "caster",
       "setup_casts": [
@@ -4897,98 +4805,6 @@
         ]
       },
       "before_expected": 0,
-      "expected": 1,
-      "tolerance": 0,
-      "metric": "server_packets",
-      "fields": {
-        "opcode": 591
-      },
-      "void_on_cast_failure": true,
-      "observe_source": "Lower bracket of 500 ms ICD ('Can occur only once every half a second.'): passive striker (reaction 0, no auto-attacks) casts two instant DmgClass=2 Physical SPELL_ATTR0_NO_ACTIVE_DEFENSE strikes (34580 then 23583) with striker & caster hit fixture 803393 (+100% hit) and caster_avoidance dodge/parry 0% plus 823764 on caster; ally_arm checks 34580 landed unblocked (1 before, 2 cumulative after) and second_strike checks present==1 packet before 23583 plus 1 landed 23583 log per phase. Nominal waits after 60235: after_trigger_ms 10 + strike.wait_ms 340 + second_strike.wait_ms 20 + wait_ms 10 = 380 ms, guarded by game_time [360, 449] ms (< 450 ms = -10% of 500 ms). Expected: 0 packets in control, exactly 1 (tolerance 0) in treatment \u2014 rejects 0 ms (current unfixed server fires 2) and 250 ms ICDs (340 ms inter-strike gap > 250 ms fires 2). Paired with icd_reopen. Reference search 2026-11-26: see duration."
-    },
-    {
-      "spell": 572116,
-      "name": "Greater Bloodthorns (0.5 sec ICD reopens above 550 ms)",
-      "kind": "metric_delta",
-      "variant": "icd_reopen",
-      "label_suffix": "icd_reopen",
-      "quote": "Can occur only once every half a second.",
-      "trigger_spell": 60235,
-      "target": "caster",
-      "setup_casts": [
-        572116
-      ],
-      "setup_target": "caster",
-      "setup_only_after": true,
-      "setup_wait_ms": 1600,
-      "strike": {
-        "spell": 34580,
-        "health": 100000,
-        "max_health": 100000,
-        "count": 1,
-        "wait_ms": 560,
-        "after_trigger_ms": 10,
-        "reaction": 0
-      },
-      "second_strike": {
-        "spell": 23583,
-        "present": 1,
-        "wait_ms": 20
-      },
-      "caster_avoidance": {
-        "dodge": 0,
-        "parry": 0
-      },
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          803393,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          803393,
-          1,
-          "striker",
-          "striker"
-        ]
-      ],
-      "ally_arm": {
-        "allies": 0,
-        "arms": [
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_damage_count",
-            "fields": {
-              "spell": 34580,
-              "caster": "striker",
-              "target": "caster",
-              "blocked": false
-            },
-            "before_expected": 1,
-            "expected": 2,
-            "tolerance": 0,
-            "source": "Confirms Strike #1 (34580, SPELL_ATTR0_NO_ACTIVE_DEFENSE) landed unblocked once in control (1) and once in treatment (cumulative 2)."
-          }
-        ]
-      },
-      "wait_ms": 10,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          560,
-          680
-        ]
-      },
-      "before_expected": 0,
       "expected": 2,
       "tolerance": 0,
       "metric": "server_packets",
@@ -4996,7 +4812,7 @@
         "opcode": 591
       },
       "void_on_cast_failure": true,
-      "observe_source": "Upper bracket of 500 ms ICD ('Can occur only once every half a second.'): same passive-striker guaranteed-hit two-strike setup as icd_held (reaction 0, 34580 then 23583, 803393 on caster & striker, 823764 on caster, dodge/parry 0%, ally_arm 34580 unblocked count 1/2, second_strike present==1 & 23583 log count 1/1). Nominal waits after 60235: after_trigger_ms 10 + strike.wait_ms 560 + second_strike.wait_ms 20 + wait_ms 10 = 600 ms, guarded by game_time [560, 680] ms (> 550 ms = +10% of 500 ms and < 700 ms). Expected: 0 packets in control, exactly 2 (tolerance 0) in treatment \u2014 rejects >= 700 ms, 1000 ms, and one-shot ICDs. Together with icd_held, brackets the 500 ms ICD inside +-10%. Reference search 2026-11-26: see duration."
+      "observe_source": "Owner ruling Q-bm-3 (sp_only_edit_text, 2026-11-26, Bloodmage ADR 0015): rev_20261127_04 removes 'Can occur only once every half a second.' from Greater Bloodthorns 572116. Passive striker hits twice inside 380 ms (34580 then 23583, game_time [360, 449] ms) and 572116 fires both shield packets (2 in treatment vs 0 in control, confirming no 0.5 s ICD)."
     },
     {
       "spell": 806182,
@@ -7614,7 +7430,7 @@
       "wait_ms": 2500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Heartbreak 572895 Effect[2] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE BasePoints 423 (DieSides 0; client $m3 = 424, CalcValue = 423) triggers 520315 SPELL_EFFECT_HEAL. Tooltip states ${$m3+0+$BH*.3+$spi*1}: at reference stats (SP 0, Spirit 114), tooltip expects 424 + 0 + 114 = 538 (or 423 + 114 = 537; tol 2 covers the 1-pt DieSides=0 offset while excluding missing Spirit scaling = 423). Precondition fixture 984954 disables spell crits. Uncast control reads 0. Paired with heal_sp and heal_spi. Reference search 2026-11-26: coa-history 520315: 73 SPELL_HEAL events across 2 logs (min 926, max 2268, mean 1398.0 \u2014 confirms 520315 scaled strongly above base 423 on live)."
+      "observe_source": "Heartbreak 572895 Effect[2] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE BasePoints 423 (DieSides 0; client $m3 = 424, CalcValue = 423) triggers 520315 SPELL_EFFECT_HEAL. Tooltip states ${$m3+0+$BH*.3+$spi*1}: at reference stats (SP 0, Spirit 114), tooltip expects 424 + 0 + 114 = 538 (or 423 + 114 = 537; tol 2 covers the 1-pt DieSides=0 offset while excluding missing Spirit scaling = 423). Precondition fixture 984954 disables spell crits. Uncast control reads 0. Paired with heal_sp and heal_spi. Reference search 2026-11-26: coa-history 520315: 73 SPELL_HEAL events across 2 logs (min 926, max 2268, mean 1398.0 — confirms 520315 scaled strongly above base 423 on live)."
     },
     {
       "spell": 572895,
@@ -8128,7 +7944,7 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Level-50 scaling arm for Visceral Power 807687 ('scaling with level', G-32; BaseLevel/SpellLevel 40, BasePoints 14 + DieSides 1 = 15, RealPointsPerLevel 4.0 -> at level 50: 15 + 10 * 4 = 55). At caster_level 50 (asserted by caster_level option), setup Gorge 804805 + Empowered Heartbreak 572895 raises caster AP & SP by +220 (165 + 55; ally SP 0 -> 165), and follow-up Bloodbolt 578305 (0.45*SP + 0.20*AP, DieSides 12 -> max roll diff +-11, phase_since: true, dummy_distance 3 yd, wait_ms 1000) gains +143 Shadow damage (220*0.45 + 220*0.20 = 99 + 44 = 143, tol 12 excludes 807563-only +107 and level-60 +169). Reference search 2026-11-26: see empowered_self_l60."
+      "observe_source": "Level-50 scaling arm for Visceral Power 807687 (BaseLevel=SpellLevel=40, RealPointsPerLevel=4 -> +55 AP/SP at level 50, Bloodmage ADR 0014 / Q-bm-16). Empowered Heartbreak raises caster AP & SP by +220 (165 + 55); Bloodbolt 578305 gains +143 Shadow damage (340 -> 483 +- 12)."
     },
     {
       "spell": 300226,
@@ -8483,7 +8299,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Blood Tap 707900 (extra_spells[18], Spell.dbc PowerType -2 POWER_HEALTH ManaCostPercentage 30 -> int32(1504 * 0.30) = 451 HP; Effect[0] 137 SPELL_EFFECT_ENERGIZE_PCT MiscValue 1 POWER_RAGE BasePoints 49 + DieSides 1 = 50% = $s1). With regen off, Rage set to 0 before both phases (phase_power_in_uncast_before) and caster_health [10000, 10000]: uncast control reads 0 Rage / 10000 HP; real 707900 cast reads 500 internal Rage (50% of precondition max_power 1000) and 9549 HP (-451 HP) exact. Paired with rage_scaled_max. Reference search 2026-11-26: coa-history 707900: 211 SPELL_CAST_SUCCESS / 211 SPELL_ENERGIZE across 22 logs (min 50, max 61, mean 58.0 displayed Rage \u2014 confirming 50% of 100..120 max Rage on live)."
+      "observe_source": "Blood Tap 707900 (extra_spells[18], Spell.dbc PowerType -2 POWER_HEALTH ManaCostPercentage 30 -> int32(1504 * 0.30) = 451 HP; Effect[0] 137 SPELL_EFFECT_ENERGIZE_PCT MiscValue 1 POWER_RAGE BasePoints 49 + DieSides 1 = 50% = $s1). With regen off, Rage set to 0 before both phases (phase_power_in_uncast_before) and caster_health [10000, 10000]: uncast control reads 0 Rage / 10000 HP; real 707900 cast reads 500 internal Rage (50% of precondition max_power 1000) and 9549 HP (-451 HP) exact. Paired with rage_scaled_max. Reference search 2026-11-26: coa-history 707900: 211 SPELL_CAST_SUCCESS / 211 SPELL_ENERGIZE across 22 logs (min 50, max 61, mean 58.0 displayed Rage — confirming 50% of 100..120 max Rage on live)."
     },
     {
       "spell": 707900,
@@ -9025,7 +8841,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Truthful tooltip test for Blood Covenant 1200012 row#552 ('Sacrifice 90% of your own health to carve a large blood rune into the ground.'). Spell.dbc 1200012 has PowerType -2 (POWER_HEALTH), ManaCost 0, ManaCostPercentage 90. With caster_health [10000, 10000] and regen off, sacrificing 90% of the caster's own health leaves 1000 HP (tolerance 200 = 2 pts per G-19). Server SpellInfo::CalcPowerCost (SpellInfo.cpp:3212-3214) instead multiplies ManaCostPercentage by GetCreateHealth() (level-60 Bloodmage BaseHP = 65 + 1483 - 44 = 1504 via rev_20260903_01_live_class_baseline.sql:928 + rev_20260912_00_custom_class_stat_progression.sql, Druid fallback 11), deducting 1353 HP (13.53% of 10000, or 64.3% of natural level-60 max health 2104) and leaving 8647 HP. Kept unweakened per G-31 / Bucket 4 cross-ref A so the alert stands honestly for owner ruling (see ADR 1318 for Cultist base_health comparison; Bloodmage has no base_mana). Reference search 2026-11-26: see summon_ritual."
+      "observe_source": "Owner ruling O-9 ('opt_in_1200012', Bloodmage ADR 0003): 1200012 opts into UsesMaxHealthForCost, sacrificing 90% of caster_health [10000, 10000] = 9000 HP and leaving 1000 +- 200 HP."
     },
     {
       "spell": 680680,
@@ -12116,7 +11932,7 @@
     },
     {
       "spell": 504627,
-      "name": "Blood Bond (threat redirect from bonded ally to caster \u2014 ALERT probe)",
+      "name": "Blood Bond (redirects 10% of bonded ally threat to caster)",
       "kind": "metric_delta",
       "variant": "threat_redirect",
       "label_suffix": "threat_redirect",
@@ -12151,7 +11967,7 @@
       "wait_ms": 2500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "$s3 = 10 (504627 EffectBasePoints[2] -11 + DieSides 1, displayed 10%), but Spell.dbc 504627 Effect[2] = 0 with no SPELL_EFFECT_REDIRECT_THREAT or script handler (rev_20260920_52_bloodmage_scripted_procs.sql:42-43). Ally casts two Light of the Naaru 41394 hits (2200 exact Holy damage) at dummy in each phase; 10% threat redirect would add >= 220 caster threat on dummy (above the 58 flat buff threat from casting 504627 on an in-combat ally), so this check is expected to ALERT at 58 on current build. Reference search 2026-11-26: coa-history 504627: 0 events in 186 logs; bindmysoul talents.normalized.json 504627 states 'redirect their threat generated to you'."
+      "observe_source": "Blood Bond 504627 Effect[2] = 10% ($s3 = 10; aura_ascension_bloodmage_blood_bond OnHit, Bloodmage ADR 0021). Ally casts two Light of the Naaru 41394 hits (2200 Holy damage); caster receives >= 220 redirected threat vs 58 without 504627."
     },
     {
       "spell": 572412,
@@ -12516,7 +12332,7 @@
     },
     {
       "spell": 707624,
-      "name": "Blood Mark (applies 707625 area aura to nearby enemy \u2014 ALERT probe)",
+      "name": "Blood Mark (applies 707625 area aura to nearby enemy)",
       "kind": "metric_delta",
       "variant": "aura_applied",
       "label_suffix": "aura_applied",
@@ -12535,7 +12351,7 @@
       "expected": 1,
       "wait_ms": 1200,
       "expire_ms": 500,
-      "observe_source": "$707375a1 = 5 yd, $707625s1 = 3% (Spell.dbc 707625 Effect[0] 129 SPELL_EFFECT_APPLY_AREA_AURA_ENEMY aura 87 Physical +3%, RadiusIndex 8 = 5 yd). Unlike Dark Mark 705731 (AscensionBloodmageTalents.cpp:492-493), Blood Mark 707624 carries only SPELL_AURA_DUMMY and has no C++/SQL handler casting 707625 (expected to ALERT at 0 on current build). Reference search 2026-11-26: coa-history 707624/707625: 0 events in 186 logs; bindmysoul talents.normalized.json 707624 matches verbatim."
+      "observe_source": "Blood Mark 707624 applies 707625 area aura (5 yd, +3% Physical damage taken, Bloodmage ADR 0021) to nearby dummy at 3 yd (0 before learning 707624, 1 after)."
     },
     {
       "spell": 707623,
@@ -12865,7 +12681,7 @@
     },
     {
       "spell": 801961,
-      "name": "Bloodmoon Power (Liquify cleanses negative effect when used \u2014 ALERT probe)",
+      "name": "Bloodmoon Power (Liquify cleanses negative effect on cast)",
       "kind": "metric_delta",
       "variant": "cleanse_on_use",
       "label_suffix": "cleanse_on_use",
@@ -12892,7 +12708,7 @@
       "wait_ms": 800,
       "expire_ms": 7000,
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip states 'Your Liquify now cleanses all negative effects when used.' Caster carries dispellable negative Curse of Weakness 18267 from dummy; 800 ms after casting Liquify 806310 (while Liquify 6000 ms is active), 18267 should be cleansed (0) with 801961 learned vs kept (1) without 801961. AscensionBloodmageTalents.cpp:552-561 instead runs only in OnAuraRemove (when Liquify ends at 6000 ms), so this check is expected to ALERT at 1 on current build. Reference search 2026-11-26: coa-history 801961: 0 events in 186 logs; bindmysoul talents.normalized.json 801961 matches verbatim."
+      "observe_source": "Bloodmoon Power 801961 cleanses dispellable negative Curse of Weakness 18267 when Liquify 806310 is cast (AscensionBloodmageTalents OnAuraApply, Bloodmage ADR 0020): kept (1) without 801961, cleansed (0) within 800 ms after learning 801961."
     },
     {
       "spell": 504292,
@@ -15720,7 +15536,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "704646 Swarm of Flies (Spell.dbc Effect[0] aura 42 -> 704647 Spread Taldarams; pending_db_world/rev_20260918_33_bloodmage_swarm_of_flies_proc.sql sets SpellFamilyName 26, SpellFamilyMask1 131072 Bloodbolt, ProcFlags 69972, SpellTypeMask 1, SpellPhaseMask 2, Chance 100). 704647 Effect[1] 173 SPELL_EFFECT_ASCENSION_REFRESH_AURA BasePoints 14999 + 1 = 15000 ms, MiscValue 800772 (Taldaram's Torment rank 1; level-60 rank is 802580, DurationIndex 8 = 15000 ms). Baseline before phase (trigger_only_after true) reads 0. Treatment casts 802580 at t=0, waits 8000 ms, casts Bloodbolt 578305 at t=8000 ms: at +14100 ms after Bloodbolt (t=22100 ms, 7.1 s past unrefreshed 15000 ms expiry, game_time.after [13900, 14400]), refreshed 802580 must still be present (1, > 13500 ms = -10% of 15000 ms), then expired (0) 1800 ms later at +15900 ms (game_time.expired [15700, 16200], < 16500 ms = +10%). Note: SpellEffects.cpp:855 EffectAscensionRefreshAura calls target->GetAura(effect.MiscValue) without walking ranks, so rank 8 802580 is expected to alert unless fixed. Reference search 2026-11-26: coa-history 704647: 0 events; bindmysoul 704646 matches verbatim."
+      "observe_source": "704646 Swarm of Flies triggers 704647 (EffectAscensionRefreshAura walking spell_ranks) so Bloodbolt 578305 refreshes level-60 Taldaram's Torment 802580 (passes past 14100 ms and expires by 15900 ms)."
     },
     {
       "spell": 802315,
@@ -16093,7 +15909,7 @@
           704692
         ]
       },
-      "observe_source": "Scope check for 704692 Corrupted Blood: tooltip states unqualified 'increasing your damage dealt against them by $532623s1%' (10%), whereas Spell.dbc 532623 Effect[0] EffectSpellClassMask (6291456, 0, 0) restricts the +10% bonus to Veinburst and Reave only. Testing Bloodbolt 578305 on Humanoid (entry 6) after Taldaram's Torment 802580 measures whether general Bloodmage damage receives +10% or +0%. Reference search 2026-11-26: coa-history 532623: 0 events; bindmysoul 704692 says 'increasing your damage dealt against them by 10%.'."
+      "observe_source": "Owner ruling Q-bm-13 (all_damage, 2026-11-26, Bloodmage ADR 0012): 532623 Effect[0] EffectSpellClassMask matches all family-26 damage spells and rev_20261127_04 updates 532623 ToolTip ('Damage taken from the Bloodmage increased by ${$w1}%.'). Bloodbolt 578305 against Humanoid gains +10% (ratio 1.10)."
     },
     {
       "spell": 707435,
@@ -16250,7 +16066,7 @@
       "wait_ms": 1000,
       "expire_ms": 31000,
       "void_on_cast_failure": true,
-      "observe_source": "680731 Black Heart ($681031s1 = 20% of 1000 max Rage = 200 internal Rage). Vampyr's Kiss 504281 tooltip explicitly states '$?s680731[ and instantly regenerate $805912s1% of your maximum Rage][]', and live Ascension combat logs (coa-history 2026-11-26) confirm exact 1:1 SPELL_ENERGIZE (681031) per 504281 SPELL_CAST_SUCCESS (log 88: 3/3 vs 13 ticks; log 149: 18/18 vs 55 ticks; log 150: 109/109 vs 452 ticks; mean 20.0 Rage). Setup casts Bloodbolt 578305 (sets Rage to 300 and spends 300 -> leaves 0 Rage) with disable_regeneration true, then casts 504281 Vampyr's Kiss. Reads caster Rage 1000 ms after casting 504281 (before the first 5000 ms periodic tick): expects 0 without 680731 and 200 with 680731. Note: AscensionBloodmageSecondary.cpp:404-405 instead grants MaxPower/5 inside OnPeriodicDamageResult (0 on cast, +200 per periodic tick) and is expected to alert. Reference search 2026-11-26: coa-history 681031: 152 SPELL_ENERGIZE across 10 logs; bindmysoul 680731 matches verbatim."
+      "observe_source": "Owner ruling Q-bm-6 (fix_20_instant_edit_text, 2026-11-26, Bloodmage ADR 0030): Black Heart 680731 grants +20% maximum Rage (200 internal Rage on 1000 max) instantly when Vampyr's Kiss 504281 is cast (0 without 680731, 200 within 1000 ms with 680731)."
     },
     {
       "spell": 804686,
@@ -16617,7 +16433,7 @@
     },
     {
       "spell": 806274,
-      "name": "Aortic Aegis (casting Blood Veil on an ally applies Blood Veil 504263 to caster's party)",
+      "name": "Aortic Aegis (casting Blood Veil on an ally applies cast-rank Blood Veil 572279 to caster's party)",
       "kind": "metric_delta",
       "variant": "caster_party",
       "label_suffix": "caster_party",
@@ -16635,7 +16451,7 @@
       },
       "metric": "aura",
       "fields": {
-        "spell": 504263,
+        "spell": 572279,
         "caster": "caster"
       },
       "before_expected": 0,
@@ -16643,7 +16459,7 @@
       "wait_ms": 1000,
       "expire_ms": 16000,
       "void_on_cast_failure": true,
-      "observe_source": "806274 Aortic Aegis (Spell.dbc Effect[0] aura 42 -> 806275 Effect[0] 64 TRIGGER_SPELL 504263 Blood Veil rank 1, TargetA 33 TARGET_UNIT_SRC_AREA_PARTY, EffectRadiusIndex 11 = 45 yd; pending_db_world/rev_20260920_58_bloodmage_aortic_aegis_proc.sql sets ProcFlags 16384 DONE_SPELL_MAGIC_DMG_CLASS_POS, SpellFamilyMask1 536870912). Casting Blood Veil 572279 on grouped ally in caster's party leaves ally2 without 504263 before learn (control = 0) and applies 504263 to ally2 after learn (= 1). Note: see target_party_raid_sub2 and rank divergence note in report. Reference search 2026-11-26: coa-history 504263: 13 casts / 22 refreshes, 806275: 0 events; bindmysoul 806274 matches verbatim."
+      "observe_source": "Owner ruling Q-bm-22 (align_live_both, 2026-11-26, Bloodmage ADR 0017): casting 572279 with 806274 propagates cast rank 572279 via aura_ascension_bloodmage_aortic_aegis (AddAura to friendly alive subgroup members within 45 yd of target). Expects 0 before -> 1 after."
     },
     {
       "spell": 806274,
@@ -16662,11 +16478,11 @@
       ],
       "ally_arm": {
         "allies": 6,
-        "reach_source": "Blood Veil 572279 TargetA 21 TARGET_UNIT_TARGET_ALLY reaches any raid member (ally5 in raid subgroup 2); Aortic Aegis tooltip claims 'applies to the party members of the target' (ally6 in subgroup 2 with ally5), whereas 806275 DBC TargetA 33 TARGET_UNIT_SRC_AREA_PARTY reaches only the caster's own party (rev_20260920_58_bloodmage_aortic_aegis_proc.sql:25-27)."
+        "reach_source": "Blood Veil 572279 reaches any raid member (ally5 in raid subgroup 2); aura_ascension_bloodmage_aortic_aegis fans cast rank 572279 to ally6 in ally5's subgroup within 45 yd."
       },
       "metric": "aura",
       "fields": {
-        "spell": 504263,
+        "spell": 572279,
         "caster": "caster"
       },
       "before_expected": 0,
@@ -16674,7 +16490,7 @@
       "wait_ms": 1000,
       "expire_ms": 16000,
       "void_on_cast_failure": true,
-      "observe_source": "Tests tooltip 'party members of the target' when target is outside caster's own party: caster + ally..ally4 stand in raid subgroup 1, ally5 + ally6 stand in raid subgroup 2. Casting 572279 on ally5 should apply Blood Veil to ally6 (party member of ally5), expecting 0 -> 1. Known divergence recorded in rev_20260920_58_bloodmage_aortic_aegis_proc.sql:25-27 (806275 TargetA 33 TARGET_UNIT_SRC_AREA_PARTY targets caster's party, not target's party), so this entry is expected to alert (reads 0 -> 0). Reference search 2026-11-26: coa-history 806275: 0 events; bindmysoul 806274 matches verbatim."
+      "observe_source": "Owner ruling Q-bm-22 (align_live_both, 2026-11-26, Bloodmage ADR 0017): casting 572279 with 806274 propagates cast rank 572279 via aura_ascension_bloodmage_aortic_aegis (AddAura to friendly alive subgroup members within 45 yd of target). Expects 0 before -> 1 after."
     },
     {
       "spell": 92114,
@@ -19688,7 +19504,7 @@
       "kind": "metric_delta",
       "variant": "leap",
       "label_suffix": "leap",
-      "quote": "Leap behind an enemy, dealing ${$804866m2+$804866ppl2+$AP*0.2} Physical Damage,",
+      "quote": "Leap behind an enemy, dealing ${$m2+$ppl2} Physical Damage,",
       "trigger_spell": 500126,
       "target": "dummy",
       "dummy_distance": 15.0,
@@ -19732,7 +19548,7 @@
       "kind": "metric_delta",
       "variant": "damage_base",
       "label_suffix": "damage_base",
-      "quote": "Leap behind an enemy, dealing ${$804866m2+$804866ppl2+$AP*0.2} Physical Damage,",
+      "quote": "Leap behind an enemy, dealing ${$m2+$ppl2} Physical Damage,",
       "trigger_spell": 500126,
       "target": "dummy",
       "dummy_distance": 15.0,
@@ -19764,21 +19580,21 @@
         "critical": false
       },
       "before_expected": 0,
-      "expected": 146.5,
-      "after_at_least": 140,
-      "after_at_most": 153,
+      "expected": 111.2,
+      "after_at_least": 105,
+      "after_at_most": 118,
       "wait_ms": 2000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip formula ${$804866m2+$804866ppl2+$AP*0.2}: Spell.dbc 804866 Effect[1] BasePoints 6 + DieSides 2 (7..8, mean 7.5), BaseLevel 1, RealPointsPerLevel 1.6 -> +94.4 at level 60; reference AP 223 * 0.2 = 44.6 -> 146..147 Physical damage (band 140..153 excludes 0, unscaled ~111, and 2x). Precondition fixtures: 985345 (100% ArP), 984948 (hit/exp), 64481 (-100% melee crit), 525031 (CasterAuraSpell). Reference search 2026-11-26: coa-history 500126: 283 hits (min 32, max 119, mean 90.0) in 27 logs; 804866: 0 events; coabuildhub 500126 states '7+3.6 Points Per Level+AP*0.2' (older state)."
+      "observe_source": "Owner ruling Q-bm-1 (keep_edit_text, 2026-11-26, Bloodmage ADR 0040): server keeps Lunge 500126 Effect[1] BasePoints 25 + DieSides 5 (BaseLevel=SpellLevel=8, RealPointsPerLevel 1.6 -> 109..113, mean 111.2) with 0 AP scaling, and rev_20261127_04_bloodmage_client_texts.sql removes '$804866' and '$AP*0.2'. Precondition fixtures: 985345 (100% ArP), 984948 (hit/exp), 64481 (-100% melee crit), 525031 (CasterAuraSpell). Band [105, 118] excludes 0, AP-scaled 146.5, and 2x."
     },
     {
       "spell": 500126,
-      "name": "Lunge (Physical damage at +20000 AP)",
+      "name": "Lunge (Physical damage at +20000 AP confirms 0 AP scaling)",
       "kind": "metric_delta",
       "variant": "damage_ap",
       "label_suffix": "damage_ap",
-      "quote": "Leap behind an enemy, dealing ${$804866m2+$804866ppl2+$AP*0.2} Physical Damage,",
+      "quote": "Leap behind an enemy, dealing ${$m2+$ppl2} Physical Damage,",
       "trigger_spell": 500126,
       "target": "dummy",
       "dummy_distance": 15.0,
@@ -19811,13 +19627,13 @@
         "critical": false
       },
       "before_expected": 0,
-      "expected": 4146.5,
-      "after_at_least": 4135,
-      "after_at_most": 4158,
+      "expected": 111.2,
+      "after_at_least": 105,
+      "after_at_most": 118,
       "wait_ms": 2000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip AP term $AP*0.2 at +20000 AP (total 20223): 7.5 + 94.4 + 20223*0.2 = 4146.5 Physical damage (band 4135..4158 excludes unscaled damage and wrong AP coefficient). Precondition fixtures: 985345 (100% ArP), 984948 (hit/exp), 64481 (-100% melee crit), 525031 (CasterAuraSpell). Reference search 2026-11-26: coa-history 500126: 283 hits (min 32, max 119, mean 90.0) across 27 logs; coabuildhub 500126 includes AP*0.2."
+      "observe_source": "Owner ruling Q-bm-1 (keep_edit_text, 2026-11-26, Bloodmage ADR 0040): under ${$m2+$ppl2} with +20000 AP (total 20223 AP), server deals 109..113 (mean 111.2, band [105, 118]), confirming 0 AP scaling and excluding +0.2*AP (4146.5). Precondition fixtures: 985345, 984948, 64481, 525031."
     },
     {
       "spell": 500126,
@@ -21363,7 +21179,7 @@
     },
     {
       "spell": 802469,
-      "name": "Reave (non-bleeding above 35% HP: neither bleed 802883 nor execute 802884 fires)",
+      "name": "Reave (non-bleeding above 35% HP: neither bleed 805612 nor execute 802884 fires)",
       "kind": "metric_delta",
       "variant": "cond_no_bleed_no_exec",
       "label_suffix": "cond_no_bleed_no_exec",
@@ -21409,7 +21225,7 @@
       ],
       "metric": "spell_damage_total",
       "fields": {
-        "spell": 802883,
+        "spell": 805612,
         "target": "dummy"
       },
       "before_expected": 0,
@@ -21450,11 +21266,11 @@
           }
         ]
       },
-      "observe_source": "Negative control for bleeding and <35% health conditions on 802469 Reave (AscensionBloodmageSecondary.cpp:284-286,357-360): dummy not bleeding and at 36% HP (settled 1600 ms via neutral 60235 cast). Reave lands (count=1) while both 802883 (bleed copy) and 802884 (execute copy) deal 0. Reference search 2026-11-26: coa-history 802883/802884: 1833/936 hits in 19 logs; coabuildhub 800490 matches verbatim."
+      "observe_source": "Negative control for bleeding and <35% health conditions on 802469 Reave (AscensionBloodmageSecondary.cpp:284-286,357-360): dummy not bleeding and at 36% HP (settled 1600 ms via neutral 60235 cast). Reave lands (count=1) while both 805612 (bleed copy) and 802884 (execute copy) deal 0. Reference search 2026-11-26: coa-history 805612/802884: 1833/936 hits in 19 logs; coabuildhub 800490 matches verbatim."
     },
     {
       "spell": 802469,
-      "name": "Reave (bleeding condition adds 100% Shadow damage via 802883)",
+      "name": "Reave (bleeding condition adds 100% Shadow damage via 805612)",
       "kind": "metric_delta",
       "variant": "cond_bleed",
       "label_suffix": "cond_bleed",
@@ -21497,7 +21313,7 @@
       ],
       "metric": "spell_damage_count",
       "fields": {
-        "spell": 802883,
+        "spell": 805612,
         "target": "dummy",
         "school_mask": 32
       },
@@ -21529,11 +21345,11 @@
             "metric": "spell_damage_total",
             "count_metric": "spell_damage_count",
             "fields": {
-              "spell": 802883,
+              "spell": 805612,
               "target": "dummy",
               "school_mask": 32
             },
-            "source": "Bleed Shadow copy 802883 (100% of 802469 damage)."
+            "source": "Bleed Shadow copy 805612 (100% of 802469 damage)."
           },
           {
             "actors": [
@@ -21556,11 +21372,11 @@
             "denominator": 0,
             "expected": 1.0,
             "tolerance": 0.01,
-            "source": "802883 Shadow damage equals 100% ($572280s1%) of 802469 damage when target is bleeding."
+            "source": "805612 Shadow damage equals 100% ($572280s1%) of 802469 damage when target is bleeding."
           }
         ]
       },
-      "observe_source": "802469 Reave bleeding condition ($572280s1 = 100%, Spell.dbc 572280 Effect[0] BasePoints 99 + 1 = 100; AscensionBloodmageSecondary.cpp:284,357-358 casts 802883 Shadow CopyDamage for 100% of dealt damage). Dummy carries bleed 772 Rend (Mechanic 15, precondition fixture), at 100% HP: 802883 fires (count=1, school_mask 32 Shadow) with ratio 802883/802469 == 1.00 +- 0.01 while 802884 stays 0. Reference search 2026-11-26: coa-history 802883: 1833 hits (max 23389 = 100% of 802469 max 23389) in 19 logs; coabuildhub 800490 matches verbatim."
+      "observe_source": "802469 Reave bleeding condition ($572280s1 = 100%, Spell.dbc 572280 Effect[0] BasePoints 99 + 1 = 100; AscensionBloodmageSecondary.cpp:284,357-358 casts 805612 Shadow CopyDamage for 100% of dealt damage). Dummy carries bleed 772 Rend (Mechanic 15, precondition fixture), at 100% HP: 805612 fires (count=1, school_mask 32 Shadow) with ratio 805612/802469 == 1.00 +- 0.01 while 802884 stays 0. Reference search 2026-11-26: coa-history 805612: 1833 hits (max 23389 = 100% of 802469 max 23389) in 19 logs; coabuildhub 800490 matches verbatim."
     },
     {
       "spell": 802469,
@@ -21669,7 +21485,7 @@
     },
     {
       "spell": 802469,
-      "name": "Reave (behind non-bleeding target should add 100% Shadow damage via 805612)",
+      "name": "Reave (behind non-bleeding target should add 100% Shadow damage via 802883)",
       "kind": "metric_delta",
       "variant": "cond_behind",
       "label_suffix": "cond_behind",
@@ -21706,7 +21522,7 @@
       ],
       "metric": "spell_damage_count",
       "fields": {
-        "spell": 805612,
+        "spell": 802883,
         "target": "dummy",
         "school_mask": 32
       },
@@ -21738,13 +21554,13 @@
             ],
             "metric": "spell_damage_total",
             "fields": {
-              "spell": 802883,
+              "spell": 805612,
               "target": "dummy"
             },
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "Dummy not bleeding: bleed copy 802883 stays 0."
+            "source": "Dummy not bleeding: bleed copy 805612 stays 0."
           },
           {
             "actors": [
@@ -21798,11 +21614,11 @@
           }
         ]
       },
-      "observe_source": "802469 Reave behind-target condition alone (not bleeding, 100% HP): caster at x=0 behind +x-facing dummy at x=3 (!target->HasInArc(M_PI, player), AscensionBloodmageSecondary.cpp:287-288,361-362). Tooltip promises +100% ($572280s1%) Shadow damage via 805612 independently of bleeding; Spell.dbc 805612 carries TargetAuraState=18 (AURA_STATE_BLEEDING) which blocks 805612 on non-bleeding targets (SPELL_FAILED_TARGET_AURASTATE -> SPELL_FAILED_DONT_REPORT 27). Reference search 2026-11-26: coa-history 805612: 2057 hits in 19 logs; coabuildhub 800490 matches verbatim."
+      "observe_source": "802469 Reave behind-target condition alone (not bleeding, 100% HP): caster at x=0 behind +x-facing dummy at x=3 (!target->HasInArc(M_PI, player), AscensionBloodmageSecondary.cpp:287-288,361-362). Tooltip promises +100% ($572280s1%) Shadow damage via 802883 independently of bleeding; Spell.dbc 802883 carries TargetAuraState=18 (AURA_STATE_BLEEDING) which blocks 802883 on non-bleeding targets (SPELL_FAILED_TARGET_AURASTATE -> SPELL_FAILED_DONT_REPORT 27). Reference search 2026-11-26: coa-history 802883: 2057 hits in 19 logs; coabuildhub 800490 matches verbatim."
     },
     {
       "spell": 802469,
-      "name": "Reave (in front of bleeding target does not trigger behind Shadow copy 805612)",
+      "name": "Reave (in front of bleeding target does not trigger behind Shadow copy 802883)",
       "kind": "metric_delta",
       "variant": "cond_front",
       "label_suffix": "cond_front",
@@ -21848,7 +21664,7 @@
       ],
       "metric": "spell_damage_count",
       "fields": {
-        "spell": 805612,
+        "spell": 802883,
         "target": "dummy",
         "school_mask": 32
       },
@@ -21881,14 +21697,14 @@
             ],
             "metric": "spell_damage_count",
             "fields": {
-              "spell": 802883,
+              "spell": 805612,
               "target": "dummy",
               "school_mask": 32
             },
             "before_expected": 0,
             "expected": 1,
             "tolerance": 0,
-            "source": "Dummy carries 772 Rend bleed: bleed copy 802883 fires (1 hit), proving TargetAuraState=18 was met and only front-facing suppressed 805612."
+            "source": "Dummy carries 772 Rend bleed: bleed copy 805612 fires (1 hit), proving TargetAuraState=18 was met and only front-facing suppressed 802883."
           },
           {
             "actors": [
@@ -21928,7 +21744,7 @@
           }
         ]
       },
-      "observe_source": "Front-facing negative control for 802469 Reave behind-target condition (!target->HasInArc(M_PI, player), AscensionBloodmageSecondary.cpp:287-288,361-362). relocate_before_trigger dx=+3.2 moves caster from x=-8949.95 to x=-8946.75, placing caster 0.2 yd in front of the +x-facing dummy at x=-8946.95 (verified by caster/dummy position_x and distance_2d preconditions; 0.2 yd stays within IsWithinBoundaryRadius in Spell.cpp:7363 so 802469 FacingCasterFlags=1 casts cleanly while dummy->HasInArc(M_PI, caster) is true; note dx=+6 exceeds boundary radius and fails SPELL_FAILED_UNIT_NOT_INFRONT 134 because relocate preserves caster orientation o=0). Dummy carries 772 Rend bleed so bleed copy 802883 fires (count=1) while behind copy 805612 stays 0 (and Reave 802469 lands 1 hit). Reference search 2026-11-26: coa-history 805612: 2057 hits in 19 logs; coabuildhub 800490 matches verbatim."
+      "observe_source": "Front-facing negative control for 802469 Reave behind-target condition (!target->HasInArc(M_PI, player), AscensionBloodmageSecondary.cpp:287-288,361-362). relocate_before_trigger dx=+3.2 moves caster from x=-8949.95 to x=-8946.75, placing caster 0.2 yd in front of the +x-facing dummy at x=-8946.95 (verified by caster/dummy position_x and distance_2d preconditions; 0.2 yd stays within IsWithinBoundaryRadius in Spell.cpp:7363 so 802469 FacingCasterFlags=1 casts cleanly while dummy->HasInArc(M_PI, caster) is true; note dx=+6 exceeds boundary radius and fails SPELL_FAILED_UNIT_NOT_INFRONT 134 because relocate preserves caster orientation o=0). Dummy carries 772 Rend bleed so bleed copy 805612 fires (count=1) while behind copy 802883 stays 0 (and Reave 802469 lands 1 hit). Reference search 2026-11-26: coa-history 802883: 2057 hits in 19 logs; coabuildhub 800490 matches verbatim."
     },
     {
       "spell": 802469,
@@ -22015,11 +21831,11 @@
             "metric": "spell_damage_total",
             "count_metric": "spell_damage_count",
             "fields": {
-              "spell": 802883,
+              "spell": 805612,
               "target": "dummy",
               "school_mask": 32
             },
-            "source": "Bleed Shadow copy 802883 (100% of 802469 damage)."
+            "source": "Bleed Shadow copy 805612 (100% of 802469 damage)."
           },
           {
             "actors": [
@@ -22041,11 +21857,11 @@
             "metric": "spell_damage_total",
             "count_metric": "spell_damage_count",
             "fields": {
-              "spell": 805612,
+              "spell": 802883,
               "target": "dummy",
               "school_mask": 32
             },
-            "source": "Behind Shadow copy 805612 (100% of 802469 damage)."
+            "source": "Behind Shadow copy 802883 (100% of 802469 damage)."
           },
           {
             "actors": [
@@ -22090,7 +21906,7 @@
             "denominator": 0,
             "expected": 1.0,
             "tolerance": 0.01,
-            "source": "Bleed copy 802883 equals 100% ($572280s1%) of 802469 damage."
+            "source": "Bleed copy 805612 equals 100% ($572280s1%) of 802469 damage."
           },
           {
             "numerator": 2,
@@ -22104,11 +21920,11 @@
             "denominator": 0,
             "expected": 1.0,
             "tolerance": 0.01,
-            "source": "Behind copy 805612 equals 100% ($572280s1%) of 802469 damage."
+            "source": "Behind copy 802883 equals 100% ($572280s1%) of 802469 damage."
           }
         ]
       },
-      "observe_source": "Stacking proof for 802469 Reave 'for each condition met' (AscensionBloodmageSecondary.cpp:353-363): dummy bleeding (772 Rend), at 34% HP (settled 1600 ms via neutral 60235 cast), caster behind dummy (x=0 vs +x-facing dummy at x=3). All three Shadow copies fire simultaneously for 100% of 802469 damage each (802883, 802884, 805612 ratios all == 1.00 +- 0.01 -> +300% total Shadow damage). Reference search 2026-11-26: coa-history 802883/802884/805612: 1833/936/2057 hits in 19 logs; coabuildhub 800490 matches verbatim."
+      "observe_source": "Stacking proof for 802469 Reave 'for each condition met' (AscensionBloodmageSecondary.cpp:353-363): dummy bleeding (772 Rend), at 34% HP (settled 1600 ms via neutral 60235 cast), caster behind dummy (x=0 vs +x-facing dummy at x=3). All three Shadow copies fire simultaneously for 100% of 802469 damage each (805612, 802884, 802883 ratios all == 1.00 +- 0.01 -> +300% total Shadow damage). Reference search 2026-11-26: coa-history 805612/802884/802883: 1833/936/2057 hits in 19 logs; coabuildhub 800490 matches verbatim."
     },
     {
       "spell": 504819,
@@ -22533,7 +22349,7 @@
     },
     {
       "spell": 572575,
-      "name": "Dark Liturgy (bounces up to 10 nearby allies, capped at 10 of 16 candidates)",
+      "name": "Dark Liturgy (primary + up to 10 nearby allies = 180..198 heals across 18 casts)",
       "kind": "heal_sum",
       "variant": "bounce_cap",
       "label_suffix": "bounce_cap",
@@ -22746,11 +22562,13 @@
           "name": "bounce_cap",
           "judge": "cap",
           "spell": 572575,
-          "expected": 180,
-          "witness": "treatment"
+          "expected": 187,
+          "witness": "treatment",
+          "at_least": 180,
+          "at_most": 198
         }
       ],
-      "observe_source": "Dark Liturgy 572575 MaxAffectedTargets = 10 ($i = 10; Effect[0] TargetA 21 + TargetB 31 TARGET_UNIT_DEST_AREA_ALLY, RadiusIndex 20 = 25 yd; Spell.dbc). 16 eligible friendly units (caster + 7 grouped allies at 2-8 yd + 8 assistable faction-35 creatures entry 631 type_flags 0x1000 at 9-16 yd, all well inside 25 yd). 18 real casts at caster expect 180 heals (10/cast), against 288 if uncapped. Witness: every unit takes at least one heal (probability a unit is skipped across 18 random draws of 10 of 16 is (6/16)^18 = 2.2e-8 per unit). Note: TargetA 21 adds caster unconditionally while TargetB 31 calls RandomResize(targets, 10) over all 16 units before deduplication (Spell.cpp:1419-1425), so each cast heals 11 targets with probability 6/16 (expected ~186.75 heals; probability of rolling exact 180 = (10/16)^18 = 2.1e-4 per run, < 0.05% flip risk per pair) and this entry truthfully alerts on the TargetA+TargetB cap overrun. Reference search 2026-11-26: coa-history 572575: 5714 heals across 652 casts (~8.8 heals/cast)."
+      "observe_source": "Owner ruling Q-bm-2 (keep_edit_text, 2026-11-26, Bloodmage ADR 0040): server keeps TargetA 21 (caster) + TargetB 31 (MaxAffectedTargets = 10 over 16 eligible friendly units within 25 yd) -> 10 or 11 unique heals per cast (~186.75 across 18 casts, bounded by [180, 198] vs 288 uncapped). Witness verifies every unit took at least one heal."
     },
     {
       "spell": 572575,
@@ -22805,11 +22623,11 @@
     },
     {
       "spell": 572575,
-      "name": "Dark Liturgy (healing for less for each target struck: 0.95x EffectDamageMultiplier)",
+      "name": "Dark Liturgy (bounces heal equally with 0% per-target decay)",
       "kind": "metric_delta",
-      "variant": "bounce_decay",
-      "label_suffix": "bounce_decay",
-      "quote": "healing for less for each target struck.",
+      "variant": "no_bounce_decay",
+      "label_suffix": "no_bounce_decay",
+      "quote": "bouncing to up to $i nearby allies.",
       "trigger_spell": 572575,
       "gate_timing": "start",
       "trigger_only_after": true,
@@ -22880,14 +22698,14 @@
           {
             "numerator": 1,
             "denominator": 0,
-            "expected": 0.95,
+            "expected": 1.0,
             "tolerance": 0.02,
-            "source": "Spell.dbc 572575 EffectDamageMultiplier[0] = 0.95 (-5% per bounce, tooltip 'healing for less for each target struck'); excludes 1.00 (no decay)."
+            "source": "Bounced heal on ally2 equals 100% of primary heal on ally (0% per-target decay per Q-bm-2)."
           }
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Dark Liturgy 572575 EffectDamageMultiplier[0] = 0.95 (Spell.dbc) corresponds to tooltip 'healing for less for each target struck'. Casts 572575 at ally with nearby ally2 at +20000 SP and 16255 -100% crit (each base heal ~7441, die spread 22 = 0.3%). Checks ally2/ally heal ratio against 0.95 +- 0.02 (0.93..0.97, strictly excluding 1.00 flat/no-decay). Note: EffectChainTarget[0] = 0 and Spell::EffectHeal never multiplies by m_damageMultipliers, so if the server heals all targets equally (ratio ~1.00) this entry truthfully alerts. Reference search 2026-11-26: coa-history 572575: 5714 heals across 4 logs."
+      "observe_source": "Owner ruling Q-bm-2 (keep_edit_text, 2026-11-26, Bloodmage ADR 0040): rev_20261127_04 drops 'healing for less for each target struck' from Dark Liturgy; server keeps 1.00x flat healing across primary ally and bounced ally2 (1.00 +- 0.02, excluding 0.95x decay)."
     },
     {
       "spell": 572575,
@@ -23424,12 +23242,12 @@
       },
       "before_expected": 0,
       "expected": 1219,
-      "after_at_least": 1060,
+      "after_at_least": 1208,
       "after_at_most": 1220,
       "wait_ms": 32500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Sacrificial Rite 800786 (cast on 800785 expiry at t=16000 ms; DurationIndex 8 = 15000 ms, Effect[1] SPELL_AURA_PERIODIC_HEAL Amplitude 1500 ms -> 10 ticks, BasePoints 101, DieSides 1, RealPointsPerLevel 2.0, BaseLevel 58, MaxLevel 0 -> level 60 tick = 102 + 4 = 106, 10 ticks = 1060; with 800786's own Effect[0] +15% healing done = 10 * floor(106 * 1.15) = 1210..1219). Wait 32500 ms covers 1s cast + 15s ritual + 15s HoT + 1.5s margin; 16255 -100% crit ensures non-crit ticks. Paired with expiry_hot_sp. Reference search 2026-11-26: see mortal_form_gate."
+      "observe_source": "Sacrificial Rite 800786 (cast on 800785 expiry at t=16000 ms; 10 ticks at 1500 ms, 106/tick * 1.15 from Effect[0] = 1210..1219). Wait 32500 ms ensures all 10 ticks land ([1208, 1220] excludes 9 ticks 1089)."
     },
     {
       "spell": 800785,
@@ -23473,12 +23291,12 @@
       },
       "before_expected": 0,
       "expected": 47219,
-      "after_at_least": 41050,
+      "after_at_least": 47200,
       "after_at_most": 47230,
       "wait_ms": 32500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "SP scaling arm for 800786 (${($800786d*1000/$800786t2)*($800786m2+$800786ppl2+$SP*.2)}): 10 ticks * (106 + 20000 * 0.2) = 41060 unbuffed, or * 1.15 (800786 Effect[0] +15% healing done) = 47219 (band [41050, 47230] strictly excludes stock default 0.1/tick = 21060..24219 and 0 SP = 1060..1219). Truthfully alerts if 800786 lacks a 0.2 dot_bonus spell_bonus_data row. Reference search 2026-11-26: see mortal_form_gate."
+      "observe_source": "SP scaling arm for 800786 (+20000 SP * 0.2/tick, Effect[0] +15% = 47219 across 10 ticks; [47200, 47230] excludes 9 ticks 42497, stock 0.1/tick, and 0 SP)."
     },
     {
       "spell": 800785,
@@ -24367,6 +24185,263 @@
       ],
       "poll_ms": 10,
       "observe_source": "Bloodmoon Strength 578120 Effect[0] SPELLMOD_ACTIVATION_TIME -50% ($s1 = 50; Spell.dbc) on Rotclaw 503484 (1000 ms * 0.50 = 500 ms; Eternal Curse 800157 + 524861 precondition fixtures; Cultist 301317 & Witch Doctor 560545 precedent). read_at_cast (ADR 1282) captures 3 hits (t=0, 500, 1000 ms) inside window [0, 1250] (between 1025 and 1450 ms) -> mean period 500 ms (G-19 band +-25 ms excludes 1000 ms and 667 ms). Paired with rotclaw_period_control. Reference search 2026-11-26: see rotclaw_period_control."
+    },
+    {
+      "spell": 578120,
+      "name": "Bloodmoon Strength (Bloodfang Bite gains +0.25 * Dodge Rating = +250 at 1000 CR_DODGE)",
+      "kind": "metric_delta",
+      "variant": "dodge_scaling_bloodfang_bite",
+      "label_suffix": "dodge_scaling_bloodfang_bite",
+      "quote": "and your Bloodfang Bite, Claw Sweep, and Bloodbolt additionally scales with dodge rating.",
+      "learn": [
+        572551
+      ],
+      "trigger_spell": 572551,
+      "gate_spell": 578120,
+      "gate_timing": "between",
+      "cast_in_before": true,
+      "target": "dummy",
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          18062,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          18062,
+          0,
+          1000
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 2
+            },
+            "before_expected": 1000,
+            "expected": 1000,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Fixture 18062 Effect[0]=1000 holds CR_DODGE (rating 2) at exact 1000 in both arms."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 685,
+      "expected": 935,
+      "expected_gain": 250,
+      "tolerance": 25,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Owner ruling Q-bm-15 / O-11 ('specify_rate' 0.25, Bloodmage ADR 0008): with fixture 18062 holding CR_DODGE = 1000 in both arms (985345 100% ArP, 984948 hit, 64481 -100% crit), learning 578120 adds +250 damage to Bloodfang Bite 572551 (685 -> 935 +- 25)."
+    },
+    {
+      "spell": 578120,
+      "name": "Bloodmoon Strength (Claw Sweep gains +0.25 * Dodge Rating = +250 at 1000 CR_DODGE)",
+      "kind": "metric_delta",
+      "variant": "dodge_scaling_claw_sweep",
+      "label_suffix": "dodge_scaling_claw_sweep",
+      "quote": "and your Bloodfang Bite, Claw Sweep, and Bloodbolt additionally scales with dodge rating.",
+      "learn": [
+        500444
+      ],
+      "trigger_spell": 500444,
+      "gate_spell": 578120,
+      "gate_timing": "between",
+      "cast_in_before": true,
+      "target": "dummy",
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          18062,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          18062,
+          0,
+          1000
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 2
+            },
+            "before_expected": 1000,
+            "expected": 1000,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Fixture 18062 Effect[0]=1000 holds CR_DODGE (rating 2) at exact 1000 in both arms."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500444,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 206,
+      "expected": 456,
+      "expected_gain": 250,
+      "tolerance": 25,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Owner ruling Q-bm-15 / O-11 ('specify_rate' 0.25, Bloodmage ADR 0008): with fixture 18062 holding CR_DODGE = 1000 in both arms (985345 100% ArP, 984948 hit, 64481 -100% crit), learning 578120 adds +250 damage to Claw Sweep 500444 (unarmored 206 -> 456 +- 25)."
+    },
+    {
+      "spell": 578120,
+      "name": "Bloodmoon Strength (Bloodbolt gains +0.25 * Dodge Rating = +250 at 1000 CR_DODGE)",
+      "kind": "metric_delta",
+      "variant": "dodge_scaling_bloodbolt",
+      "label_suffix": "dodge_scaling_bloodbolt",
+      "quote": "and your Bloodfang Bite, Claw Sweep, and Bloodbolt additionally scales with dodge rating.",
+      "learn": [
+        578305
+      ],
+      "trigger_spell": 578305,
+      "gate_spell": 578120,
+      "gate_timing": "between",
+      "cast_in_before": true,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 500,
+      "player_spell_power": 0,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          18062,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ],
+        [
+          18062,
+          0,
+          1000
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 2
+            },
+            "before_expected": 1000,
+            "expected": 1000,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Fixture 18062 Effect[0]=1000 holds CR_DODGE (rating 2) at exact 1000 in both arms."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 381,
+      "expected": 631,
+      "expected_gain": 250,
+      "tolerance": 25,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Owner ruling Q-bm-15 / O-11 ('specify_rate' 0.25, Bloodmage ADR 0008): with fixture 18062 holding CR_DODGE = 1000 in both arms (823764 spellpen, 16255 -100% crit), learning 578120 adds +250 Shadow damage to Bloodbolt 578305 (381 -> 631 +- 25)."
     },
     {
       "spell": 560479,
@@ -30418,7 +30493,7 @@
       "kind": "metric_delta",
       "variant": "cone_edge",
       "label_suffix": "cone_edge",
-      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage.",
+      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.6} Physical damage.",
       "trigger_spell": 807785,
       "gate_spell": 704115,
       "cast_in_before": false,
@@ -30459,7 +30534,7 @@
       "kind": "metric_delta",
       "variant": "radius_edge",
       "label_suffix": "radius_edge",
-      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage.",
+      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.6} Physical damage.",
       "trigger_spell": 807785,
       "gate_spell": 704115,
       "cast_in_before": false,
@@ -30523,7 +30598,7 @@
       "kind": "metric_delta",
       "variant": "damage_gate",
       "label_suffix": "damage_gate",
-      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage.",
+      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.6} Physical damage.",
       "trigger_spell": 807785,
       "gate_spell": 704115,
       "target": "dummy",
@@ -30554,21 +30629,21 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 642,
+      "expected": 662,
       "tolerance": 2,
       "wait_ms": 3500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Gate check: 704115 tooltip states Aortic Assault triggers 806214 for ${$806214m1*$<scalingbp>+$AP*0.5} = 703.959 Physical (zero variance, EffectDieSides=1; ~642 after dummy armor) ONLY when 704115 is learned (control before learning 704115 must deal 0; tolerance 2 strictly excludes buggy ap_bonus=0.6 value 662 even if ungated trigger is fixed). Aortic Assault 807785 Effect[2] SPELL_AURA_PERIODIC_TRIGGER_SPELL -> 806214 is not gated on 704115 in src/server/ (expected ALERT if before > 0). Reference search 2026-11-26: see cone_edge."
+      "observe_source": "Owner ruling Q-bm-12 (keep_60_edit_704115, 2026-11-26, Bloodmage ADR 0040) & Clotting gate (ADR 0022): rev_20261127_04 updates 704115 tooltip from $AP*0.5 to $AP*0.6. Control without 704115 deals 0; treatment with 704115 at ref AP 223 deals 592.459 + 223*0.6 = 726.259 Physical (~662 after dummy armor, tol 2 excludes 642 from 0.5 AP)."
     },
     {
       "spell": 704115,
-      "name": "Clotting (AP scaling ratio from +980 AP against tooltip $AP*0.5)",
+      "name": "Clotting (AP scaling ratio from +980 AP against tooltip $AP*0.6)",
       "kind": "hit_ratio",
       "variant": "ap_scaling",
       "label_suffix": "ap_scaling",
-      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage.",
-      "expected": 1.69606,
+      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.6} Physical damage.",
+      "expected": 1.80963,
       "observe_spell": 806214,
       "cast_spell": 807785,
       "cast_wait_ms": 3500,
@@ -30599,7 +30674,7 @@
       "critical": false,
       "trials": 2,
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip formula ${$806214m1*$<scalingbp>+$AP*0.5}: at ref AP 223 = 592.459 + 111.5 = 703.959; at AP 223 + 980 (fixture 35785 Attack Power 980) = 1203 -> 592.459 + 601.5 = 1193.959 -> ratio 1193.959 / 703.959 = 1.69606 (+69.61%; armor cancels in ratio). 806214 has DieSides=1 (zero variance), so 2 trials per arm (4 casts total, staying below the 5-cast 25% HP drain threshold of Spell.cpp:7423) give exact half-width 0. Special watch: pending_db_world/rev_20261010_91_bloodmage_coefficients.sql:28 sets 806214 ap_bonus = 0.6 (predicting ~1.8096 / +80.96%, outside G-19 +-3.48 pt band -> expected ALERT). Reference search 2026-11-26: coa-history 806214 6236 hits across 16 logs; bindmysoul lists 704115; installed Spell.dbc governs."
+      "observe_source": "Owner ruling Q-bm-12 (Bloodmage ADR 0040): formula ${$806214m1*$<scalingbp>+$AP*0.6} at ref AP 223 = 726.259 vs AP 1203 (fixture 35785) = 1314.259 -> exact ratio 1.80963 (+80.96%, excluding 0.5 AP 1.69606)."
     },
     {
       "spell": 704115,
@@ -45353,11 +45428,11 @@
       "before_expected": 60,
       "expected": 138,
       "expected_ratio": 2.3,
-      "tolerance": 0.065,
+      "tolerance": 0.02,
       "wait_ms": 1300,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Embedded @s:803392:0@: 803392 Effect[1] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER BasePoints 2 + DieSides 1 = +3% per stack ($s2 = 3), StackAmount 10 -> +30% at 10 stacks (Spell.dbc). Judged as cumulative ratio after / before = (B + 1.30*B) / B = 2.30 +- 0.065 (before floor >= 60), so it stays valid both on current 803392 base 86 (197 / 86 = 2.2907) and once 803392 is fixed to O-37 77 (177 / 77 = 2.2987), while excluding 0% (2.00), 0.5x +15% (2.15), and 2x +60% (2.60). Reference search 2026-11-26: see hematoma_damage_base."
+      "observe_source": "Embedded @s:803392:0@: 803392 Effect[1] aura 271 BasePoints 2 + DieSides 1 = +3% per stack, StackAmount 10 -> +30% at 10 stacks. With 803392 RealPointsPerLevel=0 (O-37), cumulative ratio (77 + 100) / 77 = 2.2987 +- 0.02 (excluding 2.00, 2.15, and 2.60)."
     },
     {
       "spell": 524865,
@@ -45398,10 +45473,10 @@
     },
     {
       "spell": 524865,
-      "name": "Final Embrace (Hematoma generates Rage based on damage dealt: server gives 0 Rage)",
+      "name": "Final Embrace (Hematoma generates 0 Rage per owner ruling Q-bm-4)",
       "kind": "metric_delta",
-      "variant": "hematoma_rage",
-      "label_suffix": "hematoma_rage",
+      "variant": "hematoma_no_rage",
+      "label_suffix": "hematoma_no_rage",
       "quote": "@s:803392:0@",
       "trigger_spell": 23783,
       "gate_spell": 524865,
@@ -45451,9 +45526,7 @@
         "power": 1
       },
       "before_expected": 0,
-      "expected": 50,
-      "after_at_least": 1,
-      "after_at_most": 1000,
+      "expected": 0,
       "wait_ms": 5500,
       "expire_ms": 500,
       "ally_arm": {
@@ -45476,7 +45549,8 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "G-3 alert reproduction: embedded @s:803392:0@ tooltip states 'Generates Rage based on damage dealt.' (Spell.dbc; video t=10:00 verbatim). With Rage set to 0 in both phases and regeneration off, control (before, 524865 withheld) reads 0 Rage and 0 ticks; treatment casts 524865 and waits 5500 ms while 5 Hematoma 803392 ticks deal damage (verified by ally_arm), expecting Rage >= 1 (after_at_least 1). Currently 803392 has zero Rage generation in C++/DBC -> reads 0 Rage, producing a clean reproducible alert. Reference search 2026-11-26: coa-history 803392: 9036 hits across 14 logs."
+      "observe_source": "Owner ruling Q-bm-4 (keep_zero_edit_text, 2026-11-26, Bloodmage ADR 0040): rev_20261127_04 drops 'Generates Rage based on damage dealt.' from 803392; 5 ticks of Hematoma 803392 (verified by ally_arm) generate exact 0 Rage on the Bloodmage.",
+      "tolerance": 0
     },
     {
       "spell": 804602,
@@ -45503,7 +45577,7 @@
       "kind": "metric_delta",
       "variant": "cursed_form_ticks",
       "label_suffix": "cursed_form_ticks",
-      "quote": "Every $/1000;T1 second you remain in a Cursed Form",
+      "quote": "Every $t1 seconds you remain in a Cursed Form",
       "trigger_spell": 553267,
       "gate_spell": 804602,
       "gate_timing": "start",
@@ -45556,7 +45630,7 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 185000,
-      "observe_source": "804602 Effect[0] EffectAmplitude 5000 ms triggers 804603 (-5000 ms on Bloodsurge 553267, 180000 ms CD) only while HasCursedForm(player) (AscensionBloodmageTalents.cpp:919-935, rev_20260920_80_bloodmage_crimson_feast_cursed_form.sql). With 804602 learned from start, both phases prime 553267 Bloodsurge and re-attempt it without cooldown reset after 150400-152000 ms: control (before, Mortal Form only) stays on 180 s CD -> re-attempt refused, aura 553267 = 0; treatment (after, Blood Curse 562720 active 30 s -> 6 ticks x -5 s = -30 s cut) succeeds -> aura 553267 = 1. Paired with bloodsurge_cd_cut proving the exact -30000 ms +- 2000 ms cut. Reference search 2026-11-26: see bloodsurge_cd_cut."
+      "observe_source": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): rev_20261127_04 updates 'Every $/1000;T1 second' -> 'Every $t1 seconds' matching 804602 EffectAmplitude[0] = 5000 ms (6 ticks in 30 s Blood Curse -> -30 s Bloodsurge CD vs 0 in Mortal Form control)."
     },
     {
       "spell": 504728,
@@ -45813,7 +45887,7 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "560073 Crimson Terror states 'Your Transgression now grants spell damage equal to $s2% of your Spirit for the duration' ($s2 = 50%, Effect[1] SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_EFFECT1 BasePoints 49 + DieSides 1, EffectSpellClassMask [0, 0, 0x4]), targeting 801102 (FF [0, 0, 0x4], SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT Spirit, applied by AscensionBloodmageTalents.cpp:494-500). On Bloodmage L60 reference Spirit 114: 50% = 57 SP (control without 560073 reads 0; treatment reads 57 +- 1, excluding 0x = 0 and 2x = 114). Note: embedded @s:801076:0@ '$?s560073[, granting spell damage equal to $s1% of your Spirit][]' has a client tooltip token defect where 801076 $s1 resolves to 0% (-1+1=0) instead of $560073s2% (50%). Reference search 2026-11-26: coa-history 801102: 6 applies / 6 removals in 3 logs; coabuildhub 560073 reads '50% of your Spirit'."
+      "observe_source": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26) & Bloodmage ADR 0041: 560073 Effect[1] adds +50% to 801102 Effect[0] (57 SP on reference Spirit 114), and rev_20261127_04 fixes embedded 801076 token $s1% -> $560073s2%."
     },
     {
       "spell": 504728,
@@ -46069,7 +46143,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "G-3 alert reproduction: embedded @s:801076:0@ @ext clause states 'While in a Cursed Form you are treated as if you were a Demon.' Unlike 562720/562572/680692/800157 (which carry aura 36 SPELL_AURA_MOD_SHAPESHIFT MiscValue 57 -> SpellShapeshiftForm 57 creatureType=3 CREATURE_TYPE_DEMON), Transgression 801076 lacks aura 36 (E0 dummy, E1 dummy, E2 aura 354) and Unit::GetCreatureType (Unit.cpp:13406-13424) has no Bloodmage 801076 override. Striker casts Interdict 560116 (CD 120 s cleared during expire_ms 122000), whose Effect[1] triggers 561309 (TargetCreatureType 36 = Undead|Demon). Control (Mortal Form Humanoid): 561309 = 0. Treatment (after real cast of 801076): expects 1 (Demon) but server leaves caster Humanoid (561309 = 0) -> clean alert. Paired with demon_creature_type_blood_curse_sanity proving Blood Curse 562720 lands 561309 = 1. Reference search 2026-11-26: SpellShapeshiftForm.dbc row 57 creatureType=3; Spell.dbc 801076 lacks aura 36."
+      "observe_source": "Transgression 801076 sets Effect[1] SPELL_AURA_MOD_SHAPESHIFT MiscValue 57 (SpellShapeshiftForm 57 CREATURE_TYPE_DEMON, Bloodmage ADR 0018). Striker Interdict 560116 triggers 561309 (Demon|Undead only): 0 in Mortal Form control vs 1 after casting 801076."
     },
     {
       "spell": 504728,
@@ -46509,7 +46583,7 @@
       "tolerance": 0,
       "wait_ms": 1000,
       "expire_ms": 500,
-      "observe_source": "G-3 alert reproduction: 803585 tooltip states 'the target takes $s3% increased healing, but being damaged ends the effect.' Spell.dbc 803585 has AuraInterruptFlags = 0 (missing AURA_INTERRUPT_FLAG_TAKE_DAMAGE 0x2) and zero C++/SQL scripts. Uses zero-HP-cost trigger 60235 with 803585 fixture aura held in both phases: control (before) takes no damage (health 10000, aura = 1); treatment (after) takes 100 damage from 2653 (health 9900 verified ok by ally_arm) and expects aura 803585 = 0. Server leaves aura 803585 = 1 -> clean reproducible alert. Reference search 2026-11-26: see heal_taken_pct."
+      "observe_source": "803585 Effect[2] healing-taken buff carries AURA_INTERRUPT_FLAG_TAKE_DAMAGE (0x2, BloodmageTalents OnLoadSpellCustomAttr + ClientSpellPatches, Bloodmage ADR 0022): control takes no damage (health 10000, aura=1); treatment takes 100 damage from 2653 (health 9900) and clears 803585 (0)."
     },
     {
       "spell": 803585,
@@ -46549,7 +46623,7 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 12000,
-      "observe_source": "803585 Attributes 402653184 includes SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000, Spell.dbc); Spell::CheckCast (Spell.cpp:5954-5955) returns SPELL_FAILED_AFFECTING_COMBAT (1) when caster->IsInCombat(). Control (before, out of combat): cast of 803585 at grouped ally begins with cast_failure 0 (8 s cast \u2014 SpellCastTimes[170] = 8000 ms \u2014 clears during expire_ms 12000). Treatment (after, in combat via 802580 at dummy): cast returns 1 (SPELL_FAILED_AFFECTING_COMBAT). Note: full dead-ally resurrect peaceful_resurrect (Effect 18) waits on bm-tb1. Reference search 2026-11-26: see heal_taken_pct."
+      "observe_source": "803585 Attributes 402653184 includes SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000, Spell.dbc); Spell::CheckCast (Spell.cpp:5954-5955) returns SPELL_FAILED_AFFECTING_COMBAT (1) when caster->IsInCombat(). Control (before, out of combat): cast of 803585 at grouped ally begins with cast_failure 0 (8 s cast — SpellCastTimes[170] = 8000 ms — clears during expire_ms 12000). Treatment (after, in combat via 802580 at dummy): cast returns 1 (SPELL_FAILED_AFFECTING_COMBAT). Note: full dead-ally resurrect peaceful_resurrect (Effect 18) waits on bm-tb1. Reference search 2026-11-26: see heal_taken_pct."
     },
     {
       "spell": 803585,
@@ -46569,7 +46643,8 @@
           "quote": "Brings a dead player back to life with $s1% health and mana."
         }
       ],
-      "observe_source": "G-3 alert reproduction (ADR 1323): Vampyr Bite 803585 Effect[0] = 18 (SPELL_EFFECT_RESURRECT), EffectBasePoints[0] = 819 + EffectDieSides[0] = 1 = 820 ($s1 = 820%), EffectMiscValue[0] = 1030, CastingTimeIndex 170 = 8000 ms, Attributes 402653184 includes SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000), zero C++/SQL scripts (Spell.dbc). Uses ally_class 13 (Witch Doctor, mana-using CoA class so max_power(0) > 0). Out of combat, dead ally first sends CMSG_RESURRECT_RESPONSE with no offer (alive_unoffered = 0); caster casts 803585 (cast_failure_peaceful = 0 after 8500 ms), ally accepts (alive_peaceful = 1) with regeneration off. Spell::EffectResurrect (SpellEffects.cpp:5735-5736) computes CountPctFromMaxHealth(820) and CalculatePct(maxMana, 820) and Player::ResurrectPlayer clamps health and mana to 100% of max pools, while peaceful_resurrect compares against unclamped 820% -> truthful G-3 alert on both health and mana. In-combat refusal stays on clause #422 (in_combat_refused). Reference search 2026-11-26: coa-history 803585: 3 casts / 1 apply / 1 removal in 3 logs; video t=6:48 matches verbatim."
+      "observe_source": "Status 2 owner ruling Q-bm-7 ('leave', 2026-11-26, Bloodmage ADR 0039): Vampyr Bite 803585 keeps Spell.dbc $s1 = 820% and '$s1%' tooltip text while Player::ResurrectPlayer clamps restored health and mana to 100% of maximum pools. clamp_percent: true verifies the exact 100% clamped resurrection result on both health and mana plus out-of-combat refusal.",
+      "clamp_percent": true
     },
     {
       "spell": 803585,
@@ -46710,11 +46785,11 @@
     },
     {
       "spell": 504281,
-      "name": "Vampyr's Kiss (Black Heart 680731: instant Rage on cast vs 0 on server)",
+      "name": "Vampyr's Kiss (Black Heart 680731: instant 20% max Rage on cast)",
       "kind": "metric_delta",
       "variant": "black_heart_instant_rage",
       "label_suffix": "black_heart_instant_rage",
-      "quote": "$?s680731[ and instantly regenerate $805912s1% of your maximum Rage][]",
+      "quote": "$?s680731[ and instantly regenerate $681031s1% of your maximum Rage][]",
       "trigger_spell": 504281,
       "gate_spell": 680731,
       "gate_timing": "between",
@@ -46755,15 +46830,15 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "G-3 alert reproduction: 504281 conditional '$?s680731[ and instantly regenerate $805912s1% of your maximum Rage][]' has two defects: (1) instant-vs-periodic timing \u2014 AscensionBloodmageSecondary.cpp:404-405 grants GetMaxPower(POWER_RAGE)/5 (200 raw Rage) on periodic replication ticks (5000 ms) instead of instantly on cast (at wait_ms 1000 before tick 1, control reads 0 and treatment reads 0 -> clean alert); (2) tooltip conflict requiring owner ruling \u2014 Spell.dbc 805912 has Effect[0]=0 but EffectBasePoints[0]=29 + DieSides=1 so $805912s1 resolves to 30% (300 raw Rage), contradicting Black Heart 680731's $681031s1 = 20% (200 raw Rage, matching server periodic grant). Paired with black_heart_periodic_rage proving 200 raw Rage arrives on the 5000 ms periodic tick. Reference search 2026-11-26: coabuildhub 680731 reads 'Your Vampyr's Kiss now regenerates 20% of your maximum Rage.'."
+      "observe_source": "Owner ruling Q-bm-6 (Bloodmage ADR 0030): rev_20261127_04 updates 504281 conditional token from $805912s1% (30%) to $681031s1% (20%). With 680731, casting 504281 immediately triggers 681031 (+200 internal Rage = 20% of 1000 max Rage) within 1000 ms (0 without 680731)."
     },
     {
       "spell": 504281,
-      "name": "Vampyr's Kiss (Black Heart 680731 diagnostic: 20% max Rage arrives on 5 s periodic tick)",
+      "name": "Vampyr's Kiss (Black Heart 680731: no duplicate Rage grant on 5 s periodic tick)",
       "kind": "metric_delta",
       "variant": "black_heart_periodic_rage",
       "label_suffix": "black_heart_periodic_rage",
-      "quote": "$?s680731[ and instantly regenerate $805912s1% of your maximum Rage][]",
+      "quote": "$?s680731[ and instantly regenerate $681031s1% of your maximum Rage][]",
       "trigger_spell": 504281,
       "gate_spell": 680731,
       "gate_timing": "between",
@@ -46804,7 +46879,7 @@
       "wait_ms": 6000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Diagnostic companion to black_heart_instant_rage: same setup waited 6000 ms (past tick 1 at 5000 ms). Control (without 680731): 0 Rage. Treatment (with 680731): reads 200 raw Rage (20% of 1000 max Rage) from bloodmage_kiss_periodic::OnPeriodicDamageResult (AscensionBloodmageSecondary.cpp:404-405), confirming Rage is granted periodically on replication ticks rather than instantly on cast. Reference search 2026-11-26: see black_heart_instant_rage."
+      "observe_source": "Companion to black_heart_instant_rage over 6000 ms (past tick 1 at 5000 ms): total Rage gained remains 200 +- 5 (excluding 0 and excluding 400 from duplicate periodic tick grants)."
     },
     {
       "spell": 504281,
@@ -47356,7 +47431,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "G-3 alert reproduction: 504711 Effect[0] aura 354 BasePoints 49 + DieSides 1 = 50% ($504711s1 = 50, Spell.dbc) via aura_ascension_bloodmage_animated_blood_leech (AscensionBloodmageTalents.cpp:826-861). Engaging dummy with Taldaram's Torment 802580 (376 HP cast cost, 0 self-heal): control (before, no amalgam) drops 10000 -> 9624 HP exact. Over 11500 ms, amalgam 315301 lands 4 Blood Strike 589023 hits (~32000 Shadow dmg, verified by ally_arm), which at 50% leech plus ~200 HP melee leech expects 9624 + 16000 + 200 = 25824 +- 1600 ([24224, 27424], strictly excluding 0x ~9824, 0.5x ~17824, and 2x ~41824). Because UpdateAI casts 589023 with triggered=true (AscensionBloodmageTalents.cpp:425) while spell_proc 504711 has AttributesMask=0 (missing PROC_ATTR_TRIGGERED_CAN_PROC, rev_20261018_37_bloodmage_animated_blood_leech.sql:15), Blood Strike produces 0 heal \u2014 only amalgam melee swings heal caster (~9824 HP vs 25824 +- 1600). Reference search 2026-11-26: see blood_strike_base."
+      "observe_source": "504711 Animated Blood Heal Passive (AttributesMask=2, Bloodmage ADR 0022) procs 592015 healing for 50% of triggered Blood Strike 589023 damage (~16000) plus ~200 melee leech = 25824 +- 1600 HP."
     },
     {
       "spell": 573357,
@@ -47439,45 +47514,11 @@
     },
     {
       "spell": 573357,
-      "name": "Animated Blood (Vampyr Lord $?s560259 gives +0 sec duration per Thirst stack)",
-      "kind": "metric_delta",
-      "variant": "vampyr_lord_thirst_duration",
-      "label_suffix": "vampyr_lord_thirst_duration",
-      "quote": "$?s560259[ Duration increased by $/1000;570744s1 sec per stack of Thirst.][]",
-      "trigger_spell": 573357,
-      "gate_spell": 560259,
-      "gate_timing": "between",
-      "cast_in_before": true,
-      "target": "caster",
-      "measure_actor": "caster",
-      "cast_power": 1000,
-      "phase_auras": [
-        [
-          706613,
-          10,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "owned_creature_count",
-      "fields": {
-        "entry": 315301
-      },
-      "before_expected": 0,
-      "expected": 1,
-      "tolerance": 0,
-      "wait_ms": 18000,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "observe_source": "G-3 client tooltip defect reproduction: 573357 tooltip gates Thirst duration extension on '$?s560259' (Vampyr Lord, +35% dmg) and reads '$/1000;570744s1' (0 sec), whereas bloodmage_blood_constructor (AscensionBloodmageTalents.cpp:634-642) correctly implements 561196 Blood Constructor (+1 sec/Thirst). With 10 Thirst stacks (706613 fixture), control (before 560259) despawns by 18000 ms (0); treatment (after learning 560259) reads 0 (+0 s) against literal tooltip expectation 1 -> clean alert exposing the client tooltip defect ($?s560259 + 570744s1=0 vs 561196; once tooltip is fixed/ruled, retire this check rather than changing server to 560259). Paired with blood_constructor_thirst_duration proving 561196 extends to 25 s. Reference search 2026-11-26: coabuildhub 561196 reads 'Increases the duration of Animated Blood by 1 sec per stack of Thirst.'."
-    },
-    {
-      "spell": 573357,
-      "name": "Animated Blood (Blood Constructor 561196 diagnostic: +1 sec/Thirst extends to 25 sec)",
+      "name": "Animated Blood (Blood Constructor 561196 adds +1 sec/Thirst = 25 sec)",
       "kind": "metric_delta",
       "variant": "blood_constructor_thirst_duration",
       "label_suffix": "blood_constructor_thirst_duration",
-      "quote": "$?s560259[ Duration increased by $/1000;570744s1 sec per stack of Thirst.][]",
+      "quote": "$?s561196[ Duration increased by $/1000;561196s1 sec per stack of Thirst.][]",
       "trigger_spell": 573357,
       "gate_spell": 561196,
       "gate_timing": "start",
@@ -47515,7 +47556,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Diagnostic companion to vampyr_lord_thirst_duration: with 561196 Blood Constructor learned and 10 stacks of Thirst (706613 fixture), uncast control reads 0; treatment lives 25 s (1 at game_time [22800, 24500] > 22500 = -10%, 0 at [25500, 27200] < 27500 = +10%), proving server gates on 561196 not $?s560259. Reference search 2026-11-26: see vampyr_lord_thirst_duration."
+      "observe_source": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): rev_20261127_04 updates 573357 conditional to $?s561196 and duration token to $/1000;561196s1, matching server duration 25 s at 10 Thirst stacks."
     },
     {
       "spell": 575335,
@@ -47700,7 +47741,7 @@
       "wait_ms": 500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "G-3 alert reproduction: 575335 tooltip names 'Ravenous Strike and Claw Sweep by $s1%' ($s1 = 10), but Spell.dbc EffectSpellClassMask is [0, 0x800001, 0] (Ravenous Strike [0,1,0] + Bloodfang Bite [0,0x800000,0]), missing Claw Sweep 500444 [0,0,0x4000] (DmgClass 2 melee). Applied forced-crit spell_damage_total of Claw Sweep 500444 at +100000 AP vs Diseased (503484) dummy expects cumulative ratio 2.10 +- 0.02 (+10%) while server delivers 2.00 (+0%) -> clean deterministic alert. Reference search 2026-11-26: video t=10:50 verbatim."
+      "observe_source": "Blood Plague 575335 (EffectSpellClassMask (0, 1, 16384), Bloodmage ADR 0024) grants Claw Sweep 500444 +10% critical damage against Diseased targets."
     },
     {
       "spell": 575335,
@@ -47763,7 +47804,7 @@
       "wait_ms": 500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "G-3 alert reproduction (wrong mask proof): 575335 tooltip names only Ravenous Strike and Claw Sweep, NOT Bloodfang Bite 572551 (DmgClass 2 melee), so applied forced-crit spell_damage_total of 572551 vs Diseased (503484) dummy expects cumulative ratio 2.00 +- 0.02 (+0%). Because Spell.dbc EffectSpellClassMask is [0, 0x800001, 0] (0x800000 = Bloodfang Bite), server wrongly boosts 572551 applied crit damage to 2.10 (+10%) -> clean deterministic alert. Reference search 2026-11-26: see claw_sweep_crit_dmg."
+      "observe_source": "Blood Plague 575335 (EffectSpellClassMask (0, 1, 16384), Bloodmage ADR 0024) excludes Bloodfang Bite 572551, leaving its critical damage at 1.00x against Diseased targets."
     },
     {
       "spell": 575335,
@@ -47899,7 +47940,7 @@
       "wait_ms": 500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "G-3 alert reproduction (crit chance leg): 575335 Effect[0] ASCENSION_STATE_MASKED_CRIT +10% has wrong mask [0, 0x800001, 0], missing Claw Sweep 500444 [0, 0, 0x4000]. Reads Unit::SpellTakenCritChance for 500444 against Diseased (Rotclaw 503484) dummy before and after learning 575335: expects +10.0 pts while server delivers 0.0 pts -> deterministic alert. Reference search 2026-11-26: see claw_sweep_crit_dmg."
+      "observe_source": "Blood Plague 575335 (EffectSpellClassMask (0, 1, 16384), Bloodmage ADR 0024) grants Claw Sweep 500444 +10% critical strike chance against Diseased targets."
     },
     {
       "spell": 524907,
@@ -48136,7 +48177,7 @@
       "kind": "metric_delta",
       "variant": "rage_period_before",
       "label_suffix": "rage_period_before",
-      "quote": "and $/10;t3 Rage every $t3 sec.",
+      "quote": "and $/10;s3 Rage every $t3 sec.",
       "trigger_spell": 524907,
       "gate_timing": "start",
       "trigger_only_after": true,
@@ -48169,7 +48210,7 @@
       "kind": "metric_delta",
       "variant": "rage_period_after",
       "label_suffix": "rage_period_after",
-      "quote": "and $/10;t3 Rage every $t3 sec.",
+      "quote": "and $/10;s3 Rage every $t3 sec.",
       "trigger_spell": 524907,
       "gate_timing": "start",
       "trigger_only_after": true,
@@ -48198,11 +48239,11 @@
     },
     {
       "spell": 524907,
-      "name": "Hemoglobe (generates 50 internal = 5 displayed Rage per tick; tooltip $/10;t3 typo for $/10;s3)",
+      "name": "Hemoglobe (generates 50 internal = 5 displayed Rage per tick)",
       "kind": "metric_delta",
       "variant": "rage_amount",
       "label_suffix": "rage_amount",
-      "quote": "and $/10;t3 Rage every $t3 sec.",
+      "quote": "and $/10;s3 Rage every $t3 sec.",
       "trigger_spell": 524907,
       "gate_timing": "start",
       "trigger_only_after": true,
@@ -48228,7 +48269,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "524907 E2 (aura 24 SPELL_AURA_PERIODIC_ENERGIZE, Amp 1500 ms, EffectBasePoints 49 + DieSides 1 = 50 internal = 5 displayed Rage per tick; Spell.dbc). Reads spell_energize_total of 524907 = 0 before cast and exactly 50 (tol 0, excludes 0 and 100) after 1 tick at game_time [1550, 2800] ms. Client-text typo tracked for owner card: Description writes '$/10;t3 Rage' (renders 0.15 Rage because $t3 is 1.5 sec) and ToolTip writes '$/10;s2 Rage', both typos for '$/10;s3 Rage' (5 Rage). Reference search 2026-11-26: coa-history 524907 0 events; coabuildhub 524907 renders '0.15 Rage every 1.5 sec'."
+      "observe_source": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): 524907 E2 generates 50 internal = 5 displayed Rage every 1500 ms (game_time [1550, 2800] ms), and rev_20261127_04 updates Description $/10;t3 -> $/10;s3 and ToolTip $/10;s2 -> $/10;s3."
     },
     {
       "spell": 524907,
@@ -48437,7 +48478,7 @@
     },
     {
       "spell": 704654,
-      "name": "Ultra Instinct (G-3 alert: 3 stacks grant +15% crit damage vs +9% tooltip)",
+      "name": "Ultra Instinct (3 stacks grant +15% crit damage vs +9% tooltip)",
       "kind": "hit_ratio",
       "variant": "crit_damage_alert",
       "label_suffix": "crit_damage_alert",
@@ -48522,7 +48563,7 @@
       },
       "trials": 4,
       "void_on_cast_failure": true,
-      "observe_source": "G-3 truthful alert reproduction for 704654 -> 504166 E1 (SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 127): tooltip cites $504166s1% = +3% per stack (+9% at 3 stacks -> 1.09x crit damage), whereas Spell.dbc 504166 E1 has EffectBasePoints 4 + DieSides 1 = +5% per stack (+15% at 3 stacks -> 1.15x). Each trial clears 504166, casts 3 forced-spell-crit Bloodbolt 578305 (0 HP cost, 300 Rage) to build 3 real stacks of 504166, then observes forced-crit Bloodmoon Blast 501614 at +20000 SP (48441 keeps caster HP full; 823764 spellpen). Expected ratio 1.09 (G-19 band [1.07, 1.11]) truthfully alerts at ~1.15x. Reference search 2026-11-26: coa-history 704654/504166 0 events; coabuildhub 704654 matches '3%'."
+      "observe_source": "Owner ruling Q-bm-8 (Bloodmage ADR 0011): Ultra Instinct grants +3% critical damage per stack (+9% at 3 stacks on 504166 Effect[1])."
     },
     {
       "spell": 704654,
@@ -48572,7 +48613,7 @@
     },
     {
       "spell": 704654,
-      "name": "Ultra Instinct (G-3 alert: 2nd proc refreshes to 10 sec instead of cutting to 9 sec)",
+      "name": "Ultra Instinct (2nd proc refreshes to 10 sec instead of cutting to 9 sec)",
       "kind": "metric_delta",
       "variant": "duration_cut_alert",
       "label_suffix": "duration_cut_alert",
@@ -48624,7 +48665,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "G-3 truthful alert reproduction for 704654 -> 504166 E2 ($/1000;504166s3 = 1 sec duration cut per additional crit). Control (trigger_only_after) reads aura 504166 = 0; treatment casts 1st forced-crit 572907 at t=0 and 2nd forced-crit 572907 at t=+1600 ms. Per tooltip, 2nd crit reduces duration (refresh-to-9s semantics expect 9000 ms after 2nd cast; note cut-without-refresh semantics would leave 7400 ms remaining, tracked for owner ruling). game_time (measured from the 2nd cast) reads aura 504166 held (1) at [8150, 8850] ms (> 8100 ms = 9000 - 10%) and expects gone (0) at [9150, 9850] ms (< 9900 ms = 9000 + 10%). Because SpellEffects.cpp:899-920 RefreshDuration resets 504166 to m_maxDuration=11000 ms then subtracts 1000 ms once -> 10000 ms, aura is still 1 at expired -> ALERTS cleanly on expired == 1. Reference search 2026-11-26: see duration."
+      "observe_source": "Owner ruling Q-bm-8 (Bloodmage ADR 0011): Ultra Instinct cuts remaining duration by 1 s per critical strike without refreshing."
     },
     {
       "spell": 704654,
@@ -48848,11 +48889,11 @@
           }
         ]
       },
-      "observe_source": "Lower GCD bracket for 804811 E0 aura 108 SPELLMOD_GLOBAL_COOLDOWN -50% ($s1 = 50) on Bloodfang Bite 572551 (StartRecoveryCategory 133, StartRecoveryTime 1500 ms -> 750 ms; Spell.dbc). Probed with instant GCD-133 follow-up Ravenous Strike 500123 (0 Rage, 8% base HP cost, CasterAuraSpell 525031 already active) at delay_ms 695 + wait_ms 15 -> game_time after 572551 inside [676, 749] ms (> 675 ms = 750 - 10%, < 750 ms): spell_cast_count of 500123 stays 0 in control and 0 in treatment (refused by active 750 ms GCD, excluding -10% GCD 675 ms or 0 ms), while ally_arm proves 572551 fired in both phases. Paired with bite_gcd_ready at delay_ms 775. Reference search 2026-11-26: see enrage_duration."
+      "observe_source": "Lower GCD bracket for 804811 E0 aura 108 SPELLMOD_GLOBAL_COOLDOWN -50% ($s1 = 50) on Bloodfang Bite 572551 (StartRecoveryCategory 133, StartRecoveryTime 1500 ms -> 750 ms; Spell.dbc). Probed with instant GCD-133 follow-up Ravenous Strike 500123 (0 Rage, 8% base HP cost, CasterAuraSpell 525031 already active) at delay_ms 695 + wait_ms 15 -> game_time after 572551 inside [676, 749] ms (> 675 ms = 750 - 10%, < 750 ms): spell_cast_count of 500123 stays 0 in control and 0 in treatment (refused by active 750 ms GCD, excluding -10% GCD 675 ms or 0 ms), while ally_arm proves 572551 fired in both phases. Paired with bite_gcd_ready_alert at delay_ms 775. Reference search 2026-11-26: see enrage_duration."
     },
     {
       "spell": 804811,
-      "name": "Monstrous Howl (G-3 alert: Spell.cpp MIN_GCD=1000 ms clamps -50% 750 ms GCD, refusing cast at 775 ms)",
+      "name": "Monstrous Howl (Spell.cpp MIN_GCD=1000 ms clamps -50% 750 ms GCD, refusing cast at 775 ms)",
       "kind": "metric_delta",
       "variant": "bite_gcd_ready_alert",
       "label_suffix": "bite_gcd_ready_alert",
@@ -48929,7 +48970,7 @@
           }
         ]
       },
-      "observe_source": "G-3 truthful alert reproduction for 804811 E0 (-50% GCD on 572551: 1500 ms -> 750 ms): 804811 E0 applies SPELLMOD_GLOBAL_COOLDOWN -50% (Spell.cpp:9237 -> 750 ms), but Spell::TriggerGlobalCooldown (Spell.cpp:9199,9246-9247) clamps any gcd < MIN_GCD (1000 ms) back up to 1000 ms (-33.3% instead of tooltip -50%). Probing with instant GCD-133 Ravenous Strike 500123 (0 Rage, 8% base HP cost) at delay_ms 775 + wait_ms 15 -> game_time inside [751, 824] ms (> 750 ms, < 825 ms = 750 + 10%): tooltip expects 1 cast in treatment, whereas server refuses 500123 with SPELL_FAILED_NOT_READY (67) -> measured 0 -> ALERTS cleanly (passes once MIN_GCD clamp is fixed). Paired with bite_gcd_held ([676, 749] ms -> 0) and bite_gcd_1000ms_confirm ([1005, 1120] ms -> 1, proving 500123 succeeds once the 1000 ms clamped GCD expires). Reference search 2026-11-26: see enrage_duration."
+      "observe_source": "Owner ruling Q-bm-9 (Bloodmage ADR 0031): Monstrous Howl allows 750 ms GCD on Bloodfang Bite (all 6 charges), permitting follow-up Ravenous Strike 500123 at 775 ms ([751, 824] ms)."
     },
     {
       "spell": 804811,
@@ -49484,7 +49525,7 @@
     },
     {
       "spell": 801959,
-      "name": "Eyes In The Night (G-3 alert: 5000 ms SQL ICD blocks 2nd proc at 3500 ms vs 3 sec tooltip)",
+      "name": "Eyes In The Night (5000 ms SQL ICD blocks 2nd proc at 3500 ms vs 3 sec tooltip)",
       "kind": "metric_delta",
       "variant": "icd_3s_alert",
       "label_suffix": "icd_3s_alert",
@@ -49551,7 +49592,7 @@
           }
         ]
       },
-      "observe_source": "G-3 truthful alert reproduction for 801959 ICD defect: learned talent tooltip 801959 states 'Can only occur once every 3 sec' (3000 ms; governs over hidden buff 806723's 'every 5 sec' per G-7), whereas SQL rev_20261025_03_coa_eyes_in_the_night_proc.sql:7 sets Cooldown = 5000 (5000 ms). Caster receives its own raid aura 806723 (Check: target->IsPlayer()); forced_roll 806723 forces 100% proc chance; dummy casts 1579748 (ALWAYS_HIT 0x40000, 0 cost, 0 CD, 0 speed, 26 direct magic dmg) twice 3500 ms apart (> 3300 ms = 3000 + 10%, < 5000 ms), guarded by game_time [8800, 9250] ms (1500 lead + 2*3500 + 500 wait = 9000 ms) and ally_arm spell_damage_count (2 -> 4) + event_interval_min_ms (3500 +- 150 ms). Tooltip expects 2 casts of 801958; server blocks the 2nd proc and produces 1 -> ALERTS cleanly. Paired with icd_5s_confirm (5500 ms -> 2) and icd_2500ms_blocked (2500 ms -> 1). Reference search 2026-11-26: coa-history 801959/806723 0 events; coabuildhub 801959 is older state ('every 5 sec'), whereas our Spell.dbc 801959 and live video t=11:22 read 'every 3 sec' (G-9)."
+      "observe_source": "Owner ruling Q-bm-14 (Bloodmage ADR 0032): Eyes In The Night uses a 3000 ms SQL ICD on 806723, allowing a second Shadow Colony proc at 3500 ms."
     },
     {
       "spell": 801959,
@@ -49697,7 +49738,7 @@
     },
     {
       "spell": 801959,
-      "name": "Eyes In The Night (G-3 alert: RedirectThreat generates 0 threat when low-HP ally has 0 threat)",
+      "name": "Eyes In The Night (RedirectThreat generates 0 threat when low-HP ally has 0 threat)",
       "kind": "metric_delta",
       "variant": "threat_zero_ally_alert",
       "label_suffix": "threat_zero_ally_alert",
@@ -49733,7 +49774,7 @@
       "after_at_least": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "G-3 truthful alert reproduction for 801959 threat clause: tooltip states 'If allies have less health than you when this occurs, generate a large amount of threat against the enemy that triggered it.' In AscensionBloodmageSecondary.cpp:896-911 (RedirectThreat), server only transfers 50% of enemy->GetThreatMgr().GetThreat(ally) and returns early if amount <= 0. Dummy casts ALWAYS_HIT 1579748 (26 direct magic damage, instant, 0% miss) 16 times at grouped ally (after hit 1, ally is < 100% HP vs caster 10000/10000 = 100% HP and survives all 16+16 hits with 0 threat on dummy); ally_triggers_darkwing proves Shadow Colony procs 801958 under the exact same grouped_ally + 1579748 setup with P(>=1 on hits 2..16) = 99.95% (0.6^15 = 0.00047), yet caster's threat on dummy stays 0 (expecting >= 1 truthfully alerts). Reference search 2026-11-26: coa-history 801959/806723 0 events; coabuildhub 801959 matches verbatim."
+      "observe_source": "Owner ruling Q-bm-14 (Bloodmage ADR 0032): Eyes In The Night grants direct 600 threat on the attacker's threat list even when the protected ally has 0 threat."
     },
     {
       "spell": 681792,
@@ -49741,7 +49782,7 @@
       "kind": "hit_ratio",
       "variant": "base_bloodbolt",
       "label_suffix": "base_bloodbolt",
-      "quote": "Increases the damage dealt and spell power scaling of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
+      "quote": "Increases the damage dealt of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
       "expected": 1.2,
       "observe_spell": 578305,
       "learn": [
@@ -49806,7 +49847,7 @@
       "kind": "hit_ratio",
       "variant": "base_bloodmoon",
       "label_suffix": "base_bloodmoon",
-      "quote": "Increases the damage dealt and spell power scaling of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
+      "quote": "Increases the damage dealt of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
       "expected": 1.2,
       "observe_spell": 501614,
       "learn": [
@@ -49873,7 +49914,7 @@
       "kind": "hit_ratio",
       "variant": "base_crimson_tide",
       "label_suffix": "base_crimson_tide",
-      "quote": "Increases the damage dealt and spell power scaling of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
+      "quote": "Increases the damage dealt of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
       "expected": 1.2,
       "observe_spell": 504134,
       "learn": [
@@ -49931,12 +49972,12 @@
     },
     {
       "spell": 681792,
-      "name": "Cursed Blood (G-3 alert: Bloodmoon Blast at +20000 SP scales 1.20x vs 1.43x cumulative)",
+      "name": "Cursed Blood (Bloodmoon Blast at +20000 SP scales 1.20x without SP double-dip)",
       "kind": "hit_ratio",
-      "variant": "sp_scaling_bloodmoon_alert",
-      "label_suffix": "sp_scaling_bloodmoon_alert",
-      "quote": "Increases the damage dealt and spell power scaling of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
-      "expected": 1.43,
+      "variant": "sp_single_scale_bloodmoon",
+      "label_suffix": "sp_single_scale_bloodmoon",
+      "quote": "Increases the damage dealt of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
+      "expected": 1.2,
       "observe_spell": 501614,
       "learn": [
         501614
@@ -49974,16 +50015,16 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "G-3 truthful alert reproduction for 681792 'damage dealt and spell power scaling by 20%': Spell.dbc 681792 carries only E1 SPELLMOD_DAMAGE (+20%) and E2 SPELLMOD_DOT (+20%) with NO SPELLMOD_BONUS_MULTIPLIER (24) or SPELLMOD_SP_DOT_COEFFICIENT (40). Rejuvenation 48441 replenishes 501614's 105 HP cost across 20+20 trials. At +20000 SP on Bloodmoon Blast 501614 (base ~540.5, SP term 20000*0.466229 = 9324.6 -> total 9865.1), cumulative +20% damage AND +20% SP scaling expects (1.20*540.5 + 1.44*9324.6)/9865.1 = 1.427 (~1.43, G-19 band [1.41, 1.45]), whereas server delivers 1.20x -> ALERTS cleanly. Reference search 2026-11-26: see base_bloodbolt."
+      "observe_source": "Owner ruling Q-bm-11 (keep_120_edit_text, 2026-11-26, Bloodmage ADR 0040): rev_20261127_04 drops 'and spell power scaling' from 681792; at +20000 SP on Bloodmoon Blast (SP coeff 0.466229), server delivers 1.20x total damage (excluding 1.00x and 1.43x double-dip)."
     },
     {
       "spell": 681792,
-      "name": "Cursed Blood (G-3 alert: Bloodbolt at +20000 SP scales 1.20x vs 1.43x cumulative)",
+      "name": "Cursed Blood (Bloodbolt at +20000 SP scales 1.20x without SP double-dip)",
       "kind": "hit_ratio",
-      "variant": "sp_scaling_bloodbolt_alert",
-      "label_suffix": "sp_scaling_bloodbolt_alert",
-      "quote": "Increases the damage dealt and spell power scaling of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
-      "expected": 1.43,
+      "variant": "sp_single_scale_bloodbolt",
+      "label_suffix": "sp_single_scale_bloodbolt",
+      "quote": "Increases the damage dealt of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
+      "expected": 1.2,
       "observe_spell": 578305,
       "learn": [
         578305
@@ -50020,16 +50061,16 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "G-3 truthful alert reproduction for 681792 SP scaling on Bloodbolt 578305 (base ~336.5 + AP 44.6 = 381.1, SP term 20000*0.45 = 9000 -> total 9381.1; cumulative +20% damage & +20% SP expects 1.430, G-19 band [1.41, 1.45]). Server delivers 1.20x (no SPELLMOD_BONUS_MULTIPLIER) -> ALERTS cleanly. Reference search 2026-11-26: see base_bloodbolt."
+      "observe_source": "Owner ruling Q-bm-11 (keep_120_edit_text, 2026-11-26, Bloodmage ADR 0040): rev_20261127_04 drops 'and spell power scaling' from 681792; at +20000 SP on Bloodbolt (SP coeff 0.45), server delivers 1.20x total damage (excluding 1.00x and 1.43x double-dip)."
     },
     {
       "spell": 681792,
-      "name": "Cursed Blood (G-3 alert: Crimson Tide at +20000 SP scales 1.20x vs 1.426x cumulative)",
+      "name": "Cursed Blood (Crimson Tide at +20000 SP scales 1.20x without SP double-dip)",
       "kind": "hit_ratio",
-      "variant": "sp_scaling_crimson_tide_alert",
-      "label_suffix": "sp_scaling_crimson_tide_alert",
-      "quote": "Increases the damage dealt and spell power scaling of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
-      "expected": 1.426,
+      "variant": "sp_single_scale_crimson_tide",
+      "label_suffix": "sp_single_scale_crimson_tide",
+      "quote": "Increases the damage dealt of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
+      "expected": 1.2,
       "observe_spell": 504134,
       "learn": [
         504134
@@ -50084,7 +50125,7 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "G-3 truthful alert reproduction for 681792 SP scaling on Crimson Tide 504134: base tick mean is 358.0 (350 + 1..15, Spell.dbc) and SP term at +20000 SP is 20000 * 0.28 = 5600 (rev_20261010_91_bloodmage_coefficients.sql:30; total 5958.0). Under cumulative +20% DoT damage (SPELLMOD_DOT) AND +20% SP scaling (SPELLMOD_SP_DOT_COEFFICIENT / SPELLMOD_BONUS_MULTIPLIER), fixed tick is 1.20*358.0 + 1.44*5600 = 8493.6 -> exact ratio 8493.6/5958.0 = 1.4256x (+42.56%, inside expected 1.426 G-19 band [40.47%, 44.73%]), whereas server carries only E2 SPELLMOD_DOT (+20%) and delivers 1.20x -> ALERTS cleanly. Reference search 2026-11-26: see base_bloodbolt."
+      "observe_source": "Owner ruling Q-bm-11 (keep_120_edit_text, 2026-11-26, Bloodmage ADR 0040): rev_20261127_04 drops 'and spell power scaling' from 681792; at +20000 SP on Crimson Tide (SP coeff 0.28), server delivers 1.20x total damage (excluding 1.00x and 1.43x double-dip)."
     },
     {
       "spell": 681792,
@@ -50408,45 +50449,11 @@
     },
     {
       "spell": 501614,
-      "name": "Bloodmoon Blast (G-3 alert: $?s500107 fails to grant Thirst 706613)",
-      "kind": "metric_delta",
-      "variant": "thirst_500107_alert",
-      "label_suffix": "thirst_500107_alert",
-      "quote": "$?s500107[, and 1 stack of Thirst.@s:706613:0@][.]",
-      "trigger_spell": 501614,
-      "gate_spell": 500107,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "caster_health": [
-        10000,
-        10000
-      ],
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "aura_stacks",
-      "fields": {
-        "spell": 706613
-      },
-      "before_expected": 0,
-      "expected": 1,
-      "wait_ms": 2500,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "observe_source": "G-3 truthful alert reproduction for 501614 broken $?s500107 conditional: tooltip gates Thirst stack on unobtainable legacy spell 500107 instead of obtainable Sanguine passive 92112 Thirst. Even when 500107 is learned, casting 501614 yields 0 stacks of 706613 Thirst (expecting 1 truthfully alerts). Paired with thirst_92112_works proving 92112 grants 1 stack. Reference search 2026-11-26: coa-history 500107 0 events; coa-obtainable 500107 NOT FOUND vs 92112 OBTAINABLE."
-    },
-    {
-      "spell": 501614,
-      "name": "Bloodmoon Blast (control: real Sanguine passive 92112 grants 1 stack of Thirst 706613)",
+      "name": "Bloodmoon Blast (Sanguine passive 92112 grants 1 stack of Thirst 706613)",
       "kind": "metric_delta",
       "variant": "thirst_92112_works",
       "label_suffix": "thirst_92112_works",
-      "quote": "$?s500107[, and 1 stack of Thirst.@s:706613:0@][.]",
+      "quote": "$?s92112[, and 1 stack of Thirst.@s:706613:0@][.]",
       "trigger_spell": 501614,
       "gate_spell": 92112,
       "target": "dummy",
@@ -50472,39 +50479,11 @@
       "wait_ms": 2500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Working-gate companion to thirst_500107_alert: with obtainable Sanguine passive 92112 Thirst learned, casting 501614 grants 1 stack of 706613 Thirst (0 before learning 92112, 1 after). Proves server implements Thirst under 92112 and tooltip $?s500107 is a stale spell ID. Reference search 2026-11-26: see thirst_500107_alert."
+      "observe_source": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): rev_20261127_04 replaces $?s500107 with $?s92112. Casting 501614 grants 0 Thirst before learning 92112 and 1 stack after."
     },
     {
       "spell": 501614,
-      "name": "Bloodmoon Blast (G-3 alert: $?s807489 Leeching Tome does NOT allow moving cast)",
-      "kind": "metric_delta",
-      "variant": "moving_807489_alert",
-      "label_suffix": "moving_807489_alert",
-      "quote": "Usable while moving.",
-      "trigger_spell": 501614,
-      "gate_spell": 807489,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "caster_health": [
-        10000,
-        10000
-      ],
-      "moving_before_trigger": {
-        "flag": "forward"
-      },
-      "metric": "cast_failure",
-      "fields": {
-        "spell": 501614
-      },
-      "before_expected": 51,
-      "expected": 0,
-      "wait_ms": 2500,
-      "expire_ms": 500,
-      "observe_source": "G-3 truthful alert reproduction for 501614 broken $?s807489 conditional: tooltip gates 'Usable while moving.' on Leeching Tome 807489 (Bloodbolt leech/cost passive, zero moving-cast aura) instead of Unchained 92113 (which triggers 807528 aura 313 masking 501614 [0, 8192, 0]). With moving_before_trigger forward and 807489 learned, 501614 still fails with SPELL_FAILED_MOVING (51) -> ALERTS against expected 0. Paired with moving_92113_works. Reference search 2026-11-26: coa-obtainable 807489 & 92113 both OBTAINABLE."
-    },
-    {
-      "spell": 501614,
-      "name": "Bloodmoon Blast (control: real Unchained passive 92113 allows moving cast)",
+      "name": "Bloodmoon Blast (Unchained passive 92113 allows casting while moving)",
       "kind": "metric_delta",
       "variant": "moving_92113_works",
       "label_suffix": "moving_92113_works",
@@ -50528,7 +50507,7 @@
       "expected": 0,
       "wait_ms": 2500,
       "expire_ms": 10500,
-      "observe_source": "Working-gate companion to moving_807489_alert: Unchained 92113 E0 periodic triggers 807528 Accursed (Amp 10000 ms, expire_ms 10500 ms after learning 92113 ensures 807528 aura 313 is active). Moving cast fails with 51 (SPELL_FAILED_MOVING) before learning 92113 and succeeds (0) after learning 92113. Proves tooltip $?s807489 is a wrong spell ID for 92113. Reference search 2026-11-26: see moving_807489_alert."
+      "observe_source": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): rev_20261127_04 replaces $?s807489 with $?s92113 (triggers 807528 aura 313). Moving cast fails (51) before 92113 and succeeds (0) after."
     },
     {
       "spell": 501132,
@@ -50555,7 +50534,7 @@
     },
     {
       "spell": 501132,
-      "name": "Fearmonger (G-3 alert: 802580 ticks every 2100 ms [-30% period] vs 2308 ms [+30% tick rate])",
+      "name": "Fearmonger (802580 ticks every 2100 ms [-30% period] vs 2308 ms [+30% tick rate])",
       "kind": "hit_period",
       "variant": "tick_period_tooltip_alert",
       "label_suffix": "tick_period_tooltip_alert",
@@ -50577,7 +50556,7 @@
         ]
       ],
       "poll_ms": 1,
-      "observe_source": "G-3 truthful alert reproduction for 501132 E0: tooltip says 'Increases the tick rate ... by 30%' (+30% rate = 3000 / 1.30 = 2308 ms period, G-19 +-5% band [2192.6, 2423.4] ms), whereas Spell.dbc 501132 E0 sets SPELLMOD_ACTIVATION_TIME -30% (bp -31 + 1 -> 3000 * 0.70 = 2100 ms period = +42.86% tick rate). Testing literal tooltip expected_ms 2308 truthfully alerts at measured 2100 ms. Reference search 2026-11-26: see tick_period_control."
+      "observe_source": "Fearmonger 501132 increases Taldaram's Torment 802580 tick rate by +30% (3000 / 1.30 = 2308 ms, O-24 / Q-bm-10, Bloodmage ADR 0010)."
     },
     {
       "spell": 501132,
@@ -50603,7 +50582,7 @@
       "wait_ms": 500,
       "expire_ms": 16000,
       "void_on_cast_failure": true,
-      "observe_source": "501132 E1 aura 108 SPELLMOD_COST +30% ($s1 = 30, bp 29 + 1) on Taldaram's Torment 802580 (Spell.dbc PowerType -2 POWER_HEALTH, ManaCost 0, ManaCostPercentage 25 \u2014 health cost, not Rage). Level-60 Bloodmage BaseHP = 1504 -> CalcPowerCost = int32(CalculatePct(1504, 25)) = 376 HP before 501132 (10000 -> 9624) and int32(AddPct(376, 30)) = 488 HP after 501132 (10000 -> 9512; tol 1 for float AddPct truncation, excludes 0% = 9624 and +60% = 9399). Reference search 2026-11-26: see tick_period_control."
+      "observe_source": "501132 E1 aura 108 SPELLMOD_COST +30% ($s1 = 30, bp 29 + 1) on Taldaram's Torment 802580 (Spell.dbc PowerType -2 POWER_HEALTH, ManaCost 0, ManaCostPercentage 25 — health cost, not Rage). Level-60 Bloodmage BaseHP = 1504 -> CalcPowerCost = int32(CalculatePct(1504, 25)) = 376 HP before 501132 (10000 -> 9624) and int32(AddPct(376, 30)) = 488 HP after 501132 (10000 -> 9512; tol 1 for float AddPct truncation, excludes 0% = 9624 and +60% = 9399). Reference search 2026-11-26: see tick_period_control."
     },
     {
       "spell": 572907,
@@ -50752,11 +50731,11 @@
         "least": 12,
         "source": "572907 E0 BasePoints 374 + DieSides 32 rolls [375, 406] (mean 390.5); EffectTriggerSpellWithValue passes it as SPELLVALUE_BASE_POINT0 to 800775 whose DieSides 1 adds +1 (SpellInfo.cpp:506 -> [376, 407], mean 391.5). Over 12 non-crit hits (sigma_12 = 2.67), 391.5 +- 8.5 = [383.0, 400.0] covers both 390.5 and 391.5 (> 3.1 sigma) while alerting reproducibly on the current server's ~409.5 mean."
       },
-      "observe_source": "0-SP base damage arm for 572907 -> 800775 tooltip formula ${$m1+0+$sps*0.35}: 572907 E0 (BasePoints 374 + DieSides 32 = [375, 406], mean 390.5) forwards via SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (SpellEffects.cpp:1850) to 800775 (E0 SCHOOL_DAMAGE, DieSides 1 adds +1 -> [376, 407], mean 391.5). Runs 12 non-crit casts (11 setup + 1 trigger, 1600 ms apart; 823764 spellpen, 984954 non-crit, 48441 replenishes 14% base-HP cost) and checks per-hit mean via same_arm_ratio against 391.5 +- 8.5 ([383.0, 400.0], total 4698 +- 102). Paired with damage_sp_alert (+20000 SP). Reference search 2026-11-26: coa-history 572907 1505 casts in 19 logs and 800775 12051 hits in 33 logs; live video t=6:44 matches."
+      "observe_source": "Sanguine Rupture 572907 -> 800775 base Shadow damage at 0 SP (391.5 mean across 12 non-crit casts; 802496 Effect[2] cleared, Bloodmage ADR 0014)."
     },
     {
       "spell": 572907,
-      "name": "Sanguine Rupture (G-3 alert: 800775 lacks tooltip 0.35 SP scaling at +20000 SP)",
+      "name": "Sanguine Rupture (800775 lacks tooltip 0.35 SP scaling at +20000 SP)",
       "kind": "metric_delta",
       "variant": "damage_sp_alert",
       "label_suffix": "damage_sp_alert",
@@ -50801,7 +50780,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "G-3 truthful alert reproduction for 572907 -> 800775 tooltip formula ${$m1+0+$sps*0.35}: at +20000 SP expects [375, 407] + 20000*0.35 = [7375, 7407] (passes fixed [376, 407] + 7000 = [7376, 7407]). In server, 800775 has BaseLevel 3 / SpellLevel 3 / MaxLevel 0, no spell_bonus_data row, and is absent from AscensionStockCoefficientData.h (which lists only trigger chain head 800774), so it delivers 0.00x SP (~393..426 instead of ~7391) -> ALERTS cleanly. Paired with damage_base_alert (0 SP). Reference search 2026-11-26: coa-history 572907 1505 casts in 19 logs and 800775 12051 hits in 33 logs; live video t=6:44 matches."
+      "observe_source": "Sanguine Rupture 572907 -> 800775 SP scaling (+0.35 * SP at +20000 SP = [7375, 7407]; Bloodmage ADR 0009 / 0014)."
     },
     {
       "spell": 572907,
@@ -50888,6 +50867,40 @@
       },
       "void_on_cast_failure": true,
       "observe_source": "572907 E0 (8 yd radius TARGET_UNIT_SRC_AREA_ENEMY) triggers 800775 on each enemy in range; 800775 E1 triggers 802496 (E1 ENERGIZE POWER_RAGE, bp 19 + ds 22 = 20..41 internal Rage per hit; Spell.dbc). With 3 dummies inside 8 yd (dummy, area1, area2), casting 572907 hits all 3 (verified by ally_arm) and fires exactly 3 energize events of 802496 on caster (0 before, 3 after). Reference search 2026-11-26: coa-history 802496 12173 SPELL_ENERGIZE (2-4 Rage, mean 3.0) across 33 logs."
+    },
+    {
+      "spell": 572907,
+      "name": "Sanguine Rupture (Sanguine passive 92112 grants 1 stack of Thirst 706613)",
+      "kind": "metric_delta",
+      "variant": "thirst_92112",
+      "label_suffix": "thirst_92112",
+      "quote": "Generates 1 stack of Thirst.",
+      "trigger_spell": 572907,
+      "gate_spell": 92112,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706613
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): rev_20261127_04 updates Sanguine Rupture 572907 from $?s500107 to $?s92112. Casting 572907 grants 0 Thirst before learning 92112 and 1 stack after."
     }
   ],
   "player_observations": [],

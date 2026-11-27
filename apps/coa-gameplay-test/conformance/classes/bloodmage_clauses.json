@@ -495,7 +495,17 @@
     "labels": [
       "501614 behaviour_metric_delta mortal_form"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): replace broken $?s500107 and $?s807489 with $?s92112 and $?s92113.",
+      "spell": 501614,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 501614,
@@ -504,11 +514,21 @@
       "501614 behaviour_metric_delta damage_base",
       "501614 behaviour_metric_delta damage_sp"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): replace broken $?s500107 and $?s807489 with $?s92112 and $?s92113.",
+      "spell": 501614,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 501614,
-    "clause": "and generates Rage$?s500107[, and 1 stack of Thirst.][.]$?s807489[\r\n\r\nUsable while moving.][]",
+    "clause": "and generates Rage$?s92112[, and 1 stack of Thirst.][.]$?s92113[\r\n\r\nUsable while moving.][]",
     "kind": "claim",
     "claims": [
       {
@@ -518,30 +538,50 @@
         ]
       },
       {
-        "claim": "$?s500107[, and 1 stack of Thirst.][.]",
+        "claim": "$?s92112[, and 1 stack of Thirst.][.]",
         "labels": [
-          "501614 behaviour_metric_delta thirst_500107_alert",
           "501614 behaviour_metric_delta thirst_92112_works"
         ]
       },
       {
-        "claim": "$?s807489[\r\n\r\nUsable while moving.][]",
+        "claim": "$?s92113[\r\n\r\nUsable while moving.][]",
         "labels": [
-          "501614 behaviour_metric_delta moving_807489_alert",
           "501614 behaviour_metric_delta moving_92113_works"
         ]
       }
-    ]
+    ],
+    "dbc_clause": "and generates Rage$?s500107[, and 1 stack of Thirst.][.]$?s807489[\r\n\r\nUsable while moving.][]",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): replace broken $?s500107 and $?s807489 with $?s92112 and $?s92113.",
+      "spell": 501614,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 500126,
-    "clause": "Leap behind an enemy, dealing ${$804866m2+$804866ppl2+$AP*0.2} Physical Damage,",
+    "clause": "Leap behind an enemy, dealing ${$m2+$ppl2} Physical Damage,",
     "labels": [
       "500126 behaviour_metric_delta leap",
       "500126 behaviour_metric_delta damage_base",
       "500126 behaviour_metric_delta damage_ap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "dbc_clause": "Leap behind an enemy, dealing ${$804866m2+$804866ppl2+$AP*0.2} Physical Damage,",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-1 (keep_edit_text, 2026-11-26, Bloodmage ADR 0040): Lunge keeps 109..113 base damage with 0 AP scaling; client removes $804866 and $AP*0.2.",
+      "spell": 500126,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 500126,
@@ -549,7 +589,17 @@
     "labels": [
       "500126 behaviour_metric_delta daze_duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-1 (keep_edit_text, 2026-11-26, Bloodmage ADR 0040): Lunge keeps 109..113 base damage with 0 AP scaling; client removes $804866 and $AP*0.2.",
+      "spell": 500126,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 500126,
@@ -557,7 +607,17 @@
     "labels": [
       "500126 behaviour_metric_delta rage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-1 (keep_edit_text, 2026-11-26, Bloodmage ADR 0040): Lunge keeps 109..113 base damage with 0 AP scaling; client removes $804866 and $AP*0.2.",
+      "spell": 500126,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 500444,
@@ -886,7 +946,7 @@
   },
   {
     "spell": 504281,
-    "clause": "Curse an enemy, causing them to bleed for $o1 Shadow damage over $d$?s680731[ and instantly regenerate $805912s1% of your maximum Rage][].",
+    "clause": "Curse an enemy, causing them to bleed for $o1 Shadow damage over $d$?s680731[ and instantly regenerate $681031s1% of your maximum Rage][].",
     "kind": "claim",
     "claims": [
       {
@@ -902,13 +962,24 @@
         ]
       },
       {
-        "claim": "$?s680731[ and instantly regenerate $805912s1% of your maximum Rage][]",
+        "claim": "$?s680731[ and instantly regenerate $681031s1% of your maximum Rage][]",
         "labels": [
           "504281 behaviour_metric_delta black_heart_instant_rage",
           "504281 behaviour_metric_delta black_heart_periodic_rage"
         ]
       }
-    ]
+    ],
+    "dbc_clause": "Curse an enemy, causing them to bleed for $o1 Shadow damage over $d$?s680731[ and instantly regenerate $805912s1% of your maximum Rage][].",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-6 (fix_20_instant_edit_text, 2026-11-26, Bloodmage ADR 0030): Vampyr's Kiss grants 20% max Rage instantly on cast and replaces $805912s1% with $681031s1%.",
+      "spell": 504281,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 504281,
@@ -917,7 +988,17 @@
       "504281 behaviour_metric_delta periodic_replication",
       "504281 behaviour_metric_delta periodic_replication_external_dot"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-6 (fix_20_instant_edit_text, 2026-11-26, Bloodmage ADR 0030): Vampyr's Kiss grants 20% max Rage instantly on cast and replaces $805912s1% with $681031s1%.",
+      "spell": 504281,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 504134,
@@ -1125,7 +1206,7 @@
     "spell": 504627,
     "clause": "and redirect $s3% of their threat generated to you.",
     "labels": [
-      "504627 effect_value #3"
+      "504627 behaviour_metric_delta threat_redirect"
     ],
     "kind": "claim"
   },
@@ -1210,7 +1291,7 @@
   },
   {
     "spell": 504728,
-    "clause": "Enter a unique Cursed Form for $d that does not disable the use of Mortal Form abilities$?s560073[, granting spell damage equal to $s1% of your Spirit][].",
+    "clause": "Enter a unique Cursed Form for $d that does not disable the use of Mortal Form abilities$?s560073[, granting spell damage equal to $560073s2% of your Spirit][].",
     "kind": "claim",
     "claims": [
       {
@@ -1227,12 +1308,23 @@
         ]
       },
       {
-        "claim": "$?s560073[, granting spell damage equal to $s1% of your Spirit][]",
+        "claim": "$?s560073[, granting spell damage equal to $560073s2% of your Spirit][]",
         "labels": [
           "504728 behaviour_metric_delta crimson_terror_spirit_sp"
         ]
       }
-    ]
+    ],
+    "dbc_clause": "Enter a unique Cursed Form for $d that does not disable the use of Mortal Form abilities$?s560073[, granting spell damage equal to $s1% of your Spirit][].",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): embedded Transgression 801076 replaces $s1% with $560073s2%.",
+      "spell": 801076,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 504728,
@@ -1240,7 +1332,17 @@
     "labels": [
       "504728 behaviour_metric_delta vampiric_feast_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): embedded Transgression 801076 Description row.",
+      "spell": 801076,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 504728,
@@ -1248,7 +1350,17 @@
     "labels": [
       "504728 behaviour_metric_delta vampiric_feast_heal"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): embedded Transgression 801076 Description row.",
+      "spell": 801076,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 504728,
@@ -1257,7 +1369,17 @@
       "504728 behaviour_metric_delta demon_creature_type",
       "504728 behaviour_metric_delta demon_creature_type_blood_curse_sanity"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): embedded Transgression 801076 Description row.",
+      "spell": 801076,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 504758,
@@ -1677,9 +1799,20 @@
     "labels": [
       "524865 behaviour_metric_delta hematoma_damage_base",
       "524865 behaviour_metric_delta hematoma_damage_sp",
-      "524865 behaviour_metric_delta hematoma_damage_ap"
+      "524865 behaviour_metric_delta hematoma_damage_ap",
+      "524865 behaviour_metric_delta hematoma_no_rage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-4 (keep_zero_edit_text, 2026-11-26, Bloodmage ADR 0040): embedded Hematoma 803392 drops 'Generates Rage based on damage dealt.'.",
+      "spell": 803392,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 524865,
@@ -1687,7 +1820,17 @@
     "labels": [
       "524865 behaviour_metric_delta hematoma_stack_amp"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-4 (keep_zero_edit_text, 2026-11-26, Bloodmage ADR 0040): embedded Hematoma 803392 drops 'Generates Rage based on damage dealt.'.",
+      "spell": 803392,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 524865,
@@ -1695,15 +1838,17 @@
     "labels": [
       "524865 behaviour_metric_delta hematoma_max_stacks"
     ],
-    "kind": "claim"
-  },
-  {
-    "spell": 524865,
-    "clause": "Generates Rage based on damage dealt.",
-    "labels": [
-      "524865 behaviour_metric_delta hematoma_rage"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-4 (keep_zero_edit_text, 2026-11-26, Bloodmage ADR 0040): embedded Hematoma 803392 drops 'Generates Rage based on damage dealt.'.",
+      "spell": 803392,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 524907,
@@ -1733,7 +1878,17 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Hemoglobe replaces $/10;t3 and $/10;s2 typos with $/10;s3.",
+      "spell": 524907,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
   },
   {
     "spell": 524907,
@@ -1741,11 +1896,21 @@
     "labels": [
       "524907 behaviour_metric_delta vitality_stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Hemoglobe replaces $/10;t3 and $/10;s2 typos with $/10;s3.",
+      "spell": 524907,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
   },
   {
     "spell": 524907,
-    "clause": "and $/10;t3 Rage every $t3 sec.",
+    "clause": "and $/10;s3 Rage every $t3 sec.",
     "claims": [
       {
         "claim": "every $t3 sec",
@@ -1755,13 +1920,24 @@
         ]
       },
       {
-        "claim": "and $/10;t3 Rage",
+        "claim": "and $/10;s3 Rage",
         "labels": [
           "524907 behaviour_metric_delta rage_amount"
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "dbc_clause": "and $/10;t3 Rage every $t3 sec.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Hemoglobe replaces $/10;t3 and $/10;s2 typos with $/10;s3.",
+      "spell": 524907,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
   },
   {
     "spell": 524907,
@@ -1770,7 +1946,17 @@
       "524907 behaviour_hit_ratio stamina_scaling",
       "524907 behaviour_hit_ratio spirit_scaling"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Hemoglobe replaces $/10;t3 and $/10;s2 typos with $/10;s3.",
+      "spell": 524907,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
   },
   {
     "spell": 553267,
@@ -2432,7 +2618,17 @@
       "572116 behaviour_expiry duration",
       "572116 behaviour_metric_delta raid_reach"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-3 (sp_only_edit_text, 2026-11-26, Bloodmage ADR 0015): Greater Bloodthorns keeps +0.035 SP scaling and drops 'Can occur only once every half a second.'.",
+      "spell": 572116,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 572116,
@@ -2441,18 +2637,20 @@
       "572116 behaviour_metric_delta shield_hits",
       "572116 behaviour_metric_delta shield_damage",
       "572116 behaviour_metric_delta shield_spell",
-      "572116 behaviour_metric_delta shield_sp"
+      "572116 behaviour_metric_delta shield_sp",
+      "572116 behaviour_metric_delta no_icd"
     ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572116,
-    "clause": "Can occur only once every half a second.",
-    "labels": [
-      "572116 behaviour_metric_delta icd_held",
-      "572116 behaviour_metric_delta icd_reopen"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-3 (sp_only_edit_text, 2026-11-26, Bloodmage ADR 0015): Greater Bloodthorns keeps +0.035 SP scaling and drops 'Can occur only once every half a second.'.",
+      "spell": 572116,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 572412,
@@ -2627,7 +2825,17 @@
     "labels": [
       "573357 behaviour_metric_delta summon_duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Animated Blood replaces $?s560259 and 570744s1 with $?s561196 and 561196s1.",
+      "spell": 573357,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 573357,
@@ -2637,7 +2845,17 @@
       "573357 behaviour_metric_delta blood_strike_sp",
       "573357 behaviour_metric_delta blood_strike_ap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Animated Blood replaces $?s560259 and 570744s1 with $?s561196 and 561196s1.",
+      "spell": 573357,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 573357,
@@ -2645,11 +2863,21 @@
     "labels": [
       "573357 behaviour_metric_delta blood_strike_heal"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Animated Blood replaces $?s560259 and 570744s1 with $?s561196 and 561196s1.",
+      "spell": 573357,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 573357,
-    "clause": "$?s681078[\r\n\r\nEmpowered: Duration increased by $/1000;681398s2 sec and you summon 1 additional amalgam.][]$?s560259[ \r\n\r\nDuration increased by $/1000;570744s1 sec per stack of Thirst.][]",
+    "clause": "$?s681078[\r\n\r\nEmpowered: Duration increased by $/1000;681398s2 sec and you summon 1 additional amalgam.][]$?s561196[ \r\n\r\nDuration increased by $/1000;561196s1 sec per stack of Thirst.][]",
     "kind": "claim",
     "claims": [
       {
@@ -2665,13 +2893,23 @@
         ]
       },
       {
-        "claim": "$?s560259[ \r\n\r\nDuration increased by $/1000;570744s1 sec per stack of Thirst.][]",
+        "claim": "$?s561196[ \r\n\r\nDuration increased by $/1000;561196s1 sec per stack of Thirst.][]",
         "labels": [
-          "573357 behaviour_metric_delta vampyr_lord_thirst_duration",
           "573357 behaviour_metric_delta blood_constructor_thirst_duration"
         ]
       }
-    ]
+    ],
+    "dbc_clause": "$?s681078[\r\n\r\nEmpowered: Duration increased by $/1000;681398s2 sec and you summon 1 additional amalgam.][]$?s560259[ \r\n\r\nDuration increased by $/1000;570744s1 sec per stack of Thirst.][]",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Animated Blood replaces $?s560259 and 570744s1 with $?s561196 and 561196s1.",
+      "spell": 573357,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 575335,
@@ -2718,7 +2956,11 @@
       },
       {
         "claim": "and your Bloodfang Bite, Claw Sweep, and Bloodbolt additionally scales with dodge rating.",
-        "labels": []
+        "labels": [
+          "578120 behaviour_metric_delta dodge_scaling_bloodfang_bite",
+          "578120 behaviour_metric_delta dodge_scaling_claw_sweep",
+          "578120 behaviour_metric_delta dodge_scaling_bloodbolt"
+        ]
       }
     ]
   },
@@ -3366,26 +3608,27 @@
   },
   {
     "spell": 681792,
-    "clause": "Increases the damage dealt and spell power scaling of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
+    "clause": "Increases the damage dealt of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
     "kind": "claim",
-    "claims": [
-      {
-        "claim": "Increases the damage dealt",
-        "labels": [
-          "681792 behaviour_hit_ratio base_bloodbolt",
-          "681792 behaviour_hit_ratio base_bloodmoon",
-          "681792 behaviour_hit_ratio base_crimson_tide"
-        ]
-      },
-      {
-        "claim": "and spell power scaling of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%",
-        "labels": [
-          "681792 behaviour_hit_ratio sp_scaling_bloodbolt_alert",
-          "681792 behaviour_hit_ratio sp_scaling_bloodmoon_alert",
-          "681792 behaviour_hit_ratio sp_scaling_crimson_tide_alert"
-        ]
-      }
-    ]
+    "dbc_clause": "Increases the damage dealt and spell power scaling of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
+    "labels": [
+      "681792 behaviour_hit_ratio base_bloodbolt",
+      "681792 behaviour_hit_ratio base_bloodmoon",
+      "681792 behaviour_hit_ratio base_crimson_tide",
+      "681792 behaviour_hit_ratio sp_single_scale_bloodbolt",
+      "681792 behaviour_hit_ratio sp_single_scale_bloodmoon",
+      "681792 behaviour_hit_ratio sp_single_scale_crimson_tide"
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-11 (keep_120_edit_text, 2026-11-26, Bloodmage ADR 0040): keeps 1.20x damage dealt and drops 'and spell power scaling'.",
+      "spell": 681792,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 681792,
@@ -3393,7 +3636,17 @@
     "labels": [
       "681792 behaviour_metric_delta resist_reduction"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-11 (keep_120_edit_text, 2026-11-26, Bloodmage ADR 0040): keeps 1.20x damage dealt and drops 'and spell power scaling'.",
+      "spell": 681792,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 681792,
@@ -3412,7 +3665,17 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-11 (keep_120_edit_text, 2026-11-26, Bloodmage ADR 0040): keeps 1.20x damage dealt and drops 'and spell power scaling'.",
+      "spell": 681792,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 684331,
@@ -3463,7 +3726,7 @@
   },
   {
     "spell": 704115,
-    "clause": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage.",
+    "clause": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.6} Physical damage.",
     "claims": [
       {
         "claim": "in a $806214a1 yd frontal cone",
@@ -3473,14 +3736,25 @@
         ]
       },
       {
-        "claim": "suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage",
+        "claim": "suffer ${$806214m1*$<scalingbp>+$AP*0.6} Physical damage",
         "labels": [
           "704115 behaviour_metric_delta damage_gate",
           "704115 behaviour_hit_ratio ap_scaling"
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "dbc_clause": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-12 (keep_60_edit_704115, 2026-11-26, Bloodmage ADR 0040): aligns 704115 tooltip from +$AP*0.5 to +$AP*0.6.",
+      "spell": 704115,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 704115,
@@ -3488,7 +3762,17 @@
     "labels": [
       "704115 behaviour_hit_ratio bleeding_bonus"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-12 (keep_60_edit_704115, 2026-11-26, Bloodmage ADR 0040): aligns 704115 tooltip from +$AP*0.5 to +$AP*0.6.",
+      "spell": 704115,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 704166,
@@ -4010,7 +4294,8 @@
       "704692 behaviour_metric_delta mechanical_control",
       "704692 behaviour_hit_ratio humanoid_bloodbolt"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Owner ruling Q-bm-13 (all_damage, 2026-11-26, Bloodmage ADR 0012): 532623 matches all family-26 damage spells and rev_20261127_04 updates 532623 ToolTip to Damage taken from the Bloodmage increased."
   },
   {
     "spell": 705731,
@@ -4425,7 +4710,8 @@
       {
         "claim": "Increases the Physical damage taken by enemies by $707625s1%",
         "labels": [
-          "707624 effect_value 707625e0 #1"
+          "707624 effect_value 707625e0 #1",
+          "707624 behaviour_metric_delta aura_applied"
         ]
       }
     ],
@@ -4674,7 +4960,17 @@
     "labels": [
       "572907 behaviour_metric_delta mortal_form"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Sanguine Rupture replaces $?s500107 with $?s92112.",
+      "spell": 572907,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 572907,
@@ -4694,13 +4990,36 @@
           "572907 behaviour_metric_delta rage_per_enemy"
         ]
       }
-    ]
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Sanguine Rupture replaces $?s500107 with $?s92112.",
+      "spell": 572907,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 572907,
-    "clause": "$?s500107[\r\n\r\nGenerates 1 stack of Thirst.][]",
-    "labels": [],
-    "kind": "claim"
+    "clause": "$?s92112[\r\n\r\nGenerates 1 stack of Thirst.][]",
+    "labels": [
+      "572907 behaviour_metric_delta thirst_92112"
+    ],
+    "kind": "claim",
+    "dbc_clause": "$?s500107[\r\n\r\nGenerates 1 stack of Thirst.][]",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-24 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Sanguine Rupture replaces $?s500107 with $?s92112.",
+      "spell": 572907,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 800776,
@@ -4791,7 +5110,17 @@
     "labels": [
       "572575 behaviour_metric_delta mortal_form_gate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-2 (keep_edit_text, 2026-11-26, Bloodmage ADR 0040): Dark Liturgy keeps flat bouncing heals and drops healing for less for each target struck.",
+      "spell": 572575,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 572575,
@@ -4801,17 +5130,28 @@
       "572575 behaviour_metric_delta heal_sp",
       "572575 behaviour_metric_delta heal_spirit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-2 (keep_edit_text, 2026-11-26, Bloodmage ADR 0040): Dark Liturgy keeps flat bouncing heals and drops healing for less for each target struck.",
+      "spell": 572575,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 572575,
-    "clause": "and applying Blood Rituals to them, bouncing to up to $i nearby allies, healing for less for each target struck.",
+    "clause": "and applying Blood Rituals to them, bouncing to up to $i nearby allies.",
     "kind": "claim",
     "claims": [
       {
         "claim": "bouncing to up to $i nearby allies",
         "labels": [
-          "572575 behaviour_metric_delta bounce_cap"
+          "572575 behaviour_metric_delta bounce_cap",
+          "572575 behaviour_metric_delta no_bounce_decay"
         ]
       },
       {
@@ -4819,14 +5159,19 @@
         "labels": [
           "572575 behaviour_metric_delta blood_rituals_apply"
         ]
-      },
-      {
-        "claim": "healing for less for each target struck.",
-        "labels": [
-          "572575 behaviour_metric_delta bounce_decay"
-        ]
       }
-    ]
+    ],
+    "dbc_clause": "and applying Blood Rituals to them, bouncing to up to $i nearby allies, healing for less for each target struck.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-2 (keep_edit_text, 2026-11-26, Bloodmage ADR 0040): Dark Liturgy keeps flat bouncing heals and drops healing for less for each target struck.",
+      "spell": 572575,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 572575,
@@ -4836,7 +5181,17 @@
       "572575 behaviour_metric_delta blood_rituals_heal_sp",
       "572575 behaviour_metric_delta blood_rituals_heal_sta"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-2 (keep_edit_text, 2026-11-26, Bloodmage ADR 0040): Dark Liturgy keeps flat bouncing heals and drops healing for less for each target struck.",
+      "spell": 572575,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 800782,
@@ -5025,7 +5380,8 @@
       "803585 behaviour_cast_combat peaceful health",
       "803585 behaviour_cast_combat peaceful mana"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 2 owner ruling Q-bm-7 ('leave', 2026-11-26, Bloodmage ADR 0039): keep Player::ResurrectPlayer 100% clamp and keep '$s1%' (820%) in Spell.dbc and client text; verified with opt-in clamp_percent: true on 803585 peaceful."
   },
   {
     "spell": 803585,
@@ -5238,7 +5594,9 @@
   {
     "spell": 801961,
     "clause": "Your Liquify now cleanses all negative effects when used.",
-    "labels": [],
+    "labels": [
+      "801961 behaviour_metric_delta cleanse_on_use"
+    ],
     "kind": "claim"
   },
   {
@@ -5373,7 +5731,17 @@
       "501667 behaviour_cast_applies_aura duration",
       "501667 behaviour_expiry duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-3 (sp_only_edit_text, 2026-11-26, Bloodmage ADR 0015): Bloodthorns keeps +0.035 SP scaling and drops 'Can occur only once every half a second.'.",
+      "spell": 501667,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 501667,
@@ -5382,18 +5750,20 @@
       "501667 behaviour_metric_delta shield_hits",
       "501667 behaviour_metric_delta shield_damage",
       "501667 behaviour_metric_delta shield_spell",
-      "501667 behaviour_metric_delta shield_sp"
+      "501667 behaviour_metric_delta shield_sp",
+      "501667 behaviour_metric_delta no_icd"
     ],
-    "kind": "claim"
-  },
-  {
-    "spell": 501667,
-    "clause": "Can occur only once every half a second.",
-    "labels": [
-      "501667 behaviour_metric_delta icd_held",
-      "501667 behaviour_metric_delta icd_reopen"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-3 (sp_only_edit_text, 2026-11-26, Bloodmage ADR 0015): Bloodthorns keeps +0.035 SP scaling and drops 'Can occur only once every half a second.'.",
+      "spell": 501667,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 802315,
@@ -5619,7 +5989,7 @@
   },
   {
     "spell": 804602,
-    "clause": "Every $/1000;T1 second you remain in a Cursed Form now reduces the cooldown of your Bloodsurge by $/1000;804603s1 sec.",
+    "clause": "Every $t1 seconds you remain in a Cursed Form now reduces the cooldown of your Bloodsurge by $/1000;804603s1 sec.",
     "claims": [
       {
         "claim": "reduces the cooldown of your Bloodsurge by $/1000;804603s1 sec",
@@ -5630,13 +6000,24 @@
         ]
       },
       {
-        "claim": "Every $/1000;T1 second you remain in a Cursed Form",
+        "claim": "Every $t1 seconds you remain in a Cursed Form",
         "labels": [
           "804602 behaviour_metric_delta cursed_form_ticks"
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "dbc_clause": "Every $/1000;T1 second you remain in a Cursed Form now reduces the cooldown of your Bloodsurge by $/1000;804603s1 sec.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261127_04_bloodmage_client_texts.sql",
+      "commit": "df5dcbbeab",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling Q-bm-23 (fix_all_three_mpq, 2026-11-26, Bloodmage ADR 0041): Crimson Feast replaces $/1000;T1 second typo with $t1 seconds.",
+      "spell": 804602,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 804604,
