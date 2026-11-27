@@ -634,7 +634,8 @@ public: /* UnitScript */
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* spellInfo,
         uint8 effectIndex, float& value);
     void ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo, AuraEffect const* triggeredByAura);
-    void ModifyHealReceived(Unit* target, Unit* healer, uint32& addHealth, SpellInfo const* spellInfo);
+    void ModifyHealReceived(Unit* first, Unit* second, uint32& addHealth, SpellInfo const* spellInfo,
+        Unit* recipient = nullptr);
     void OnBeforeHealAbsorb(HealInfo& healInfo);
     void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit* caster, int32& amount);
     uint32 DealDamage(Unit* AttackerUnit, Unit* pVictim, uint32 damage, DamageEffectType damagetype,

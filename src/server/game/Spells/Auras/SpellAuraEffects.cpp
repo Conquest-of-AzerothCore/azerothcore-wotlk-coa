@@ -3384,7 +3384,9 @@ void AuraEffect::HandleAuraModPacify(AuraApplication const* aurApp, uint8 mode, 
     else
     {
         // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
-        if (target->HasPacifyAura() || target->HasPacifySilenceAura())
+        constexpr uint32 Liquify = 806310;
+        if (target->HasPacifyAura() || target->HasPacifySilenceAura() ||
+            (target->IsPlayer() && target->getClass() == CLASS_SON_OF_ARUGAL && target->HasAura(Liquify)))
             return;
         target->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
     }

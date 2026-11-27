@@ -243,18 +243,11 @@ public:
             value = float(amount);
     }
 
-    void ModifyHealReceived(Unit* first, Unit* second, uint32& heal, SpellInfo const* spellInfo) override
+    void ModifyHealReceivedFor(Unit* recipient, Unit* first, Unit* second, uint32& heal,
+        SpellInfo const* spellInfo) override
     {
         if (!spellInfo || !heal)
             return;
-
-        bool const periodicOnly = spellInfo->HasAura(SPELL_AURA_PERIODIC_HEAL) &&
-            !spellInfo->HasEffect(SPELL_EFFECT_HEAL) &&
-            !spellInfo->HasEffect(SPELL_EFFECT_HEAL_PCT) &&
-            !spellInfo->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) &&
-            !spellInfo->HasEffect(SPELL_EFFECT_HEAL_MECHANICAL) &&
-            !spellInfo->HasEffect(SPELL_EFFECT_HEALTH_LEECH);
-        Unit* recipient = (first == second || periodicOnly) ? first : second;
 
         if (recipient)
             if (AuraEffect const* vital = recipient->GetAuraEffect(VitalShield, EFFECT_0))

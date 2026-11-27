@@ -1,11 +1,12 @@
 import unittest
 
-from behaviours import behaviour_scenario
-from compare import judge_behaviour
-from kinds.once_per_aura_proc import once_per_aura_proc_spec
+from behaviours import BEHAVIOUR_METRIC_DELTA, behaviour_scenario
+from compare import judge_behaviour, missing_measurement
+from kinds.once_per_aura_proc import once_per_aura_proc_spec, once_per_aura_proc_verdict
 from profile import CASTER, DBC_DIR, load_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
+from values import Expectation
 
 ENDURE = 681190
 ENDURE_HEAL = 681189
@@ -37,6 +38,32 @@ def seeded_values(model: dict, **overrides) -> dict:
             phase, field = key.split('__')
             values[reads[phase][field]] = val
     return values
+
+
+class OncePerAuraProcPrefixTests(unittest.TestCase):
+    def test_measured_hit1_violation_precedes_missing_hit2(self):
+        reads = {
+            'baseline': dict(logs='b_logs', aura='b_aura', proc='b_proc'),
+            'control': dict(logs='c_logs', aura='c_aura', proc='c_proc'),
+            'app1_cast': dict(aura='a1_aura', cast_failure='a1_failure'),
+            'hit1': dict(logs='h1_logs', aura='h1_aura', proc='h1_proc'),
+            'hit2': dict(logs='h2_logs', aura='h2_aura', proc='h2_proc'),
+        }
+        model = dict(reads=reads, metric='spell_heal_count', spell=ENDURE, proc_spell=ENDURE_HEAL,
+                     strike_spell=STRIKE)
+        expectation = Expectation('prefix', BEHAVIOUR_METRIC_DELTA, ENDURE, ENDURE_HEAL, None, '', '', model)
+        base = base_verdict(expectation)
+        run = FakeRun(dict(b_logs=0, b_aura=0, b_proc=0, c_logs=1, c_aura=0, c_proc=0,
+                           a1_aura=1, a1_failure=0, h1_logs=2, h1_aura=1, h1_proc=0))
+
+        verdict = once_per_aura_proc_verdict(base, run, model)
+        self.assertEqual((verdict.status, verdict.measured, verdict.expected), ('alert', 0.0, 1.0))
+        self.assertIn('application 1 hit 1', verdict.explanation)
+
+        run.values['h1_proc'] = 1
+        verdict = once_per_aura_proc_verdict(base, run, model)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertEqual(verdict.explanation, missing_measurement(run, 'h2_logs'))
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')

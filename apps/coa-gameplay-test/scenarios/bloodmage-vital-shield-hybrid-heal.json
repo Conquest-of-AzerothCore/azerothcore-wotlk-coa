@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Vital Shield boosts a Regrowth tick only on the recipient",
+  "contract": "Vital Shield 504849 increases Nature healing received by 15%. Regrowth 8936 has a direct heal and a periodic Nature heal; applying only its aura isolates the ticks while keeping the hybrid SpellInfo. Compare the first tick without either shield, with the recipient shielded, and with only the healer shielded.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "healer", "race": 1, "class": 20, "level": 60, "spell_power": 5000 },
+    { "id": "recipient", "race": 1, "class": 20, "level": 60 }
+  ],
+  "steps": [
+    { "action": "set_aura", "actor": "healer", "spell": 16255, "stacks": 1, "amount": -100 },
+    { "action": "set_aura", "actor": "recipient", "caster": "healer", "spell": 8936, "stacks": 1 },
+    {
+      "action": "assert", "actor": "healer", "metric": "spell_heal_count", "spell": 8936,
+      "target": "recipient", "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "snapshot", "actor": "healer", "metric": "spell_heal_total", "spell": 8936,
+      "target": "recipient", "save_as": "unshielded_tick"
+    },
+    { "action": "set_aura", "actor": "recipient", "spell": 8936, "stacks": 0 },
+    { "action": "set_aura", "actor": "recipient", "spell": 504849, "stacks": 1 },
+    { "action": "set_aura", "actor": "recipient", "caster": "healer", "spell": 8936, "stacks": 1 },
+    {
+      "action": "assert", "actor": "healer", "metric": "spell_heal_count", "spell": 8936,
+      "target": "recipient", "equals": 2, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The recipient's Vital Shield boosts the tick by 15%",
+      "actor": "healer", "metric": "spell_heal_total", "spell": 8936, "target": "recipient",
+      "relative_to": "unshielded_tick", "ratio_to": "unshielded_tick", "min": 1.14, "max": 1.16
+    },
+    {
+      "action": "snapshot", "actor": "healer", "metric": "spell_heal_total", "spell": 8936,
+      "target": "recipient", "save_as": "before_healer_shield"
+    },
+    { "action": "set_aura", "actor": "recipient", "spell": 8936, "stacks": 0 },
+    { "action": "set_aura", "actor": "recipient", "spell": 504849, "stacks": 0 },
+    { "action": "set_aura", "actor": "healer", "spell": 504849, "stacks": 1 },
+    { "action": "set_aura", "actor": "recipient", "caster": "healer", "spell": 8936, "stacks": 1 },
+    {
+      "action": "assert", "actor": "healer", "metric": "spell_heal_count", "spell": 8936,
+      "target": "recipient", "equals": 3, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The healer's Vital Shield does not boost healing on someone else",
+      "actor": "healer", "metric": "spell_heal_total", "spell": 8936, "target": "recipient",
+      "relative_to": "before_healer_shield", "ratio_to": "unshielded_tick", "equals": 1
+    }
+  ]
+}

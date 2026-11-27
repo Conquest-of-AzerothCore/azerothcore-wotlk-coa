@@ -212,63 +212,57 @@ def once_per_aura_proc_scenario(class_file: dict, spec: OncePerAuraProcSpec) -> 
     return timed(scenario, waited_ms(steps)), [expectation]
 
 
-def collect_labels(reads: dict) -> list[str]:
-    found = []
-    for value in reads.values():
-        if isinstance(value, dict):
-            found.extend(value.values())
-        else:
-            found.append(value)
-    return found
-
-
 def once_per_aura_proc_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     reads = model['reads']
-    missing = next((lbl for lbl in collect_labels(reads) if run.values.get(lbl) is None), None)
-    if missing is not None:
-        return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
-    val = run.values
-    b_logs, b_aura, b_proc = val[reads['baseline']['logs']], val[reads['baseline']['aura']], val[reads['baseline']['proc']]
-    c_logs, c_aura, c_proc = val[reads['control']['logs']], val[reads['control']['aura']], val[reads['control']['proc']]
-    a1_aura, a1_fail = val[reads['app1_cast']['aura']], val[reads['app1_cast']['cast_failure']]
-    h1_logs, h1_aura, h1_proc = val[reads['hit1']['logs']], val[reads['hit1']['aura']], val[reads['hit1']['proc']]
-    h2_logs, h2_aura, h2_proc = val[reads['hit2']['logs']], val[reads['hit2']['aura']], val[reads['hit2']['proc']]
-    a2_clear = val[reads['app2_cleared']]
-    a2_aura, a2_fail = val[reads['app2_cast']['aura']], val[reads['app2_cast']['cast_failure']]
-    h3_logs, h3_aura, h3_proc = val[reads['hit3']['logs']], val[reads['hit3']['aura']], val[reads['hit3']['proc']]
-    detail = {'metric': model['metric'], 'control_delta': c_proc - b_proc, 'hit1_delta': h1_proc - c_proc,
-              'hit2_delta': h2_proc - h1_proc, 'hit3_delta': h3_proc - h2_proc,
-              'auras': {'control': c_aura, 'app1_cast': a1_aura, 'hit1': h1_aura, 'hit2': h2_aura,
-                        'app2_cleared': a2_clear, 'app2_cast': a2_aura, 'hit3': h3_aura},
-              'strike_deltas': [c_logs - b_logs, h1_logs - c_logs, h2_logs - h1_logs, h3_logs - h2_logs]}
-    if b_aura != 0 or b_proc != 0:
-        return replace(base, status='unmeasured', detail=detail,
-                       explanation=f'baseline not clean: aura={b_aura:g}, proc={b_proc:g}')
-    if detail['strike_deltas'] != [1.0, 1.0, 1.0, 1.0]:
-        return replace(base, status='unmeasured', detail=detail,
-                       explanation=f'strike {model["strike_spell"]} log deltas {detail["strike_deltas"]}, expected '
-                                   f'[1, 1, 1, 1] (a strike missed or was avoided)')
-    if c_aura != 0 or a1_fail != 0 or a1_aura != 1 or a2_clear != 0 or a2_fail != 0 or a2_aura != 1:
-        return replace(base, status='unmeasured', detail=detail,
-                       explanation=f'aura cast precondition failed: control_aura={c_aura:g}, app1_fail={a1_fail:g}, '
-                                   f'app1_aura={a1_aura:g}, cleared={a2_clear:g}, app2_fail={a2_fail:g}, '
-                                   f'app2_aura={a2_aura:g}')
-    if detail['control_delta'] != 0:
-        return replace(base, status='alert', measured=detail['control_delta'], expected=0.0, detail=detail,
-                       explanation=f'control fired {detail["control_delta"]:g} proc(s) of {model["proc_spell"]} '
-                                   f'without {model["spell"]} active')
-    if h1_aura != 1 or detail['hit1_delta'] != 1:
-        return replace(base, status='alert', measured=detail['hit1_delta'], expected=1.0, detail=detail,
-                       explanation=f'application 1 hit 1: aura={h1_aura:g} (expected 1), proc delta='
-                                   f'{detail["hit1_delta"]:g} (expected 1)')
-    if h2_aura != 1 or detail['hit2_delta'] != 0:
-        return replace(base, status='alert', measured=detail['hit2_delta'], expected=0.0, detail=detail,
-                       explanation=f'application 1 hit 2 (same aura): aura={h2_aura:g} (expected 1), proc delta='
-                                   f'{detail["hit2_delta"]:g} (expected 0)')
-    if h3_aura != 1 or detail['hit3_delta'] != 1:
-        return replace(base, status='alert', measured=detail['hit3_delta'], expected=1.0, detail=detail,
-                       explanation=f'application 2 hit 3 (reapplied aura): aura={h3_aura:g} (expected 1), proc delta='
-                                   f'{detail["hit3_delta"]:g} (expected 1)')
+    detail = {'metric': model['metric'], 'auras': {}, 'strike_deltas': []}
+    strikes = {'control': (0, 0, 'control'), 'hit1': (1, 1, 'application 1 hit 1'),
+               'hit2': (1, 0, 'application 1 hit 2 (same aura)'),
+               'hit3': (1, 1, 'application 2 hit 3 (reapplied aura)')}
+    for phase in ('baseline', 'control', 'app1_cast', 'hit1', 'hit2', 'app2_cleared', 'app2_cast', 'hit3'):
+        labels = reads[phase]
+        if isinstance(labels, str):
+            labels = {'aura': labels}
+        values = {field: run.values.get(label) for field, label in labels.items()}
+        missing = next((labels[field] for field, value in values.items() if value is None), None)
+        if missing is not None:
+            return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
+
+        aura = values['aura']
+        if phase == 'baseline':
+            if aura != 0 or values['proc'] != 0:
+                return replace(base, status='unmeasured', detail=detail,
+                               explanation=f'baseline not clean: aura={aura:g}, proc={values["proc"]:g}')
+            last_logs, last_proc = values['logs'], values['proc']
+            continue
+
+        detail['auras'][phase] = aura
+        if phase not in strikes:
+            expected_aura = 0 if phase == 'app2_cleared' else 1
+            failure = values.get('cast_failure', 0)
+            if aura != expected_aura or failure != 0:
+                return replace(base, status='unmeasured', detail=detail,
+                               explanation=f'{phase} precondition failed: aura={aura:g} (expected {expected_aura}), '
+                                           f'cast_failure={failure:g}')
+            continue
+
+        expected_aura, expected_proc, description = strikes[phase]
+        strike_delta = values['logs'] - last_logs
+        proc_delta = values['proc'] - last_proc
+        detail['strike_deltas'].append(strike_delta)
+        detail[f'{phase}_delta'] = proc_delta
+        if strike_delta != 1:
+            return replace(base, status='unmeasured', detail=detail,
+                           explanation=f'{description}: strike {model["strike_spell"]} log delta {strike_delta:g}, '
+                                       'expected 1 (a strike missed or was avoided)')
+        if phase == 'control' and aura != expected_aura:
+            return replace(base, status='unmeasured', detail=detail,
+                           explanation=f'control precondition failed: aura={aura:g} (expected 0)')
+        if aura != expected_aura or proc_delta != expected_proc:
+            return replace(base, status='alert', measured=proc_delta, expected=float(expected_proc), detail=detail,
+                           explanation=f'{description}: aura={aura:g} (expected {expected_aura}), '
+                                       f'proc delta={proc_delta:g} (expected {expected_proc})')
+        last_logs, last_proc = values['logs'], values['proc']
+
     return replace(base, status='ok', measured=1.0, expected=1.0, low=1.0, high=1.0, detail=detail,
                    explanation=f'{model["proc_spell"]} ({model["metric"]}) deltas across 4 landed '
                                f'{model["strike_spell"]} strikes: control 0, app1 hit1 +1 (aura 1), app1 hit2 +0 '

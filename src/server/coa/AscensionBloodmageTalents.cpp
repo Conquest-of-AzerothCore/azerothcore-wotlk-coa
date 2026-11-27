@@ -680,8 +680,8 @@ public:
             ClearFinalEmbraceCrimsonMaw(player);
         if (aura->GetId() == SPELL_ACCURSED_FORM)
             player->RemoveAurasDueToSpell(SPELL_ACCURSED_FORM_AGILITY);
-        if (aura->GetId() == SPELL_LIQUIFY && !player->HasAuraType(SPELL_AURA_MOD_PACIFY) &&
-            !player->HasAuraType(SPELL_AURA_MOD_PACIFY_SILENCE))
+        if (aura->GetId() == SPELL_LIQUIFY && !player->HasAura(SPELL_LIQUIFY) &&
+            !player->HasPacifyAura() && !player->HasPacifySilenceAura())
             player->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
         if (aura->GetId() == SPELL_TRANSGRESSION || aura->GetId() == SPELL_TRANSGRESSION_VAMPIRIC_FANG)
             player->RemoveAurasDueToSpell(SPELL_TRANSGRESSION_SPIRIT_POWER, player->GetGUID());
