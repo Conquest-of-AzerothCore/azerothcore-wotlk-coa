@@ -44,6 +44,8 @@ class SumCheck:
     source_on: str | None = None
     band: tuple[float, float] = (0.0, 0.0)
     band_reason: str = ''
+    at_least: int | None = None
+    at_most: int | None = None
 
 
 @dataclass(frozen=True)
@@ -67,10 +69,13 @@ def sum_creature(raw: dict) -> SumCreature:
 def sum_check(raw: dict, quote: str) -> SumCheck:
     band = raw.get('band', [0.0, 0.0])
     control = raw.get('control_expected')
+    at_least = raw.get('at_least')
+    at_most = raw.get('at_most')
     return SumCheck(raw['name'], raw['judge'], int(raw['spell']), raw.get('quote', quote), float(raw['expected']),
                     None if control is None else int(control), raw.get('witness'), raw.get('on'),
                     None if raw.get('source') is None else int(raw['source']), raw.get('source_on'),
-                    (float(band[0]), float(band[1])), raw.get('band_reason', ''))
+                    (float(band[0]), float(band[1])), raw.get('band_reason', ''),
+                    None if at_least is None else int(at_least), None if at_most is None else int(at_most))
 
 
 def heal_sum_spec(entry: dict) -> HealSumSpec:
@@ -129,6 +134,12 @@ def validate(spec: HealSumSpec) -> None:
                                      (check.witness == CONTROL and spec.gate_spell is None)):
             raise ValueError(f'{spec.spell} {KIND} check {check.name} needs a whole expected total and a witness '
                              f'phase of {WITNESS_PHASES} that the entry runs')
+        if (check.at_least is None) != (check.at_most is None):
+            raise ValueError(f'{spec.spell} {KIND} check {check.name} sets at_least and at_most together')
+        if check.at_least is not None and (check.judge != 'cap' or
+                                           not 0 <= check.at_least <= check.expected <= check.at_most):
+            raise ValueError(f'{spec.spell} {KIND} check {check.name} needs cap with '
+                             f'0 <= at_least <= expected <= at_most')
         if check.judge == 'pair' and (check.on not in ids or check.source_on not in ids or check.source is None
                                       or check.expected <= 0 or not check.band_reason
                                       or check.band[0] > check.band[1]):
@@ -234,6 +245,8 @@ def check_model(spec: HealSumSpec, check: SumCheck, reads: dict) -> dict:
              'units': unit_ids(spec), 'phases': list(phases(spec)), 'reads': reads}
     if check.judge == 'cap':
         model.update({'control_expected': check.control_expected, 'witness': check.witness})
+        if check.at_least is not None:
+            model.update({'at_least': check.at_least, 'at_most': check.at_most})
     else:
         model.update({'on': check.on, 'source': check.source, 'source_on': check.source_on,
                       'band': list(check.band), 'band_reason': check.band_reason})
@@ -279,16 +292,19 @@ def cap_verdict(base, run, model: dict):
                                    f'{listed(witnessed)}): a unit no heal reaches does not show a cap')
     total = sum(treatment.values())
     control_total = None if control is None else sum(control.values())
-    status = 'ok' if total == model['expected'] and (control is None or
-                                                       control_total == model['control_expected']) else 'alert'
+    low = float(model['at_least']) if 'at_least' in model else model['expected']
+    high = float(model['at_most']) if 'at_most' in model else model['expected']
+    status = 'ok' if low <= total <= high and (control is None or
+                                               control_total == model['control_expected']) else 'alert'
     control_text = ('' if control is None else
                     f'; control window without the gate {control_total:g} ({listed(control)}), expected '
                     f'{model["control_expected"]}')
-    return replace(base, status=status, measured=total, expected=model['expected'], low=model['expected'],
-                   high=model['expected'],
+    range_note = f'[{low:g}, {high:g}]' if 'at_least' in model else f'{model["expected"]:g}'
+    compare_note = f'within [{low:g}, {high:g}]' if 'at_least' in model else 'exactly'
+    return replace(base, status=status, measured=total, expected=model['expected'], low=low, high=high,
                    explanation=f'treatment heals of {spell}: {total:g} ({listed(treatment)}), expected '
-                               f'{model["expected"]:g}{control_text}; every unit took a heal in the '
-                               f'{model["witness"]} window, so each was a candidate; counts are compared exactly')
+                               f'{range_note}{control_text}; every unit took a heal in the '
+                               f'{model["witness"]} window, so each was a candidate; counts are compared {compare_note}')
 
 
 def pair_verdict(base, run, model: dict):

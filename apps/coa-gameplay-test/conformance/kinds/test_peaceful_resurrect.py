@@ -138,6 +138,28 @@ class PeacefulResurrectTests(unittest.TestCase):
         for bad_class in (1, 11, 33, True, '13'):
             with self.subTest(bad_class=bad_class), self.assertRaisesRegex(ValueError, 'ally_class'):
                 peaceful_resurrect_spec({**EFFECT18_ENTRY, 'ally_class': bad_class})
+        with self.assertRaisesRegex(ValueError, 'clamp_percent'):
+            peaceful_resurrect_spec({**EFFECT18_ENTRY, 'clamp_percent': 'yes'})
+
+    def test_effect_18_opt_in_clamp_percent_accepts_100_percent_and_alerts_below(self):
+        scenario, expectations = behaviour_scenario(load_class_file(20), {**EFFECT18_ENTRY, 'clamp_percent': True})
+        run.validate(scenario)
+        by_claim = {expectation.model['claim']: expectation for expectation in expectations}
+        values = {
+            f'803585 peaceful_resurrect peaceful {name}': float(value)
+            for name, value in {
+                'alive_unoffered': 0, 'combat_peaceful': 0, 'cast_failure_peaceful': 0, 'alive_peaceful': 1,
+                'health_peaceful': 4000, 'mana_peaceful': 2000, 'max_health_peaceful': 4000,
+                'max_power_peaceful': 2000, 'combat_fighting': 1, 'cast_failure_fighting': 1, 'alive_fighting': 0,
+            }.items()}
+        health_ok = judge_behaviour(base_verdict(by_claim['health']), FakeRun(values), by_claim['health'])
+        mana_ok = judge_behaviour(base_verdict(by_claim['mana']), FakeRun(values), by_claim['mana'])
+        self.assertEqual((health_ok.status, health_ok.measured, health_ok.expected), ('ok', 4000.0, 4000.0))
+        self.assertEqual((mana_ok.status, mana_ok.measured, mana_ok.expected), ('ok', 2000.0, 2000.0))
+        short_hp = judge_behaviour(base_verdict(by_claim['health']),
+                                   FakeRun({**values, '803585 peaceful_resurrect peaceful health_peaceful': 3999.0}),
+                                   by_claim['health'])
+        self.assertEqual(short_hp.status, 'alert')
 
 
 if __name__ == '__main__':

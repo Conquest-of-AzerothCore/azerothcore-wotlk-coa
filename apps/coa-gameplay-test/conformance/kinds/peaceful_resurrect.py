@@ -41,6 +41,7 @@ class PeacefulResurrectSpec:
     label_suffix: str
     combat_cast: int | None = None
     ally_class: int | None = None
+    clamp_percent: bool = False
 
 
 def peaceful_resurrect_spec(entry: dict) -> PeacefulResurrectSpec:
@@ -49,8 +50,12 @@ def peaceful_resurrect_spec(entry: dict) -> PeacefulResurrectSpec:
     if ally_class is not None and (type(ally_class) is not int or not MIN_COA_CLASS <= ally_class <= MAX_COA_CLASS):
         raise ValueError(f'{entry["spell"]} {KIND} ally_class must be a CoA class ({MIN_COA_CLASS}..{MAX_COA_CLASS}), '
                          f'not {ally_class!r}')
+    clamp_percent = entry.get('clamp_percent', False)
+    if type(clamp_percent) is not bool:
+        raise ValueError(f'{entry["spell"]} {KIND} clamp_percent must be bool, not {clamp_percent!r}')
     spec = PeacefulResurrectSpec(entry['spell'], entry['name'], entry['quote'], claims,
-                                 entry.get('label_suffix', 'peaceful'), entry.get('combat_cast'), ally_class)
+                                 entry.get('label_suffix', 'peaceful'), entry.get('combat_cast'), ally_class,
+                                 clamp_percent)
     names = [claim for claim, _ in spec.claims]
     if not names or len(set(names)) != len(names) or not set(names) <= set(CLAIM_READINGS):
         raise ValueError(f'{spec.spell} {KIND} needs distinct claims from {sorted(CLAIM_READINGS)}')
@@ -155,7 +160,8 @@ def peaceful_resurrect_scenario(class_file: dict, spec: PeacefulResurrectSpec) -
                 {'action': 'stop_attack', 'actor': CASTER}]
              + accept('accept after the refused cast in combat')
              + [measurement(label['alive_fighting'], ALLY, 'alive')])
-    amount_text = (f'{health}% of max_health and {health}% of max_power (unclamped)' if is_percent
+    clamp_note = 'clamped to 100%' if spec.clamp_percent else 'unclamped'
+    amount_text = (f'{health}% of max_health and {health}% of max_power ({clamp_note})' if is_percent
                    else f'{health} health and {mana} mana')
     ally = {**player_fixture(class_file), 'id': ALLY, 'allow_regeneration': False}
     if spec.ally_class is not None:
@@ -185,9 +191,12 @@ def peaceful_resurrect_scenario(class_file: dict, spec: PeacefulResurrectSpec) -
             value_reading, max_reading = PERCENT_MAX_READING[claim]
             fixed_readings = {reading: [label[reading], expected[reading]]
                               for reading in CLAIM_READINGS[claim][:-1]}
+            percent_check = {'reading': value_reading, 'label': label[value_reading],
+                             'max_label': label[max_reading], 'percent': health}
+            if spec.clamp_percent:
+                percent_check['clamp_percent'] = True
             model = {'kind': KIND, 'quote': quote, 'claim': claim, 'readings': fixed_readings,
-                     'percent_check': {'reading': value_reading, 'label': label[value_reading],
-                                       'max_label': label[max_reading], 'percent': health}}
+                     'percent_check': percent_check}
             displayed = f'{health}%'
         else:
             model = {'kind': KIND, 'quote': quote, 'claim': claim,
@@ -224,6 +233,8 @@ def peaceful_resurrect_verdict(base, run, model: dict):
             return replace(base, status='unmeasured', measured=measured,
                            explanation=f'{percent_check["reading"]} cannot judge {percent}% against max {maximum:g}')
         expected_value = float(pct_expected(maximum, percent))
+        if percent_check.get('clamp_percent'):
+            expected_value = min(maximum, expected_value)
         if abs(measured - expected_value) > 1e-9:
             wrong[percent_check['reading']] = measured
         status = 'ok' if not wrong else 'alert'
