@@ -4,8 +4,10 @@
 #include "AllBattlegroundScript.h"
 #include "Battleground.h"
 #include "BattlegroundScore.h"
+#include "Chat.h"
 #include "Player.h"
 #include "PlayerScript.h"
+#include "StringFormat.h"
 #include <algorithm>
 #include <limits>
 
@@ -16,11 +18,14 @@ uint32 Accrue(uint32 glory, uint32 earned)
     return glory + std::min(earned, std::numeric_limits<uint32>::max() - glory);
 }
 
-uint32 ObjectiveReward(uint32 scoreType, uint32 count)
+uint32 ObjectiveReward(BattlegroundTypeId bgType, uint32 scoreType, uint32 count)
 {
+    uint32 each = 0;
     switch (scoreType)
     {
         case SCORE_FLAG_CAPTURES:
+            each = bgType == BATTLEGROUND_WS ? WarsongFlagCaptureGlory : ObjectiveGlory;
+            break;
         case SCORE_BASES_ASSAULTED:
         case SCORE_BASES_DEFENDED:
         case SCORE_GRAVEYARDS_ASSAULTED:
@@ -28,10 +33,28 @@ uint32 ObjectiveReward(uint32 scoreType, uint32 count)
         case SCORE_TOWERS_ASSAULTED:
         case SCORE_TOWERS_DEFENDED:
         case SCORE_MINES_CAPTURED:
-            return uint32(std::min<uint64>(uint64(ObjectiveGlory) * count, std::numeric_limits<uint32>::max()));
+            each = ObjectiveGlory;
+            break;
         default:
             return 0;
     }
+
+    return uint32(std::min<uint64>(uint64(each) * count, std::numeric_limits<uint32>::max()));
+}
+
+uint32 GloryToNextRank(uint32 glory)
+{
+    auto const next = std::upper_bound(RankThresholds.begin(), RankThresholds.end(), glory);
+    return next == RankThresholds.end() ? 0 : *next - glory;
+}
+
+std::string GainMessage(uint32 earned, uint32 total)
+{
+    uint32 const needed = GloryToNextRank(total);
+    if (!needed)
+        return Acore::StringFormat("You gained {} Glory.", earned);
+
+    return Acore::StringFormat("You gained {} Glory. {} Glory needed to reach the next rank.", earned, needed);
 }
 
 WorldPacket BuildUpdate(ObjectGuid guid, uint32 glory)
@@ -49,8 +72,10 @@ uint32 Get(Player const* player)
 
 void Earn(Player* player, uint32 glory)
 {
-    player->UpdatePlayerSetting(Setting, 0, Accrue(Get(player), glory));
+    uint32 const total = Accrue(Get(player), glory);
+    player->UpdatePlayerSetting(Setting, 0, total);
     Send(player);
+    ChatHandler(player->GetSession()).SendSysMessage(GainMessage(glory, total));
 }
 
 void Send(Player* player)
@@ -78,7 +103,7 @@ public:
 
     void OnPlayerHonorableKillingBlow(Player* killer, Player*) override
     {
-        Earn(killer, KillingBlowGlory);
+        Earn(killer, KillingBlowBonusGlory);
     }
 };
 
@@ -90,7 +115,7 @@ public:
 
     void OnBattlegroundUpdatePlayerScore(Battleground* bg, Player* player, uint32 type, uint32 value) override
     {
-        uint32 const glory = ObjectiveReward(type, value);
+        uint32 const glory = ObjectiveReward(bg->GetBgTypeID(), type, value);
         if (!glory)
             return;
 
