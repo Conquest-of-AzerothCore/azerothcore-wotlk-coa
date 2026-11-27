@@ -68,7 +68,8 @@ class StarterTemplates(unittest.TestCase):
         self.db.executescript(self.sql)
         added = {entry for entry, in self.db.execute("SELECT entry FROM item_template")}
         expected = {entry for _, entry, _, _, _ in starters}
-        self.assertEqual(added, expected - installed_template_ids())
+        retained = {777989}
+        self.assertEqual(added, (expected | retained) - installed_template_ids())
         for _, entry, _, slot, count in starters:
             if entry not in added:
                 continue
@@ -78,6 +79,22 @@ class StarterTemplates(unittest.TestCase):
             self.assertGreaterEqual(stack, count, entry)
             if slot < 19:
                 self.assertLessEqual(level, 1, entry)
+
+
+class LiveStarterItems(unittest.TestCase):
+    def test_new_custom_characters_do_not_receive_vanity_collection_sync(self):
+        header = (ROOT / "src/server/coa/AscensionCustomClassData.h").read_text(encoding="utf-8")
+        block = header.split("LiveStarterItems =", 1)[1].split("}};", 1)[0]
+        starters = [tuple(map(int, row)) for row in re.findall(
+            r"\{(\d+), (\d+), (\d+), (\d+), (\d+)\}", block,
+        )]
+        self.assertEqual({class_id for class_id, *_ in starters}, set(range(12, 33)))
+        for class_id in range(12, 33):
+            with self.subTest(class_id=class_id):
+                items = {entry for owner, entry, _, _, _ in starters if owner == class_id}
+                self.assertNotIn(777989, items)
+                self.assertIn(6948, items)
+                self.assertIn(117, items)
 
 
 if __name__ == "__main__":
