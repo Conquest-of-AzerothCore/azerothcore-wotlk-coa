@@ -278,6 +278,24 @@ void ApplyContracts(SpellInfo* info)
         info->DurationEntry = sSpellDurationStore.LookupEntry(18);
     if (id == 680600)
         info->Effects[1].BasePoints = 99;
+    if (id == 520152)
+        info->Effects[0].RealPointsPerLevel = 0.0f;
+    if (id == 573067)
+        info->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(10);
+    if (id == 572637)
+        for (uint8 slot = 0; slot < 2; ++slot)
+        {
+            info->Effects[slot].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ALLY);
+            info->Effects[slot].TargetB = SpellImplicitTargetInfo();
+            info->Effects[slot].RadiusEntry = nullptr;
+        }
+    if (id == 805180)
+    {
+        info->Effects[0].BasePoints = 10;
+        info->Effects[0].DieSides = 1;
+        info->Effects[0].RealPointsPerLevel = 0.175f;
+        info->Effects[0].BonusMultiplier = 0.0f;
+    }
     info->_InitializeExplicitTargetMask();
 }
 }

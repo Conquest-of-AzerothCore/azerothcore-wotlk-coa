@@ -118,6 +118,7 @@ POWER_TERM_LABEL = 'power_term_label'
 TRIGGER_WITH_VALUE = 'trigger_with_value'
 TRIGGER_WITH_VALUE_CHECKS = ('effect_value', 'aura_amount')
 PERIODIC_TRIGGER_SPELL_WITH_VALUE = 227
+TRIGGER_SPELL_WITH_VALUE_EFFECT = 142
 CONTRAST_LABEL = 'contrast_label'
 BASE_ROLL_READ_STATUS = 'read_status'
 BASE_ROLL_REFUSED = f'; {BASE_ROLL_ONLY} not accepted: '
@@ -727,17 +728,39 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
                        explanation=f'{token.text}: {terms.reason}', detail={BONUS_DATA: terms.reason})
     if terms:
         reads = [read + terms.total for read in reads]
+    trigger_detail = None
+    trigger_note = ''
+    if (terms is None and expectation.check == 'effect_value'
+            and tooltips.spell_field(spell_id, f'Effect[{effect}]') == TRIGGER_SPELL_WITH_VALUE_EFFECT):
+        unpowered_caster = unpowered(tokens.caster)
+        unpowered_values = []
+        for roll in rolls:
+            unpowered_readout = tooltips.read(expectation.rank_id, unpowered_caster, (spell_id, effect, roll))
+            if index >= len(unpowered_readout.values) or unpowered_readout.values[index].text != token.text:
+                unpowered_values = []
+                break
+            unpowered_val = undivided(unpowered_readout.values[index])
+            unpowered_values.append(unpowered_val * plain_sign(roll) if plain else unpowered_val)
+        if unpowered_values and abs(fmean(values) - fmean(unpowered_values)) > FLOAT_EPSILON:
+            full_mean, judged_mean = fmean(values), fmean(unpowered_values)
+            power_term = full_mean - judged_mean
+            trigger_detail = {'full_value': full_mean, 'power_term': power_term, 'judged_amount': judged_mean}
+            trigger_note = (f' on an effect {TRIGGER_SPELL_WITH_VALUE_EFFECT} carrier (minus power term '
+                            f'{power_term:g}; SpellEffects.cpp:1862-1868 hands BASE_POINT0 to its triggered spell)')
+            values = unpowered_values
     truncated_terms = terms.truncated if terms else 0
     allowance = TRUNCATED_READ * (1 + truncated_terms)
     mean, expected, sigma = fmean(reads), fmean(values), pstdev(values)
     needed = mean_samples(values)
     if needed is not None and placeholder_sample_count(tooltips, spell_id, effect):
         needed = min(needed, planned_reads(expectation, tokens, tooltips, index, spell_id, effect, rolls))
-    roll = (f'{token.text} over the roll {rolls.start}..{rolls.stop - 1} of effect {effect}: {min(values):g} to '
-            f'{max(values):g}{block_note}, uniform mean {expected:.3f} sigma {sigma:.3f}; {len(reads)} '
-            f'spell_effect_value reads '
+    roll = (f'{token.text}{trigger_note} over the roll {rolls.start}..{rolls.stop - 1} of effect {effect}: '
+            f'{min(values):g} to {max(values):g}{block_note}, uniform mean {expected:.3f} sigma {sigma:.3f}; '
+            f'{len(reads)} spell_effect_value reads '
             f'(each one SpellEffectInfo::CalcValue roll{"; " + terms.text() if terms else ""}), mean {mean:.3f}')
-    detail = {'reads': len(reads), 'reads_needed': needed, **({BONUS_DATA: terms.detail()} if terms else {})}
+    detail = {'reads': len(reads), 'reads_needed': needed,
+              **({BONUS_DATA: terms.detail()} if terms else {}),
+              **({TRIGGER_WITH_VALUE: trigger_detail} if trigger_detail is not None else {})}
     if needed is None:
         return replace(base, status=MEASURED, measured=mean, expected=expected, detail=detail,
                        explanation=f'{roll}; a mean of 0 has no half-width of {MEAN_HALF_WIDTH:.0%}')
@@ -1021,9 +1044,12 @@ def unpowered(caster: CasterStats) -> CasterStats:
 def judge_trigger_with_value(base: Verdict, expectation: Expectation, measured: float, tokens: Tokens,
                              tooltips: TooltipSource, index: int, effect: tuple[int, int]) -> Verdict | None:
     spell_id, effect_index = effect
-    if (expectation.check not in TRIGGER_WITH_VALUE_CHECKS
-            or tooltips.spell_field(spell_id, f'EffectApplyAuraName[{effect_index}]')
-            != PERIODIC_TRIGGER_SPELL_WITH_VALUE):
+    is_aura = (expectation.check in TRIGGER_WITH_VALUE_CHECKS
+               and tooltips.spell_field(spell_id, f'EffectApplyAuraName[{effect_index}]')
+               == PERIODIC_TRIGGER_SPELL_WITH_VALUE)
+    is_effect = (expectation.check == 'effect_value'
+                 and tooltips.spell_field(spell_id, f'Effect[{effect_index}]') == TRIGGER_SPELL_WITH_VALUE_EFFECT)
+    if not is_aura and not is_effect:
         return None
     token = tokens.readout.values[index]
     unpowered_value = tooltips.read(expectation.rank_id, unpowered(tokens.caster)).values[index]
@@ -1035,10 +1061,13 @@ def judge_trigger_with_value(base: Verdict, expectation: Expectation, measured: 
     term = full - judged
     if term == 0:
         return None
-    why = (f'{token.text} on an aura {PERIODIC_TRIGGER_SPELL_WITH_VALUE} carrier: full value {full:g} at the '
+    carrier_text = (f'an aura {PERIODIC_TRIGGER_SPELL_WITH_VALUE} carrier' if is_aura
+                    else f'an effect {TRIGGER_SPELL_WITH_VALUE_EFFECT} carrier')
+    source_ref = 'SpellAuraEffects.cpp:6566' if is_aura else 'SpellEffects.cpp:1862-1868'
+    why = (f'{token.text} on {carrier_text}: full value {full:g} at the '
            f'measured stats minus the power term {term:g} (attack, ranged attack and spell power read as 0) = '
            f'judged amount {judged:g}; the amount is the BASE_POINT0 that spell {spell_id} effect {effect_index} '
-           f'hands its triggered spell (SpellAuraEffects.cpp:6566), whose hit labels carry the power term (D-292)')
+           f'hands its triggered spell ({source_ref}), whose hit labels carry the power term (D-292)')
     verdict = deterministic(base, measured, measured, judged, why)
     return replace(verdict, detail={**(verdict.detail or {}), TRIGGER_WITH_VALUE: {
         'full_value': full, 'power_term': term, 'judged_amount': judged}})

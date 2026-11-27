@@ -59,6 +59,7 @@ void Summon(Player* player, uint32 entry, Position const& position, uint32 durat
         Wander(summon);
     if (entry == 50263)
     {
+        summon->SetPhaseMask(player->GetPhaseMask(), true);
         summon->SetLevel(player->GetLevel());
         summon->SetMaxHealth(std::min<uint64>(UINT32_MAX, uint64(player->GetMaxHealth()) * 10));
         summon->SetHealth(summon->GetMaxHealth());

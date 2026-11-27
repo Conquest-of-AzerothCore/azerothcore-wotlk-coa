@@ -26,6 +26,7 @@ RAID_TARGETS = frozenset({57})
 RESURRECT_EFFECTS = frozenset({18, 113})
 ALLY = 'ally'
 ALLY_CASTS_KEY = 'value_ally_casts'
+VALUE_REAGENTS_KEY = 'value_reagents'
 HONOUR_MIN_RANGE_KEY = 'honour_min_range'
 BASE_MANA_POWER_COST_KEY = 'base_mana_power_cost'
 BASE_HEALTH_KEY = 'base_health'
@@ -333,6 +334,32 @@ def cast_aura_steps(class_file: dict, spell: int) -> list[dict]:
                 aura_spell, stacks = cast_aura_entry(aura)
                 steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': aura_spell, 'stacks': stacks})
     return steps
+
+
+def value_reagent_entry(class_file: dict, rank_id: int) -> tuple[tuple[tuple[int, int], ...], str | None]:
+    entries = [entry for entry in class_file.get(VALUE_REAGENTS_KEY, []) if entry['spell'] == rank_id]
+    if not entries:
+        return (), None
+    if len(entries) > 1:
+        raise ValueError(f'{VALUE_REAGENTS_KEY} lists {rank_id} more than once')
+    entry = entries[0]
+    extra = set(entry) - {'spell', 'items', 'destination_unit', 'reason'}
+    raw_items = entry.get('items', [])
+    destination = entry.get('destination_unit')
+    if extra or not isinstance(raw_items, list) or destination not in (None, CASTER):
+        raise ValueError(f'{VALUE_REAGENTS_KEY} entry for {rank_id} takes spell, items, and optional destination_unit '
+                         f'{CASTER!r}, not {entry!r}')
+    items = []
+    for raw in raw_items:
+        if (not isinstance(raw, list) or len(raw) != 2
+                or type(raw[0]) is not int or raw[0] <= 0
+                or type(raw[1]) is not int or raw[1] <= 0):
+            raise ValueError(f'{VALUE_REAGENTS_KEY} item for {rank_id} must be [positive_item, positive_count], '
+                             f'not {raw!r}')
+        items.append((raw[0], raw[1]))
+    if not items and destination is None:
+        raise ValueError(f'{VALUE_REAGENTS_KEY} entry for {rank_id} must name items or destination_unit')
+    return tuple(items), destination
 
 
 def value_ally_cast(class_file: dict, rank_id: int) -> tuple[int, ...] | None:
@@ -910,6 +937,11 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             cast_steps += ally_setup_steps(records, ally_cast)
             cast['target'] = ALLY
         cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id)
+        reagent_items, destination_unit = value_reagent_entry(class_file, rank_id)
+        for item_id, count in reagent_items:
+            cast_steps.append({'action': 'add_item', 'actor': CASTER, 'item': item_id, 'count': count})
+        if destination_unit is not None:
+            cast['destination_unit'] = destination_unit
         if summon_reads:
             cast_steps += summon_aura_setup_steps(records, summon_carrier)
         cast_steps.append(cast)

@@ -257,6 +257,12 @@ public:
         if (!player || !target || miss != SPELL_MISS_NONE || info->SpellFamilyName != 31)
             return;
         uint32 id = info->Id;
+        if (id == 500723 && target->CanHaveThreatList() && !target->IsFriendlyTo(player))
+        {
+            if (target->GetThreatMgr().GetThreat(player) <= 0.0f)
+                target->GetThreatMgr().AddThreat(player, 1.0f, info, true, true);
+            target->GetThreatMgr().TauntUpdate();
+        }
         if (id == 500862 && healing)
         {
             bool old = State(player).event;
