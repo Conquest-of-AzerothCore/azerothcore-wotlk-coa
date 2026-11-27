@@ -15115,13 +15115,27 @@
               "spell": 504272
             },
             "before_expected": 0,
-            "expected": 1,
+            "expected": 0,
             "tolerance": 0,
-            "source": "Confirms Crimson Tide 504134 hit only dummy (at 8 yd, inside 10 yd radius) and not area1/area2 (at 15.5/16.5 yd, outside 10 + 1.275 + 2.66 = 13.935 yd edge), granting exactly 1 stack of 504272 before the Bloodbolt read"
+            "source": "Confirms Bloodbolt 578305 consumes Sovereignty 504272 on cast (AscensionBloodmageVitality.cpp:118-119) after applying the +1 jump target."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 504134,
+              "target": "area1"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Crimson Tide 504134 hit only dummy (8 yd) and not area1/area2 (15.5/16.5 yd, outside 13.935 yd edge), granting exactly 1 stack of 504272 before Bloodbolt."
           }
         ]
       },
-      "observe_source": "504272 Sovereignty Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 17 SPELLMOD_JUMP_TARGETS BasePoints 0 + DieSides 1 = +1 per stack on Bloodbolt 578305 (EffectChainTarget 1, DmgClass MAGIC -> 10 yd jump radius Spell.cpp:2228-2231). dummy at 8 yd is inside Crimson Tide 504134's 10 yd radius while area1 (15.5 yd, 7.5 yd from dummy) and area2 (16.5 yd, 8.5 yd from dummy) are outside 504134's 13.935 yd edge (10 + 1.275 reach + 2.66 leeway) yet inside Bloodbolt's 10 yd chain radius. After 1 Crimson Tide tick on dummy (3500 ms -> 1 stack of 504272), Bloodbolt at dummy hits area1 0 times before 806049 (control) and 1 time after 806049, while headroom area2 stays at 0. Reference search 2026-11-26: coa-history 504272: 914 applied; bindmysoul 806049 matches verbatim."
+      "observe_source": "504272 Sovereignty Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 17 SPELLMOD_JUMP_TARGETS BasePoints 0 + DieSides 1 = +1 per stack on Bloodbolt 578305 (EffectChainTarget 1, DmgClass MAGIC -> 10 yd jump radius Spell.cpp:2228-2231). dummy at 8 yd is inside Crimson Tide 504134's 10 yd radius while area1 (15.5 yd, 7.5 yd from dummy) and area2 (16.5 yd, 8.5 yd from dummy) are outside 504134's 13.935 yd edge (10 + 1.275 reach + 2.66 leeway) yet inside Bloodbolt's 10 yd chain radius. After 1 Crimson Tide tick on dummy (3500 ms -> 1 stack of 504272), Bloodbolt at dummy hits area1 0 times before 806049 (control) and 1 time after 806049, while headroom area2 stays at 0 and Bloodbolt consumes 504272 on cast (AscensionBloodmageVitality.cpp:118-119). Reference search 2026-11-26: coa-history 504272: 914 applied; bindmysoul 806049 matches verbatim."
     },
     {
       "spell": 806049,
@@ -17488,17 +17502,6 @@
       "gate_spell": 681077,
       "target": "caster",
       "measure_actor": "caster",
-      "corpse": {
-        "entry": 6,
-        "health": 100,
-        "distance": 5
-      },
-      "setup_casts": [
-        92559
-      ],
-      "setup_target": "corpse",
-      "setup_only_after": true,
-      "setup_wait_ms": 1500,
       "ally_arm": {
         "allies": 1,
         "ally_health": [
@@ -17517,7 +17520,7 @@
       "wait_ms": 6000,
       "expire_ms": 5600,
       "void_on_cast_failure": true,
-      "observe_source": "Truthful test of Blood Feast 706605 conditional tooltip clause '$?s681077[, and then causes you to burst, healing party and raid members within $520312a1 yds for ${$520312m1+$520312ppl1+$SP*0.7525}][]' (/srv/coa/server-data/dbc Spell.dbc). Learns Arterial Bind 681077 (gate_spell), groups an injured ally (2000/20000 HP) beside the caster, drains a nearby corpse for the full 5000 ms channel (wait_ms 6000), and reads spell_heal_count of Life's Essence 520312 on ally (expected 1). Because 520312 has zero references in src/, this check is expected to alert truthfully at 0 rather than hiding the missing server implementation. Reference search 2026-11-26: see mortal_form."
+      "observe_source": "Checks Blood Feast 706605 conditional tooltip clause '$?s681077[, and then causes you to burst, healing party and raid members within $520312a1 yds for ${$520312m1+$520312ppl1+$SP*0.7525}][]' (/srv/coa/server-data/dbc Spell.dbc). With default between-phase gating on Arterial Bind 681077 and an injured ally (2000/20000 HP) beside the caster, channels 706605 for the full 5000 ms (wait_ms 6000) and reads spell_heal_count of Life's Essence 520312 on ally (0 before 681077 is learned, 1 after; AscensionBloodmageTalents.cpp:2007-2034, Bloodmage ADR 0023). Reference search 2026-11-26: see mortal_form."
     },
     {
       "spell": 706605,
@@ -24260,14 +24263,14 @@
         "target": "dummy",
         "critical": false
       },
-      "before_expected": 685,
-      "expected": 935,
-      "expected_gain": 250,
+      "before_expected": 667,
+      "expected": 1602,
+      "expected_gain": 935,
       "tolerance": 25,
-      "wait_ms": 500,
+      "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Owner ruling Q-bm-15 / O-11 ('specify_rate' 0.25, Bloodmage ADR 0008): with fixture 18062 holding CR_DODGE = 1000 in both arms (985345 100% ArP, 984948 hit, 64481 -100% crit), learning 578120 adds +250 damage to Bloodfang Bite 572551 (685 -> 935 +- 25)."
+      "observe_source": "Owner ruling Q-bm-15 / O-11 ('specify_rate' 0.25, Bloodmage ADR 0008): with fixture 18062 holding CR_DODGE = 1000 in both arms (985345 100% ArP, 984948 hit, 64481 -100% crit), cumulative spell_damage_total reads >= 667 before (base roll [667, 702]) and gains 935 +- 25 after learning 578120 ([917, 952] = [667..702] + 250)."
     },
     {
       "spell": 578120,
@@ -24349,14 +24352,14 @@
         "target": "dummy",
         "school_mask": 1
       },
-      "before_expected": 206,
-      "expected": 456,
-      "expected_gain": 250,
-      "tolerance": 25,
-      "wait_ms": 500,
+      "before_expected": 191,
+      "expected": 647,
+      "expected_gain": 456,
+      "tolerance": 20,
+      "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Owner ruling Q-bm-15 / O-11 ('specify_rate' 0.25, Bloodmage ADR 0008): with fixture 18062 holding CR_DODGE = 1000 in both arms (985345 100% ArP, 984948 hit, 64481 -100% crit), learning 578120 adds +250 damage to Claw Sweep 500444 (unarmored 206 -> 456 +- 25)."
+      "observe_source": "Owner ruling Q-bm-15 / O-11 ('specify_rate' 0.25, Bloodmage ADR 0008): with fixture 18062 holding CR_DODGE = 1000 in both arms (985345 100% ArP, 984948 hit, 64481 -100% crit), cumulative spell_damage_total reads >= 191 before (unarmored roll [191, 220]) and gains 456 +- 20 after learning 578120 ([441, 470] = [191..220] + 250)."
     },
     {
       "spell": 578120,
@@ -24434,14 +24437,14 @@
         "target": "dummy",
         "school_mask": 32
       },
-      "before_expected": 381,
-      "expected": 631,
-      "expected_gain": 250,
-      "tolerance": 25,
+      "before_expected": 375,
+      "expected": 1006,
+      "expected_gain": 631,
+      "tolerance": 15,
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Owner ruling Q-bm-15 / O-11 ('specify_rate' 0.25, Bloodmage ADR 0008): with fixture 18062 holding CR_DODGE = 1000 in both arms (823764 spellpen, 16255 -100% crit), learning 578120 adds +250 Shadow damage to Bloodbolt 578305 (381 -> 631 +- 25)."
+      "observe_source": "Owner ruling Q-bm-15 / O-11 ('specify_rate' 0.25, Bloodmage ADR 0008): with fixture 18062 holding CR_DODGE = 1000 in both arms (823764 spellpen, 16255 -100% crit), cumulative spell_damage_total reads >= 375 before ([375, 387]) and gains 631 +- 15 Shadow damage after learning 578120 ([625, 637] = [375..387] + 250)."
     },
     {
       "spell": 560479,
@@ -46467,10 +46470,10 @@
               "spell": 532125,
               "caster": "caster"
             },
-            "before_expected": 0,
+            "before_expected": 1,
             "expected": 1,
             "tolerance": 0,
-            "source": "Verifies Sated 532125 precondition fixture is absent in control (0) and active in treatment (1)"
+            "source": "Verifies Phase 1 Fleshcraft applies Sated 532125 (Q-bm-22) and Sated stays active to block the Phase 2 recast."
           }
         ]
       },
@@ -46485,7 +46488,7 @@
       "tolerance": 0,
       "wait_ms": 1000,
       "expire_ms": 500,
-      "observe_source": "G-3 alert reproduction: embedded @s:532125:0@ Sated tooltip states 'Cannot be affected by Fleshcraft for $d.' (DurationIndex 25 = 180000 ms, Spell.dbc). Control (before, no Sated): 801952 heals caster for 5000 (50% of 10000). Treatment (after, 532125 Sated fixture verified active by ally_arm): expects 801952 to be blocked (expected_gain 0, total 5000). Currently no C++/DBC check blocks 801952 on a Sated target -> heals 5000 again (gain 5000 vs 0), producing a clean alert. Reference search 2026-11-26: coa-history 532125: 40 applies in 20 logs; video t=7:20 verbatim."
+      "observe_source": "Q-bm-22 / O-10: embedded @s:532125:0@ Sated tooltip states 'Cannot be affected by Fleshcraft for $d.' (DurationIndex 25 = 180000 ms, Spell.dbc). Control (before) heals caster for 5000 (50% of 10000) and applies Sated 532125 on hit (AscensionBloodmageVitality.cpp:377-379); treatment (after, 532125 confirmed active by ally_arm) blocks the Fleshcraft 801952 recast via ExcludeTargetAuraSpell = 532125 (AscensionBloodmageVitality.cpp:67-76, expected_gain 0, total 5000). Reference search 2026-11-26: coa-history 532125: 40 applies in 20 logs; video t=7:20 verbatim."
     },
     {
       "spell": 803585,
@@ -48613,7 +48616,7 @@
     },
     {
       "spell": 704654,
-      "name": "Ultra Instinct (2nd proc refreshes to 10 sec instead of cutting to 9 sec)",
+      "name": "Ultra Instinct (2nd proc at +1600 ms cuts remaining duration by 1 sec to 7.4 sec without refreshing)",
       "kind": "metric_delta",
       "variant": "duration_cut_alert",
       "label_suffix": "duration_cut_alert",
@@ -48651,21 +48654,21 @@
       "before_expected": 0,
       "expected": 1,
       "after_expiry_expected": 0,
-      "wait_ms": 8300,
-      "expiry_wait_ms": 1400,
+      "wait_ms": 6900,
+      "expiry_wait_ms": 900,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          8150,
-          8850
+          6700,
+          7250
         ],
         "expired": [
-          9150,
-          9850
+          7600,
+          8150
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Owner ruling Q-bm-8 (Bloodmage ADR 0011): Ultra Instinct cuts remaining duration by 1 s per critical strike without refreshing."
+      "observe_source": "Owner ruling Q-bm-8 (Bloodmage ADR 0011): 1st crit at t=0 applies 504166 (10000 ms); 2nd crit at +1600 ms cuts remaining 8400 ms by 1000 ms to 7400 ms without refreshing (AscensionBloodmageTalents.cpp:1853-1872). Reading 1 at 6900 ms ([6700, 7250] ms after 2nd cast) excludes a -2s cut (6400 ms), and reading 0 at 7800 ms ([7600, 8150] ms after 2nd cast) excludes no cut (8400 ms) and refresh (9000/10000 ms)."
     },
     {
       "spell": 704654,
@@ -48674,28 +48677,26 @@
       "variant": "max_stacks",
       "label_suffix": "max_stacks",
       "quote": "stacking up to $504166u times.",
-      "trigger_spell": 578305,
+      "trigger_spell": 572907,
       "gate_spell": 704654,
-      "setup_casts": [
-        572907,
-        572907,
-        572907,
-        572907,
-        572907,
-        572907,
-        572907,
-        572907,
-        572907,
-        572907
-      ],
-      "setup_wait_ms": 1600,
       "target": "dummy",
+      "dummy_distance": 2.0,
+      "area_dummies": [
+        2.0,
+        2.5,
+        3.0,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0
+      ],
       "measure_actor": "caster",
       "caster_health": [
         10000,
         10000
       ],
-      "cast_power": 1000,
       "force_crit": "spell",
       "phase_auras": [
         [
@@ -48711,10 +48712,10 @@
       },
       "before_expected": 0,
       "expected": 10,
-      "wait_ms": 500,
-      "expire_ms": 12000,
+      "wait_ms": 200,
+      "expire_ms": 2000,
       "void_on_cast_failure": true,
-      "observe_source": "504166 StackAmount 10 ($504166u = 10; Spell.dbc). Drives 11 forced-spell-crit direct casts (10x Sanguine Rupture 572907 at 1600 ms GCD + Bloodbolt 578305): reads aura_stacks of 504166 = 0 before learning 704654 (control) and 10 after (exact cap, excluding 11 or early expiry). Reference search 2026-11-26: see crit_chance_one."
+      "observe_source": "504166 StackAmount 10 ($504166u = 10; Spell.dbc). Single forced-spell-crit cast of Sanguine Rupture 572907 strikes dummy (2.0 yd) and 9 area_dummies (2.0..6.0 yd inside 8 yd radius), delivering 10 simultaneous ability crits: 1st crit applies 504166 (10000 ms) and crits 2..10 stack it to 10 while cutting -9000 ms (leaving 1000 ms remaining; read at wait_ms 200). Control before learning 704654 reads 0; after learning 704654 reads exact 10. Reference search 2026-11-26: see crit_chance_one."
     },
     {
       "spell": 804811,
@@ -49279,7 +49280,7 @@
           "caster"
         ],
         [
-          2132140,
+          33143,
           1,
           "dummy",
           "dummy"
@@ -49310,7 +49311,7 @@
         "least": 1,
         "source": "801958 tooltip '${$802358m1+$802358ppl1+$SP*.4+$AP*.2}': 5 + int32(36*0.65)=23 + int32(223*0.2)=44 = 72 per non-crit Bat Bite 802358 (SchoolMask 33 Shadowstrike bypasses armor)."
       },
-      "observe_source": "Embedded @s:801958:0@ clause ('and strike the target for ${$802358m1+$802358ppl1+$SP*.4+$AP*.2} Physical Damage'): 802358 Bat Bite E0 SCHOOL_DAMAGE BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.65 from BaseLevel 24 to level 60 -> int32(36*0.65) = 23 -> 28; PrepareAscensionBloodmageBatBite (AscensionBloodmageDarkwing.cpp:176-213) adds owner Shadow SP*0.4 + owner AP*0.2 = 0 + int32(223*0.2) = 44 -> 72 per hit (SchoolMask 33 Physical+Shadow uses lower resistance, so dummy Shadow resist 0 -> 0% armor mitigation). attack_swings engages dummy so ShadowBatAI::TryBite (AscensionBloodmageDarkwing.cpp:112-124) sees owner->GetVictim() == dummy within BAT_RETARGET_TIMEOUT (2000 ms); gate_cast casts 801958 between attack phases (triggers_darkwing already proves 804811+572551 casts 801958). same_arm_ratio verifies mean non-crit damage per Bat Bite = 72 +- 3 (excludes 0 and 2x). Paired with bat_bite_damage_sp (+20000 SP). Reference search 2026-11-26: coa-history 802358 301 SPELL_DAMAGE (mean 76.0) in 1 log; coabuildhub 804811 matches formula."
+      "observe_source": "Embedded @s:801958:0@ clause ('and strike the target for ${$802358m1+$802358ppl1+$SP*.4+$AP*.2} Physical Damage'): 802358 Bat Bite E0 SCHOOL_DAMAGE BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.65 from BaseLevel 24 to level 60 -> int32(36*0.65) = 23 -> 28; PrepareAscensionBloodmageBatBite (AscensionBloodmageDarkwing.cpp:176-213) adds owner Shadow SP*0.4 + owner AP*0.2 = 0 + int32(223*0.2) = 44 -> 72 per hit (SchoolMask 33 Physical+Shadow uses lower resistance, so dummy Shadow resist 0 -> 0% armor mitigation). Fixture 33143 (Blessed Resilience, SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE = -1000) prevents Bat Bite crits on dummy; attack_swings engages dummy so ShadowBatAI::TryBite (AscensionBloodmageDarkwing.cpp:112-124) sees owner->GetVictim() == dummy within BAT_RETARGET_TIMEOUT (2000 ms); gate_cast casts 801958 between attack phases (triggers_darkwing already proves 804811+572551 casts 801958). same_arm_ratio verifies mean non-crit damage per Bat Bite = 72 +- 3 (excludes 0 and 2x). Paired with bat_bite_damage_sp (+20000 SP). Reference search 2026-11-26: coa-history 802358 301 SPELL_DAMAGE (mean 76.0) in 1 log; coabuildhub 804811 matches formula."
     },
     {
       "spell": 804811,
@@ -49334,7 +49335,7 @@
           "caster"
         ],
         [
-          2132140,
+          33143,
           1,
           "dummy",
           "dummy"
@@ -49365,7 +49366,7 @@
         "least": 1,
         "source": "801958 tooltip '${$802358m1+$802358ppl1+$SP*.4+$AP*.2}': at +20000 SP, 28 + int32(20000*0.4)=8000 + int32(223*0.2)=44 = 8072 per non-crit Bat Bite 802358 (proves BAT_BITE_SPELL_POWER_COEFFICIENT = 0.4)."
       },
-      "observe_source": "SP scaling companion to bat_bite_damage for 802358 Bat Bite (AscensionBloodmageDarkwing.cpp:35,202 BAT_BITE_SPELL_POWER_COEFFICIENT = 0.4). At +20000 Shadow SP: base 28 + int32(20000*0.4) = 8000 + int32(223*0.2) = 44 -> 8072 per non-crit Bat Bite (delta +8000 over bat_bite_damage proves 0.4 SP coefficient, excluding 0x and 2x). Reference search 2026-11-26: see bat_bite_damage."
+      "observe_source": "SP scaling companion to bat_bite_damage for 802358 Bat Bite (AscensionBloodmageDarkwing.cpp:35,202 BAT_BITE_SPELL_POWER_COEFFICIENT = 0.4). Fixture 33143 (Blessed Resilience, aura 197 = -1000) prevents Bat Bite crits on dummy. At +20000 Shadow SP: base 28 + int32(20000*0.4) = 8000 + int32(223*0.2) = 44 -> 8072 per non-crit Bat Bite (delta +8000 over bat_bite_damage proves 0.4 SP coefficient, excluding 0x and 2x). Reference search 2026-11-26: see bat_bite_damage."
     },
     {
       "spell": 804811,
