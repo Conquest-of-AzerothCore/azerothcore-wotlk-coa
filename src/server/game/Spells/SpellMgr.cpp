@@ -369,6 +369,9 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellInfo const
         spellproto->Effects[EFFECT_0].IsAura(SPELL_AURA_MOD_FEAR))
         return 8 * IN_MILLISECONDS;
 
+    if (spellproto->SpellFamilyName == 25 && spellproto->Id == 560963)
+        return 6 * IN_MILLISECONDS;
+
     // Explicit diminishing duration
     switch (spellproto->SpellFamilyName)
     {

@@ -2499,3 +2499,7 @@ Options with a module:
 - [`uncritical_casts`](metric_delta_options/uncritical_casts.md): the treatment cast repeated, each cast whose
   recorded damage event is critical dropped, the rest judged one by one, below a stated minimum unmeasured (ADR 1288,
   provisional)
+- `single_target` (`target_entry`, `cast_power`, ADR 1328): optional hostile-target mode for `SPELL_ATTR5_LIMIT_N`
+  crowd control; when `target_entry` is set, spawns two hostile creatures (`dummy`, `dummy2`) of that entry at 5 yd
+  instead of two grouped allies, with optional explicit `cast_power` before each cast. Omitting both reproduces the
+  grouped-ally scenario byte-for-byte.

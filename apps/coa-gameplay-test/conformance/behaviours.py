@@ -4087,6 +4087,8 @@ def group_stack_cap_spec(entry: dict) -> GroupStackCapSpec:
 
 SINGLE_TARGET_CAST_WAIT_MS = 300
 SINGLE_TARGET_SECOND_ALLY = 'ally2'
+SINGLE_TARGET_SECOND_DUMMY = 'dummy2'
+SINGLE_TARGET_DUMMY_DISTANCE = 5
 SINGLE_TARGET_GCD_WAIT_MS = 1600
 
 
@@ -4096,6 +4098,8 @@ class SingleTargetSpec:
     name: str
     quote: str
     wait_ms: int = SINGLE_TARGET_CAST_WAIT_MS
+    target_entry: int | None = None
+    cast_power: int | None = None
 
 
 def single_target_label(spec: SingleTargetSpec, moment: str) -> str:
@@ -4108,10 +4112,16 @@ def single_target_scenario(class_file: dict, spec: SingleTargetSpec) -> tuple[di
     class_file = armed_for(class_file, records, spec.spell)
     facts = facts_of(records, spec.spell)
     second_ally = SINGLE_TARGET_SECOND_ALLY
+    hostile = spec.target_entry is not None
+    first_target = TARGET if hostile else ALLY
+    second_target = SINGLE_TARGET_SECOND_DUMMY if hostile else second_ally
 
     def cast_steps(target: str) -> list[dict]:
         steps = []
-        if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+        if spec.cast_power is not None:
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                          'value': spec.cast_power})
+        elif facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
             steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
         steps += required_aura_steps(facts)
@@ -4123,25 +4133,41 @@ def single_target_scenario(class_file: dict, spec: SingleTargetSpec) -> tuple[di
     first_label = single_target_label(spec, 'first_after_first_cast')
     removed_label = single_target_label(spec, 'first_after_second_cast')
     second_label = single_target_label(spec, 'second_after_second_cast')
-    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
-                                      {'action': 'group', 'actor': CASTER, 'target': ALLY},
-                                      {'action': 'group', 'actor': CASTER, 'target': second_ally}]
-    steps += cast_steps(ALLY)
-    steps.append(measurement(first_label, ALLY, 'aura', spell=spec.spell))
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+    if not hostile:
+        steps += [{'action': 'group', 'actor': CASTER, 'target': ALLY},
+                  {'action': 'group', 'actor': CASTER, 'target': second_ally}]
+    steps += cast_steps(first_target)
+    steps.append(measurement(first_label, first_target, 'aura', spell=spec.spell))
     steps.append({'action': 'wait', 'label': 'Global cooldown', 'ms': SINGLE_TARGET_GCD_WAIT_MS})
-    steps += cast_steps(second_ally)
-    steps.append(measurement(removed_label, ALLY, 'aura', spell=spec.spell))
-    steps.append(measurement(second_label, second_ally, 'aura', spell=spec.spell))
-    scenario = {
-        'schema': 1,
-        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour single target',
-        'contract': f'Casts {spec.spell} on a first grouped ally, reads its own aura ({first_label!r}, expected '
-                    f'present), then casts it again on a second grouped ally and reads the first ally\'s aura '
-                    f'again ({removed_label!r}, expected removed) alongside the second ally\'s aura '
-                    f'({second_label!r}, expected present): {spec.quote!r}.',
-        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY},
-                   {**player_fixture(class_file), 'id': second_ally}],
-        'steps': steps}
+    steps += cast_steps(second_target)
+    steps.append(measurement(removed_label, first_target, 'aura', spell=spec.spell))
+    steps.append(measurement(second_label, second_target, 'aura', spell=spec.spell))
+    if hostile:
+        dummy = {'owner': CASTER, 'entry': spec.target_entry, 'level': class_file['level'],
+                 'health': DUMMY_HEALTH, 'distance': SINGLE_TARGET_DUMMY_DISTANCE, 'stationary': True}
+        scenario = {
+            'schema': 1,
+            'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour single target',
+            'contract': f'Casts {spec.spell} on a first hostile creature (entry {spec.target_entry}), reads its own '
+                        f'aura ({first_label!r}, expected present), then casts it again on a second hostile creature '
+                        f'(entry {spec.target_entry}) and reads the first creature\'s aura again ({removed_label!r}, '
+                        f'expected removed) alongside the second creature\'s aura ({second_label!r}, expected '
+                        f'present): {spec.quote!r}.',
+            'players': [player_fixture(class_file)],
+            'creatures': [{**dummy, 'id': TARGET}, {**dummy, 'id': SINGLE_TARGET_SECOND_DUMMY}],
+            'steps': steps}
+    else:
+        scenario = {
+            'schema': 1,
+            'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour single target',
+            'contract': f'Casts {spec.spell} on a first grouped ally, reads its own aura ({first_label!r}, expected '
+                        f'present), then casts it again on a second grouped ally and reads the first ally\'s aura '
+                        f'again ({removed_label!r}, expected removed) alongside the second ally\'s aura '
+                        f'({second_label!r}, expected present): {spec.quote!r}.',
+            'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY},
+                        {**player_fixture(class_file), 'id': second_ally}],
+            'steps': steps}
     label = f'{spec.spell} behaviour_single_target'
     model = {'kind': 'single_target', 'first_label': first_label, 'removed_label': removed_label,
              'second_label': second_label, 'quote': entry.quote}
@@ -4152,7 +4178,8 @@ def single_target_scenario(class_file: dict, spec: SingleTargetSpec) -> tuple[di
 
 def single_target_spec(entry: dict) -> SingleTargetSpec:
     return SingleTargetSpec(entry['spell'], entry['name'], entry['quote'],
-                            entry.get('wait_ms', SINGLE_TARGET_CAST_WAIT_MS))
+                            entry.get('wait_ms', SINGLE_TARGET_CAST_WAIT_MS),
+                            entry.get('target_entry'), entry.get('cast_power'))
 
 
 GROUP_TARGET_FILLERS = ('ally2', 'ally3', 'ally4')

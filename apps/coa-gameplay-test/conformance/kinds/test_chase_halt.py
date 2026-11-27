@@ -76,3 +76,19 @@ class ChaseHaltTests(unittest.TestCase):
         with mock.patch.object(coverage, 'metric_evidence', return_value=without), \
                 self.assertRaises(coverage.EvidenceError):
             coverage.verdict_evidence(found, MOVE_ENTRY['quote'], {})
+
+    def test_zero_ratio_with_target_entry_and_cast_power_proves_a_full_halt(self):
+        entry = {'spell': 560963, 'name': 'Shackle The Unrepentant (unable to move)', 'kind': 'chase_halt',
+                 'label_suffix': 'unable_to_move', 'quote': 'unable to move', 'order': 'move_point', 'move_yd': 12,
+                 'expected_ratio': 0, 'far_yd': 25, 'chaser_yd': 8, 'start_ms': 1600, 'window_ms': 1000,
+                 'target_entry': 201, 'cast_power': 100}
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(19), entry)
+        run.validate(scenario)
+        self.assertEqual([c['entry'] for c in scenario['creatures'][:2]], [201, 201])
+        powers = [step for step in scenario['steps'] if step.get('action') == 'set_power']
+        self.assertEqual([(step['power'], step['value']) for step in powers], [(3, 100)])
+        start, end = (expectation.model['reads'][moment] for moment in ('start', 'end'))
+        values = {**dict(zip(start, (1000.0, 25.0, 17.0))), **dict(zip(end, (2000.0, 25.0, 9.0)))}
+        base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'fake', expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+        self.assertEqual(judge_behaviour(base, FakeRun(values), expectation).status, 'ok')

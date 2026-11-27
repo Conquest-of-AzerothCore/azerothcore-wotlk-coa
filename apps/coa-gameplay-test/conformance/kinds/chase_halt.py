@@ -34,25 +34,29 @@ class ChaseHaltSpec:
     label_suffix: str = 'chase_halt'
     order: str = ATTACK
     move_yd: float = 0.0
+    target_entry: int | None = None
+    cast_power: int | None = None
 
 
 def chase_halt_spec(entry: dict) -> ChaseHaltSpec:
     spec = ChaseHaltSpec(int(entry['spell']), entry['name'], entry['quote'],
                          tuple(int(spell) for spell in entry.get('learn', [])),
                          tuple((int(raw[0]), raw[1], int(raw[2]) if raw[2] is not None else None, int(raw[3]))
-                               for raw in entry['raises']),
+                               for raw in entry.get('raises', [])),
                          int(entry['chased_entry']) if entry.get('chased_entry') is not None else None,
                          float(entry['expected_ratio']), float(entry['far_yd']),
                          float(entry['chaser_yd']), int(entry['start_ms']), int(entry['window_ms']),
                          entry.get('label_suffix', 'chase_halt'), entry.get('order', ATTACK),
-                         float(entry.get('move_yd', 0.0)))
+                         float(entry.get('move_yd', 0.0)),
+                         int(entry['target_entry']) if entry.get('target_entry') is not None else None,
+                         int(entry['cast_power']) if entry.get('cast_power') is not None else None)
     if spec.order not in (ATTACK, MOVE_POINT):
         raise ValueError(f'{spec.spell} chase_halt orders the movers to attack or to move to a point')
     if spec.order == ATTACK and spec.chased_entry is None:
         raise ValueError(f'{spec.spell} chase_halt attack order names the chased creature entry')
     if spec.order == MOVE_POINT and not CHASE_MINIMUM_YD < spec.move_yd < spec.far_yd - spec.chaser_yd:
         raise ValueError(f'{spec.spell} chase_halt point move stays short of the far dummy')
-    if not 0 < spec.expected_ratio < 1 or spec.window_ms < 500 or spec.start_ms < 0:
+    if not 0 <= spec.expected_ratio < 1 or spec.window_ms < 500 or spec.start_ms < 0:
         raise ValueError(f'{spec.spell} chase_halt states a ratio below 1 and a window of at least 500 ms')
     if not DUMMY_DISTANCE < spec.chaser_yd < spec.far_yd - CHASE_MINIMUM_YD:
         raise ValueError(f'{spec.spell} chase_halt places the chaser between the hooked dummy and the far one')
@@ -68,7 +72,8 @@ def chase_label(spec: ChaseHaltSpec, read: str) -> str:
 def chase_halt_scenario(class_file: dict, spec: ChaseHaltSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, spec.expected_ratio)
-    moving = {**creature_fixture(class_file), 'stationary': False}
+    moving = {**creature_fixture(class_file), 'stationary': False,
+              **({'entry': spec.target_entry} if spec.target_entry is not None else {})}
     creatures = [{**moving, 'id': HOOKED, 'distance': DUMMY_DISTANCE},
                  {**moving, 'id': CHASER, 'distance': spec.chaser_yd},
                  {**creature_fixture(class_file), 'id': FAR, 'distance': spec.far_yd}]
@@ -87,7 +92,7 @@ def chase_halt_scenario(class_file: dict, spec: ChaseHaltSpec) -> tuple[dict, li
     if spec.order == ATTACK:
         steps += [{'action': 'attack_owned_creature', 'actor': mover, 'target': CASTER, 'entry': spec.chased_entry}
                   for mover in MOVERS]
-    steps += hit_ratio_cast(records, spec.spell, CASTER, HOOKED)[:-1]
+    steps += hit_ratio_cast(records, spec.spell, CASTER, HOOKED, spec.cast_power)[:-1]
     steps.append({'action': 'wait', 'label': 'chase start', 'ms': spec.start_ms})
     if spec.order == MOVE_POINT:
         steps += [{'action': 'move_point', 'actor': mover, 'dx': spec.move_yd} for mover in MOVERS]
