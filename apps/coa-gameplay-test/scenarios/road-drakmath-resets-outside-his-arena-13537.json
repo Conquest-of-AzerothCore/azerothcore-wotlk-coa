@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Road to De Other Side: Drak'math resets when his target leaves his arena",
+  "contract": "Issue #13537: Drak'math the Sinister King (162715) followed a player out of his arena, because dungeon creatures have no leash and the web doors have no server collision, so he could be kited away. Expected: he resets when he or his target is more than 22 yards from his spawn point (coa_boss_leash with target = 1). The arena walls stand 16 to 20 yards from the middle and the doors 19.5 yards, so a player anywhere in the arena keeps him in combat.",
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8914.0, "y": -133.0, "z": 80.6},
+  "players": [
+    {"id": "p", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000}
+  ],
+  "steps": [
+    {"action": "teleport", "label": "p enters Road to De Other Side in the middle of Drak'math's arena", "actor": "p", "map": 937, "x": 291.025, "y": 152.136, "z": 248.036, "ignore_access": true},
+    {"action": "assert", "label": "SETUP: p is in Road to De Other Side", "actor": "p", "metric": "map_id", "equals": 937, "within_ms": 10000},
+    {"action": "set_health", "actor": "p", "value": 50000000, "maximum": 50000000},
+    {"action": "summon", "label": "Drak'math rises beside p", "actor": "p", "as": "drakmath", "entry": 162715, "distance": 2},
+    {"action": "attack", "actor": "p", "target": "drakmath"},
+    {"action": "assert", "label": "CONTROL: Drak'math is in combat", "actor": "drakmath", "metric": "combat", "equals": 1, "within_ms": 3000},
+    {"action": "relocate", "label": "p steps 15 yards west, still inside the arena", "actor": "p", "dx": -15.0},
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "label": "CONTROL: Drak'math stays in combat while p is inside the arena", "actor": "drakmath", "metric": "combat", "equals": 1},
+    {"action": "relocate", "label": "p runs 16 yards further west, through the web door out of the arena", "actor": "p", "dx": -16.0},
+    {"action": "assert", "label": "DISCRIMINATING: Drak'math resets once his target has left the arena", "actor": "drakmath", "metric": "combat", "equals": 0, "within_ms": 5000},
+    {"action": "assert", "label": "p leaves combat with him", "actor": "p", "metric": "combat", "equals": 0, "within_ms": 5000}
+  ]
+}
