@@ -80,6 +80,12 @@ int main()
     rows.Items.push_back({9000000, 4, 1, uint32(-1), 7, 42, 6, 0});
     rows.ItemRowIndexById.emplace(9000000, 0);
     assert(FindItemRow(rows, 9000000) == rows.Items.front());
+    rows.Items.push_back({10221840, 4, 1, uint32(-1), 7, 145, 9, 0});
+    rows.ItemRowIndexById.emplace(10221840, rows.Items.size() - 1);
+    objects.items.emplace(10221840, ItemTemplate{10221840, 4, 1, -1, 7, 145, 9, 0});
+    DungeonRescale::owned.insert(10221840);
+    auto mythicVariant = FindItemRow(rows, 10221840);
+    assert(mythicVariant && (*mythicVariant)[5] == 145);
     DungeonRescale::owned.insert(10000999);
     assert(!FindItemRow(rows, 10000999));
     ItemScaling::Registry::Instance().items.emplace(27000001,
