@@ -4455,10 +4455,16 @@ void Player::AddEnchantmentDuration(Item* item, EnchantmentSlot slot, uint32 dur
 void Player::ApplyEnchantment(Item* item, bool apply)
 {
     for (uint32 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
-        ApplyEnchantment(item, EnchantmentSlot(slot), apply);
+        ApplyEnchantmentInternal(item, EnchantmentSlot(slot), apply, true, false, false);
 }
 
 void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur, bool ignore_condition)
+{
+    ApplyEnchantmentInternal(item, slot, apply, apply_dur, ignore_condition, true);
+}
+
+void Player::ApplyEnchantmentInternal(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur,
+    bool ignore_condition, bool notify)
 {
     if (!item || !item->IsEquipped())
         return;
@@ -4569,6 +4575,8 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                         }
                     }
 
+                    if (enchant_spell_id == SPELL_SCHOOL_NORMAL)
+                        m_ascensionGearBonusArmor += apply ? int32(enchant_amount) : -int32(enchant_amount);
                     HandleStatFlatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + enchant_spell_id), TOTAL_VALUE, float(enchant_amount), apply);
                     break;
                 case ITEM_ENCHANTMENT_TYPE_STAT:
@@ -4600,6 +4608,7 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             break;
                         case ITEM_MOD_HEALTH:
                             LOG_DEBUG("entities.player.items", "+ {} HEALTH", enchant_amount);
+                            m_ascensionGearHealth += apply ? int32(enchant_amount) : -int32(enchant_amount);
                             HandleStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(enchant_amount), apply);
                             break;
                         case ITEM_MOD_AGILITY:
@@ -4624,6 +4633,7 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             break;
                         case ITEM_MOD_STAMINA:
                             LOG_DEBUG("entities.player.items", "+ {} STAMINA", enchant_amount);
+                            m_ascensionGearHealth += apply ? int32(enchant_amount) * 10 : -int32(enchant_amount) * 10;
                             HandleStatFlatModifier(UNIT_MOD_STAT_STAMINA, TOTAL_VALUE, float(enchant_amount), apply);
                             UpdateStatBuffMod(STAT_STAMINA);
                             break;
@@ -4828,6 +4838,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
             AddEnchantmentDuration(item, slot, 0);
         }
     }
+
+    if (notify && !item->IsBroken())
+        sScriptMgr->OnPlayerAfterApplyEnchantment(this, item, slot, apply);
 }
 
 void Player::UpdateSkillEnchantments(uint16 skill_id, uint16 curr_value, uint16 new_value)

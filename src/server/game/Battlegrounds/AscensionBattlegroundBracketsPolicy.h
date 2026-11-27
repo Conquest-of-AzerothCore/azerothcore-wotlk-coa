@@ -30,6 +30,22 @@ namespace AscensionBattlegroundBracketsPolicy
         std::uint32_t maxLevel;
     };
 
+    enum class ArmorTier : std::uint8_t
+    {
+        Cloth = 0,
+        Leather = 1,
+        Mail = 2,
+        Plate = 3
+    };
+
+    struct GearValues
+    {
+        float health = 0.0f;
+        float armor = 0.0f;
+        float shieldArmor = 0.0f;
+        bool hasShield = false;
+    };
+
     struct LevelValues
     {
         std::uint32_t health;
@@ -40,10 +56,11 @@ namespace AscensionBattlegroundBracketsPolicy
     struct Lift
     {
         float health = 0.0f;
+        float armor = 0.0f;
 
         bool Empty() const
         {
-            return health == 0.0f;
+            return health == 0.0f && armor == 0.0f;
         }
     };
 
@@ -170,6 +187,96 @@ namespace AscensionBattlegroundBracketsPolicy
     inline float PlayerOutputHealth(LevelValues const& values)
     {
         return static_cast<float>(values.health) + PlayerStaminaHealth(values.stats[2]);
+    }
+
+    inline constexpr std::array<std::uint32_t, 12> GearAnchorLevels = {
+        10, 15, 20, 25, 29, 35, 40, 45, 46, 49, 55, 59
+    };
+
+    inline float InterpolateLevelTable(std::uint32_t level, std::array<float, 12> const& values)
+    {
+        if (level <= GearAnchorLevels.front())
+            return values.front();
+        if (level >= GearAnchorLevels.back())
+            return values.back();
+
+        for (std::size_t index = 1; index < GearAnchorLevels.size(); ++index)
+        {
+            if (level <= GearAnchorLevels[index])
+            {
+                std::uint32_t const lowLevel = GearAnchorLevels[index - 1];
+                std::uint32_t const highLevel = GearAnchorLevels[index];
+                float const fraction = static_cast<float>(level - lowLevel) /
+                    static_cast<float>(highLevel - lowLevel);
+                return values[index - 1] + (values[index] - values[index - 1]) * fraction;
+            }
+        }
+        return values.back();
+    }
+
+    inline float GearHealthBudget(std::uint32_t level)
+    {
+        static constexpr std::array<float, 12> Values = {
+            140.0f, 185.0f, 240.0f, 305.0f, 365.0f, 460.0f, 545.0f, 650.0f, 665.0f, 705.0f, 820.0f, 900.0f
+        };
+        return InterpolateLevelTable(level, Values);
+    }
+
+    inline float GearArmorBudget(ArmorTier tier, std::uint32_t level, bool rebornArmor)
+    {
+        static constexpr std::array<std::array<float, 12>, 4> RebornValues = {{
+            {  98.0f, 130.0f, 162.0f, 195.0f,  221.0f,  260.0f,  291.0f,  321.0f,  327.0f,  344.0f,  376.0f,  394.0f },
+            { 192.0f, 250.0f, 310.0f, 375.0f,  422.0f,  496.0f,  556.0f,  613.0f,  624.0f,  659.0f,  718.0f,  757.0f },
+            { 386.0f, 505.0f, 625.0f, 751.0f,  852.0f,  999.0f, 1121.0f, 1235.0f, 1267.0f, 1362.0f, 1490.0f, 1569.0f },
+            { 496.0f, 638.0f, 780.0f, 929.0f, 1046.0f, 1220.0f, 1367.0f, 1512.0f, 2258.0f, 2397.0f, 2649.0f, 2798.0f }
+        }};
+        static constexpr std::array<std::array<float, 12>, 4> StockValues = {{
+            { 460.0f, 518.0f, 583.0f, 657.0f, 722.0f, 832.0f, 938.0f, 1055.0f, 1081.0f, 1160.0f, 1338.0f, 1471.0f },
+            { 615.0f, 693.0f, 780.0f, 878.0f, 966.0f, 1114.0f, 1254.0f, 1412.0f, 1447.0f, 1552.0f, 1789.0f, 1967.0f },
+            { 706.0f, 794.0f, 894.0f, 1007.0f, 1107.0f, 1277.0f, 1437.0f, 1618.0f, 1658.0f, 1779.0f, 2051.0f, 2255.0f },
+            { 793.0f, 893.0f, 1006.0f, 1132.0f, 1245.0f, 1435.0f, 1616.0f, 1819.0f, 1864.0f, 2000.0f, 2306.0f, 2536.0f }
+        }};
+        std::size_t const index = std::min<std::size_t>(static_cast<std::size_t>(tier), 3);
+        return InterpolateLevelTable(level, (rebornArmor ? RebornValues : StockValues)[index]);
+    }
+
+    inline float GearShieldArmorBudget(std::uint32_t level, bool rebornArmor)
+    {
+        static constexpr std::array<float, 12> RebornValues = {
+            130.0f, 231.0f, 364.0f, 520.0f, 644.0f, 833.0f, 985.0f, 1132.0f, 1160.0f, 1244.0f, 1408.0f, 1513.0f
+        };
+        static constexpr std::array<float, 12> StockValues = {
+            326.0f, 367.0f, 414.0f, 466.0f, 512.0f, 590.0f, 665.0f,  748.0f,  767.0f,  823.0f,  948.0f, 1043.0f
+        };
+        return InterpolateLevelTable(level, rebornArmor ? RebornValues : StockValues);
+    }
+
+    inline float GearCatchUpAmount(float ownBudget, float targetBudget, float currentGear, float scale)
+    {
+        if (scale <= 0.0f)
+            return 0.0f;
+        float const scaledOwn = ownBudget * scale;
+        float const scaledTarget = targetBudget * scale;
+        float const floorGap = Gain(std::max(currentGear, 0.0f), scaledTarget);
+        float const levelGap = Gain(scaledOwn, scaledTarget);
+        return std::round(std::min(levelGap, floorGap));
+    }
+
+    inline Lift PlayerGearLift(std::uint32_t ownLevel, std::uint32_t targetLevel, ArmorTier ownTier,
+        ArmorTier targetTier, bool rebornArmor, GearValues const& gear, float scale = 1.0f)
+    {
+        Lift lift;
+        if (targetLevel <= ownLevel || scale <= 0.0f)
+            return lift;
+
+        lift.health = GearCatchUpAmount(GearHealthBudget(ownLevel), GearHealthBudget(targetLevel),
+            gear.health, scale);
+        lift.armor = GearCatchUpAmount(GearArmorBudget(ownTier, ownLevel, rebornArmor),
+            GearArmorBudget(targetTier, targetLevel, rebornArmor), gear.armor, scale);
+        if (gear.hasShield)
+            lift.armor += GearCatchUpAmount(GearShieldArmorBudget(ownLevel, rebornArmor),
+                GearShieldArmorBudget(targetLevel, rebornArmor), gear.shieldArmor, scale);
+        return lift;
     }
 
     inline Lift LiftBetween(LevelValues const& own, LevelValues const& target)

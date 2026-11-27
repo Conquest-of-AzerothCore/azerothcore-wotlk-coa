@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "A combat pet in a widened battleground bracket gains its own level-stat difference",
-  "contract": "A level 12 Human Warlock with an Imp (416) who enters a Warsong Gulch of the 10-29 bracket gets a health-only lift applied directly to maximum health (UNIT_MOD_HEALTH), with no Stamina lift on either the owner or the pet. The Warlock gains the level 29 minus level 12 player_class_stats base health plus Stamina health directly on maximum health (+333 = 223 base health + 11 Stamina x 10); Stamina and mana are not lifted. The Imp gains only the difference of its own pet_levelstats health rows (+407 = 591 - 184) and zero Stamina gain (neither lifted nor inherited from the owner). Its Strength, Agility, Stamina and mana are not lifted. Output ratios are the lifted to own health: the Imp 591 / 184 = 3.21196 from pet_levelstats rows 416 at levels 29 and 12, and the Warlock (128 + 20 + 10 x 7 = 218 at level 12, 351 + 20 + 10 x 18 = 551 at level 29 from player_class_stats, Human race rows zero) 551 / 218 = 2.52752. A Target Dummy (4071, summon properties 61, creature 2673) the Warlock summons inside is its guardian and reports the Warlock's ratio. A level 29 Orc Warrior completes the faction pairing. Leaving through the leave packet resummons the Imp without the lift.",
+  "contract": "A level 12 Human Warlock with an Imp (416) who enters a Warsong Gulch of the 10-29 bracket gets a base health plus gear health lift (+207) applied directly to maximum health (UNIT_MOD_HEALTH), with no Stamina lift on either the owner or the pet. The Warlock gains the level 29 minus level 12 player_class_stats base health plus Stamina health plus 207 gear health directly on maximum health (+540 = 223 base health + 11 Stamina x 10 + 207 gear health); Stamina and mana are not lifted. The Imp gains only the difference of its own pet_levelstats health rows (+407 = 591 - 184) and zero Stamina gain (neither lifted nor inherited from the owner). Its Strength, Agility, Stamina and mana are not lifted. Output ratios are the lifted to own bare health: the Imp 591 / 184 = 3.21196 from pet_levelstats rows 416 at levels 29 and 12, and the Warlock (128 + 20 + 10 x 7 = 218 at level 12, 351 + 20 + 10 x 18 = 551 at level 29 from player_class_stats, Human race rows zero) 551 / 218 = 2.52752. A Target Dummy (4071, summon properties 61, creature 2673) the Warlock summons inside is its guardian and reports the Warlock's ratio. A level 29 Orc Warrior completes the faction pairing. Leaving through the leave packet resummons the Imp without the lift.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -229,11 +229,11 @@
     },
     {
       "action": "assert",
-      "label": "Warlock maximum health rises by base health +223 and 11 Stamina equivalent (333)",
+      "label": "Warlock maximum health rises by base health +223, 11 Stamina equivalent and 207 gear health (540)",
       "actor": "lock",
       "metric": "max_health",
       "relative_to": "lock_health",
-      "equals": 333,
+      "equals": 540,
       "within_ms": 5000
     },
     {

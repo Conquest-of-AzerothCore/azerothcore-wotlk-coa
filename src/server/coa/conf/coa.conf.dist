@@ -417,6 +417,22 @@ CoA.Battleground.WideBrackets.Ranges = "10-29,30-49,50-59"
 
 CoA.Battleground.WideBrackets.MaxLiftLevels = 0
 
+#    CoA.Battleground.WideBrackets.GearCatchUp.Enable
+#        Description: Compensate missing gear Health and Armor for lifted players below the bracket
+#                     top up to a green-gear reference budget scaled by the level gap. Read at startup
+#                     only.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+CoA.Battleground.WideBrackets.GearCatchUp.Enable = 1
+
+#    CoA.Battleground.WideBrackets.GearCatchUp.Scale
+#        Description: Multiplier applied to the reference gear Health and Armor budgets used for
+#                     wide-bracket defensive equipment catch-up. Read at startup only.
+#        Default:     1.0
+
+CoA.Battleground.WideBrackets.GearCatchUp.Scale = 1.0
+
 ###################################################################################################
 # RATED SOLO ARENA
 #
