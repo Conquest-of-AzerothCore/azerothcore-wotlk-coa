@@ -1101,7 +1101,9 @@ namespace
         player->UpdatePlayerSetting(SeasonConquestSetting, SEASON_CONQUEST_SEASON, ConquestSeason);
         player->UpdatePlayerSetting(SeasonConquestSetting, SEASON_CONQUEST_EARNED, earned);
         player->ModifyArenaPoints(int32(points));
-        AscensionConquest::AnnounceArenaPoints(player, points);
+        ChatHandler(player->GetSession()).PSendSysMessage(
+            "You've received {} Arena Points. Current Points: ({}) Cap: ({}/{})", points, player->GetArenaPoints(),
+            earned, cap);
     }
 
     void GrantWinRewards(Player* player, uint32 teamType)
@@ -1516,8 +1518,7 @@ namespace
 void AscensionConquest::AnnounceArenaPoints(Player* player, uint32 points)
 {
     ChatHandler(player->GetSession()).PSendSysMessage(
-        "You've received {} Arena Points. Current Points: ({}) Cap: ({}/{})", points, player->GetArenaPoints(),
-        ConquestEarnedThisSeason(player), ConquestCap());
+        "You've received {} Arena Points. Current Points: ({})", points, player->GetArenaPoints());
 }
 
 void AddAscensionArenaQueueScripts()
