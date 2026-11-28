@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Cloak of Flames: Immolation adds its spell power bonus once (#12311)",
+  "contract": "#12311: Cloak of Flames 3475 equips damage shield 909276 Immolation, tooltip ${$m1+0.035*$SP+0.023*$AP} (base 30). AuraEffect::CalculateAmount adds the caster bonus to a SPELL_AURA_DAMAGE_SHIELD amount when the aura is applied, and Unit::DealDamageShieldDamage adds it again on every hit, so a cloak equipped while carrying spell power dealt about 30 + 0.07 * SP. aura_ascension_damage_shield_single_bonus keeps the stored amount at its base 30. The warrior carries 1000 fixture spell power before equipping the cloak: once gives about 30 + 35 + 0.023 * AP (~70), doubled about 110.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "w", "race": 1, "class": 1, "level": 60, "spell_power": 1000 }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "w", "entry": 299, "level": 60, "distance": 3, "health": 1000000 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 4000 },
+    { "action": "add_item", "actor": "w", "item": 3475 },
+    { "action": "equip", "actor": "w", "item": 3475, "slot": 14 },
+    { "action": "assert", "label": "Immolation is up", "actor": "w", "metric": "aura", "spell": 909276, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "The stored shield amount stays at its base 30", "actor": "w", "metric": "aura_amount", "spell": 909276, "effect": 0, "equals": 30 },
+    { "action": "creature_attack", "label": "The creature melees the warrior", "actor": "d", "target": "w" },
+    { "action": "wait", "label": "Let several swings land", "ms": 8000 },
+    { "action": "assert", "label": "The last damage shield hit is Immolation", "actor": "w", "metric": "server_packet_u32", "opcode": 591, "index": 4, "equals": 909276 },
+    { "action": "assert", "label": "Immolation adds 3.5% SP once (~70), not twice (~110)", "actor": "w", "metric": "server_packet_u32", "opcode": 591, "index": 5, "min": 60, "max": 85 }
+  ]
+}

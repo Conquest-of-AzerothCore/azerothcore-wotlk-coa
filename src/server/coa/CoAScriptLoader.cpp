@@ -485,6 +485,7 @@ void AddSC_AscensionBushcraft();
 void AddSC_AscensionVoidPortal();
 void AddSC_AscensionWoollyPride();
 void AddSC_AscensionIdleGaze();
+void AddSC_AscensionDamageShields();
 
 void AddSC_XPHotspots();
 
@@ -972,4 +973,5 @@ void AddCoAScripts()
     AddSC_AscensionVoidPortal();
     AddSC_AscensionWoollyPride();
     AddSC_AscensionIdleGaze();
+    AddSC_AscensionDamageShields();
 }
