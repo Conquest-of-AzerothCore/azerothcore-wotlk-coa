@@ -239,6 +239,10 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT;
     if (id == 807733 && info->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN)
         info->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_SCHOOL_ABSORB;
+    if (id == 807733 && info->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_MOD_THREAT &&
+        info->Effects[EFFECT_2].BasePoints == 74 && info->Effects[EFFECT_2].RealPointsPerLevel == 0.5f &&
+        info->Effects[EFFECT_2].MiscValue == 125)
+        info->Effects[EFFECT_2].Effect = 0;
     if (id == 707535)
     {
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT;
@@ -252,6 +256,18 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_2].TriggerSpell = 680386;
     if (Dusk(info) || id == 680230)
         info->AttributesEx3 &= ~SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON;
+    if (id == 680230)
+    {
+        info->Effects[EFFECT_0].BasePoints = 0;
+        info->Effects[EFFECT_0].DieSides = 0;
+        info->Effects[EFFECT_0].RealPointsPerLevel = 0.0f;
+        if (info->Effects[EFFECT_1].TriggerSpell == 802842)
+            info->Effects[EFFECT_1].Effect = 0;
+        if (info->Effects[EFFECT_2].TriggerSpell == 802007)
+            info->Effects[EFFECT_2].Effect = 0;
+    }
+    if (id == 523510)
+        info->MaxAffectedTargets = 0;
     if (Heartseeking(info))
         info->Effects[EFFECT_2].TriggerSpell = 807316;
     if (Quickdraw(info) && info->Effects[EFFECT_2].TriggerSpell == 680235)

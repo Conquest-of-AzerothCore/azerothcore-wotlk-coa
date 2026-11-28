@@ -14310,5 +14310,36 @@ class PhaseAuraStrikerTests(unittest.TestCase):
                 behaviour_scenario(load_fixture_class_file(23), entry)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioMeleeRangedRatingTests(unittest.TestCase):
+    def test_melee_and_ranged_hit_rating_fixture_stats_validate_and_apply(self):
+        from behaviours import HIT_RATIO_FIXTURE_STATS
+        self.assertIn('melee_hit_rating', HIT_RATIO_FIXTURE_STATS)
+        self.assertIn('ranged_hit_rating', HIT_RATIO_FIXTURE_STATS)
+        class_file = load_class_file(15)
+        for rating, observe in (('melee_hit_rating', 681350), ('ranged_hit_rating', 501342)):
+            with self.subTest(rating=rating):
+                entry = {
+                    'spell': 562390,
+                    'name': f'Brand of the Profane ({rating})',
+                    'kind': 'hit_ratio',
+                    'variant': rating,
+                    'label_suffix': rating,
+                    'quote': 'Brand an enemy increasing their chance to be hit by melee and ranged attacks by $s2% for $d.',
+                    'expected': 1.0,
+                    'observe_spell': observe,
+                    'rate': 'landed',
+                    'expected_points': 2,
+                    'trials': 100,
+                    'parts': 1,
+                    'fixture': {rating: 0},
+                    'control': {'auras': [[823764, 1]]},
+                    'treatment': {'auras': [[823764, 1]], 'casts': [562390]},
+                }
+                scenario, _ = behaviour_scenario(class_file, entry)
+                run.validate(scenario, run.SIMULATED_CLOCK)
+                self.assertEqual(scenario['players'][0][rating], 0)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -2202,5 +2202,31 @@ class SummonPendingEvidenceTest(unittest.TestCase):
             evidence_of(clauses, [judged(label, BEHAVIOUR_METRIC_DELTA, 'summon_pending')])
 
 
+class WitchHunterExtraMetricsEvidenceTest(unittest.TestCase):
+    def test_new_state_metrics_prove_matching_clauses(self):
+        cases = (
+            ('stealth_detection', 'Increases your stealth detection significantly.'),
+            ('reputation_gain', 'Increase reputation gains of your party by $s1% for $d.'),
+            ('pet_entry', 'Dismiss your Shadow Hound.'),
+            ('pet_health', 'Coalesces the shadows, bringing back your Shadow Hound from the dead.'),
+            ('reaction_to', 'While active you will appear as neutral to all aggressive creatures.'),
+            ('display_id', 'Take on the form of the target enemy Undead or Demon.'),
+            ('display_of_creature', 'Take on the form of the target enemy Undead or Demon.'),
+        )
+        for metric, text in cases:
+            with self.subTest(metric=metric):
+                label = f'1 behaviour_metric_delta {metric}'
+                self.assertEqual(METRIC_EVIDENCE[metric], STATE)
+                read = judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)
+                self.assertEqual(evidence_of([claim(text, label)], [read])[0], [BEHAVIOUR])
+                self.assertEqual(evidence_of([claim('Deals 50 Fire damage.', label)], [read])[0], [DATA])
+                unlearned = judged(label, BEHAVIOUR_METRIC_DELTA, metric)
+                self.assertEqual(evidence_of([claim(text, label)], [unlearned])[0], [DATA])
+        for metric in ('display_id', 'display_of_creature'):
+            label = f'1 behaviour_metric_delta {metric}_form_guard'
+            read = judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)
+            self.assertEqual(evidence_of([claim('Deals 50 Fire damage while in this form.', label)], [read])[0], [DATA])
+
+
 if __name__ == '__main__':
     unittest.main()

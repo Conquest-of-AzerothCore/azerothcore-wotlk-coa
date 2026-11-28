@@ -434,7 +434,8 @@ class witch_hunter_state : public UnitScript
             return player->IsPlayer() && player->getClass() == CLASS_WITCH_HUNTER && player->HasAura(802281) &&
                    creature->IsCreature() && !creature->IsControlledByPlayer();
         };
-        if (unit && target && (disguise(unit, target) || disguise(target, unit)))
+        if (unit && target && (disguise(unit, target) || disguise(target, unit)) &&
+            unit->GetFactionReactionTo(unit->GetFactionTemplateEntry(), target) < REP_NEUTRAL)
         {
             reaction = REP_NEUTRAL;
             return false;

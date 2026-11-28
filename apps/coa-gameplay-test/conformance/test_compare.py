@@ -866,6 +866,42 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
         self.assertNotIn('trigger_with_value', verdict.detail or {})
 
+    def rolled_aura_227_verdicts(self, measured: str = '1047', opted_in: bool = True):
+        text = '${$m1+0+$AP*1+$SP*1}'
+
+        def tokens(caster, forced):
+            base_val = forced[2] if forced is not None else 1047
+            return [Displayed(text, base_val + caster.ap + caster.sp_by_school.get(1, 0), 0, 'flat')]
+
+        labels = {'effect_value': '1001 effect_value e0 #0', 'aura_amount': '1001 aura_amount e0 #0'}
+        items = [expectation(label, check, text, 'read flat', 0, {'samples': 1}) for check, label in labels.items()]
+        reader = FakeTooltips(tokens, points={(RANK, 0): (1045, 3)},
+                              fields={(RANK, 'Effect[0]'): 6, (RANK, 'EffectApplyAuraName[0]'): 227})
+        if opted_in:
+            reader.class_file = {'effect_overrides': [{'spell': RANK, 'effect': 0, 'trigger_with_value': True,
+                                                       'citation': 'seeded'}]}
+        steps = [assert_step(label, measured) for label in labels.values()]
+        verdicts = self.value_run(items, [text], steps, reader)
+        return [verdicts[label] for label in labels.values()]
+
+    def test_a_rolled_aura_227_carrier_is_judged_on_its_unpowered_roll_for_effect_value_and_aura_amount(self):
+        for verdict in self.rolled_aura_227_verdicts():
+            self.assertEqual(verdict.status, 'ok')
+            self.assertAlmostEqual(verdict.expected, 1047.0)
+            detail = verdict.detail['trigger_with_value']
+            self.assertAlmostEqual(detail['power_term'], 313.0)
+            self.assertIn('SpellAuraEffects.cpp:6566', verdict.explanation)
+
+    def test_an_unflagged_rolled_aura_227_carrier_keeps_its_power_term(self):
+        for verdict in self.rolled_aura_227_verdicts(measured=str(1047 + 313), opted_in=False):
+            self.assertEqual(verdict.status, 'ok')
+            self.assertAlmostEqual(verdict.expected, 1047.0 + 313.0)
+            self.assertNotIn('trigger_with_value', verdict.detail or {})
+
+    def test_a_rolled_aura_227_carrier_holding_power_term_alerts(self):
+        for verdict in self.rolled_aura_227_verdicts(measured=str(1047 + 313)):
+            self.assertEqual(verdict.status, 'alert')
+
     def test_a_base_roll_only_token_whose_hit_labels_are_not_in_the_comparison_is_an_alert(self):
         verdict = self.base_roll_verdict()
         self.assertEqual(verdict.status, 'alert')
@@ -885,6 +921,34 @@ class CompareTest(unittest.TestCase):
         verdict = self.unlinked_base_roll_verdict(term=0.0)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('holds no power term', verdict.explanation)
+
+    def test_a_rolled_stat_base_roll_only_token_is_judged_on_its_base_roll_and_accepts_hit_ratio_link(self):
+        text = '${$m1+0+$STA*6}'
+
+        def tokens(caster, forced):
+            base = forced[2] if forced is not None else 746
+            return [Displayed(text, float(base) + caster.stats.get(2, 0.0) * 6.0, 0, 'flat')]
+
+        item = expectation('1001 effect_value e0 #0', 'effect_value', text, 'read flat', 0, {'samples': 28})
+        reader = FakeTooltips(tokens, points={(1001, 0): (745, 55)})
+        override = {'spell': 1001, 'effect': 0, 'base_roll_only': True, 'placeholder_sample_count': True,
+                    'power_term_label': '1001 behaviour_hit_ratio stamina_scaling',
+                    'contrast_label': '1001 hit_mean', 'citation': 'seeded'}
+        reader.class_file = {'effect_overrides': [override]}
+        steps = [assert_step('stat 2', '93')] + [assert_step(f'1001 effect_value e0 #0 sample {i}', '773')
+                                                 for i in range(1, 29)]
+        steps.append(assert_step('1001 effect_value e0 #0', '773'))
+        with mock.patch('compare.resolve_base_roll_links', side_effect=lambda verdicts: verdicts):
+            verdict = self.value_run([item], [text], steps, reader)['1001 effect_value e0 #0']
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.expected, 773.0)
+        self.assertAlmostEqual(verdict.detail['base_roll_only']['power_term'], 558.0)
+        linked = resolve_base_roll_links([
+            verdict,
+            self.linked_hit('1001 behaviour_hit_ratio stamina_scaling', 'ok', check='behaviour_hit_ratio'),
+            self.linked_hit('1001 hit_mean', 'ok', check='hit_mean'),
+        ])[0]
+        self.assertEqual(linked.status, 'ok')
 
     def test_fewer_reads_than_generation_sized_stay_measured(self):
         verdict = self.spell_power_roll_verdict(177)
@@ -2378,6 +2442,22 @@ class GeneratedTokenTest(unittest.TestCase):
         self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '8040').status, 'ok')
         self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '8041').status, 'tolerated')
         self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '9000').status, 'alert')
+
+    def test_permanent_spell_duration_requires_exact_sentinel(self):
+        from compare import Tokens, judge_token
+        from tooltip import PERMANENT_DURATION_MS, Displayed, Readout
+        from values import Expectation
+        exp = Expectation(
+            label='802281 spell_duration 802281 #0', check='spell_duration', spell_id=802281, rank_id=802281,
+            effect_index=None, displayed='$d', rule='read permanent duration', model={'effect_spell': 802281})
+        base = Verdict(
+            label=exp.label, status='unmeasured', measured=None, expected=None, low=None, high=None, explanation='',
+            scenario='s', spell_id=802281, rank_id=802281, check=exp.check, build='a' * 64)
+        tokens = Tokens(Readout([Displayed('$d', PERMANENT_DURATION_MS, None, 'duration_ms')], []))
+        ok = judge_token(base, exp, None, -1.0, tokens, None, 'Infiltrate')
+        self.assertEqual((ok.status, ok.expected, ok.low, ok.high), ('ok', -1.0, -1.0, -1.0))
+        zero = judge_token(base, exp, None, 0.0, tokens, None, 'Infiltrate')
+        self.assertEqual(zero.status, 'alert')
 
 
 def fixture_generate(class_id: int, out: Path, **options) -> Path:

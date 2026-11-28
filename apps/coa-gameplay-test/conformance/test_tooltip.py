@@ -374,11 +374,13 @@ class ClientDbcTooltipTest(unittest.TestCase):
         self.assertEqual(readout.values[3].value, DOWNFALL_DURATION_MS)
         self.assertEqual(readout.unreadable, [])
 
-    def test_until_cancelled_duration_is_unreadable(self):
+    def test_until_cancelled_duration_reads_as_permanent(self):
         records = Records(self.dbc)
         description = records.dbc_field('Spell', BATTLE_STANCE, 'Description[enUS]')
         self.assertIn('Lasts $d', description)
-        self.assertEqual(Tooltip(records, BATTLE_STANCE, LEVEL_60_TEMPLAR).read(description).unreadable, ['$d'])
+        readout = Tooltip(records, BATTLE_STANCE, LEVEL_60_TEMPLAR).read(description)
+        self.assertEqual(readout.unreadable, [])
+        self.assertEqual(displayed(readout, '$d'), Displayed('$d', -1.0, None, 'duration_ms'))
         self.assertEqual(displayed(self.read(SCOURGEBANE_STRIKE), '$i'), Displayed('$i', 0, None, 'count'))
 
 
@@ -747,6 +749,50 @@ class StreamedTextTests(unittest.TestCase):
                 self.assertEqual(records.dbc_field('Spell', 11, 'ToolTip[enUS]'), 'Old tooltip.')
                 self.assertEqual(records.field('Spell', 10, 'ToolTip[enUS]'),
                                  records.dbc_field('Spell', 10, 'ToolTip[enUS]'))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class WitchHunterExtraTooltipTest(unittest.TestCase):
+    DAWN_BLADE = 574343
+    FLAMES_OF_SIN = 92094
+    INFILTRATE = 802281
+
+    @classmethod
+    def setUpClass(cls):
+        cls.dbc = DataSet(DBC_DIR)
+
+    def test_repeated_identical_conditional_prefix_reads_cleanly(self):
+        plain = read_tooltip(self.dbc, self.DAWN_BLADE, GUNNER)
+        self.assertEqual(plain.unreadable, [])
+        self.assertEqual([value.text for value in plain.values], ['${$m1+0+$spfi*0.15+$AP*0.15}'])
+        gated = read_tooltip(self.dbc, self.DAWN_BLADE, replace(GUNNER, known_spells=frozenset({self.FLAMES_OF_SIN})))
+        self.assertEqual(gated.unreadable, [])
+        self.assertEqual([value.text for value in gated.values],
+                         ['${$m1+0+$spfi*0.15+$AP*0.15}', '$/1000;803710s2'])
+
+    def test_mismatched_repeated_conditional_prefix_stays_unreadable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            write_fixture(Path(directory), {
+                10: {'Description[enUS]': '$?s71$?s72[Deals $s1.][]', 'EffectBasePoints[0]': 9, 'EffectDieSides[0]': 1},
+            }, {})
+            readout = read_tooltip(DataSet(Path(directory)), 10, FIXTURE_CASTER)
+            self.assertEqual(readout.values, [])
+            self.assertEqual(len(readout.unreadable), 1)
+            self.assertIn('unhandled $? operator', readout.unreadable[0])
+
+    def test_permanent_duration_token_reads_as_negative_one(self):
+        readout = read_tooltip(self.dbc, self.INFILTRATE, GUNNER)
+        self.assertEqual(readout.unreadable, [])
+        self.assertEqual(readout.values, [Displayed('$d', -1.0, None, 'duration_ms')])
+
+    def test_zero_duration_token_stays_unreadable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            write_fixture(Path(directory), {
+                10: {'Description[enUS]': 'Lasts $d.', 'DurationIndex': 0},
+            }, {})
+            readout = read_tooltip(DataSet(Path(directory)), 10, FIXTURE_CASTER)
+            self.assertEqual(readout.values, [])
+            self.assertEqual(readout.unreadable, ['$d'])
 
 
 if __name__ == '__main__':

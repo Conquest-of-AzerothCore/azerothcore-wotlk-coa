@@ -1266,7 +1266,7 @@ class ValueReagentsTest(unittest.TestCase):
             [{'spell': 804777}],
             [{'spell': 804777, 'items': [[1210, 0]]}],
             [{'spell': 804777, 'items': [[True, 1]]}],
-            [{'spell': 804777, 'items': [[1210, 1]], 'destination_unit': 'dummy'}],
+            [{'spell': 804777, 'items': [[1210, 1]], 'destination_unit': 'ally'}],
             [{'spell': 804777, 'items': [[1210, 1]], 'extra': 1}],
             [{'spell': 804777, 'items': [[1210, 1]]}, {'spell': 804777, 'items': [[1210, 1]]}],
         )
@@ -1289,6 +1289,82 @@ class ValueReagentsTest(unittest.TestCase):
         self.assertEqual(cast_opt['destination_unit'], CASTER)
         self.assertIn({'action': 'add_item', 'actor': CASTER, 'item': 1210, 'count': 1}, sc_opt['steps'])
         self.assertNotIn({'action': 'add_item', 'actor': CASTER, 'item': 1210, 'count': 1}, sc_plain['steps'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_destination_dummy_routes_persistent_area_aura_to_dummy_and_waits_for_missile(self):
+        from values import MISSILE_WAIT_LABEL, VALUE_REAGENTS_KEY
+        witch_hunter = load_class_file(15)
+        caltrops = ClassSpell(503679, 'Caltrops', (503679,), 503679, 14, False)
+        with_opt = {**witch_hunter, VALUE_REAGENTS_KEY: [{'spell': 503679, 'destination_unit': TARGET}]}
+        scenario, expectations, _ = value_scenario(with_opt, caltrops, 503679)
+        self.assertEqual([creature['id'] for creature in scenario['creatures']], [TARGET])
+        cast = next(step for step in scenario['steps'] if step.get('action') == 'cast' and step.get('spell') == 503679)
+        self.assertEqual(cast['destination_unit'], TARGET)
+        self.assertTrue(any(step.get('label') == MISSILE_WAIT_LABEL for step in scenario['steps']))
+        aura_steps = [step for step in scenario['steps']
+                      if step.get('metric') in ('aura', 'aura_duration_ms') and step.get('spell') == 503679]
+        self.assertEqual(len(aura_steps), 2)
+        self.assertTrue(all(step['actor'] == TARGET for step in aura_steps))
+        dur_exp = next(exp for exp in expectations if exp.check == 'aura_duration_ms')
+        self.assertEqual(dur_exp.rule, 'read duration_ms')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_value_reagents_target_auras_sets_buff_on_dummy_before_cast(self):
+        from values import VALUE_REAGENTS_KEY
+        witch_hunter = load_class_file(15)
+        purge_evil = ClassSpell(572306, 'Purge Evil', (572306,), 572306, 40, False)
+        loc = {'map': 0, 'x': -9617.06, 'y': -288.949, 'z': 57.3053, 'o': 0}
+        with_opt = {**witch_hunter, VALUE_REAGENTS_KEY: [{'spell': 572306, 'target_auras': [[8599, 1]], 'location': loc}]}
+        scenario, _, _ = value_scenario(with_opt, purge_evil, 572306)
+        aura_step = {'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'spell': 8599, 'stacks': 1}
+        cast_index = next(i for i, step in enumerate(scenario['steps']) if step.get('action') == 'cast')
+        self.assertIn(aura_step, scenario['steps'][:cast_index])
+        self.assertEqual(scenario['location'], loc)
+
+        dark_tonic = ClassSpell(680491, 'Dark Tonic', (680491,), 680491, 10, False)
+        non_hostile = {**witch_hunter, VALUE_REAGENTS_KEY: [{'spell': 680491, 'target_auras': [[8599, 1]]}]}
+        nh_scenario, _, _ = value_scenario(non_hostile, dark_tonic, 680491)
+        self.assertEqual([creature['id'] for creature in nh_scenario['creatures']], [TARGET])
+        self.assertIn(aura_step, nh_scenario['steps'])
+
+        passive = ClassSpell(562225, 'Night Hunter', (562225,), 562225, 1, True)
+        with self.assertRaises(ValueError):
+            value_scenario({**witch_hunter, VALUE_REAGENTS_KEY: [{'spell': 562225, 'target_auras': [[8599, 1]]}]},
+                           passive, 562225)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_permanent_own_duration_reads_spell_duration_ms_even_with_cast_time(self):
+        witch_hunter = load_class_file(15)
+        infiltrate = ClassSpell(802281, 'Infiltrate', (802281,), 802281, 22, False)
+        scenario, expectations, _ = value_scenario(witch_hunter, infiltrate, 802281)
+        dur_exp = next(exp for exp in expectations if exp.check == 'spell_duration')
+        self.assertEqual(dur_exp.displayed, '$d')
+        self.assertEqual(dur_exp.rule, 'read permanent duration')
+        self.assertTrue(any(step.get('metric') == 'spell_duration_ms' and step.get('spell') == 802281
+                            for step in scenario['steps']))
+        self.assertFalse(any(exp.rule.startswith(UNREADABLE) and '$d' in exp.rule for exp in expectations))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_value_reagents_target_entry_and_distance_override_dummy(self):
+        from values import VALUE_REAGENTS_KEY, value_reagent_entry
+        witch_hunter = load_class_file(15)
+        infiltrate = ClassSpell(802281, 'Infiltrate', (802281,), 802281, 22, False)
+        holy_water = ClassSpell(802826, 'Holy Water Tonic', (802826,), 802826, 20, False)
+        with_opt = {
+            **witch_hunter,
+            VALUE_REAGENTS_KEY: [
+                {'spell': 802281, 'target_entry': 11200, 'distance': 15},
+                {'spell': 802826, 'target_entry': 11200},
+            ],
+        }
+        sc_inf, _, _ = value_scenario(with_opt, infiltrate, 802281)
+        self.assertEqual((sc_inf['creatures'][0]['entry'], sc_inf['creatures'][0]['distance']), (11200, 15.0))
+        sc_hw, _, _ = value_scenario(with_opt, holy_water, 802826)
+        self.assertEqual((sc_hw['creatures'][0]['entry'], sc_hw['creatures'][0]['distance']), (11200, 3))
+        for bad in ({'spell': 802281, 'target_entry': 0}, {'spell': 802281, 'distance': 0},
+                    {'spell': 802281, 'distance': 150}, {'spell': 802281, 'target_entry': True}):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                value_reagent_entry({VALUE_REAGENTS_KEY: [bad]}, 802281)
 
 
 if __name__ == '__main__':

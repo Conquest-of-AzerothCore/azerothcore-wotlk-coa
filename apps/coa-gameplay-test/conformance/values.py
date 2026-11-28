@@ -9,8 +9,8 @@ from block_value import block_value_steps
 from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet, dataset
 from profile import (CASTER, DBC_DIR, EQUIP_FIELDS, WEAPON_REQUIREMENT_FIELDS, armed, base_steps, character_of,
                      known_aura_label, measurement, player_fixture, server_requirement, skill_target)
-from tooltip import (MIXED_PERIOD, OVER_TICKS, TICKING_AURAS, CasterStats, Displayed, ForcedPoints, Records, Tooltip,
-                     Unreadable, mixed_period_reason, period_reading, read_tooltip)
+from tooltip import (MIXED_PERIOD, OVER_TICKS, PERMANENT_DURATION_MS, TICKING_AURAS, CasterStats, Displayed,
+                     ForcedPoints, Records, Tooltip, Unreadable, mixed_period_reason, period_reading, read_tooltip)
 
 CHECKS = ('effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration', 'power_cost',
           'cooldown_ms', 'known_aura', 'effect_radius', 'aura_amplitude_ms')
@@ -185,9 +185,9 @@ def cast_distance(records: Records, spell_id: int, min_range: bool = False) -> f
     return distance
 
 
-def missile_wait_ms(records: Records, spell_id: int, distance: float) -> int:
+def missile_wait_ms(records: Records, spell_id: int, distance: float, force: bool = False) -> int:
     speed = records.field('Spell', spell_id, 'Speed')
-    if distance == DUMMY_DISTANCE or speed <= 0:
+    if speed <= 0 or (not force and distance == DUMMY_DISTANCE):
         return 0
     return math.ceil(max(distance, MISSILE_MIN_DISTANCE_YD) / speed * 1000) + CAST_MARGIN_MS
 
@@ -252,9 +252,15 @@ def gap_closer_expectation(rank_id: int, spell_id: int, label: str, target_kind:
     return steps, expectation
 
 
-def aura_carrier(facts: RankFacts, effect: int, ally_cast: bool = False) -> dict:
+PERSISTENT_AREA_AURA = 27
+
+
+def aura_carrier(facts: RankFacts, effect: int, ally_cast: bool = False,
+                 destination_unit: str | None = None) -> dict:
     if facts.target_a[effect] in SELF_TARGETS:
         return {'actor': CASTER, 'caster': CASTER}
+    if destination_unit == TARGET and facts.effects[effect] == PERSISTENT_AREA_AURA:
+        return {'actor': TARGET, 'caster': CASTER}
     if ally_cast and facts.target_a[effect] in FRIEND_TARGETS | RAID_TARGETS:
         return {'actor': ALLY, 'caster': CASTER}
     if not is_hostile(facts):
@@ -343,12 +349,25 @@ def value_reagent_entry(class_file: dict, rank_id: int) -> tuple[tuple[tuple[int
     if len(entries) > 1:
         raise ValueError(f'{VALUE_REAGENTS_KEY} lists {rank_id} more than once')
     entry = entries[0]
-    extra = set(entry) - {'spell', 'items', 'destination_unit', 'reason'}
+    extra = set(entry) - {'spell', 'items', 'destination_unit', 'target_entry', 'distance', 'target_auras', 'location', 'reason'}
     raw_items = entry.get('items', [])
     destination = entry.get('destination_unit')
-    if extra or not isinstance(raw_items, list) or destination not in (None, CASTER):
+    target_entry = entry.get('target_entry')
+    distance = entry.get('distance')
+    raw_target_auras = entry.get('target_auras', [])
+    location = entry.get('location')
+    if extra or not isinstance(raw_items, list) or not isinstance(raw_target_auras, list) or destination not in (None, CASTER, TARGET):
         raise ValueError(f'{VALUE_REAGENTS_KEY} entry for {rank_id} takes spell, items, and optional destination_unit '
-                         f'{CASTER!r}, not {entry!r}')
+                         f'{CASTER!r} or {TARGET!r}, target_entry, distance, target_auras, and location, not {entry!r}')
+    if location is not None and (not isinstance(location, dict) or set(location) != {'map', 'x', 'y', 'z', 'o'}):
+        raise ValueError(f'{VALUE_REAGENTS_KEY} location for {rank_id} must define map, x, y, z, o, not {location!r}')
+    if target_entry is not None and (type(target_entry) is not int or target_entry <= 0):
+        raise ValueError(f'{VALUE_REAGENTS_KEY} target_entry for {rank_id} must be a positive int, not {target_entry!r}')
+    if distance is not None and (isinstance(distance, bool) or not isinstance(distance, (int, float))
+                                 or not math.isfinite(distance) or not 0 < distance <= 100):
+        raise ValueError(f'{VALUE_REAGENTS_KEY} distance for {rank_id} must be in (0, 100], not {distance!r}')
+    for raw_aura in raw_target_auras:
+        cast_aura_entry(raw_aura)
     items = []
     for raw in raw_items:
         if (not isinstance(raw, list) or len(raw) != 2
@@ -357,9 +376,37 @@ def value_reagent_entry(class_file: dict, rank_id: int) -> tuple[tuple[tuple[int
             raise ValueError(f'{VALUE_REAGENTS_KEY} item for {rank_id} must be [positive_item, positive_count], '
                              f'not {raw!r}')
         items.append((raw[0], raw[1]))
-    if not items and destination is None:
-        raise ValueError(f'{VALUE_REAGENTS_KEY} entry for {rank_id} must name items or destination_unit')
+    if not items and destination is None and target_entry is None and distance is None and not raw_target_auras and location is None:
+        raise ValueError(f'{VALUE_REAGENTS_KEY} entry for {rank_id} must name items, destination_unit, target_entry, '
+                         f'distance, target_auras, or location')
     return tuple(items), destination
+
+
+def value_target_auras(class_file: dict, rank_id: int) -> list[dict]:
+    entries = [entry for entry in class_file.get(VALUE_REAGENTS_KEY, []) if entry['spell'] == rank_id]
+    if not entries:
+        return []
+    steps = []
+    for raw_aura in entries[0].get('target_auras', []):
+        aura_spell, stacks = cast_aura_entry(raw_aura)
+        steps.append({'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'spell': aura_spell, 'stacks': stacks})
+    return steps
+
+
+def value_location_override(class_file: dict, rank_id: int) -> dict | None:
+    entries = [entry for entry in class_file.get(VALUE_REAGENTS_KEY, []) if entry['spell'] == rank_id]
+    if not entries or entries[0].get('location') is None:
+        return None
+    return dict(entries[0]['location'])
+
+
+def value_target_override(class_file: dict, rank_id: int) -> tuple[int | None, float | None]:
+    entries = [entry for entry in class_file.get(VALUE_REAGENTS_KEY, []) if entry['spell'] == rank_id]
+    if not entries:
+        return None, None
+    entry = entries[0]
+    distance = entry.get('distance')
+    return entry.get('target_entry'), (float(distance) if distance is not None else None)
 
 
 def value_ally_cast(class_file: dict, rank_id: int) -> tuple[int, ...] | None:
@@ -700,6 +747,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                 + effect_modifier_measurements(records, label, spell_id, effect))
 
     ally_cast = value_ally_cast(class_file, rank_id)
+    reagent_items, destination_unit = value_reagent_entry(class_file, rank_id)
+    target_entry_override, target_distance_override = value_target_override(class_file, rank_id)
     summon_carrier = summon_aura_carrier(class_file, rank_id)
     summon_reads = False
 
@@ -713,7 +762,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             return summon_aura_measurement(label, metric, rank_id, summon_carrier)
         use_ally_cast = ally_cast is not None and not is_hostile(facts) and not targets_resurrect(facts)
         return measurement(label, metric=metric, spell=rank_id,
-                           **aura_carrier(facts, carrier_effect, use_ally_cast), **fields)
+                           **aura_carrier(facts, carrier_effect, use_ally_cast, destination_unit), **fields)
 
     def summon_gap(carrier_effect: int, metric: str) -> str:
         return summon_aura_gap(metric) if carried_by_summon(carrier_effect) else ''
@@ -863,6 +912,12 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         own_duration = OWN_DURATION.fullmatch(shown.text)
         aura_effect = first_aura_effect(facts, removed_effects)
         if shown.kind == 'duration_ms' and own_duration and own_duration.group(1) in ('', str(rank_id)):
+            if shown.value == PERMANENT_DURATION_MS:
+                label = f'{rank_id} spell_duration {rank_id} #{ordinal}'
+                measured.append(measurement(label, CASTER, 'spell_duration_ms', spell=rank_id))
+                expect(label, 'spell_duration', None, shown.text, note_rule('read permanent duration', note),
+                       {'effect_spell': rank_id})
+                return
             label = f'{rank_id} aura_duration_ms #{ordinal}'
             if facts.passive or aura_effect is None:
                 expect(label, 'aura_duration_ms', None, shown.text,
@@ -921,6 +976,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             after_cast.append(measurement(label, CASTER, 'cooldown_ms', spell=rank_id))
             expect(label, 'cooldown_ms', None, str(facts.recast_ms), 'max(RecoveryTime, CategoryRecoveryTime)')
             cast_wanted = True
+    target_aura_steps = value_target_auras(class_file, rank_id)
+    if target_aura_steps and not cast_wanted:
+        raise ValueError(f'{VALUE_REAGENTS_KEY} target_auras for {rank_id} requires a cast, but no cast is generated')
     if cast_wanted:
         if facts.mana_cost > 0 and facts.power_type != MANA:
             cast_steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
@@ -936,8 +994,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                 cast_steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
             cast_steps += ally_setup_steps(records, ally_cast)
             cast['target'] = ALLY
-        cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id)
-        reagent_items, destination_unit = value_reagent_entry(class_file, rank_id)
+        cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id) + target_aura_steps
         for item_id, count in reagent_items:
             cast_steps.append({'action': 'add_item', 'actor': CASTER, 'item': item_id, 'count': count})
         if destination_unit is not None:
@@ -949,8 +1006,10 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             cast_steps.append({'action': 'wait', 'label': CAST_WAIT_LABEL,
                                'ms': facts.cast_time_ms + CAST_MARGIN_MS})
         use_min_range = honour_min_range(class_file)
-        travel_ms = (missile_wait_ms(records, rank_id, cast_distance(records, rank_id, use_min_range))
-                     if is_hostile(facts) else 0)
+        distance = (target_distance_override if target_distance_override is not None
+                    else cast_distance(records, rank_id, use_min_range))
+        travel_ms = (missile_wait_ms(records, rank_id, distance, force=destination_unit == TARGET)
+                     if is_hostile(facts) or destination_unit == TARGET else 0)
         if travel_ms:
             cast_steps.append({'action': 'wait', 'label': MISSILE_WAIT_LABEL, 'ms': travel_ms})
         cast_steps.append(measurement(f'{rank_id} cast_failure', CASTER, 'cast_failure', spell=rank_id))
@@ -979,11 +1038,17 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         'players': [player_fixture(class_file)],
         'steps': learn + sampled + cast_steps + after_cast + ally_grant_proofs}
     summon_target = summon_reads and is_hostile(facts_of(records, summon_carrier['summon']))
-    if (is_hostile(facts) or summon_target) and cast_wanted:
-        placed = rank_id if is_hostile(facts) else summon_carrier['summon']
-        scenario['creatures'] = [{'id': TARGET, 'owner': CASTER, 'entry': DUMMY_ENTRY, 'level': class_file['level'],
-                                  'health': DUMMY_HEALTH,
-                                  'distance': cast_distance(records, placed, honour_min_range(class_file))}]
+    if (is_hostile(facts) or destination_unit == TARGET or summon_target or target_aura_steps) and cast_wanted:
+        placed = (rank_id if is_hostile(facts) or destination_unit == TARGET or target_aura_steps
+                  else summon_carrier['summon'])
+        distance = (target_distance_override if target_distance_override is not None
+                    else cast_distance(records, placed, honour_min_range(class_file)))
+        scenario['creatures'] = [{'id': TARGET, 'owner': CASTER,
+                                  'entry': target_entry_override if target_entry_override is not None else DUMMY_ENTRY,
+                                  'level': class_file['level'], 'health': DUMMY_HEALTH, 'distance': distance}]
     if (targets_resurrect(facts) or needs_ally_target or ally_cast is not None) and cast_wanted:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
+    location_override = value_location_override(class_file, rank_id)
+    if location_override is not None:
+        scenario['location'] = location_override
     return scenario, expectations, periodic_totals

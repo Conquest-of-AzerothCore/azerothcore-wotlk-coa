@@ -65,8 +65,8 @@ from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUE
                        questions, spell_name, write_questions)
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MINIMUM_PASSES, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE,
                    TALENT_DELTA, TWO_SIDED_99, levers, mean_interval, ratio_interval, student_t_quantile)
-from tooltip import (CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, UnscaledForcedPoints,
-                     Unreadable)
+from tooltip import (PERMANENT_DURATION_MS, CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip,
+                     UnscaledForcedPoints, Unreadable)
 from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK,
                       MAGNITUDE_CHECK, MINION, MINION_COOLDOWN_BAND, PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK,
                       cooldown_trial_label, duration_trial_label, minion_cooldown_event_label)
@@ -730,8 +730,12 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
         reads = [read + terms.total for read in reads]
     trigger_detail = None
     trigger_note = ''
-    if (terms is None and expectation.check == 'effect_value'
-            and tooltips.spell_field(spell_id, f'Effect[{effect}]') == TRIGGER_SPELL_WITH_VALUE_EFFECT):
+    is_aura = (expectation.check in TRIGGER_WITH_VALUE_CHECKS
+               and tooltips.spell_field(spell_id, f'EffectApplyAuraName[{effect}]')
+               == PERIODIC_TRIGGER_SPELL_WITH_VALUE)
+    is_effect = (expectation.check == 'effect_value'
+                 and tooltips.spell_field(spell_id, f'Effect[{effect}]') == TRIGGER_SPELL_WITH_VALUE_EFFECT)
+    if terms is None and (is_effect or (is_aura and trigger_with_value_entry(tooltips, spell_id, effect))):
         unpowered_caster = unpowered(tokens.caster)
         unpowered_values = []
         for roll in rolls:
@@ -745,8 +749,11 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
             full_mean, judged_mean = fmean(values), fmean(unpowered_values)
             power_term = full_mean - judged_mean
             trigger_detail = {'full_value': full_mean, 'power_term': power_term, 'judged_amount': judged_mean}
-            trigger_note = (f' on an effect {TRIGGER_SPELL_WITH_VALUE_EFFECT} carrier (minus power term '
-                            f'{power_term:g}; SpellEffects.cpp:1862-1868 hands BASE_POINT0 to its triggered spell)')
+            carrier_text = (f'an aura {PERIODIC_TRIGGER_SPELL_WITH_VALUE} carrier' if is_aura
+                            else f'an effect {TRIGGER_SPELL_WITH_VALUE_EFFECT} carrier')
+            source_ref = 'SpellAuraEffects.cpp:6566' if is_aura else 'SpellEffects.cpp:1862-1868'
+            trigger_note = (f' on {carrier_text} (minus power term '
+                            f'{power_term:g}; {source_ref} hands BASE_POINT0 to its triggered spell)')
             values = unpowered_values
     truncated_terms = terms.truncated if terms else 0
     allowance = TRUNCATED_READ * (1 + truncated_terms)
@@ -993,15 +1000,16 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
     if expectation.check == 'aura_amplitude_ms':
         return deterministic(base, measured, measured, token.value, f'{token.text} read with the measured stats')
     if expectation.check == 'spell_duration':
-        verdict = deterministic(base, measured, measured, token.value,
-                                f'{token.text} read from SpellDuration against the {SPELL_DURATION_SCOPE}')
+        why = f'{token.text} read from SpellDuration against the {SPELL_DURATION_SCOPE}'
+        verdict = (exact(base, measured, token.value, why) if token.value == PERMANENT_DURATION_MS
+                   else deterministic(base, measured, measured, token.value, why))
         return replace(verdict, detail={**(verdict.detail or {}), 'scope': SPELL_DURATION_SCOPE})
     effect = token_effect(expectation)
     ticks = (expectation.model or {}).get(PER_TICK_TICKS)
     base_roll = base_roll_entry(tooltips, *effect) \
         if effect is not None and expectation.check == 'effect_value' and not ticks else None
     if base_roll is not None:
-        return judge_base_roll(base, expectation, measured, tokens, tooltips, index, base_roll)
+        return judge_base_roll(base, expectation, run, measured, tokens, tooltips, index, base_roll)
     if effect is not None and not ticks:
         base_points, die_sides = tooltips.effect_points(*effect)
         if die_sides not in FIXED_DIE_SIDES:
@@ -1037,8 +1045,20 @@ def base_roll_entry(tooltips: TooltipSource, spell_id: int, effect: int) -> dict
                 None)
 
 
+def trigger_with_value_entry(tooltips: TooltipSource, spell_id: int, effect: int) -> dict | None:
+    class_file = getattr(tooltips, 'class_file', None) or {}
+    return next((entry for entry in class_file.get('effect_overrides', [])
+                 if (entry['spell'], entry['effect']) == (spell_id, effect)
+                 and entry.get(TRIGGER_WITH_VALUE) is True),
+                None)
+
+
 def unpowered(caster: CasterStats) -> CasterStats:
     return replace(caster, ap=0.0, rap=0.0, sp_by_school={school: 0.0 for school in caster.sp_by_school})
+
+
+def unstat(caster: CasterStats) -> CasterStats:
+    return replace(unpowered(caster), stats={stat: 0.0 for stat in caster.stats})
 
 
 def judge_trigger_with_value(base: Verdict, expectation: Expectation, measured: float, tokens: Tokens,
@@ -1073,7 +1093,7 @@ def judge_trigger_with_value(base: Verdict, expectation: Expectation, measured: 
         'full_value': full, 'power_term': term, 'judged_amount': judged}})
 
 
-def judge_base_roll(base: Verdict, expectation: Expectation, measured: float, tokens: Tokens,
+def judge_base_roll(base: Verdict, expectation: Expectation, run: Run, measured: float, tokens: Tokens,
                     tooltips: TooltipSource, index: int, entry: dict) -> Verdict:
     token = tokens.readout.values[index]
     links = {POWER_TERM_LABEL: entry.get(POWER_TERM_LABEL), CONTRAST_LABEL: entry.get(CONTRAST_LABEL)}
@@ -1085,24 +1105,36 @@ def judge_base_roll(base: Verdict, expectation: Expectation, measured: float, to
                        explanation=f'{BASE_ROLL_ONLY} on spell {entry["spell"]} effect {entry["effect"]} names no '
                                    f'{" and no ".join(unnamed)}: the subtracted power term of {token.text} would be '
                                    f'proved by no hit label (D-57, D-198)')
-    _, die_sides = tooltips.effect_points(entry['spell'], entry['effect'])
-    if die_sides not in FIXED_DIE_SIDES:
-        return replace(base, status='alert', measured=measured,
-                       explanation=f'{BASE_ROLL_ONLY} judges a fixed roll; spell {entry["spell"]} effect '
-                                   f'{entry["effect"]} rolls {die_sides} die sides')
-    unpowered_value = tooltips.read(expectation.rank_id, unpowered(tokens.caster)).values[index]
+    base_points, die_sides = tooltips.effect_points(entry['spell'], entry['effect'])
+    stripped_caster = unpowered(tokens.caster)
+    unpowered_value = tooltips.read(expectation.rank_id, stripped_caster).values[index]
     if unpowered_value.text != token.text:
         return replace(base, status='alert', measured=measured,
                        explanation=f'{BASE_ROLL_ONLY}: token #{index} reads {unpowered_value.text} without power, '
                                    f'{token.text} with the measured stats')
     full, judged = undivided(token), undivided(unpowered_value)
     term = full - judged
+    stripped_desc = 'attack, ranged attack and spell power read as 0'
+    if term == 0 and tokens.caster.stats:
+        stripped_caster = unstat(tokens.caster)
+        unstat_value = tooltips.read(expectation.rank_id, stripped_caster).values[index]
+        if unstat_value.text == token.text and undivided(unstat_value) != full:
+            judged = undivided(unstat_value)
+            term = full - judged
+            stripped_desc = 'attack, ranged attack, spell power and primary stats read as 0'
     if term == 0:
         return replace(base, status='alert', measured=measured, expected=full,
                        explanation=f'{BASE_ROLL_ONLY} on {token.text}, which holds no power term at the measured '
                                    f'stats (full value {full:g}); judge the full token instead')
+    if die_sides not in FIXED_DIE_SIDES:
+        rolled_verdict = judge_roll(base, expectation, run, measured, replace(tokens, caster=stripped_caster),
+                                    tooltips, index, roll_range(base_points, die_sides))
+        why = (f'{rolled_verdict.explanation}; base roll only: subtracted term {term:g} ({stripped_desc}), '
+               f'counted by "{links[POWER_TERM_LABEL]}" against its contrast "{links[CONTRAST_LABEL]}"')
+        return replace(rolled_verdict, explanation=why, detail={**(rolled_verdict.detail or {}), BASE_ROLL_ONLY: {
+            'full_value': full, 'power_term': term, 'judged_base': judged, **links}})
     why = (f'{token.text} base roll only: full value {full:g} at the measured stats minus the power term {term:g} '
-           f'(attack, ranged attack and spell power read as 0) = judged base {judged:g}; the power term is counted '
+           f'({stripped_desc}) = judged base {judged:g}; the power term is counted '
            f'by "{links[POWER_TERM_LABEL]}" against its contrast "{links[CONTRAST_LABEL]}"')
     verdict = deterministic(base, measured, measured, judged, why)
     return replace(verdict, detail={**(verdict.detail or {}), BASE_ROLL_ONLY: {
@@ -1131,7 +1163,7 @@ def resolve_base_roll_links(verdicts: list[Verdict], labels: set[str] | None = N
             linked = by_label.get(roll[field])
             if linked is None:
                 reasons.append(f'{field} "{roll[field]}" is not in this comparison')
-            elif linked.check not in HIT_CHECKS:
+            elif linked.check not in (HIT_CHECKS | {BEHAVIOUR_HIT_RATIO}):
                 reasons.append(f'{field} "{roll[field]}" is a {linked.check} label, not a hit label')
             elif linked.status not in CONFORMANT:
                 reasons.append(f'{field} "{roll[field]}" is {linked.status}')

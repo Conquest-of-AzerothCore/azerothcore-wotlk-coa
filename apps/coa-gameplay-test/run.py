@@ -99,7 +99,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'creature_query_rank', 'creature_query_quest_item', 'quest_level', 'quest_xp',
     'quest_log_sent_level', 'quest_log_sent_level_count', 'quest_log_sent_xp', 'quest_offer_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
     'quest_query_text_contains',
-    'health', 'health_pct', 'max_health', 'creature_type', 'respawn_remaining', 'power', 'max_power', 'alive', 'combat', 'can_attack', 'victim', 'has_redirects', 'casting', 'level',
+    'health', 'health_pct', 'max_health', 'creature_type', 'respawn_remaining', 'power', 'max_power', 'alive', 'combat', 'can_attack', 'reaction_to', 'victim', 'has_redirects', 'casting', 'level',
     'aura', 'aura_stacks', 'aura_charges', 'aura_duration_ms', 'aura_amount', 'aura_positive', 'aura_visible',
     'carried_aura_count', 'applied_aura_count',
     'knows_spell', 'spell_rank', 'first_rank_spell', 'spell_active', 'has_talent', 'talent_points', 'active_talent_spec', 'cooldown_ms', 'spell_cooldown_packet_ms', 'sent_aura_amount', 'item_loot_releases',
@@ -1275,6 +1275,8 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(step.get('target') in actor_ids, f'{where}: can_attack metric needs the attacked unit')
                 if 'spell' in step:
                     number(step['spell'], f'{where}.spell', 1, 2**32 - 1, True)
+            if metric == 'reaction_to':
+                require(step.get('target') in actor_ids, f'{where}: reaction_to metric needs the target unit')
             if metric == 'carried_aura_count':
                 require(type(step.get('spells')) is list and 0 < len(step['spells']) <= 50,
                         f'{where}: carried_aura_count must list 1-50 spells')

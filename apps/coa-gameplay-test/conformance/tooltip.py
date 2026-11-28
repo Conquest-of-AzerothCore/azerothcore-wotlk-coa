@@ -48,6 +48,7 @@ PERIOD_PROBE_FACTOR = 2
 PERIODIC_TOTAL_LETTERS = 'oO'
 PERIODIC_AT_APPLY_ATTRIBUTE_EX5 = 0x200
 DEFAULT_PERIOD_MS = 5000
+PERMANENT_DURATION_MS = -1.0
 DESCRIPTION = 'Description[enUS]'
 
 COLOR_CODE = re.compile(r'\|[cC][0-9a-fA-F]{8}|\|[rR]')
@@ -56,7 +57,7 @@ EXTENSION_BLOCK = re.compile(r'@ext:(?P<body>(?:(?!:ext@).)*):ext@', re.DOTALL)
 SPELL_MARKUP = re.compile(r'@s:(?P<spell>\d+):(?P<flags>-?\d+)@')
 TOKEN_SPELL = re.compile(r'\$(\d+)')
 SPELL_TOKEN = re.compile(r'(?P<spell>\d*)(?P<letter>[A-Za-z])(?P<digit>[1-9]?)')
-SINGLE_CONDITION = re.compile(r'[sS](\d+)')
+SINGLE_CONDITION = re.compile(r'[sS](\d+)(?:\$\?[sS]\1)*')
 SCALED_TOKEN = re.compile(r'(?P<operator>[/*])(?P<factor>\d+);')
 FORMAT_SUFFIX = re.compile(r'\.[1-9]')
 NAMED_VARIABLE = re.compile(r'<(\w+)>')
@@ -226,6 +227,13 @@ class Records:
                       in self.raw_records('ItemSubClass', ITEM_SUBCLASS_LAYOUT, ITEM_SUBCLASS_RECORD)
                       if item_class == WEAPON_ITEM_CLASS]
         return max(subclasses) + 1 if subclasses else 0
+
+    def is_permanent_duration(self, spell_id: int) -> bool:
+        index = self.field('Spell', spell_id, 'DurationIndex')
+        if not index or self.field('SpellDuration', index, 'DurationPerLevel') != 0:
+            return False
+        return (self.field('SpellDuration', index, 'Duration') == -1
+                and self.field('SpellDuration', index, 'MaxDuration') == -1)
 
     def duration_ms(self, spell_id: int) -> float:
         index = self.field('Spell', spell_id, 'DurationIndex')
@@ -705,6 +713,8 @@ class Tooltip:
         if letter in 'hH':
             return self.spell_counter(spell_id, 'h'), None, 'chance_pct', None
         if letter in 'dD':
+            if self.records.is_permanent_duration(spell_id):
+                return PERMANENT_DURATION_MS, None, 'duration_ms', None
             return self.records.duration_ms(spell_id), None, 'duration_ms', None
         if letter in 'uUiI':
             return self.spell_counter(spell_id, letter.lower()), None, 'count', None

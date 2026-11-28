@@ -3945,6 +3945,8 @@ private:
         }
         if (metric == "pvp_flagged")
             return unit->IsPvP();
+        if (metric == "reaction_to")
+            return double(unit->GetReactionTo(GetUnit(step.get<std::string>("target"))));
         if (metric == "creature_type")
             return unit->GetCreatureType();
         if (metric == "display_id")
