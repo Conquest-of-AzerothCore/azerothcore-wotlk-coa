@@ -23,12 +23,12 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
   1, 1, 0, 2048, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.584, 1, 1, 1, 0, 0, 1, 0, 0, '', 0)
 ON DUPLICATE KEY UPDATE `entry` = VALUES(`entry`);
 
-DELETE FROM `creature_template_model` WHERE `CreatureID` = 304252;
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 304252 AND `Idx` = 0;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
 (304252, 0, 7891, 1, 1, 0);
 
-DELETE FROM `creature_template_spell` WHERE `CreatureID` = 304252;
+DELETE FROM `creature_template_spell` WHERE `CreatureID` = 304252 AND `Index` = 0;
 INSERT INTO `creature_template_spell` (`CreatureID`, `Index`, `Spell`, `VerifiedBuild`) VALUES
 (304252, 0, 3427, 0);
 
@@ -39,9 +39,9 @@ UPDATE `item_template` SET `spellppmRate_1` = 0.5 WHERE `entry` IN (410158, 4100
 -- Worldforged object placements (Azeroth World Editor 0.10.0, 2026-11-27)
 -- 6940831 Old Dragonmaw Cleaver (387882), 6941742 Flower of Tranquility (254222)
 UPDATE `gameobject` SET
-  `position_x` = CASE `guid` WHEN 6940831 THEN -3415.8270935539254 WHEN 6941742 THEN 2620.434907740776 END,
-  `position_y` = CASE `guid` WHEN 6940831 THEN -3073.340454074676 WHEN 6941742 THEN 1339.4560349653627 END,
-  `position_z` = CASE `guid` WHEN 6940831 THEN 23.83972930057409 WHEN 6941742 THEN 260.1748362502452 END,
+  `position_x` = CASE `guid` WHEN 6940831 THEN -3415.8270935539254 WHEN 6941742 THEN 2620.46 END,
+  `position_y` = CASE `guid` WHEN 6940831 THEN -3073.340454074676 WHEN 6941742 THEN 1339.62 END,
+  `position_z` = CASE `guid` WHEN 6940831 THEN 23.83972930057409 WHEN 6941742 THEN 256.20 END,
   `orientation` = CASE `guid` WHEN 6940831 THEN 5.096250641364397 WHEN 6941742 THEN 0.62312 END,
   `rotation0` = CASE `guid` WHEN 6940831 THEN 0.17780774560313614 WHEN 6941742 THEN 0 END,
   `rotation1` = CASE `guid` WHEN 6940831 THEN 0.28539597258425564 WHEN 6941742 THEN 0 END,
