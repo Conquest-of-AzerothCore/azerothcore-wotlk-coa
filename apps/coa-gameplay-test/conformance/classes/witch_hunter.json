@@ -413,6 +413,7 @@
     "501340": "Houndmaster",
     "501341": "Houndmaster",
     "501342": "Houndmaster",
+    "501343": "Houndmaster",
     "500094": "Black Knight",
     "503679": "Boltslinger",
     "523485": "Black Knight",
@@ -27866,8 +27867,21 @@
       "cast_in_before": false,
       "ally_arm": {
         "allies": 5,
-        "reach_source": "Spell.dbc 523510 Effect[0] ImplicitTargetA=56 (TARGET_UNIT_CASTER_AREA_RAID), RadiusIndex=23 (40 yd), Stage 1 D-2 sets MaxAffectedTargets=0 (uncapped raid-wide) reaching party subgroup 1 (ally) and raid subgroup 2 (ally5).",
+        "reach_source": "Spell.dbc 523510 Effect[0] ImplicitTargetA=56 (TARGET_UNIT_CASTER_AREA_RAID), RadiusIndex=23 (40 yd), Stage 1 D-2 sets MaxAffectedTargets=0 (uncapped raid-wide) reaching caster, party subgroup 1 (ally..ally4), and raid subgroup 2 (ally5).",
         "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 523510
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Caster receives 523510 (0 -> 1)."
+          },
           {
             "actors": [
               "ally"
@@ -27880,6 +27894,45 @@
             "expected": 1,
             "tolerance": 0,
             "source": "Party member ally receives 523510 (0 -> 1)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 523510
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Party member ally2 receives 523510 (0 -> 1)."
+          },
+          {
+            "actors": [
+              "ally3"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 523510
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Party member ally3 receives 523510 (0 -> 1)."
+          },
+          {
+            "actors": [
+              "ally4"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 523510
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Party member ally4 receives 523510 (0 -> 1)."
           },
           {
             "actors": [
@@ -27906,7 +27959,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Settled Stage 1 D-2 (MaxAffectedTargets=0): 523510 Effect[0] +285 Armor + Effect[1] +12 Agility (+24 Armor via StatSystem.cpp:394) = +309 Armor on naked L60 Human Witch Hunter raid subgroup 2 member ally5 (254 -> 563; applies 523510 to both ally and ally5). Live evidence: 2026-08-15 12:19:01.119, spell 523510, Ascension combat log, private archive."
+      "observe_source": "Settled Stage 1 D-2 (MaxAffectedTargets=0): 523510 Effect[0] +285 Armor + Effect[1] +12 Agility (+24 Armor via StatSystem.cpp:394) = +309 Armor on naked L60 Human Witch Hunter raid subgroup 2 member ally5 (254 -> 563; applies 523510 to every eligible member: caster, ally, ally2, ally3, ally4, and ally5). Live evidence: 2026-08-15 12:19:01.119, spell 523510, Ascension combat log, private archive."
     },
     {
       "spell": 523510,
@@ -30205,7 +30258,7 @@
     },
     {
       "spell": 680585,
-      "name": "Dark Aura (does not stack with Prayer of Shadow Protection 27683)",
+      "name": "Dark Aura (does not stack with Prayer of Shadow Protection R2 39374)",
       "kind": "metric_delta",
       "variant": "no_stack_shadow_prot",
       "label_suffix": "no_stack_shadow_prot",
@@ -30216,7 +30269,7 @@
       "cast_in_before": false,
       "phase_auras": [
         [
-          27683,
+          39374,
           1,
           "caster",
           "caster"
@@ -30226,14 +30279,14 @@
       "fields": {
         "school": 5
       },
-      "before_expected": 60.0,
-      "expected": 60.0,
+      "before_expected": 70.0,
+      "expected": 70.0,
       "expected_gain": 0.0,
       "tolerance": 0.01,
       "wait_ms": 1200,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Unit.cpp:7316 GetMaxPositiveAuraModifierByMiscMask(SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, 1<<5) takes max rather than sum: with Prayer of Shadow Protection 27683 (+70 Shadow Res) active, casting Dark Aura 680585 (+60) leaves Shadow Resistance at 70 (not 130)."
+      "observe_source": "Unit.cpp:7316 GetMaxPositiveAuraModifierByMiscMask(SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, 1<<5) takes max rather than sum: with Prayer of Shadow Protection R2 39374 (Spell.dbc EffectBasePoints[0]=69 + DieSides=1 = +70 Shadow Res, strictly stronger than Dark Aura's +60) active, casting Dark Aura 680585 (+60) leaves Shadow Resistance at 70 (not 130)."
     },
     {
       "spell": 681442,
@@ -32170,7 +32223,8 @@
         "spell": 41394,
         "delay_ms": 2500,
         "count": 1,
-        "wait_ms": 500
+        "wait_ms": 500,
+        "before_aura": 802281
       },
       "metric": "aura",
       "fields": {
@@ -32197,11 +32251,11 @@
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "Display ID restored after incoming strike breaks Infiltrate (verified present at 2500 ms without strike by undead_form)."
+            "source": "Display ID restored after incoming strike breaks Infiltrate (802281 presence confirmed at 2500 ms right before the strike via after_trigger_strike.before_aura)."
           }
         ]
       },
-      "observe_source": "AscensionWitchHunterCompletion.cpp:447 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE | AURA_INTERRUPT_FLAG_DIRECT_DAMAGE to 802281: hostile Light of the Naaru 41394 strike at 2500 ms removes 802281."
+      "observe_source": "AscensionWitchHunterCompletion.cpp:447 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE | AURA_INTERRUPT_FLAG_DIRECT_DAMAGE to 802281: after_trigger_strike.before_aura asserts aura 802281 is present on caster at 2500 ms right before hostile Light of the Naaru 41394 strikes, and the final read confirms 802281 is removed."
     },
     {
       "spell": 802826,
@@ -33838,16 +33892,22 @@
       "metric": "health",
       "fields": {},
       "before_expected": 20000,
-      "expected": 19283,
-      "after_at_least": 19180,
-      "after_at_most": 19450,
-      "after_expiry_expected": 19044,
-      "tolerance": 120,
+      "expected": 19285,
+      "after_at_least": 19260,
+      "after_at_most": 19310,
+      "after_expiry_expected": 19047,
+      "tolerance": 15,
       "wait_ms": 200,
       "expiry_wait_ms": 5500,
+      "mid_expiry_read": {
+        "wait_ms": 4000,
+        "expected": 19094,
+        "tolerance": 15,
+        "source": "At t=4400 ms (4000 ms into expiry_wait_ms; 4 of 5 x 1000 ms stagger ticks paid: 48+48+48+47 = 191 of 238, leaving tick 5's 47 HP unpaid), HP is 19094 (band [19079, 19109], non-overlapping with final 19047 [19032, 19062]); an early 4-second payout reads 19047 and alerts."
+      },
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "AscensionWitchHunterDefenses.cpp:72-99 pays out the staggered 25% over 5 x 1000 ms DOT ticks bypassing armor: Void Zone 92559 (~956 post-armor on Black Knight L60 Witch Hunter) immediately drops HP by 75% (~717 -> ~19283 at t=200 ms), then after 5500 ms (5 ticks complete) HP drops the remaining 25% (~239 -> ~19044)."
+      "observe_source": "AscensionWitchHunterDefenses.cpp:72-99,154-156 pays out the staggered 25% over 5 x 1000 ms DOT ticks bypassing armor: deterministic Void Zone 92559 (BasePoints 999 + DieSides 1 = 1000 raw, 953 post-armor on Black Knight L60 Witch Hunter) immediately drops HP by 715 -> 19285 at t=400 ms (238 staggered into [48, 48, 48, 47, 47]), reads 19094 at t=4400 ms (4 ticks paid, tick 5 unpaid), and reaches 19047 at t=5900 ms (all 5 ticks complete)."
     },
     {
       "spell": 562390,

@@ -6915,7 +6915,7 @@
       "680585 behaviour_metric_delta no_stack_shadow_prot"
     ],
     "kind": "claim",
-    "reason": "Exclusive resistance aura (SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE): with Prayer of Shadow Protection 27683 (+70 Shadow Res) active, casting Dark Aura 680585 (+60) leaves Shadow Resistance at 70 (+0 gain)."
+    "reason": "Exclusive resistance aura (SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE): with Prayer of Shadow Protection R2 39374 (+70 Shadow Res, strictly stronger than Dark Aura's +60) active, casting Dark Aura 680585 (+60) leaves Shadow Resistance at 70 (+0 gain)."
   },
   {
     "spell": 681442,
@@ -7418,6 +7418,6 @@
       "807733 behaviour_metric_delta stagger_payout"
     ],
     "kind": "claim",
-    "reason": "AscensionWitchHunterDefenses.cpp:72-99, 142-157: absorbs 25% of monster Physical damage (92559), 0% of Magic damage (41394), and pays out the staggered 25% over 5 x 1000 ms ticks."
+    "reason": "AscensionWitchHunterDefenses.cpp:72-99, 142-157: absorbs 25% of monster Physical damage (92559), 0% of Magic damage (41394), and pays out the staggered 25% over 5 x 1000 ms ticks (verified at t=400 ms 19285, mid-payout t=4400 ms 19094 after 4 ticks, and completion t=5900 ms 19047)."
   }
 ]

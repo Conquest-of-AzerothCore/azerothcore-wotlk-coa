@@ -2222,6 +2222,10 @@ class WitchHunterExtraMetricsEvidenceTest(unittest.TestCase):
                 self.assertEqual(evidence_of([claim('Deals 50 Fire damage.', label)], [read])[0], [DATA])
                 unlearned = judged(label, BEHAVIOUR_METRIC_DELTA, metric)
                 self.assertEqual(evidence_of([claim(text, label)], [unlearned])[0], [DATA])
+        for metric in ('display_id', 'display_of_creature'):
+            label = f'1 behaviour_metric_delta {metric}_form_guard'
+            read = judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)
+            self.assertEqual(evidence_of([claim('Deals 50 Fire damage while in this form.', label)], [read])[0], [DATA])
 
 
 if __name__ == '__main__':

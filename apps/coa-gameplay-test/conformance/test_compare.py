@@ -2443,6 +2443,22 @@ class GeneratedTokenTest(unittest.TestCase):
         self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '8041').status, 'tolerated')
         self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '9000').status, 'alert')
 
+    def test_permanent_spell_duration_requires_exact_sentinel(self):
+        from compare import Tokens, judge_token
+        from tooltip import PERMANENT_DURATION_MS, Displayed, Readout
+        from values import Expectation
+        exp = Expectation(
+            label='802281 spell_duration 802281 #0', check='spell_duration', spell_id=802281, rank_id=802281,
+            effect_index=None, displayed='$d', rule='read permanent duration', model={'effect_spell': 802281})
+        base = Verdict(
+            label=exp.label, status='unmeasured', measured=None, expected=None, low=None, high=None, explanation='',
+            scenario='s', spell_id=802281, rank_id=802281, check=exp.check, build='a' * 64)
+        tokens = Tokens(Readout([Displayed('$d', PERMANENT_DURATION_MS, None, 'duration_ms')], []))
+        ok = judge_token(base, exp, None, -1.0, tokens, None, 'Infiltrate')
+        self.assertEqual((ok.status, ok.expected, ok.low, ok.high), ('ok', -1.0, -1.0, -1.0))
+        zero = judge_token(base, exp, None, 0.0, tokens, None, 'Infiltrate')
+        self.assertEqual(zero.status, 'alert')
+
 
 def fixture_generate(class_id: int, out: Path, **options) -> Path:
     from conformance import generate

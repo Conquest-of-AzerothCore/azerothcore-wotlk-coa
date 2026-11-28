@@ -81,9 +81,12 @@ gaps that cannot be expressed cleanly without extending the shared tooling and h
 5. **`apps/coa-gameplay-test/conformance/coverage.py`**:
    - Register `stealth_detection`, `reputation_gain`, `pet_entry`, `pet_health`, and `reaction_to` as `STATE` metrics
      with matching `STATE_PROMISES`, and widen `display_id` / `display_of_creature` promises to match `"form"`.
-6. **New `metric_delta_options/` and `kinds/` modules (plus `ally_arm.py` bystander support)**:
-   - `metric_delta_options/destination_unit.py` (`ORDER = 46`), `location.py` (`ORDER = 47`), and `bystander.py`
-     (`ORDER = 48`), with `ally_arm.py` allowing `bystander` as an arm actor when the option is configured.
+6. **New `metric_delta_options/` and `kinds/` modules (plus `ally_arm.py` bystander and `after_trigger_strike.py` pre-strike aura support)**:
+   - `metric_delta_options/destination_unit.py` (`ORDER = 46`), `location.py` (`ORDER = 47`), `bystander.py`
+     (`ORDER = 48`), and `mid_expiry_read.py` (`ORDER = 49`, splitting `expiry_wait_ms` for an intermediate read between
+     tick 4 and tick 5 on `807733`), with `ally_arm.py` allowing `bystander` as an arm actor when configured and
+     `after_trigger_strike.py` accepting an optional `before_aura` presence read right after `delay_ms` and before the
+     strike (`802281`).
    - `kinds/pet_dismiss.py` (`ORDER = 66`) and `kinds/pet_resurrect.py` (`ORDER = 67`), recording `contrast: 'own_cast'`
      so `coverage.py` scores them as behavioural state proofs.
 7. **`src/server/coa/CoAGameplayTest.cpp` and `apps/coa-gameplay-test/run.py`**:

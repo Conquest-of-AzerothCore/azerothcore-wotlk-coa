@@ -65,8 +65,8 @@ from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUE
                        questions, spell_name, write_questions)
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MINIMUM_PASSES, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE,
                    TALENT_DELTA, TWO_SIDED_99, levers, mean_interval, ratio_interval, student_t_quantile)
-from tooltip import (CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, UnscaledForcedPoints,
-                     Unreadable)
+from tooltip import (PERMANENT_DURATION_MS, CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip,
+                     UnscaledForcedPoints, Unreadable)
 from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK,
                       MAGNITUDE_CHECK, MINION, MINION_COOLDOWN_BAND, PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK,
                       cooldown_trial_label, duration_trial_label, minion_cooldown_event_label)
@@ -1000,8 +1000,9 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
     if expectation.check == 'aura_amplitude_ms':
         return deterministic(base, measured, measured, token.value, f'{token.text} read with the measured stats')
     if expectation.check == 'spell_duration':
-        verdict = deterministic(base, measured, measured, token.value,
-                                f'{token.text} read from SpellDuration against the {SPELL_DURATION_SCOPE}')
+        why = f'{token.text} read from SpellDuration against the {SPELL_DURATION_SCOPE}'
+        verdict = (exact(base, measured, token.value, why) if token.value == PERMANENT_DURATION_MS
+                   else deterministic(base, measured, measured, token.value, why))
         return replace(verdict, detail={**(verdict.detail or {}), 'scope': SPELL_DURATION_SCOPE})
     effect = token_effect(expectation)
     ticks = (expectation.model or {}).get(PER_TICK_TICKS)

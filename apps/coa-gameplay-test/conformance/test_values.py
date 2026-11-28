@@ -1321,6 +1321,17 @@ class ValueReagentsTest(unittest.TestCase):
         self.assertIn(aura_step, scenario['steps'][:cast_index])
         self.assertEqual(scenario['location'], loc)
 
+        dark_tonic = ClassSpell(680491, 'Dark Tonic', (680491,), 680491, 10, False)
+        non_hostile = {**witch_hunter, VALUE_REAGENTS_KEY: [{'spell': 680491, 'target_auras': [[8599, 1]]}]}
+        nh_scenario, _, _ = value_scenario(non_hostile, dark_tonic, 680491)
+        self.assertEqual([creature['id'] for creature in nh_scenario['creatures']], [TARGET])
+        self.assertIn(aura_step, nh_scenario['steps'])
+
+        passive = ClassSpell(562225, 'Night Hunter', (562225,), 562225, 1, True)
+        with self.assertRaises(ValueError):
+            value_scenario({**witch_hunter, VALUE_REAGENTS_KEY: [{'spell': 562225, 'target_auras': [[8599, 1]]}]},
+                           passive, 562225)
+
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_permanent_own_duration_reads_spell_duration_ms_even_with_cast_time(self):
         witch_hunter = load_class_file(15)

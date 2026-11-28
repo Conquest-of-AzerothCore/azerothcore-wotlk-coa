@@ -351,8 +351,9 @@ class WeaponSetDataTest(unittest.TestCase):
                 extra_ranks.update(str(rank) for rank in class_spell.ranks)
         actual = self.witch_hunter['spell_weapon_sets']
         self.assertEqual({spell: name for spell, name in actual.items() if spell not in extra_ranks}, expected)
-        for spell in sorted(set(actual) & extra_ranks):
+        for spell in sorted(extra_ranks):
             with self.subTest(extra_spell=spell):
+                self.assertIn(spell, actual)
                 self.assertEqual(armed_for(self.witch_hunter, self.records, int(spell))['weapon_set'], actual[spell])
 
     def test_two_handed_and_ranged_spells_take_their_sets_from_the_dbc(self):

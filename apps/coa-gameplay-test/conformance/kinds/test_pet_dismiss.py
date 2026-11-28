@@ -1,3 +1,4 @@
+from dataclasses import replace
 from pathlib import Path
 import sys
 import unittest
@@ -5,12 +6,14 @@ import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from behaviours import BEHAVIOUR_METRIC_DELTA, behaviour_scenario
+from behaviours import BEHAVIOUR_METRIC_DELTA, OWN_CAST_CONTRAST, behaviour_scenario
 from compare import judge_behaviour
+from coverage import clause_coverage
 from kinds.pet_dismiss import KIND, label, pet_dismiss_spec, pet_dismiss_verdict
 from profile import load_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
+from values import Expectation
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
 WITCH_HUNTER_CLASS_ID = 15
@@ -31,6 +34,22 @@ def dismiss_entry(**overrides) -> dict:
     }
 
 
+def synthetic_expectation() -> Expectation:
+    reads = {'before': 'dismiss before', 'control': 'dismiss control', 'cast_failure': 'dismiss cast_failure',
+             'after': 'dismiss after'}
+    return Expectation(
+        label=f'{DISMISS_HOUND} {BEHAVIOUR_METRIC_DELTA} {KIND}',
+        check=BEHAVIOUR_METRIC_DELTA,
+        spell_id=DISMISS_HOUND,
+        rank_id=DISMISS_HOUND,
+        effect_index=None,
+        displayed='',
+        rule='Dismiss your Shadow Hound.',
+        model={'kind': KIND, 'metric': 'pet_entry', 'spell': DISMISS_HOUND, 'summon_spell': WHISTLE,
+               'pet_entry': SHADOWHOUND, 'reads': reads},
+    )
+
+
 class PetDismissTests(unittest.TestCase):
     def test_spec_validates_fields_and_label(self):
         spec = pet_dismiss_spec(dismiss_entry())
@@ -47,18 +66,9 @@ class PetDismissTests(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 pet_dismiss_spec(dismiss_entry(**bad))
 
-    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
-    def test_scenario_and_verdicts_judge_clean_dismiss_and_mutants(self):
-        class_file = load_class_file(WITCH_HUNTER_CLASS_ID)
-        scenario, expectations = behaviour_scenario(class_file, dismiss_entry())
-        run.validate(scenario)
-        self.assertEqual(len(expectations), 1)
-        exp = expectations[0]
+    def test_verdicts_judge_clean_dismiss_and_mutants_without_dbc(self):
+        exp = synthetic_expectation()
         reads = exp.model['reads']
-        metrics = [step.get('metric') for step in scenario['steps'] if step.get('action') == 'assert']
-        self.assertIn('pet_entry', metrics)
-        self.assertIn('cast_failure', metrics)
-
         base = base_verdict(exp)
         ok_run = FakeRun({reads['before']: SHADOWHOUND, reads['control']: SHADOWHOUND,
                           reads['cast_failure']: 0, reads['after']: 0})
@@ -78,15 +88,22 @@ class PetDismissTests(unittest.TestCase):
 
         via_dispatch = judge_behaviour(base, ok_run, exp)
         self.assertEqual(via_dispatch.status, 'ok')
-        from dataclasses import replace
-        from behaviours import OWN_CAST_CONTRAST
-        from coverage import clause_coverage
         self.assertEqual(via_dispatch.detail['contrast'], OWN_CAST_CONTRAST)
         build = 'a' * 64
         cov = clause_coverage([{'spell': DISMISS_HOUND, 'clause': 'Dismiss your Shadow Hound.',
                                 'labels': [exp.label], 'kind': 'claim'}],
                               [replace(via_dispatch, build=build)], build=build)
         self.assertEqual((cov.proven, cov.behaviour), (1, 1))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_scenario_generates_valid_pet_dismiss_steps(self):
+        class_file = load_class_file(WITCH_HUNTER_CLASS_ID)
+        scenario, expectations = behaviour_scenario(class_file, dismiss_entry())
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        metrics = [step.get('metric') for step in scenario['steps'] if step.get('action') == 'assert']
+        self.assertIn('pet_entry', metrics)
+        self.assertIn('cast_failure', metrics)
 
 
 if __name__ == '__main__':

@@ -976,6 +976,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             after_cast.append(measurement(label, CASTER, 'cooldown_ms', spell=rank_id))
             expect(label, 'cooldown_ms', None, str(facts.recast_ms), 'max(RecoveryTime, CategoryRecoveryTime)')
             cast_wanted = True
+    target_aura_steps = value_target_auras(class_file, rank_id)
+    if target_aura_steps and not cast_wanted:
+        raise ValueError(f'{VALUE_REAGENTS_KEY} target_auras for {rank_id} requires a cast, but no cast is generated')
     if cast_wanted:
         if facts.mana_cost > 0 and facts.power_type != MANA:
             cast_steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
@@ -991,7 +994,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                 cast_steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
             cast_steps += ally_setup_steps(records, ally_cast)
             cast['target'] = ALLY
-        cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id) + value_target_auras(class_file, rank_id)
+        cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id) + target_aura_steps
         for item_id, count in reagent_items:
             cast_steps.append({'action': 'add_item', 'actor': CASTER, 'item': item_id, 'count': count})
         if destination_unit is not None:
@@ -1035,8 +1038,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         'players': [player_fixture(class_file)],
         'steps': learn + sampled + cast_steps + after_cast + ally_grant_proofs}
     summon_target = summon_reads and is_hostile(facts_of(records, summon_carrier['summon']))
-    if (is_hostile(facts) or destination_unit == TARGET or summon_target) and cast_wanted:
-        placed = rank_id if is_hostile(facts) or destination_unit == TARGET else summon_carrier['summon']
+    if (is_hostile(facts) or destination_unit == TARGET or summon_target or target_aura_steps) and cast_wanted:
+        placed = (rank_id if is_hostile(facts) or destination_unit == TARGET or target_aura_steps
+                  else summon_carrier['summon'])
         distance = (target_distance_override if target_distance_override is not None
                     else cast_distance(records, placed, honour_min_range(class_file)))
         scenario['creatures'] = [{'id': TARGET, 'owner': CASTER,
