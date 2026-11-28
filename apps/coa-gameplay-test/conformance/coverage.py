@@ -482,8 +482,9 @@ METRIC_EVIDENCE = {
                      'owned_creature_remaining_ms', 'block_value', 'school_prohibited', 'object_scale', 'rooted',
                      'carried_aura_count', 'unit_scale', 'melee_crit_taken_chance', 'display_of_creature'), STATE),
     'enemy_player_aura_duration_ms': READBACK,
+    'map_id': READBACK,
     **dict.fromkeys(('healing_power', 'swim_speed_rate', 'skill_bonus', 'mana_regen_interrupted',
-                     'map_id', 'position_y', 'position_z', 'viewpoint_entry'), STATE),
+                     'position_y', 'position_z', 'viewpoint_entry'), STATE),
     'combat_rating_bonus': STATE,
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
@@ -545,7 +546,6 @@ STATE_PROMISES = {
     'melee_crit_taken_chance': rf'{CRIT_WORDS}|critically strike',
     'display_of_creature': r'transform\w*',
     'carried_aura_count': r'empower\w*|steal(?:s|ing)?|stolen',
-    'map_id': r'teleport\w*',
     'position_y': r'teleport\w*',
     'position_z': r'teleport\w*',
     'viewpoint_entry': r'vision|sight|eye',

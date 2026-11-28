@@ -966,20 +966,26 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             cast_wanted = True
     if cast_wanted:
         cost = cast_power_cost(facts, base_energy)
-        if cost > 0:
-            cast_steps.extend(pay_power_steps(facts.power_type, cost))
         cast = {'action': 'cast', 'actor': CASTER, 'spell': rank_id}
         if is_hostile(facts):
+            if cost > 0:
+                cast_steps.extend(pay_power_steps(facts.power_type, cost))
             cast['target'] = TARGET
             cast_steps += required_target_health_steps(facts)
         elif targets_resurrect(facts):
+            if cost > 0:
+                cast_steps.extend(pay_power_steps(facts.power_type, cost))
             cast_steps.append({'action': 'die', 'actor': ALLY})
             cast['target'] = ALLY
         elif ally_cast is not None:
             if targets_raid(facts):
                 cast_steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
             cast_steps += ally_setup_steps(records, ally_cast)
+            if cost > 0:
+                cast_steps.extend(pay_power_steps(facts.power_type, cost))
             cast['target'] = ALLY
+        elif cost > 0:
+            cast_steps.extend(pay_power_steps(facts.power_type, cost))
         cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id)
         reagent_items, destination_unit = value_reagent_entry(class_file, rank_id)
         for item_id, count in reagent_items:

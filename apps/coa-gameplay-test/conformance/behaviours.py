@@ -1925,8 +1925,9 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             or not 0 < spec.target_health_after[1] < 100):
         raise ValueError(f'{spec.spell} sets the dummy\'s health after the trigger only for a dummy target, inside '
                          f'the wait and between 0 and 100 percent')
-    if spec.target_casts_before and (spec.target != TARGET or spec.attack_swings):
-        raise ValueError(f'{spec.spell} has the dummy cast before the trigger only with the dummy as its target')
+    if spec.target_casts_before and (spec.target not in (TARGET, ENEMY_PLAYER) or spec.attack_swings):
+        raise ValueError(f'{spec.spell} has the target cast before the trigger only with the dummy or enemy as its '
+                         f'target')
     if spec.game_time is not None and (spec.attack_swings or (spec.game_time[1] is None)
                                        != (spec.expiry_wait_ms is None)):
         raise ValueError(f'{spec.spell} stamps game time around a trigger cast only, with an expired window exactly '
@@ -2034,6 +2035,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             {'action': 'wait', 'ms': spec.enemy_cast_wait_ms})]
 
     def target_cast_steps() -> list[dict]:
+        if spec.target == ENEMY_PLAYER:
+            return [step for spell in spec.target_casts_before
+                    for step in ({'action': 'cast', 'actor': ENEMY_PLAYER, 'spell': spell, 'target': ENEMY_PLAYER},
+                                 {'action': 'wait', 'label': f'{spell} cast settle', 'ms': TARGET_CAST_SETTLE_MS})]
         return [step for spell in spec.target_casts_before
                 for step in ({'action': 'cast', 'actor': TARGET, 'spell': spell},
                              {'action': 'wait', 'label': f'{spell} cast settle', 'ms': TARGET_CAST_SETTLE_MS})]
@@ -2213,8 +2218,9 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                                   {'action': 'wait', 'label': 'pvp settle', 'ms': ENEMY_PLAYER_SETTLE_MS}]
         scenario['players'].append({**player_fixture(class_file), 'id': ENEMY_PLAYER, 'race': spec.enemy_player_race,
                                     **({'class': spec.enemy_player_class} if spec.enemy_player_class else {})})
+        enemy_learned = (*spec.enemy_casts, *(spec.target_casts_before if spec.target == ENEMY_PLAYER else ()))
         steps[settled:settled] = [{'action': 'learn', 'actor': ENEMY_PLAYER, 'spell': spell}
-                                  for spell in dict.fromkeys(spec.enemy_casts)]
+                                  for spell in dict.fromkeys(enemy_learned)]
         if spec.helper_casts:
             scenario['players'].append({**player_fixture(class_file), 'id': ENEMY_HELPER,
                                         'race': spec.enemy_player_race})

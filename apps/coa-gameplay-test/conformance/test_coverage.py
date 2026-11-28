@@ -520,7 +520,7 @@ class EvidenceStatusTest(unittest.TestCase):
         self.assertEqual(STATE_PROMISES['distance_2d'], r'location|hook\w*|pull\w*')
 
     def test_teleport_coordinates_and_viewpoint_entry_are_promised_states(self):
-        for metric in ('map_id', 'position_y', 'position_z'):
+        for metric in ('position_y', 'position_z'):
             label = f'535595 behaviour_metric_delta {metric}'
             self.assertEqual(METRIC_EVIDENCE[metric], STATE)
             verdicts = [judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=OWN_CAST_CONTRAST)]
@@ -528,6 +528,12 @@ class EvidenceStatusTest(unittest.TestCase):
             unpromised = claim('Increases your armor by 285.', label)
             self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
             self.assertEqual(evidence_of([unpromised], verdicts)[0], [DATA])
+        self.assertEqual(METRIC_EVIDENCE['map_id'], READBACK)
+        self.assertNotIn('map_id', STATE_PROMISES)
+        map_label = '535595 behaviour_metric_delta ally_map'
+        map_verdicts = [judged(map_label, BEHAVIOUR_METRIC_DELTA, 'map_id', contrast=OWN_CAST_CONTRAST)]
+        map_claim = claim('Break open a rift through the nether, teleporting group members to Stormwind.', map_label)
+        self.assertEqual(evidence_of([map_claim], map_verdicts)[0], [DATA])
         label = '532229 behaviour_metric_delta viewpoint'
         self.assertEqual(METRIC_EVIDENCE['viewpoint_entry'], STATE)
         verdicts = [judged(label, BEHAVIOUR_METRIC_DELTA, 'viewpoint_entry', contrast=OWN_CAST_CONTRAST)]

@@ -32437,13 +32437,19 @@
       "label_suffix": "gate_refused",
       "quote": "Consumes 2 Felfury",
       "trigger_spell": 705121,
-      "target": "caster",
+      "target": "dummy",
       "measure_actor": "caster",
       "cast_in_before": false,
       "cast_power": 100,
       "phase_auras": [
         [
           800058,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
           1,
           "caster",
           "caster"
@@ -32454,12 +32460,11 @@
         "spell": 705121
       },
       "before_expected": 0,
-      "expected": 63,
-      "after_at_least": 1,
-      "after_at_most": 255,
+      "expected": 85,
+      "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "705121 requires 2 stacks of Felfury 800058 (AscensionCustomResourceData.h: ResourceCostRules) and CasterAuraSpell 803468. Even if required_aura_steps sets 803468, holding only 1 stack of 800058 fails the 2-Felfury resource cost check (SPELL_FAILED_NO_POWER = 63; any nonzero cast_failure in [1, 255]), leaving 0 casts."
+      "observe_source": "705121 requires 2 stacks of Felfury 800058 (AscensionCustomResourceData.h: ResourceCostRules) and CasterAuraSpell 803468. Targeting the same valid dummy and holding CasterAuraSpell 803468 as in consumes, holding only 1 stack of 800058 fails specifically on the 2-Felfury resource cost check with exact SPELL_FAILED_NO_POWER (85)."
     },
     {
       "spell": 705121,
@@ -32559,7 +32564,82 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "AscensionFelswornAbilities.cpp:455-482 schedules 3 casts of 712399 (RadiusIndex 14 = 8 yd + 1.5 yd dummy reach = 9.5 yd) at t=0/300/600 ms at distances 4, 11, 18 yd ahead of caster. Primary dummy at dx=11 yd is within 9.5 yd of all 3 explosions (spell_damage_count 0 -> 3); placed dummy at dx=1 yd is within reach of ONLY Explosion 1 at 4 yd (0 -> 1); placed dummy at dx=24 yd is within reach of ONLY Explosion 3 at 18 yd (0 -> 1). Proves all 3 explosions fire progressively along the 4/11/18 yd line."
+      "observe_source": "AscensionFelswornAbilities.cpp:455-482 schedules 3 casts of 712399 (RadiusIndex 14 = 8 yd + 1.5 yd dummy reach = 9.5 yd) at t=0/300/600 ms at distances 4, 11, 18 yd ahead of caster. Primary dummy at dx=11 yd is within 9.5 yd of all 3 explosions (spell_damage_count 0 -> 3); placed dummy at dx=1 yd is within reach of ONLY Explosion 1 at 4 yd (0 -> 1); placed dummy at dx=24 yd is within reach of ONLY Explosion 3 at 18 yd (0 -> 1). Proves all 3 explosions fire along the 4/11/18 yd line (paired with three_explosions_staged for temporal 0/300/600 ms staging)."
+    },
+    {
+      "spell": 705121,
+      "name": "Sunder (3 explosions staged over time: 1 hit at 150 ms, 3 hits at 1500 ms, dx=24 unstruck at 150 ms)",
+      "kind": "metric_delta",
+      "variant": "three_explosions_staged",
+      "label_suffix": "three_explosions_staged",
+      "quote": "Sunder the ground progressively infront of you, causing 3 explosions one after another",
+      "trigger_spell": 705121,
+      "target": "dummy",
+      "dummy_distance": 11,
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": {
+        "placed": [
+          {
+            "dx": 1.0,
+            "dy": 0.0,
+            "before_expected": 0,
+            "expected": 1
+          },
+          {
+            "dx": 24.0,
+            "dy": 0.0,
+            "before_expected": 0,
+            "expected": 0
+          }
+        ]
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 712399,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 150,
+      "expiry_wait_ms": 1350,
+      "after_expiry_expected": 3,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          100,
+          250
+        ],
+        "expired": [
+          1400,
+          1700
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Temporal staging proof paired with three_explosions: AscensionFelswornAbilities.cpp:455-482 schedules 712399 at t=0/300/600 ms. At 150 ms (between Explosion 1 at 0 ms and Explosion 2 at 300 ms), dummy at dx=11 has received exactly 1 hit (rejecting simultaneous explosions) and placed dummy at dx=24 (within reach of Explosion 3 only) has 0 hits; 1350 ms later (t=1500 ms), dummy at dx=11 reaches 3 total hits."
     },
     {
       "spell": 705121,
@@ -32944,7 +33024,7 @@
     },
     {
       "spell": 705121,
-      "name": "Sunder (Inner Demon reduces target attack power by 23 via 803477, D-3)",
+      "name": "Sunder (Inner Demon reduces target attack power by 23 via 803477)",
       "kind": "metric_delta",
       "variant": "inner_demon_ap",
       "label_suffix": "inner_demon_ap",
@@ -33010,11 +33090,11 @@
             "before_expected": 0,
             "expected": 1,
             "tolerance": 0,
-            "source": "803477 is applied on dummy when Inner Demon 804216 is active and persists at 1500 ms (D-3)."
+            "source": "803477 is applied on dummy when Inner Demon 804216 is active and persists at 1500 ms (20 s duration from helper aura 807428 Effect[2] +20000 ms SPELLMOD_DURATION)."
           }
         ]
       },
-      "observe_source": "AscensionFelswornAbilities.cpp:144-145, 380-381: with Inner Demon 804216 active, 712399 casts 803477 (aura 344 ASCENSION_MOD_ATTACK_POWER_FLAT BP -24 + DS 1 = -23, DurationIndex 18 = 20000 ms after D-3 fix). Dummy AP lifted above 0 floor by AP Test 56412 (precondition fixture, Necromancer Bone Ward 681529 precedent): dummy attack_power drops by exact -23 and aura 803477 is present at 1500 ms."
+      "observe_source": "AscensionFelswornAbilities.cpp:144-145, 380-381: with Inner Demon 804216 active, 712399 casts 803477 (aura 344 ASCENSION_MOD_ATTACK_POWER_FLAT BP -24 + DS 1 = -23); helper aura 807428 (toggled by Inner Demon in AscensionFelsworn.cpp:274) grants +20000 ms flat SPELLMOD_DURATION via Effect[2] matching $/1000;807428s3 = 20 sec. Dummy AP lifted above 0 floor by AP Test 56412 (precondition fixture, Necromancer Bone Ward 681529 precedent): dummy attack_power drops by exact -23 and aura 803477 is present at 1500 ms."
     },
     {
       "spell": 705121,
@@ -33082,7 +33162,7 @@
     },
     {
       "spell": 705121,
-      "name": "Sunder (Inner Demon 803477 held at 5000 ms, D-3 regression)",
+      "name": "Sunder (Inner Demon 803477 held at 5000 ms)",
       "kind": "metric_delta",
       "variant": "inner_demon_held_5s",
       "label_suffix": "inner_demon_held_5s",
@@ -33135,11 +33215,11 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Defect D-3 regression: prior to setting 803477 DurationEntry = sSpellDurationStore.LookupEntry(18) (20000 ms, matching $/1000;807428s3 = 20 sec and live combat logs 20.08..20.44 s), 803477 expired on the very next update tick (~10 ms). Aura 803477 must remain present on dummy at 5000 ms."
+      "observe_source": "Inner Demon helper aura 807428 (toggled in AscensionFelsworn.cpp:274) adds +20000 ms flat SPELLMOD_DURATION via Effect[2] to 803477 (matching $/1000;807428s3 = 20 sec and live combat logs 20.08..20.44 s). Aura 803477 must remain present on dummy at 5000 ms."
     },
     {
       "spell": 705121,
-      "name": "Sunder (Inner Demon 803477 held at 19000 ms, D-3)",
+      "name": "Sunder (Inner Demon 803477 held at 19000 ms)",
       "kind": "metric_delta",
       "variant": "inner_demon_held_19s",
       "label_suffix": "inner_demon_held_19s",
@@ -33192,11 +33272,11 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Defect D-3 duration lower edge: dummy at 24 yd receives a single 712399 hit at t=600 ms (Explosion 3, no refresh from earlier explosions), so 803477 (20000 ms) expires near 20600 ms; aura is held at 19000 ms (18400 ms elapsed > 0.9 * 20000 = 18000 ms)."
+      "observe_source": "803477 duration lower edge (20000 ms supplied by Inner Demon helper aura 807428 Effect[2] SPELLMOD_DURATION): dummy at 24 yd receives a single 712399 hit at t=600 ms (Explosion 3, no refresh from earlier explosions), so 803477 expires near 20600 ms; aura is held at 19000 ms (18400 ms elapsed > 0.9 * 20000 = 18000 ms)."
     },
     {
       "spell": 705121,
-      "name": "Sunder (Inner Demon 803477 gone at 21500 ms, D-3)",
+      "name": "Sunder (Inner Demon 803477 gone at 21500 ms)",
       "kind": "metric_delta",
       "variant": "inner_demon_gone_21s",
       "label_suffix": "inner_demon_gone_21s",
@@ -33249,7 +33329,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Defect D-3 duration upper edge: dummy at 24 yd receives a single 712399 hit at t=600 ms, so 803477 (20000 ms) expires near 20600 ms; aura is absent at 21500 ms (20900 ms elapsed < 1.1 * 20000 = 22000 ms), paired with inner_demon_held_19s."
+      "observe_source": "803477 duration upper edge (20000 ms supplied by Inner Demon helper aura 807428 Effect[2] SPELLMOD_DURATION): dummy at 24 yd receives a single 712399 hit at t=600 ms, so 803477 expires near 20600 ms; aura is absent at 21500 ms (20900 ms elapsed < 1.1 * 20000 = 22000 ms), paired with inner_demon_held_19s."
     },
     {
       "spell": 707901,
@@ -34527,11 +34607,21 @@
         712483
       ],
       "setup_wait_ms": 500,
+      "enemy_player_race": 2,
       "target_casts_before": [
-        12051
+        25222
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 712483,
+          "expected": 1,
+          "actor": "enemy",
+          "after_target_casts": true,
+          "min_stacks": 2
+        }
       ],
       "trigger_spell": 707901,
-      "target": "dummy",
+      "target": "enemy",
       "measure_actor": "caster",
       "cast_in_before": false,
       "cast_power": 100,
@@ -34546,7 +34636,7 @@
       "metric": "spell_damage_total",
       "fields": {
         "spell": 807554,
-        "target": "dummy"
+        "target": "enemy"
       },
       "before_expected": 0,
       "expected": 0,
@@ -34554,7 +34644,7 @@
       "wait_ms": 31000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "AscensionFelswornAuras.cpp:195 fires 807554 only on AURA_REMOVE_BY_EXPIRE. Setup applies 712483 to dummy, dummy casts Evocation 12051 (AscensionFelswornAbilities.cpp:245-252 increments script value count 0 -> 1 on any non-triggered spell cast), then Bane of Fire 707901 immediately overwrites 712483 (AURA_REMOVE_BY_DEFAULT); waiting 31 s past original 30 s duration yields 0 Chaos damage from 807554."
+      "observe_source": "AscensionFelswornAuras.cpp:195 fires 807554 only on AURA_REMOVE_BY_EXPIRE. Setup applies 712483 to enemy player (race 2, 1 base stack), enemy casts real non-triggered Renew 25222 (AscensionFelswornAbilities.cpp:245-253 increments count 0 -> 1 and visual stacks 1 -> 2), before_trigger_reads (after_target_casts, min_stacks 2) verifies >= 2 stacks (at least 1 accrued cast stack) immediately before Bane of Fire 707901 overwrites 712483 (AURA_REMOVE_BY_DEFAULT); waiting 31 s past original 30 s duration yields 0 Chaos damage from 807554 (vs 96 PvP damage on un-overwritten expiry_damage_one)."
     },
     {
       "spell": 712483,
@@ -36360,6 +36450,20 @@
       },
       "ally_arm": {
         "allies": 2,
+        "ally_auras": [
+          [
+            458,
+            1,
+            "ally",
+            "ally"
+          ],
+          [
+            458,
+            1,
+            "ally2",
+            "ally2"
+          ]
+        ],
         "arms": [
           {
             "actors": [
@@ -36376,6 +36480,17 @@
           },
           {
             "actors": [
+              "ally"
+            ],
+            "metric": "run_speed_rate",
+            "fields": {},
+            "before_expected": 1.6,
+            "expected": 1.92,
+            "tolerance": 0.01,
+            "source": "Mounted grouped ally at 35 yd (Brown Horse 458) gains +20% mounted speed (1.60 -> 1.92)."
+          },
+          {
+            "actors": [
               "ally2"
             ],
             "metric": "aura",
@@ -36386,10 +36501,21 @@
             "expected": 0,
             "tolerance": 0,
             "source": "Grouped ally2 at 50 yd (outside 40 yd) does not receive 803343."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "run_speed_rate",
+            "fields": {},
+            "before_expected": 1.6,
+            "expected": 1.6,
+            "tolerance": 0.01,
+            "source": "Mounted grouped ally2 at 50 yd (outside 40 yd) stays at base mount speed (1.60 -> 1.60)."
           }
         ]
       },
-      "observe_source": "Slayer's Pact 803343 Effect[0] APPLY_AREA_AURA_RAID aura 172 MOD_MOUNTED_SPEED_NOT_STACK BasePoints 19 + 1 = +20%, RadiusIndex 23 (40 yd). Mounted on Brown Horse 458 (1.60x): run_speed_rate rises 1.60 -> 1.92."
+      "observe_source": "Slayer's Pact 803343 Effect[0] APPLY_AREA_AURA_RAID aura 172 MOD_MOUNTED_SPEED_NOT_STACK BasePoints 19 + 1 = +20%, RadiusIndex 23 (40 yd). Caster, in-range ally (35 yd), and out-of-range ally2 (50 yd) are all mounted on Brown Horse 458 (1.60x): caster and ally run_speed_rate rise 1.60 -> 1.92 while ally2 stays 1.60 -> 1.60."
     },
     {
       "spell": 803343,
@@ -37345,12 +37471,22 @@
       "before_expected": 0,
       "expected": 1,
       "tolerance": 0,
-      "wait_ms": 1700,
-      "expiry_wait_ms": 600,
+      "wait_ms": 1900,
+      "expiry_wait_ms": 250,
       "after_expiry_expected": 0,
       "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1850,
+          1950
+        ],
+        "expired": [
+          2100,
+          2200
+        ]
+      },
       "void_on_cast_failure": true,
-      "observe_source": "Betrayer's Blow 804766 Effect[1] aura 12 SPELL_AURA_MOD_STUN, DurationIndex 39 = 2000 ms ($804766d). Read on Demon Imp 416: absent before cast (0), present at 1700 ms (1, excludes 10%-short 1800 ms), expired by 2300 ms (0, excludes 10%-long 2200 ms)."
+      "observe_source": "Betrayer's Blow 804766 Effect[1] aura 12 SPELL_AURA_MOD_STUN, DurationIndex 39 = 2000 ms ($804766d). Read on Demon Imp 416: absent before cast (0), present at 1900 ms (inside [1850, 1950], strictly above 10%-short 1800 ms), expired by 2150 ms (inside [2100, 2200], strictly below 10%-long 2200 ms)."
     },
     {
       "spell": 804764,

@@ -687,6 +687,30 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'measured')
         self.assertIn('needs 10 reads', verdict.explanation)
 
+    def test_one_read_of_a_rolled_effect_outside_its_roll_range_alerts_before_sample_check(self):
+        verdict = self.rolled_verdict([999])
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('lie outside the formula range', verdict.explanation)
+
+    def zero_mean_roll_verdict(self, read: str) -> Verdict:
+        label = '1001 effect_value e0 #0'
+
+        def tokens(caster, forced):
+            roll = forced[2] if forced else -2
+            return [Displayed('$s1', abs(roll), 0, 'flat')]
+
+        item = expectation(label, 'effect_value', '$s1', 'read flat', 0, {'samples': 1})
+        reader = FakeTooltips(tokens, {(RANK, 0): (-3, 5)})
+        return self.value_run([item], ['$s1'], [assert_step(label, read)], reader)[label]
+
+    def test_zero_mean_roll_measures_a_valid_read(self):
+        self.assertEqual(self.zero_mean_roll_verdict('0').status, 'measured')
+
+    def test_zero_mean_roll_alerts_on_an_impossible_read(self):
+        verdict = self.zero_mean_roll_verdict('50')
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('lie outside the formula range', verdict.explanation)
+
     def spell_power_roll_verdict(self, count, flagged=True):
         text = '${$m3+0+$sps*.175}'
         label = '1001 effect_value e2 #0'

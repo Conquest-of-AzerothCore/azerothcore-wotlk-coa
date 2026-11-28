@@ -5431,7 +5431,8 @@
       {
         "claim": "causing 3 explosions one after another progressively infront of you",
         "labels": [
-          "705121 behaviour_metric_delta three_explosions"
+          "705121 behaviour_metric_delta three_explosions",
+          "705121 behaviour_metric_delta three_explosions_staged"
         ]
       },
       {

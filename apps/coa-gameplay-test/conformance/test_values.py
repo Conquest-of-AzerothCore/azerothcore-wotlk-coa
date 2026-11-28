@@ -765,7 +765,13 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertEqual(item.model['effect_spell'], 556503)
         self.assertEqual(item.model['effect'], 0)
         self.assertEqual(item.model['ticks'], 4)
-        self.assertGreaterEqual(item.model['samples'], 1)
+        self.assertEqual(item.model['samples'], 2)
+        expected_labels = sample_labels('705121 effect_value 556503e0 #1', 2)
+        sample_steps = [step for step in scenario['steps'] if step.get('label') in expected_labels]
+        self.assertEqual([step['label'] for step in sample_steps], expected_labels)
+        for step in sample_steps:
+            self.assertEqual((step['action'], step['metric'], step['spell'], step['effect']),
+                             ('assert', 'spell_effect_value', 556503, 0))
         self.assertNotIn('705121 effect_value 556503e0 #1', [entry['label'] for entry in periodic_totals])
         self.assertEqual(per_tick_ticks(Records(DataSet(DBC_DIR)), 556503, 0), 4)
 
@@ -1100,6 +1106,24 @@ class ValueAllyCastTest(unittest.TestCase):
                 plain_auras = [step for step in plain['steps']
                                if step.get('metric') in metrics and step.get('spell') == spell_id]
                 self.assertTrue(all(step['actor'] == CASTER for step in plain_auras))
+
+    def test_ally_cast_percentage_energy_funding_runs_after_ally_setup_steps(self):
+        felsworn = load_class_file(14)
+        spell_id = 523483
+        setup_spell = 523495
+        class_file = {**felsworn, 'value_ally_casts': [{'spell': spell_id, 'setup_casts': [setup_spell]}]}
+        scenario, _, _ = value_scenario(
+            class_file, ClassSpell(spell_id, 'Manari', (spell_id,), spell_id, 0, False), spell_id)
+        run.validate(scenario)
+        steps = scenario['steps']
+        setup_settle = max(i for i, step in enumerate(steps) if step.get('label') == f'{setup_spell} ally setup settle')
+        judged_cast = max(i for i, step in enumerate(steps)
+                          if step.get('action') == 'cast' and step.get('spell') == spell_id)
+        fund_steps = [i for i, step in enumerate(steps)
+                      if step.get('action') == 'set_power' and step.get('actor') == CASTER and step.get('power') == ENERGY]
+        self.assertTrue(fund_steps)
+        self.assertLess(setup_settle, fund_steps[-1])
+        self.assertLess(fund_steps[-1], judged_cast)
 
 
 class FirstAuraEffectTest(unittest.TestCase):
