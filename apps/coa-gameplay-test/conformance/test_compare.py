@@ -338,6 +338,25 @@ class CompareTest(unittest.TestCase):
         verdict = self.per_tick_verdict('54', ticks=None)
         self.assertEqual((verdict.status, verdict.expected), ('ok', 54.0))
 
+    def test_a_rolled_per_tick_foreign_total_is_judged_per_tick(self):
+        label = '1001 effect_value 2002e0 #0'
+        text = '${($2002d*1000/$2002T1)*($2002m1+0)}'
+        model = {'effect_spell': 2002, 'effect': 0, 'ticks': 4, 'samples': 2}
+        item = expectation(label, 'effect_value', text, 'read flat per tick', model=model)
+        labels = sample_labels(label, 2)
+
+        def tokens(caster, forced):
+            roll = forced[2] if forced else 95
+            return [Displayed(text, 4.0 * roll, None, 'flat', 2002)]
+
+        reader = FakeTooltips(tokens, {(2002, 0): (94, 2)})
+        ok = self.value_run([item], [text], [assert_step(labels[0], '95'), assert_step(labels[1], '96')], reader)[label]
+        self.assertEqual((ok.status, ok.expected), ('ok', 95.5))
+        self.assertIn('divided by 4 ticks', ok.explanation)
+        self.fresh()
+        bad = self.value_run([item], [text], [assert_step(labels[0], '380'), assert_step(labels[1], '384')], reader)[label]
+        self.assertEqual(bad.status, 'alert')
+
     def rolled_verdict(self, reads, value_of_roll=lambda roll: roll, samples=None):
         text = '${$m1+0+$AP*0.45}'
         label = '1001 effect_value e0 #0'
@@ -667,6 +686,30 @@ class CompareTest(unittest.TestCase):
         verdict = self.rolled_verdict([248])
         self.assertEqual(verdict.status, 'measured')
         self.assertIn('needs 10 reads', verdict.explanation)
+
+    def test_one_read_of_a_rolled_effect_outside_its_roll_range_alerts_before_sample_check(self):
+        verdict = self.rolled_verdict([999])
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('lie outside the formula range', verdict.explanation)
+
+    def zero_mean_roll_verdict(self, read: str) -> Verdict:
+        label = '1001 effect_value e0 #0'
+
+        def tokens(caster, forced):
+            roll = forced[2] if forced else -2
+            return [Displayed('$s1', abs(roll), 0, 'flat')]
+
+        item = expectation(label, 'effect_value', '$s1', 'read flat', 0, {'samples': 1})
+        reader = FakeTooltips(tokens, {(RANK, 0): (-3, 5)})
+        return self.value_run([item], ['$s1'], [assert_step(label, read)], reader)[label]
+
+    def test_zero_mean_roll_measures_a_valid_read(self):
+        self.assertEqual(self.zero_mean_roll_verdict('0').status, 'measured')
+
+    def test_zero_mean_roll_alerts_on_an_impossible_read(self):
+        verdict = self.zero_mean_roll_verdict('50')
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('lie outside the formula range', verdict.explanation)
 
     def spell_power_roll_verdict(self, count, flagged=True):
         text = '${$m3+0+$sps*.175}'
@@ -1223,6 +1266,17 @@ class CompareTest(unittest.TestCase):
         self.fresh()
         bad = self.value_run([expectation(label, 'power_cost', '141', rule)], [],
                              [assert_step(label, '155')], constant_reader())
+        self.assertEqual(bad[label].status, 'alert')
+
+    def test_base_energy_percent_power_cost_is_compared_and_alerts_on_mismatch(self):
+        label = '1001 power_cost'
+        rule = 'ManaCost 0 + 24% of base_energy 100 divisor 1'
+        ok = self.value_run([expectation(label, 'power_cost', '24', rule)], [],
+                            [assert_step(label, '24')], constant_reader())
+        self.assertEqual((ok[label].status, ok[label].measured, ok[label].expected), ('ok', 24.0, 24.0))
+        self.fresh()
+        bad = self.value_run([expectation(label, 'power_cost', '24', rule)], [],
+                             [assert_step(label, '30')], constant_reader())
         self.assertEqual(bad[label].status, 'alert')
 
     def test_known_aura_absent_is_an_alert(self):

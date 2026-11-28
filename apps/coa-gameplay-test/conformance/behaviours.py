@@ -1925,8 +1925,9 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             or not 0 < spec.target_health_after[1] < 100):
         raise ValueError(f'{spec.spell} sets the dummy\'s health after the trigger only for a dummy target, inside '
                          f'the wait and between 0 and 100 percent')
-    if spec.target_casts_before and (spec.target != TARGET or spec.attack_swings):
-        raise ValueError(f'{spec.spell} has the dummy cast before the trigger only with the dummy as its target')
+    if spec.target_casts_before and (spec.target not in (TARGET, ENEMY_PLAYER) or spec.attack_swings):
+        raise ValueError(f'{spec.spell} has the target cast before the trigger only with the dummy or enemy as its '
+                         f'target')
     if spec.game_time is not None and (spec.attack_swings or (spec.game_time[1] is None)
                                        != (spec.expiry_wait_ms is None)):
         raise ValueError(f'{spec.spell} stamps game time around a trigger cast only, with an expired window exactly '
@@ -2034,6 +2035,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             {'action': 'wait', 'ms': spec.enemy_cast_wait_ms})]
 
     def target_cast_steps() -> list[dict]:
+        if spec.target == ENEMY_PLAYER:
+            return [step for spell in spec.target_casts_before
+                    for step in ({'action': 'cast', 'actor': ENEMY_PLAYER, 'spell': spell, 'target': ENEMY_PLAYER},
+                                 {'action': 'wait', 'label': f'{spell} cast settle', 'ms': TARGET_CAST_SETTLE_MS})]
         return [step for spell in spec.target_casts_before
                 for step in ({'action': 'cast', 'actor': TARGET, 'spell': spell},
                              {'action': 'wait', 'label': f'{spell} cast settle', 'ms': TARGET_CAST_SETTLE_MS})]
@@ -2213,8 +2218,9 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                                   {'action': 'wait', 'label': 'pvp settle', 'ms': ENEMY_PLAYER_SETTLE_MS}]
         scenario['players'].append({**player_fixture(class_file), 'id': ENEMY_PLAYER, 'race': spec.enemy_player_race,
                                     **({'class': spec.enemy_player_class} if spec.enemy_player_class else {})})
+        enemy_learned = (*spec.enemy_casts, *(spec.target_casts_before if spec.target == ENEMY_PLAYER else ()))
         steps[settled:settled] = [{'action': 'learn', 'actor': ENEMY_PLAYER, 'spell': spell}
-                                  for spell in dict.fromkeys(spec.enemy_casts)]
+                                  for spell in dict.fromkeys(enemy_learned)]
         if spec.helper_casts:
             scenario['players'].append({**player_fixture(class_file), 'id': ENEMY_HELPER,
                                         'race': spec.enemy_player_race})
@@ -9698,14 +9704,24 @@ def fall_damage_scenario(class_file: dict, spec: FallDamageSpec) -> tuple[dict, 
 
     aura_label = fall_damage_label(spec, 'with', 'aura')
     group = [{'action': 'group', 'actor': CASTER, 'target': ALLY}] if spec.receiver == ALLY else []
-    steps = (base_steps(class_file) + group
-             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}]
-             + landing('without')
-             + cast_gate_power_step(facts) + required_aura_steps(facts)
-             + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': CASTER},
-                {'action': 'wait', 'ms': FALL_DAMAGE_AURA_SETTLE_MS},
-                measurement(aura_label, spec.receiver, 'aura', spell=spec.cast_spell)]
-             + landing('with'))
+    if facts.passive:
+        steps = (base_steps(class_file) + group
+                 + landing('without')
+                 + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell},
+                    {'action': 'wait', 'ms': FALL_DAMAGE_AURA_SETTLE_MS},
+                    measurement(aura_label, spec.receiver, 'aura', spell=spec.cast_spell)]
+                 + landing('with'))
+        delivery = f'learning passive {spec.cast_spell} puts its aura on it'
+    else:
+        steps = (base_steps(class_file) + group
+                 + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}]
+                 + landing('without')
+                 + cast_gate_power_step(facts) + required_aura_steps(facts)
+                 + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': CASTER},
+                    {'action': 'wait', 'ms': FALL_DAMAGE_AURA_SETTLE_MS},
+                    measurement(aura_label, spec.receiver, 'aura', spell=spec.cast_spell)]
+                 + landing('with'))
+        delivery = f'a real cast of {spec.cast_spell} puts its aura on it'
     players = [player_fixture(class_file)] + ([{**player_fixture(class_file), 'id': ALLY}]
                                               if spec.receiver == ALLY else [])
     scenario = {
@@ -9713,7 +9729,7 @@ def fall_damage_scenario(class_file: dict, spec: FallDamageSpec) -> tuple[dict, 
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour fall damage'
                 + (f' {spec.label_suffix}' if spec.label_suffix else ''),
         'contract': f'The {spec.receiver} lands from {spec.height:g} yd at {FIXTURE_MAX_HEALTH} maximum health, '
-                    f'once before and once after a real cast of {spec.cast_spell} puts its aura on it. The landing '
+                    f'once before and once after {delivery}. The landing '
                     f'is harness-simulated: the fall action feeds the server\'s own landing handler '
                     f'(Player::HandleFall) a MovementInfo, as a client MSG_MOVE_FALL_LAND would. The health lost with '
                     f'the aura must be below the health lost without it, proving the "{spec.quote}" clause.',

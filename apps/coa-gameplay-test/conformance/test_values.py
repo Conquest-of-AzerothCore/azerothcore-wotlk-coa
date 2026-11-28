@@ -755,9 +755,25 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'is no total over its ticks'):
             value_scenario(listed, spell, 500694)
 
-    def test_a_listed_rolled_effect_is_refused(self):
-        with self.assertRaisesRegex(ValueError, 'whose points roll'):
-            per_tick_ticks(Records(DataSet(DBC_DIR)), VINDICATION_RANK_2, 0)
+    def test_a_listed_rolled_foreign_total_keeps_sampled_per_tick_reads(self):
+        sunder = ClassSpell(705121, 'Sunder', (705121,), 705121, 0, False)
+        felsworn = load_class_file(14)
+        listed = {**felsworn, PER_TICK_FOREIGN_TOTALS: [{'spell': 556503, 'effect': 0, 'reason': 'x'}]}
+        scenario, expectations, periodic_totals = value_scenario(listed, sunder, 705121)
+        run.validate(scenario)
+        item, = [entry for entry in expectations if entry.label == '705121 effect_value 556503e0 #1']
+        self.assertEqual(item.model['effect_spell'], 556503)
+        self.assertEqual(item.model['effect'], 0)
+        self.assertEqual(item.model['ticks'], 4)
+        self.assertEqual(item.model['samples'], 2)
+        expected_labels = sample_labels('705121 effect_value 556503e0 #1', 2)
+        sample_steps = [step for step in scenario['steps'] if step.get('label') in expected_labels]
+        self.assertEqual([step['label'] for step in sample_steps], expected_labels)
+        for step in sample_steps:
+            self.assertEqual((step['action'], step['metric'], step['spell'], step['effect']),
+                             ('assert', 'spell_effect_value', 556503, 0))
+        self.assertNotIn('705121 effect_value 556503e0 #1', [entry['label'] for entry in periodic_totals])
+        self.assertEqual(per_tick_ticks(Records(DataSet(DBC_DIR)), 556503, 0), 4)
 
     def test_trailing_digit_on_a_proc_count_token_is_unmeasurable_not_unreadable(self):
         scenario, expectations = self.build(LIGHTKEEPER, LIGHTKEEPER)
@@ -1091,6 +1107,24 @@ class ValueAllyCastTest(unittest.TestCase):
                                if step.get('metric') in metrics and step.get('spell') == spell_id]
                 self.assertTrue(all(step['actor'] == CASTER for step in plain_auras))
 
+    def test_ally_cast_percentage_energy_funding_runs_after_ally_setup_steps(self):
+        felsworn = load_class_file(14)
+        spell_id = 523483
+        setup_spell = 523495
+        class_file = {**felsworn, 'value_ally_casts': [{'spell': spell_id, 'setup_casts': [setup_spell]}]}
+        scenario, _, _ = value_scenario(
+            class_file, ClassSpell(spell_id, 'Manari', (spell_id,), spell_id, 0, False), spell_id)
+        run.validate(scenario)
+        steps = scenario['steps']
+        setup_settle = max(i for i, step in enumerate(steps) if step.get('label') == f'{setup_spell} ally setup settle')
+        judged_cast = max(i for i, step in enumerate(steps)
+                          if step.get('action') == 'cast' and step.get('spell') == spell_id)
+        fund_steps = [i for i, step in enumerate(steps)
+                      if step.get('action') == 'set_power' and step.get('actor') == CASTER and step.get('power') == ENERGY]
+        self.assertTrue(fund_steps)
+        self.assertLess(setup_settle, fund_steps[-1])
+        self.assertLess(fund_steps[-1], judged_cast)
+
 
 class FirstAuraEffectTest(unittest.TestCase):
     FACTS = RankFacts(passive=False, effects=(50, 28, 27), aura_names=(0, 0, 8), target_a=(47, 47, 31),
@@ -1219,21 +1253,64 @@ class BaseManaPowerCostTest(unittest.TestCase):
         self.assertEqual(pc_health.rule, 'ManaCost 0 + 10% of base_health 1418 divisor 1')
         self.assertIn('server create mana/health', sc_health['contract'])
 
+    def test_zero_base_mana_and_base_energy_percent_power_cost(self):
+        from hits import base_mana_steps
+        from values import BASE_ENERGY_KEY, BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY
+        felsworn = {
+            **load_class_file(14),
+            BASE_MANA_POWER_COST_KEY: True,
+            'base_mana': {'power': 0, 'value': 0},
+            BASE_HEALTH_KEY: {'value': 1563},
+            BASE_ENERGY_KEY: {'power': ENERGY, 'value': 100},
+        }
+        twisted = ClassSpell(532229, 'Twisted Sight', (532229,), 532229, 0, False)
+        greater_manari = ClassSpell(523495, 'Greater Man\'ari Intuition', (523495,), 523495, 0, False)
+        betray = ClassSpell(804220, 'Betray', (804220,), 804220, 0, False)
+        blood = ClassSpell(802075, 'Blood of Mannoroth', (802075,), 802075, 0, False)
+        _, exp_twisted, _ = value_scenario(felsworn, twisted, 532229)
+        pc_twisted = next(item for item in exp_twisted if item.check == 'power_cost')
+        self.assertEqual(pc_twisted.displayed, '0')
+        self.assertEqual(pc_twisted.rule, 'ManaCost 0 + 4% of base_mana 0 divisor 1')
+        self.assertEqual(base_mana_steps(felsworn, facts_of(Records(DataSet(DBC_DIR)), 532229)), [])
+        sc_manari, exp_manari, _ = value_scenario(felsworn, greater_manari, 523495)
+        run.validate(sc_manari)
+        pc_manari = next(item for item in exp_manari if item.check == 'power_cost')
+        self.assertEqual(pc_manari.displayed, '24')
+        self.assertEqual(pc_manari.rule, 'ManaCost 0 + 24% of base_energy 100 divisor 1')
+        self.assertIn({'action': 'set_power', 'actor': CASTER, 'power': ENERGY, 'value': 24}, sc_manari['steps'])
+        self.assertIn('server create energy', sc_manari['contract'])
+        sc_betray, exp_betray, _ = value_scenario(felsworn, betray, 804220)
+        run.validate(sc_betray)
+        pc_betray = next(item for item in exp_betray if item.check == 'power_cost')
+        self.assertEqual(pc_betray.displayed, '15')
+        self.assertEqual(pc_betray.rule, 'ManaCost 0 + 15% of base_energy 100 divisor 1')
+        self.assertIn({'action': 'set_power', 'actor': CASTER, 'power': ENERGY, 'value': 15}, sc_betray['steps'])
+        _, exp_blood, _ = value_scenario(felsworn, blood, 802075)
+        pc_blood = next(item for item in exp_blood if item.check == 'power_cost')
+        self.assertEqual(pc_blood.displayed, '312')
+        self.assertEqual(pc_blood.rule, 'ManaCost 0 + 20% of base_health 1563 divisor 1')
+
     def test_invalid_base_mana_power_cost_config_is_refused(self):
-        from values import (BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY, base_health_for_power_cost,
-                            base_mana_for_power_cost)
+        from values import (BASE_ENERGY_KEY, BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY, base_energy_for_power_cost,
+                            base_health_for_power_cost, base_mana_for_power_cost)
         for bad in (
                 {BASE_MANA_POWER_COST_KEY: 1},
                 {BASE_MANA_POWER_COST_KEY: True},
                 {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 1, 'value': 1512}},
-                {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': 0}},
+                {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': -1}},
                 {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': True}}):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 base_mana_for_power_cost(bad)
+        self.assertEqual(base_mana_for_power_cost({BASE_MANA_POWER_COST_KEY: True,
+                                                   'base_mana': {'power': 0, 'value': 0}}), 0)
         valid_mana = {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': 1512}}
         for bad_health in (1418, {}, {'value': 0}, {'value': -5}, {'value': True}):
             with self.subTest(bad_health=bad_health), self.assertRaises(ValueError):
                 base_health_for_power_cost({**valid_mana, BASE_HEALTH_KEY: bad_health})
+        for bad_energy in (100, {}, {'power': 0, 'value': 100}, {'power': ENERGY, 'value': 0},
+                           {'power': ENERGY, 'value': -5}, {'power': ENERGY, 'value': True}):
+            with self.subTest(bad_energy=bad_energy), self.assertRaises(ValueError):
+                base_energy_for_power_cost({**valid_mana, BASE_ENERGY_KEY: bad_energy})
 
 
 class CastAuraStacksTest(unittest.TestCase):
@@ -1289,6 +1366,30 @@ class ValueReagentsTest(unittest.TestCase):
         self.assertEqual(cast_opt['destination_unit'], CASTER)
         self.assertIn({'action': 'add_item', 'actor': CASTER, 'item': 1210, 'count': 1}, sc_opt['steps'])
         self.assertNotIn({'action': 'add_item', 'actor': CASTER, 'item': 1210, 'count': 1}, sc_plain['steps'])
+
+
+class MissileWaitAtDummyTest(unittest.TestCase):
+    def test_non_boolean_missile_wait_at_dummy_is_refused(self):
+        from values import MISSILE_WAIT_AT_DUMMY_KEY, missile_wait_at_dummy
+        for bad in (1, 'true', None, []):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                missile_wait_at_dummy({MISSILE_WAIT_AT_DUMMY_KEY: bad})
+        self.assertFalse(missile_wait_at_dummy(None))
+        self.assertFalse(missile_wait_at_dummy({}))
+        self.assertTrue(missile_wait_at_dummy({MISSILE_WAIT_AT_DUMMY_KEY: True}))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cripple_waits_for_missile_at_dummy_only_when_opted_in(self):
+        from values import MISSILE_WAIT_AT_DUMMY_KEY, MISSILE_WAIT_LABEL
+        felsworn = load_class_file(14)
+        cripple = ClassSpell(704371, 'Cripple', (704371,), 704371, 0, False)
+        without = {key: value for key, value in felsworn.items() if key != MISSILE_WAIT_AT_DUMMY_KEY}
+        with_opt = {**without, MISSILE_WAIT_AT_DUMMY_KEY: True}
+        sc_plain, _, _ = value_scenario(without, cripple, 704371)
+        sc_opt, _, _ = value_scenario(with_opt, cripple, 704371)
+        self.assertFalse(any(step.get('label') == MISSILE_WAIT_LABEL for step in sc_plain['steps']))
+        wait = next(step for step in sc_opt['steps'] if step.get('label') == MISSILE_WAIT_LABEL)
+        self.assertEqual(wait['ms'], 600)
 
 
 if __name__ == '__main__':

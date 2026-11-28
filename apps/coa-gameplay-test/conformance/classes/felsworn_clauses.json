@@ -4909,5 +4909,1265 @@
         ]
       }
     ]
+  },
+  {
+    "spell": 500423,
+    "clause": "3 Charges,",
+    "labels": [
+      "500423 behaviour_charge_recharge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500423,
+    "clause": "10 sec recharge",
+    "labels": [
+      "500423 behaviour_charge_recharge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500423,
+    "clause": "Engulf yourself in fel energy and dash forward in the direction you're running.",
+    "labels": [
+      "500423 behaviour_metric_delta dash_forward",
+      "500423 behaviour_metric_delta dash_strafe_left",
+      "500423 behaviour_metric_delta dash_backward"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500423,
+    "clause": "Usable while rooted and removes root effects from you.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Usable while rooted and removes root effects from you",
+        "labels": [
+          "500423 behaviour_metric_delta rooted_removes"
+        ]
+      },
+      {
+        "claim": "dash forward while rooted (D-4)",
+        "labels": [
+          "500423 behaviour_metric_delta rooted_dash"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 520591,
+    "clause": "Reduces damage from falling.",
+    "labels": [
+      "520591 behaviour_fall_damage landing with reduced",
+      "520591 behaviour_fall_damage landing with aura"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 523483,
+    "clause": "Increase the friendly target's armor by ${$m1+0}",
+    "labels": [
+      "523483 effect_value e0 #0",
+      "523483 behaviour_metric_delta armor_ally"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 523483,
+    "clause": "and all primary stats by $s2 for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and all primary stats by $s2 (Strength, Agility, Stamina, Intellect, Spirit)",
+        "labels": [
+          "523483 effect_value e1 #1",
+          "523483 aura_amount e1 #1",
+          "523483 behaviour_metric_delta stats_ally"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "523483 aura_duration_ms #2",
+          "523483 behaviour_expiry duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 523483,
+    "clause": "@ext:Does not stack with other similar effects.:ext@",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Does not stack armor with other similar effects (Mark of the Wild 9885)",
+        "labels": [
+          "523483 behaviour_metric_delta no_stack_motw"
+        ]
+      },
+      {
+        "claim": "Does not stack with other Intuition effects from the same caster",
+        "labels": [
+          "523483 behaviour_metric_delta excl_illidari",
+          "523483 behaviour_metric_delta excl_greater_illidari"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 523495,
+    "clause": "Increase all party and raid members armor by ${$m1+0}",
+    "labels": [
+      "523495 effect_value e0 #0",
+      "523495 behaviour_metric_delta armor_raid",
+      "523495 behaviour_metric_delta ungrouped_control",
+      "523495 behaviour_metric_delta no_stack_motw",
+      "523495 behaviour_metric_delta excl_illidari",
+      "523495 behaviour_metric_delta excl_greater_illidari"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 523495,
+    "clause": "and all primary stats by $s2 for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and all primary stats by $s2 (Strength, Agility, Stamina, Intellect, Spirit)",
+        "labels": [
+          "523495 effect_value e1 #1",
+          "523495 aura_amount e1 #1",
+          "523495 behaviour_metric_delta stats_raid"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "523495 aura_duration_ms #2",
+          "523495 behaviour_expiry duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 532229,
+    "clause": "Summon a demonic eye and bind your vision to it and then slip into the nether.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Summon a demonic eye",
+        "labels": [
+          "532229 behaviour_metric_delta summon"
+        ]
+      },
+      {
+        "claim": "bind your vision to it",
+        "labels": [
+          "532229 behaviour_metric_delta viewpoint"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 532229,
+    "clause": "You and the eye remain stealthed while active.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "You remain stealthed while active",
+        "labels": [
+          "532229 behaviour_metric_delta caster_stealth"
+        ]
+      },
+      {
+        "claim": "the eye remains stealthed while active",
+        "labels": [
+          "532229 behaviour_metric_delta eye_stealth"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 532229,
+    "clause": "The eye moves quickly, but is very fragile.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "The eye moves quickly (movement speed)",
+        "labels": [
+          "532229 behaviour_metric_delta eye_speed"
+        ]
+      },
+      {
+        "claim": "but is very fragile (maximum health)",
+        "labels": [
+          "532229 behaviour_metric_delta eye_fragile"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 535595,
+    "clause": "Break open a rift through the nether, teleporting group members that use it to Stormwind.",
+    "labels": [
+      "535595 behaviour_metric_delta rift_spawn",
+      "535595 behaviour_metric_delta ally_map",
+      "535595 behaviour_metric_delta ally_x",
+      "535595 behaviour_metric_delta ally_y",
+      "535595 behaviour_metric_delta ally_z",
+      "535595 behaviour_metric_delta ungrouped_refused"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 535596,
+    "clause": "Break open a rift through the nether, teleporting group members that use it to Ironforge.",
+    "labels": [
+      "535596 behaviour_metric_delta rift_spawn",
+      "535596 behaviour_metric_delta ally_map",
+      "535596 behaviour_metric_delta ally_x",
+      "535596 behaviour_metric_delta ally_y",
+      "535596 behaviour_metric_delta ally_z"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 535597,
+    "clause": "Break open a rift through the nether, teleporting group members that use it to Darnassus.",
+    "labels": [
+      "535597 behaviour_metric_delta rift_spawn",
+      "535597 behaviour_metric_delta ally_map",
+      "535597 behaviour_metric_delta ally_x",
+      "535597 behaviour_metric_delta ally_y",
+      "535597 behaviour_metric_delta ally_z"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 535598,
+    "clause": "Break open a rift through the nether, teleporting group members that use it to Orgrimmar.",
+    "labels": [
+      "535598 behaviour_metric_delta rift_spawn",
+      "535598 behaviour_metric_delta ally_map",
+      "535598 behaviour_metric_delta ally_x",
+      "535598 behaviour_metric_delta ally_y",
+      "535598 behaviour_metric_delta ally_z"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 535599,
+    "clause": "Break open a rift through the nether, teleporting group members that use it to Thunder Bluff.",
+    "labels": [
+      "535599 behaviour_metric_delta rift_spawn",
+      "535599 behaviour_metric_delta ally_map",
+      "535599 behaviour_metric_delta ally_x",
+      "535599 behaviour_metric_delta ally_y",
+      "535599 behaviour_metric_delta ally_z"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 535600,
+    "clause": "Break open a rift through the nether, teleporting group members that use it to Undercity.",
+    "labels": [
+      "535600 behaviour_metric_delta rift_spawn",
+      "535600 behaviour_metric_delta ally_map",
+      "535600 behaviour_metric_delta ally_x",
+      "535600 behaviour_metric_delta ally_y",
+      "535600 behaviour_metric_delta ally_z"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 535601,
+    "clause": "Break open a rift through the nether, teleporting group members that use it to Theramore.",
+    "labels": [
+      "535601 behaviour_metric_delta rift_spawn",
+      "535601 behaviour_metric_delta ally_map",
+      "535601 behaviour_metric_delta ally_x",
+      "535601 behaviour_metric_delta ally_y",
+      "535601 behaviour_metric_delta ally_z"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 535602,
+    "clause": "Break open a rift through the nether, teleporting group members that use it to Stonard.",
+    "labels": [
+      "535602 behaviour_metric_delta rift_spawn",
+      "535602 behaviour_metric_delta ally_map",
+      "535602 behaviour_metric_delta ally_x",
+      "535602 behaviour_metric_delta ally_y",
+      "535602 behaviour_metric_delta ally_z",
+      "535602 behaviour_metric_delta ungrouped_refused"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 535603,
+    "clause": "Break open a rift through the nether, teleporting group members that use it to Altar of Storms.",
+    "labels": [
+      "535603 behaviour_metric_delta rift_spawn",
+      "535603 behaviour_metric_delta ally_map",
+      "535603 behaviour_metric_delta ally_x",
+      "535603 behaviour_metric_delta ally_y",
+      "535603 behaviour_metric_delta ally_z"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 535604,
+    "clause": "Break open a rift through the nether, teleporting group members that use it to Mannoroc Coven.",
+    "labels": [
+      "535604 behaviour_metric_delta rift_spawn",
+      "535604 behaviour_metric_delta ally_map",
+      "535604 behaviour_metric_delta ally_x",
+      "535604 behaviour_metric_delta ally_y",
+      "535604 behaviour_metric_delta ally_z"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 535605,
+    "clause": "Break open a rift through the nether, teleporting group members that use it to Dark Whisper Gorge.",
+    "labels": [
+      "535605 behaviour_metric_delta rift_spawn",
+      "535605 behaviour_metric_delta ally_map",
+      "535605 behaviour_metric_delta ally_x",
+      "535605 behaviour_metric_delta ally_y",
+      "535605 behaviour_metric_delta ally_z"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 552213,
+    "clause": "Feed on an enemy's mana, burning $m1 of their mana",
+    "labels": [
+      "552213 effect_value e0 #0",
+      "552213 aura_amount e0 #0",
+      "552213 behaviour_metric_delta mana_burn"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 552213,
+    "clause": "and restoring health to you equal to the mana burned every $t1 sec for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "restoring health to you equal to the mana burned",
+        "labels": [
+          "552213 behaviour_metric_delta heal_full_mana",
+          "552213 behaviour_metric_delta heal_partial_mana",
+          "552213 behaviour_metric_delta heal_zero_mana"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "552213 behaviour_metric_delta tick_before_first",
+          "552213 behaviour_metric_delta tick_period_2ticks"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "552213 aura_duration_ms #1",
+          "552213 behaviour_metric_delta channel_held",
+          "552213 behaviour_metric_delta channel_gone"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 552213,
+    "clause": "Usable while moving.",
+    "labels": [
+      "552213 behaviour_metric_delta moving_cast"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 552213,
+    "clause": "30 Energy, plus 30 per sec",
+    "labels": [],
+    "kind": "claim",
+    "reason": "Cost line of the spell card (Spell.dbc 552213 ManaCost 30, ManaPerSecond 30; owner ruling Q-fs-ex-2 keep_energy_per_sec; mirrors 800355 Sargeras Embrace cost-line clause).",
+    "claims": [
+      {
+        "claim": "30 Energy",
+        "labels": [
+          "552213 behaviour_metric_delta up_front"
+        ]
+      },
+      {
+        "claim": "plus 30 per sec",
+        "labels": [
+          "552213 behaviour_metric_delta drain_1",
+          "552213 behaviour_metric_delta drain_2",
+          "552213 behaviour_metric_delta free_3700",
+          "552213 behaviour_metric_delta free_4300"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 578345,
+    "clause": "Fel energies blur your outline, temporarily reducing all your threat and reducing your damage taken from area of effect spells by $s2% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "temporarily reducing all your threat",
+        "labels": [
+          "578345 behaviour_metric_delta threat_drop",
+          "578345 behaviour_metric_delta threat_restored"
+        ]
+      },
+      {
+        "claim": "reducing your damage taken from area of effect spells by $s2%",
+        "labels": [
+          "578345 effect_value e1 #0",
+          "578345 aura_amount e1 #0",
+          "578345 behaviour_hit_ratio aoe_damage"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "578345 aura_duration_ms #1",
+          "578345 behaviour_metric_delta held",
+          "578345 behaviour_metric_delta gone"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 680308,
+    "clause": "Empowers party and raid members with demonic energy, increasing their Agility by $s1.",
+    "labels": [
+      "680308 effect_value e0 #0",
+      "680308 aura_amount e0 #0",
+      "680308 behaviour_metric_delta agility_raid",
+      "680308 behaviour_metric_delta out_of_range",
+      "680308 behaviour_metric_delta ungrouped_control",
+      "680308 behaviour_metric_delta excl_illidari",
+      "680308 behaviour_metric_delta excl_manari",
+      "680308 behaviour_metric_delta excl_greater_manari"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680308,
+    "clause": "Lasts $d.",
+    "labels": [
+      "680308 aura_duration_ms #1",
+      "680308 behaviour_expiry duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704371,
+    "clause": "Cripple an enemy, slowing their movement speed and casting speed by $s1%,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "slowing their movement speed by $s1%",
+        "labels": [
+          "704371 aura_amount e0 #0",
+          "704371 behaviour_metric_delta move_slow_initial"
+        ]
+      },
+      {
+        "claim": "and casting speed by $s1%",
+        "labels": [
+          "704371 behaviour_metric_delta cast_slow_initial"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 704371,
+    "clause": "decaying over $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "decaying movement speed and casting speed",
+        "labels": [
+          "704371 behaviour_metric_delta decay_2500",
+          "704371 behaviour_metric_delta decay_4500",
+          "704371 behaviour_metric_delta decay_6500",
+          "704371 behaviour_metric_delta decay_8500",
+          "704371 behaviour_metric_delta decay_10500",
+          "704371 behaviour_metric_delta cast_decay_4500",
+          "704371 behaviour_metric_delta cast_decay_8500"
+        ]
+      },
+      {
+        "claim": "over $d",
+        "labels": [
+          "704371 aura_duration_ms #1",
+          "704371 behaviour_metric_delta held",
+          "704371 behaviour_metric_delta gone"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 705121,
+    "clause": "Consumes 2 Felfury",
+    "labels": [
+      "705121 behaviour_metric_delta gate_refused",
+      "705121 behaviour_metric_delta consumes"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705121,
+    "clause": "Sunder the ground progressively infront of you, causing 3 explosions one after another that deal ${$712399m1*$<scalingbp>+$AP*0.2+$SP*.25} Chaos Damage,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "causing 3 explosions one after another progressively infront of you",
+        "labels": [
+          "705121 behaviour_metric_delta three_explosions",
+          "705121 behaviour_metric_delta three_explosions_staged"
+        ]
+      },
+      {
+        "claim": "that deal ${$712399m1*$<scalingbp>+$AP*0.2+$SP*.25} Chaos Damage",
+        "labels": [
+          "705121 effect_value 712399e0 #0",
+          "705121 behaviour_metric_delta explosion_base",
+          "705121 behaviour_metric_delta explosion_ap",
+          "705121 behaviour_metric_delta explosion_sp"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 705121,
+    "clause": "split amongst all enemies struck, plus ${($556503d*1000/$556503T1)*($556503m1*$<scalingbp>+$AP*0.12)} over $556503d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "split amongst all enemies struck",
+        "labels": [
+          "705121 behaviour_metric_delta split_two_targets"
+        ]
+      },
+      {
+        "claim": "plus ${($556503d*1000/$556503T1)*($556503m1*$<scalingbp>+$AP*0.12)}",
+        "labels": [
+          "705121 effect_value 556503e0 #1",
+          "705121 behaviour_metric_delta dot_base",
+          "705121 behaviour_metric_delta dot_ap"
+        ]
+      },
+      {
+        "claim": "over $556503d",
+        "labels": [
+          "705121 spell_duration 556503 #2",
+          "705121 behaviour_metric_delta dot_ticks"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 705121,
+    "clause": "Inner Demon: Affected enemies have their attack power reduced by ${($803477m1+$803477ppl1)*-1} for $/1000;807428s3 sec.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Inner Demon: Affected enemies have their attack power reduced by ${($803477m1+$803477ppl1)*-1}",
+        "labels": [
+          "705121 effect_value 803477e0 #3",
+          "705121 behaviour_metric_delta inner_demon_ap",
+          "705121 behaviour_metric_delta no_inner_demon_control"
+        ]
+      },
+      {
+        "claim": "for $/1000;807428s3 sec",
+        "labels": [
+          "705121 behaviour_metric_delta inner_demon_held_5s",
+          "705121 behaviour_metric_delta inner_demon_held_19s",
+          "705121 behaviour_metric_delta inner_demon_gone_21s"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 707901,
+    "clause": "Generates 1 Felfury",
+    "kind": "claim",
+    "labels": [
+      "707901 behaviour_metric_delta felfury"
+    ]
+  },
+  {
+    "spell": 707901,
+    "clause": "Unleash fire on an enemy, increasing their Fire damage taken and their chance to be critically struck with Fire spells from you by $s2% for $d.",
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "increasing their Fire damage taken from you by $s2%",
+        "labels": [
+          "707901 behaviour_hit_ratio fire_damage",
+          "707901 behaviour_hit_ratio physical_control"
+        ]
+      },
+      {
+        "claim": "and their chance to be critically struck with Fire spells from you by $s2%",
+        "labels": [
+          "707901 behaviour_hit_ratio fire_crit",
+          "707901 behaviour_hit_ratio physical_crit_control"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "707901 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 707901,
+    "clause": "Can only have 1 Bane active on a target at a time.",
+    "kind": "claim",
+    "labels": [
+      "707901 behaviour_metric_delta one_bane"
+    ]
+  },
+  {
+    "spell": 707902,
+    "clause": "Generates 1 Felfury",
+    "kind": "claim",
+    "labels": [
+      "707902 behaviour_metric_delta felfury"
+    ]
+  },
+  {
+    "spell": 707902,
+    "clause": "Unleash shadow magic on an enemy, increasing your critical strike chance against them by $s1%,",
+    "kind": "claim",
+    "labels": [
+      "707902 behaviour_hit_ratio spell_crit",
+      "707902 behaviour_hit_ratio melee_crit"
+    ]
+  },
+  {
+    "spell": 707902,
+    "clause": "but increasing their damage dealt by $s2%.",
+    "kind": "claim",
+    "labels": [
+      "707902 behaviour_hit_ratio target_damage"
+    ]
+  },
+  {
+    "spell": 707902,
+    "clause": "Lasts for 3 critical strikes or $d.",
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "Lasts for 3 critical strikes",
+        "labels": [
+          "707902 behaviour_metric_delta two_crits_held",
+          "707902 behaviour_metric_delta three_crits_consumed"
+        ]
+      },
+      {
+        "claim": "or $d",
+        "labels": [
+          "707902 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 707902,
+    "clause": "Can only have 1 Bane active on a target at a time.",
+    "kind": "claim",
+    "labels": [
+      "707902 behaviour_metric_delta one_bane"
+    ]
+  },
+  {
+    "spell": 707903,
+    "clause": "Generates 1 Felfury",
+    "kind": "claim",
+    "labels": [
+      "707903 behaviour_metric_delta felfury"
+    ]
+  },
+  {
+    "spell": 707903,
+    "clause": "Unleash cruel magic on an enemy, allowing you to ignore $s1% of their Armor",
+    "kind": "claim",
+    "labels": [
+      "707903 behaviour_hit_ratio ignore_armor",
+      "707903 behaviour_hit_ratio ignore_armor_unarmored"
+    ]
+  },
+  {
+    "spell": 707903,
+    "clause": "and to see them while stealthed or invisible for $d.",
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "to see them while stealthed or invisible",
+        "labels": [
+          "707903 behaviour_detection stealth hidden",
+          "707903 behaviour_detection stealth revealed",
+          "707903 behaviour_detection stealth unrevealed",
+          "707903 behaviour_detection invisibility hidden",
+          "707903 behaviour_detection invisibility revealed",
+          "707903 behaviour_detection invisibility unrevealed",
+          "707903 behaviour_detection client stealth hidden",
+          "707903 behaviour_detection client stealth revealed",
+          "707903 behaviour_detection client stealth unrevealed",
+          "707903 behaviour_detection client invisibility hidden",
+          "707903 behaviour_detection client invisibility revealed",
+          "707903 behaviour_detection client invisibility unrevealed"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "707903 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 707903,
+    "clause": "Can only have 1 Bane active on a target at a time.",
+    "kind": "claim",
+    "labels": [
+      "707903 behaviour_metric_delta one_bane"
+    ]
+  },
+  {
+    "spell": 712483,
+    "clause": "Generates 1 Felfury",
+    "kind": "claim",
+    "labels": [
+      "712483 behaviour_metric_delta felfury"
+    ]
+  },
+  {
+    "spell": 712483,
+    "clause": "Unleash chaotic magic on an enemy that causes each spell or ability they cast to add 1 stack to this effect for $d.",
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "causes each spell or ability they cast to add 1 stack to this effect",
+        "labels": [
+          "712483 behaviour_metric_delta stack_zero_casts",
+          "712483 behaviour_metric_delta stack_one_cast",
+          "712483 behaviour_metric_delta stack_three_casts"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "712483 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 712483,
+    "clause": "At the end of the duration, deal damage to them based on how many stacks were accrued.",
+    "kind": "claim",
+    "labels": [
+      "712483 behaviour_metric_delta expiry_damage_zero",
+      "712483 behaviour_metric_delta expiry_damage_one",
+      "712483 behaviour_metric_delta expiry_damage_three",
+      "712483 behaviour_metric_delta overwrite_no_damage"
+    ]
+  },
+  {
+    "spell": 712483,
+    "clause": "Can only have 1 Bane active on a target at a time.",
+    "kind": "claim",
+    "labels": [
+      "712483 behaviour_metric_delta one_bane"
+    ]
+  },
+  {
+    "spell": 803885,
+    "clause": "Emanate an aura that increases nearby allies' Shadow Resistance by ${$m1+0}",
+    "kind": "claim",
+    "labels": [
+      "803885 behaviour_metric_delta shadow_res",
+      "803885 behaviour_metric_delta replaces_demonfire"
+    ]
+  },
+  {
+    "spell": 803885,
+    "clause": "and causes them to deal $s2 Shadow damage to enemies that attack them.",
+    "kind": "claim",
+    "labels": [
+      "803885 behaviour_metric_delta shield_hits",
+      "803885 behaviour_metric_delta shield_damage",
+      "803885 behaviour_metric_delta shield_spell"
+    ]
+  },
+  {
+    "spell": 800031,
+    "clause": "Emanate an aura that increases the critical strike chance of nearby allies by $s1%",
+    "kind": "claim",
+    "labels": [
+      "800031 behaviour_metric_delta crit_radius"
+    ]
+  },
+  {
+    "spell": 800031,
+    "clause": "and their damage against Demons by $s2%.",
+    "kind": "claim",
+    "labels": [
+      "800031 behaviour_hit_ratio demon_damage",
+      "800031 behaviour_hit_ratio non_demon_control"
+    ]
+  },
+  {
+    "spell": 800031,
+    "clause": "Does not stack with similar effects.",
+    "kind": "claim",
+    "labels": [
+      "800031 behaviour_metric_delta no_stack_moonkin",
+      "800031 behaviour_metric_delta no_stack_lotp"
+    ],
+    "promise_of": "Emanate an aura that increases the critical strike chance of nearby allies by $s1%"
+  },
+  {
+    "spell": 800031,
+    "clause": "Only 1 Pact can be active per player at a time.",
+    "kind": "claim",
+    "labels": [
+      "800031 behaviour_exclusivity",
+      "800031 behaviour_metric_delta replaces_vengeful",
+      "800031 behaviour_metric_delta replaces_legionfel"
+    ]
+  },
+  {
+    "spell": 501329,
+    "clause": "Empowers an ally with demonic energy, increasing their Agility by $s1.",
+    "kind": "claim",
+    "labels": [
+      "501329 behaviour_metric_delta agility",
+      "501329 behaviour_metric_delta excl_greater",
+      "501329 behaviour_metric_delta excl_manari",
+      "501329 behaviour_metric_delta excl_greater_manari",
+      "501329 behaviour_metric_delta excl_cross_class"
+    ]
+  },
+  {
+    "spell": 501329,
+    "clause": "Lasts $d.",
+    "kind": "claim",
+    "labels": [
+      "501329 behaviour_cast_applies_aura duration",
+      "501329 behaviour_expiry duration"
+    ]
+  },
+  {
+    "spell": 800353,
+    "clause": "Steal $s1 beneficial magic effect from an enemy.",
+    "kind": "claim",
+    "labels": [
+      "800353 behaviour_metric_delta steal_one",
+      "800353 behaviour_metric_delta steal_to_caster"
+    ]
+  },
+  {
+    "spell": 800353,
+    "clause": "If you successfully steal an effect, you deal ${$806062m1+$sps*0.343+$AP*0.22} Shadow Damage to the enemy.",
+    "kind": "claim",
+    "labels": [
+      "800353 behaviour_metric_delta no_buff_control",
+      "800353 script_hit 806062 steal_damage",
+      "800353 behaviour_metric_delta steal_damage_sp",
+      "800353 behaviour_metric_delta steal_damage_ap"
+    ]
+  },
+  {
+    "spell": 501288,
+    "clause": "Generates 1 Felfury",
+    "kind": "claim",
+    "labels": [
+      "501288 behaviour_metric_delta felfury"
+    ]
+  },
+  {
+    "spell": 501288,
+    "clause": "Unleash a powerful fel fireball at an enemy, dealing ${$cond($gt($spfi, $sps), $m1+0+$spfi*0.62, $m1+0+$sps*0.62)} Fire damage.",
+    "kind": "claim",
+    "labels": [
+      "501288 hit_mean",
+      "501288 behaviour_metric_delta sp_scaling"
+    ]
+  },
+  {
+    "spell": 501288,
+    "clause": "Usable while moving.",
+    "kind": "claim",
+    "labels": [
+      "501288 behaviour_metric_delta moving_cast"
+    ]
+  },
+  {
+    "spell": 547211,
+    "clause": "Generates 1 Felfury",
+    "kind": "claim",
+    "labels": [
+      "547211 behaviour_metric_delta felfury"
+    ]
+  },
+  {
+    "spell": 547211,
+    "clause": "Strike with both weapons dealing Weapon Damage plus $s1.",
+    "kind": "claim",
+    "labels": [
+      "547211 script_hit 803462 main_hand_hit",
+      "547211 script_hit 520243 off_hand_hit",
+      "547211 behaviour_metric_delta requires_weapons"
+    ]
+  },
+  {
+    "spell": 501321,
+    "clause": "Consumes 2 Felfury",
+    "kind": "claim",
+    "labels": [
+      "501321 behaviour_metric_delta consumes_felfury",
+      "501321 behaviour_metric_delta requires_two_felfury"
+    ]
+  },
+  {
+    "spell": 501321,
+    "clause": "Blast an enemy for ${$cond($gt($spfi, $sps), $m1+0+$spfi*.6+$AP*.19, $m1+0+$sps*.6+$AP*.19)} Shadowflame Damage",
+    "kind": "claim",
+    "labels": [
+      "501321 hit_mean",
+      "501321 behaviour_metric_delta sp_scaling",
+      "501321 behaviour_metric_delta ap_scaling"
+    ]
+  },
+  {
+    "spell": 501321,
+    "clause": "and generate $521213s1 Energy.",
+    "kind": "claim",
+    "labels": [
+      "501321 behaviour_metric_delta generates_energy"
+    ]
+  },
+  {
+    "spell": 501321,
+    "clause": "Inner Demon: This spell casts an additional time free of cost.",
+    "kind": "claim",
+    "labels": [
+      "501321 behaviour_metric_delta inner_demon_extra",
+      "501321 behaviour_amount_match"
+    ]
+  },
+  {
+    "spell": 802075,
+    "clause": "Generates 6 Felfury",
+    "kind": "claim",
+    "labels": [
+      "802075 behaviour_metric_delta felfury_and_health"
+    ]
+  },
+  {
+    "spell": 802075,
+    "clause": "Soak in the blood of Mannoroth, increasing your Energy regeneration by $s2% for $d.",
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "increasing your Energy regeneration by $s2%",
+        "labels": [
+          "802075 behaviour_metric_delta energy_regen"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "802075 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 803343,
+    "clause": "Emanate an aura that increases the mounted movement speed of nearby allies by $s1%.",
+    "kind": "claim",
+    "labels": [
+      "803343 behaviour_metric_delta mounted_speed",
+      "803343 behaviour_metric_delta unmounted_control"
+    ]
+  },
+  {
+    "spell": 803343,
+    "clause": "Only 1 Pact can be active per player at a time.",
+    "kind": "claim",
+    "labels": [
+      "803343 behaviour_exclusivity",
+      "803343 behaviour_metric_delta replaces_vengeful"
+    ]
+  },
+  {
+    "spell": 804052,
+    "clause": "Instantly reveals all stealthed and invisible enemies in a $a1 yd radius around you.",
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "reveals all stealthed enemies in a $a1 yd radius",
+        "labels": [
+          "804052 behaviour_metric_delta reveals_all_stealthed"
+        ]
+      },
+      {
+        "claim": "reveals invisible enemies in a $a1 yd radius",
+        "labels": [
+          "804052 behaviour_metric_delta reveals_invisible"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 804216,
+    "clause": "Consumes Felfury",
+    "kind": "claim",
+    "labels": [
+      "804216 behaviour_metric_delta consumes_felfury",
+      "804216 behaviour_cast_gate caster_aura_blocked",
+      "804216 behaviour_cast_gate caster_aura_allowed"
+    ]
+  },
+  {
+    "spell": 804216,
+    "clause": "Undergo a metamorphosis and unleash your inner demon,",
+    "kind": "claim",
+    "labels": [
+      "804216 behaviour_metric_delta metamorphosis"
+    ]
+  },
+  {
+    "spell": 804216,
+    "clause": "increasing your damage dealt by $s2%,",
+    "kind": "claim",
+    "labels": [
+      "804216 behaviour_hit_ratio damage_done"
+    ]
+  },
+  {
+    "spell": 804216,
+    "clause": "and enabling Inner Demon effects.",
+    "kind": "claim",
+    "labels": [
+      "804216 behaviour_metric_delta enables_effects"
+    ]
+  },
+  {
+    "spell": 804216,
+    "clause": "Lasts for $/1000;803465s1 sec for each Felfury consumed.",
+    "kind": "claim",
+    "labels": [
+      "804216 behaviour_metric_delta duration_one_fury",
+      "804216 behaviour_metric_delta duration_three_fury",
+      "804216 behaviour_metric_delta duration_six_fury"
+    ]
+  },
+  {
+    "spell": 804220,
+    "clause": "Taunts an enemy target to attack you for $d.",
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "Taunts an enemy target to attack you",
+        "labels": [
+          "804220 aggro_redirect primary after",
+          "804220 aggro_redirect extra1 after"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "804220 behaviour_metric_delta taunt_duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 804220,
+    "clause": "Inner Demon: Blast the enemy for ${$AP*.5} Shadowflame Damage.",
+    "kind": "claim",
+    "labels": [
+      "804220 behaviour_metric_delta inner_demon_blast",
+      "804220 behaviour_metric_delta inner_demon_blast_ap"
+    ]
+  },
+  {
+    "spell": 804758,
+    "clause": "Knowledge of demonkind allows you to track your kin, showing the location of all nearby Demons on the minimap.",
+    "kind": "claim",
+    "labels": [
+      "804758 behaviour_metric_delta track_demons",
+      "804758 behaviour_metric_delta track_only_demons"
+    ]
+  },
+  {
+    "spell": 804758,
+    "clause": "While active, your attacks against Demons have a $h% chance to deliver a Betrayer's Blow,",
+    "kind": "claim",
+    "labels": [
+      "804758 behaviour_hit_ratio proc_rate_melee_demon",
+      "804758 behaviour_hit_ratio proc_rate_spell_demon",
+      "804758 behaviour_hit_ratio proc_rate_nondemon_control"
+    ]
+  },
+  {
+    "spell": 804758,
+    "clause": "dealing ${$804766m1+$AP*.25+$SP*.5} Physical Damage and stunning the target for $804766d.",
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "dealing ${$804766m1+$AP*.25+$SP*.5} Physical Damage",
+        "labels": [
+          "804758 behaviour_metric_delta blow_damage_base",
+          "804758 behaviour_metric_delta blow_damage_scaled"
+        ]
+      },
+      {
+        "claim": "and stunning the target for $804766d",
+        "labels": [
+          "804758 behaviour_metric_delta blow_stun"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 804764,
+    "clause": "Emanate an aura that increases nearby allies' Fire resistance by ${$ppl1}",
+    "kind": "claim",
+    "labels": [
+      "804764 behaviour_metric_delta fire_res",
+      "804764 behaviour_metric_delta replaces_slayers"
+    ]
+  },
+  {
+    "spell": 804764,
+    "clause": "and their chance to resist curses and magic effects by $s2%.",
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "chance to resist curses by $s2%",
+        "labels": [
+          "804764 behaviour_taken_hit curse_resist",
+          "804764 behaviour_taken_hit disease_control"
+        ]
+      },
+      {
+        "claim": "chance to resist magic effects by $s2%",
+        "labels": [
+          "804764 behaviour_taken_hit magic_resist"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 807727,
+    "clause": "Embolden yourself with fel magic, increasing your threat generated by $s1%",
+    "kind": "claim",
+    "labels": [
+      "807727 behaviour_metric_delta threat_mult",
+      "807727 behaviour_metric_delta threat_control",
+      "807727 behaviour_metric_delta threat_stance"
+    ]
+  },
+  {
+    "spell": 807727,
+    "clause": "and reducing your damage dealt against monsters by 10%.",
+    "kind": "claim",
+    "labels": [
+      "807727 behaviour_hit_ratio monster_damage"
+    ]
+  },
+  {
+    "spell": 807727,
+    "clause": "Stagger 25% of Physical damage taken from monsters, distributing it over 5 seconds.",
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "Stagger 25% of Physical damage taken from monsters",
+        "labels": [
+          "807727 behaviour_taken_hit stagger_physical_absorb",
+          "807727 behaviour_taken_hit stagger_magic_control"
+        ]
+      },
+      {
+        "claim": "distributing it over 5 seconds",
+        "labels": [
+          "807727 behaviour_metric_delta stagger_payout"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 807942,
+    "clause": "Tap into deprave fel energies, exchanging Energy for health. Every 2 points of Energy restore 1% of your maximum health.",
+    "kind": "claim",
+    "labels": [
+      "807942 behaviour_metric_delta refused_below_two",
+      "807942 behaviour_metric_delta heal_full_energy",
+      "807942 behaviour_metric_delta heal_odd_energy"
+    ]
+  },
+  {
+    "spell": 954534,
+    "clause": "Enslave the target hostile elemental for up to $954534d (8 sec vs players), forcing it to fight for you.",
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "Enslave the target hostile elemental, forcing it to fight for you",
+        "labels": [
+          "954534 behaviour_metric_delta enslave_elemental",
+          "954534 behaviour_metric_delta non_elemental_refused"
+        ]
+      },
+      {
+        "claim": "for up to $954534d",
+        "labels": [
+          "954534 behaviour_metric_delta pve_duration"
+        ]
+      },
+      {
+        "claim": "(8 sec vs players)",
+        "labels": [
+          "954534 behaviour_metric_delta pvp_8s_cap"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 954534,
+    "clause": "Only one target can be enslaved at a time.",
+    "kind": "claim",
+    "labels": [
+      "954534 behaviour_metric_delta single_target_refused"
+    ]
   }
 ]

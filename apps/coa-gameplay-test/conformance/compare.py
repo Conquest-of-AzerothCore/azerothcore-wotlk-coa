@@ -127,7 +127,7 @@ PLAIN_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)(?P<letter>[sSmM])(?P<digit
 TRUNCATED_READ = 1.0
 BONUS_DATA = 'bonus_data'
 COST_DIVISOR = re.compile(r'ManaCost divisor (\d+)')
-BASE_MANA_COST_DIVISOR = re.compile(r'ManaCost \d+ \+ \d+% of base_(?:mana|health) \d+ divisor (\d+)')
+BASE_MANA_COST_DIVISOR = re.compile(r'ManaCost \d+ \+ \d+% of base_(?:mana|health|energy) \d+ divisor (\d+)')
 EXPLORATORY = ('gameplay', 'exploratory')
 ALERT_COLUMNS = ('scenario', 'spell_id', 'rank_id', 'label', 'check', 'status', 'measured', 'expected', 'low', 'high',
                  'deviation', 'explanation', 'server_commit', 'build', 'runs')
@@ -695,6 +695,7 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     token = tokens.readout.values[index]
     plain = PLAIN_TOKEN.fullmatch(token.text)
     spell_id, effect = token_effect(expectation)
+    ticks = (expectation.model or {}).get(PER_TICK_TICKS)
     values = []
     for roll in rolls:
         readout = tooltips.read(expectation.rank_id, tokens.caster, (spell_id, effect, roll))
@@ -702,6 +703,8 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
             return replace(base, status='unmodelled', measured=measured,
                            explanation=f'{token.text} is unreadable with roll {roll} of effect {effect}')
         value = undivided(readout.values[index])
+        if ticks:
+            value /= ticks
         values.append(value * plain_sign(roll) if plain else value)
     steps = [after - before for before, after in zip(values, values[1:])]
     if not (all(step >= -FLOAT_EPSILON for step in steps) or all(step <= FLOAT_EPSILON for step in steps)):
@@ -754,13 +757,41 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     needed = mean_samples(values)
     if needed is not None and placeholder_sample_count(tooltips, spell_id, effect):
         needed = min(needed, planned_reads(expectation, tokens, tooltips, index, spell_id, effect, rolls))
-    roll = (f'{token.text}{trigger_note} over the roll {rolls.start}..{rolls.stop - 1} of effect {effect}: '
+    per_tick_note = f' (divided by {ticks:g} ticks)' if ticks else ''
+    roll = (f'{token.text}{trigger_note}{per_tick_note} over the roll {rolls.start}..{rolls.stop - 1} of effect {effect}: '
             f'{min(values):g} to {max(values):g}{block_note}, uniform mean {expected:.3f} sigma {sigma:.3f}; '
             f'{len(reads)} spell_effect_value reads '
             f'(each one SpellEffectInfo::CalcValue roll{"; " + terms.text() if terms else ""}), mean {mean:.3f}')
     detail = {'reads': len(reads), 'reads_needed': needed,
               **({BONUS_DATA: terms.detail()} if terms else {}),
               **({TRIGGER_WITH_VALUE: trigger_detail} if trigger_detail is not None else {})}
+    per_level = per_level_loss(tooltips, spell_id, effect, tokens.caster.level)
+    unmodelled = (per_level_model_gap(base.label, run, tooltips, expectation, tokens, index, rolls.start, per_level)
+                  if per_level and per_level.loss else None)
+    engine = [value - per_level.loss for value in values] if per_level and per_level.loss and not unmodelled else None
+    rounded, outside = truncation_reads(values, reads, allowance, not truncated_terms)
+    lowered = {read: value for read, value in zip(map(engine_truncation, engine), engine)} if engine else {}
+    if engine and set(lowered) == {engine_truncation(value) for value in values}:
+        engine, lowered = None, {}
+    if outside and not (engine and all(read in lowered for read in reads)):
+        cause = (f'; per-level term {per_level.term:g} truncated to {per_level.truncated:g} (SpellInfo.cpp:497) '
+                 f'reproduces reads {sorted(lowered)} but not {[read for read in reads if read not in lowered]}'
+                 if engine else '')
+        if unmodelled:
+            cause = f'; {PER_LEVEL_UNMODELLED}: {unmodelled}'
+            detail = {**detail, PER_LEVEL_ROUNDING: PER_LEVEL_UNMODELLED}
+        if needed is None or len(reads) < needed:
+            low = min(values) - (allowance if min(values) > 0 else 0)
+            high = max(values) + (allowance if max(values) < 0 else 0)
+        else:
+            half = Z_99 * sigma / math.sqrt(len(reads))
+            low = expected - half - (allowance if expected > 0 else 0)
+            high = expected + half + (allowance if expected < 0 else 0)
+        return replace(base, status='alert', measured=mean, expected=expected, low=low, high=high, detail=detail,
+                       explanation=f'{roll}; reads {outside} lie outside the formula range {min(values):g} to '
+                                   f'{max(values):g} and are not its int32 truncation at SpellEffectInfo::CalcValue '
+                                   f'(at most {TRUNCATED_READ:g} toward zero, reproduced from a formula value)'
+                                   f'{term_truncation_note(truncated_terms)}{cause}: a deviation')
     if needed is None:
         return replace(base, status=MEASURED, measured=mean, expected=expected, detail=detail,
                        explanation=f'{roll}; a mean of 0 has no half-width of {MEAN_HALF_WIDTH:.0%}')
@@ -771,14 +802,6 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     half = Z_99 * sigma / math.sqrt(len(reads))
     low = expected - half - (allowance if expected > 0 else 0)
     high = expected + half + (allowance if expected < 0 else 0)
-    per_level = per_level_loss(tooltips, spell_id, effect, tokens.caster.level)
-    unmodelled = (per_level_model_gap(base.label, run, tooltips, expectation, tokens, index, rolls.start, per_level)
-                  if per_level and per_level.loss else None)
-    engine = [value - per_level.loss for value in values] if per_level and per_level.loss and not unmodelled else None
-    rounded, outside = truncation_reads(values, reads, allowance, not truncated_terms)
-    lowered = {read: value for read, value in zip(map(engine_truncation, engine), engine)} if engine else {}
-    if engine and set(lowered) == {engine_truncation(value) for value in values}:
-        engine, lowered = None, {}
     if (outside or rounded) and engine and all(read in lowered for read in reads):
         engine_reads = [engine_truncation(value) for value in engine]
         engine_mean = fmean(engine_reads)
@@ -795,18 +818,6 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
                                    f'(SpellInfo.cpp:592): the engine reads {min(engine_reads):g} to '
                                    f'{max(engine_reads):g}, mean {engine_mean:.3f}; every read is one of them; 99% '
                                    f'interval of the mean around the engine mean +- {half:.3f}')
-    if outside:
-        cause = (f'; per-level term {per_level.term:g} truncated to {per_level.truncated:g} (SpellInfo.cpp:497) '
-                 f'reproduces reads {sorted(lowered)} but not {[read for read in reads if read not in lowered]}'
-                 if engine else '')
-        if unmodelled:
-            cause = f'; {PER_LEVEL_UNMODELLED}: {unmodelled}'
-            detail = {**detail, PER_LEVEL_ROUNDING: PER_LEVEL_UNMODELLED}
-        return replace(base, status='alert', measured=mean, expected=expected, low=low, high=high, detail=detail,
-                       explanation=f'{roll}; reads {outside} lie outside the formula range {min(values):g} to '
-                                   f'{max(values):g} and are not its int32 truncation at SpellEffectInfo::CalcValue '
-                                   f'(at most {TRUNCATED_READ:g} toward zero, reproduced from a formula value)'
-                                   f'{term_truncation_note(truncated_terms)}{cause}: a deviation')
     if rounded:
         detail = {**detail, ENGINE_ROUNDING: sorted(set(rounded.values()))}
     status = banded_status(mean, low, high, expected)
@@ -1002,14 +1013,15 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
         if effect is not None and expectation.check == 'effect_value' and not ticks else None
     if base_roll is not None:
         return judge_base_roll(base, expectation, measured, tokens, tooltips, index, base_roll)
-    if effect is not None and not ticks:
+    if effect is not None:
         base_points, die_sides = tooltips.effect_points(*effect)
         if die_sides not in FIXED_DIE_SIDES:
             return judge_roll(base, expectation, run, measured, tokens, tooltips, index,
                               roll_range(base_points, die_sides))
-        carried = judge_trigger_with_value(base, expectation, measured, tokens, tooltips, index, effect)
-        if carried is not None:
-            return carried
+        if not ticks:
+            carried = judge_trigger_with_value(base, expectation, measured, tokens, tooltips, index, effect)
+            if carried is not None:
+                return carried
     expected = undivided(token) / ticks if ticks else undivided(token)
     per_tick = (f', divided by its {ticks:g} ticks: {undivided(token):g} over the application, {expected:g} per '
                 'tick' if ticks else '')

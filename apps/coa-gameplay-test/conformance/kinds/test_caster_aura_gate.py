@@ -81,6 +81,15 @@ class CasterAuraGateTests(unittest.TestCase):
                          [gate_label(QUICKDRAW_R7, moment) for moment in MOMENTS[:2]])
 
     def test_bad_entries_are_refused(self):
-        for changes in ({'force_crit': None}, {'force_crit': 'wand'}, {'crit_ability': QUICKDRAW_R7}):
+        for changes in ({'force_crit': None}, {'force_crit': 'wand'}, {'crit_ability': QUICKDRAW_R7},
+                        {'blocked_reason': 0}, {'blocked_reason': True}, {'blocked_reason': '85'}):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 behaviour_scenario(load_fixture_class_file(19), entry(**changes))
+
+    def test_custom_blocked_reason_sets_expected_code_only_when_stated(self):
+        plain = {key: value for key, value in entry().items()
+                 if key not in ('crit_ability', 'force_crit', 'earned_learn', 'known_probes')}
+        _, exp_default = behaviour_scenario(load_fixture_class_file(19), plain)
+        _, exp_custom = behaviour_scenario(load_fixture_class_file(19), {**plain, 'blocked_reason': 85})
+        self.assertEqual(exp_default[0].displayed, '22')
+        self.assertEqual(exp_custom[0].displayed, '85')

@@ -75,8 +75,17 @@ void ApplyContracts(SpellInfo* info)
             if (info->Effects[0].Effect == SPELL_EFFECT_HEALTH_LEECH)
                 info->Effects[0].ValueMultiplier = 1;
         }
+    if ((id >= 523479 && id <= 523483) || id == 523495)
+        if (info->Effects[EFFECT_0].DieSides > 1)
+            info->Effects[EFFECT_0].DieSides = 1;
+    if (id == 523495 || id == 804052)
+        info->MaxAffectedTargets = 0;
+    if (id == 804220)
+        info->Effects[2].Effect = 0;
     if (id == 804758 && !info->ProcFlags)
-        info->ProcFlags = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS;
+        info->ProcFlags = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS |
+                          PROC_FLAG_DONE_RANGED_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS |
+                          PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG | PROC_FLAG_DONE_PERIODIC;
     if (id == 804766 && !info->TargetCreatureType)
         info->TargetCreatureType = 1 << (CREATURE_TYPE_DEMON - 1);
     if (id == 804216)

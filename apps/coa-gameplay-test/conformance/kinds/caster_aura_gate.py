@@ -25,13 +25,18 @@ class CasterAuraGateSpec:
     force_crit: str | None = None
     earned_learn: tuple[int, ...] = ()
     known_probes: tuple[int, ...] = ()
+    blocked_reason: int = SPELL_FAILED_CASTER_AURASTATE
 
 
 def caster_aura_gate_spec(entry: dict) -> CasterAuraGateSpec:
+    blocked_reason = entry.get('blocked_reason', SPELL_FAILED_CASTER_AURASTATE)
+    if type(blocked_reason) is not int or blocked_reason <= 0:
+        raise ValueError(f'{entry["spell"]} {KIND} blocked_reason must be a positive SpellCastResult code, not '
+                         f'{blocked_reason!r}')
     spec = CasterAuraGateSpec(int(entry['spell']), entry['name'], entry['quote'],
                               None if entry.get('crit_ability') is None else int(entry['crit_ability']),
                               entry.get('force_crit'), tuple(int(spell) for spell in entry.get('earned_learn', ())),
-                              tuple(int(spell) for spell in entry.get('known_probes', ())))
+                              tuple(int(spell) for spell in entry.get('known_probes', ())), blocked_reason)
     if (spec.crit_ability is None) != (spec.force_crit is None):
         raise ValueError(f'{spec.spell} {KIND} earns the aura by a crit_ability with a force_crit, or not at all')
     if spec.force_crit is not None and spec.force_crit not in FORCE_CRIT_RATINGS:
@@ -91,9 +96,12 @@ def caster_aura_gate_scenario(class_file: dict, spec: CasterAuraGateSpec) -> tup
         steps += crit_steps(records, spec, aura, distance, probe_label(spec.spell, f'aura {aura}', 'rank_only'))
     steps += ([aura_step(aura, 0)] + attempt(spec.spell, facts, MOMENTS[0])
               + [aura_step(aura, 1)] + attempt(spec.spell, facts, MOMENTS[1]))
-    expected = {MOMENTS[0]: SPELL_FAILED_CASTER_AURASTATE, MOMENTS[1]: NO_CAST_FAILURE}
+    expected = {MOMENTS[0]: spec.blocked_reason, MOMENTS[1]: NO_CAST_FAILURE}
+    reason_text = (f'SPELL_FAILED_CASTER_AURASTATE ({SPELL_FAILED_CASTER_AURASTATE})'
+                   if spec.blocked_reason == SPELL_FAILED_CASTER_AURASTATE
+                   else f'SpellCastResult {spec.blocked_reason}')
     contract = (f'{spec.spell} is attempted at the dummy without its CasterAuraSpell {aura} on the caster and must be '
-                f'refused with SPELL_FAILED_CASTER_AURASTATE ({SPELL_FAILED_CASTER_AURASTATE}); with {aura} set '
+                f'refused with {reason_text}; with {aura} set '
                 f'(harness set_aura, the gate fixture) the same attempt must succeed.')
     if spec.crit_ability is not None:
         steps += ([{'action': 'wait', 'label': f'{spec.spell} cast and global cooldown',

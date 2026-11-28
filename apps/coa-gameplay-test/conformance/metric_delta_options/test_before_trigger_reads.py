@@ -84,6 +84,31 @@ class BeforeTriggerReadsTests(unittest.TestCase):
         missing = {key: value for key, value in {**values, **reads}.items() if key != fixture}
         self.assertEqual(judge_behaviour(base_verdict(guarded), FakeRun(missing), guarded).status, 'unmeasured')
 
+    def test_after_target_casts_with_min_stacks_reads_between_target_cast_and_trigger(self):
+        reads = [{'spell': 712483, 'expected': 1, 'actor': 'dummy', 'after_target_casts': True, 'min_stacks': 2}]
+        scenario, [expectation] = self.built(
+            cast_in_before=False, target_casts_before=[12051], before_trigger_reads=reads)
+        run.validate(scenario)
+        steps = scenario['steps']
+        labels = [step.get('label') for step in steps]
+        read_label = expectation.model['before_trigger_reads'][0]['read_labels']['after']
+        read_idx = labels.index(read_label)
+        target_cast_idx = max(i for i, step in enumerate(steps) if step.get('action') == 'cast' and step.get('spell') == 12051)
+        trigger_spell = entry()['trigger_spell']
+        trigger_cast_idx = max(i for i, step in enumerate(steps)
+                               if step.get('action') == 'cast' and step.get('spell') == trigger_spell)
+        self.assertLess(target_cast_idx, read_idx)
+        self.assertLess(read_idx, trigger_cast_idx)
+        self.assertEqual((steps[read_idx]['actor'], steps[read_idx]['metric'], steps[read_idx]['spell']),
+                         ('dummy', 'aura_stacks', 712483))
+        base_vals = {expectation.model['before_label']: 0.0, expectation.model['after_label']: 0.0}
+        self.assertEqual(
+            judge_behaviour(base_verdict(expectation), FakeRun({**base_vals, read_label: 1.0}), expectation).status,
+            'unmeasured')
+        self.assertNotEqual(
+            judge_behaviour(base_verdict(expectation), FakeRun({**base_vals, read_label: 2.0}), expectation).status,
+            'unmeasured')
+
 
 if __name__ == '__main__':
     unittest.main()
