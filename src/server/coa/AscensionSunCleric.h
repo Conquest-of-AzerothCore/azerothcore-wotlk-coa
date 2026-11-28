@@ -67,6 +67,7 @@ void Extend(Player* player, uint32 id, int32 milliseconds);
 void StackWithoutRefresh(Player* player, uint32 id);
 void ActivateDawn(Player* player);
 void Fulfill(Player* player, Spell* spell, Spell* guard, Unit* target);
+void FulfillTaken(Player* player, Unit* target);
 void Eclipse(Player* player, Unit* target, uint32 amount);
 void EclipseHeal(Player* player, Unit* target, uint32 amount);
 void ReleaseSuncharge(Player* player, Unit* target, uint32 stacks);

@@ -372,6 +372,9 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellInfo const
     if (spellproto->SpellFamilyName == 25 && spellproto->Id == 560963)
         return 6 * IN_MILLISECONDS;
 
+    if (spellproto->SpellFamilyName == 33 && spellproto->Id == 570125)
+        return 8 * IN_MILLISECONDS;
+
     // Explicit diminishing duration
     switch (spellproto->SpellFamilyName)
     {

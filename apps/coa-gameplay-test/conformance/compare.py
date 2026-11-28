@@ -185,7 +185,7 @@ CLASS_ENTRIES = {PROC_CHECK: ('procs', 'aura'), TRIGGER_CHECK: ('triggers', 'aur
                  COOLDOWN_GATE_CHECK: ('triggers', 'aura'), PROC_ENERGIZE_CHECK: ('procs', 'aura'),
                  SELF_TRIGGER_CHECK: ('triggers', 'aura'), GATE_ABSENCE_CHECK: ('triggers', 'aura'),
                  TALENT_DELTA: ('talent_modifiers', 'talent')}
-PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d')
+PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d', re.IGNORECASE)
 DESCRIPTION_VARIABLE = re.compile(r'\$<\w+>')
 SENTENCE_END = re.compile(r'[.!?](?=\s|$|[$@])|\n')
 BLANK = '___'
@@ -273,18 +273,53 @@ def literal_values(class_file: dict, rank_id: int, description: str) -> list[Dis
     return [token for token in tokens if token is not None]
 
 
+class OverriddenPoints(Records):
+    def __init__(self, dbc, overrides: Mapping[tuple[int, int], int]):
+        super().__init__(dbc)
+        self.overrides = overrides
+
+    def field(self, table_name: str, identity: int, name: str):
+        if table_name == 'Spell' and name.startswith('EffectBasePoints['):
+            effect = int(name[17:-1])
+            if (identity, effect) in self.overrides:
+                return self.overrides[(identity, effect)]
+        return super().field(table_name, identity, name)
+
+
+class OverriddenForcedPoints(ForcedPoints, OverriddenPoints):
+    def __init__(self, dbc, overrides: Mapping[tuple[int, int], int], spell_id: int, effect: int, value: int):
+        OverriddenPoints.__init__(self, dbc, overrides)
+        self.forced = (spell_id, effect)
+        self.value = value
+
+
+class OverriddenUnscaledForcedPoints(UnscaledForcedPoints, OverriddenPoints):
+    def __init__(self, dbc, overrides: Mapping[tuple[int, int], int], spell_id: int, effect: int, value: int):
+        OverriddenPoints.__init__(self, dbc, overrides)
+        self.forced = (spell_id, effect)
+        self.value = value
+
+
 class DbcTooltips:
     def __init__(self, dbc_dir: Path, class_file: dict | None = None):
         self.dbc_dir = Path(dbc_dir)
         self.dbc = dataset(self.dbc_dir)
-        self.records = Records(self.dbc)
         self.class_file = class_file or {}
+        self.overrides = {(entry['spell'], entry['effect']): entry['base_points']
+                          for entry in self.class_file.get('effect_overrides', []) if 'base_points' in entry}
+        self.records = OverriddenPoints(self.dbc, self.overrides) if self.overrides else Records(self.dbc)
         self.first_ranks: dict[int, int] | None = None
 
     def read(self, rank_id: int, caster: CasterStats, forced: tuple[int, int, int] | None = None,
              unscaled: bool = False) -> Readout:
-        points = UnscaledForcedPoints if unscaled else ForcedPoints
-        records = self.records if forced is None else points(self.dbc, *forced)
+        if forced is None:
+            records = self.records
+        elif self.overrides:
+            points = OverriddenUnscaledForcedPoints if unscaled else OverriddenForcedPoints
+            records = points(self.dbc, self.overrides, *forced)
+        else:
+            points = UnscaledForcedPoints if unscaled else ForcedPoints
+            records = points(self.dbc, *forced)
         description = records.field('Spell', rank_id, 'Description[enUS]')
         readout = Tooltip(records, rank_id, caster).read(description)
         literal = literal_values(self.class_file, rank_id, description)
@@ -4764,6 +4799,19 @@ def hit_ratio_series(run: Run, reads: list[list[str]]) -> tuple[list[float], lis
     return [later[0] - earlier[0] for earlier, later in pairs], [later[1] - earlier[1] for earlier, later in pairs]
 
 
+def hit_ratio_paired_series(run: Run, pairs: list[list[list[str]]]) -> tuple[list[float], list[float]] | str:
+    totals, counts = [], []
+    for (before_total, before_count), (after_total, after_count) in pairs:
+        values = [run.values.get(label) for label in (before_total, before_count, after_total, after_count)]
+        missing = next((label for label, value in zip((before_total, before_count, after_total, after_count), values)
+                        if value is None), None)
+        if missing is not None:
+            return missing_measurement(run, missing)
+        totals.append(values[2] - values[0])
+        counts.append(values[3] - values[1])
+    return totals, counts
+
+
 def stated_bonus_of_ratio(ratio: float, parts: list[float]) -> float:
     def ratio_of(bonus: float) -> float:
         return math.prod(1 + part * (1 + bonus / 100) / 100 for part in parts) / math.prod(1 + part / 100
@@ -4904,10 +4952,12 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
                        f'and {versus["treatment_entry"]} (type {versus["treatment_type"]}) read equal in armor '
                        f'{armor:g}, level and resistances, armor factor {armor_factor:.5g}; reference attack power '
                        f'{reference:.6g}')
+    second_hit = model.get('second_hit')
     for arm in ('control', 'treatment'):
         totals, counts = [], []
         for part in runs:
-            found = hit_ratio_series(part, model['reads'][arm])
+            found = (hit_ratio_paired_series(part, second_hit['first_pairs'][arm]) if second_hit
+                     else hit_ratio_series(part, model['reads'][arm]))
             if isinstance(found, str):
                 return replace(base, explanation=found)
             if 'health_reads' in model:
@@ -5013,12 +5063,48 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
         ratio += ' with each scaled amount truncated to int32 (the integer-truncation ruling of 2026-11-11)'
     low, high = stepped.passes if stepped else (bonus.expected - bonus.band, bonus.expected + bonus.band)
     reading = (stepped.text if stepped else delta_text(bonus) if flat is not None else bonus_text(bonus))
-    return replace(base, status=status, measured=bonus.measured, expected=bonus.expected,
-                   low=low, high=high, detail=detail,
-                   explanation=f'per-hit mean {treatment.mean:.6g} over {treatment.events:g} treatment hits against '
-                               f'{control.mean:.6g} over {control.events:g} control hits{ratio}; '
-                               f'{reading}{scaled}; {reason}'
-                               f'{beyond}')
+    verdict = replace(base, status=status, measured=bonus.measured, expected=bonus.expected,
+                      low=low, high=high, detail=detail,
+                      explanation=f'per-hit mean {treatment.mean:.6g} over {treatment.events:g} treatment hits against '
+                                  f'{control.mean:.6g} over {control.events:g} control hits{ratio}; '
+                                  f'{reading}{scaled}; {reason}'
+                                  f'{beyond}')
+    if not second_hit:
+        return verdict
+    second_series = {}
+    for arm in ('control', 'treatment'):
+        totals, counts = [], []
+        for part in runs:
+            found = hit_ratio_paired_series(part, second_hit['second_pairs'][arm])
+            if isinstance(found, str):
+                return replace(verdict, status='alert' if verdict.status == 'alert' else 'unmeasured',
+                               explanation=f'{verdict.explanation}; second hit: {found}')
+            totals += found[0]
+            counts += found[1]
+        second_series[arm] = (totals, counts)
+    second_hits = {arm: sum(counts) for arm, (_, counts) in second_series.items()}
+    if min(second_hits.values()) < minimum:
+        return replace(verdict, status='alert' if verdict.status == 'alert' else 'unmeasured',
+                       explanation=f'{verdict.explanation}; second hit without recasting: {second_hits["control"]:g} '
+                                   f'control and {second_hits["treatment"]:g} treatment hits counted (need at least '
+                                   f'{minimum})')
+    second_control, second_treatment = (per_event_sample(*second_series[arm]) for arm in ('control', 'treatment'))
+    try:
+        second_bonus = bonus_of(second_treatment, second_control, float(second_hit['expected_bonus']))
+    except ValueError as error:
+        return replace(verdict, status='alert' if verdict.status == 'alert' else 'unmeasured',
+                       explanation=f'{verdict.explanation}; second hit not judged: {error}')
+    second_status, second_reason, _ = bonus_status(second_bonus)
+    second_ratio = f', ratio {second_treatment.mean / second_control.mean:.5g}' if second_control.mean else ''
+    merged_status = ('alert' if 'alert' in (verdict.status, second_status)
+                     else verdict.status if verdict.status != 'ok'
+                     else second_status)
+    return replace(verdict, status=merged_status,
+                   detail={**detail, 'second_hit': bonus_detail(second_bonus)},
+                   explanation=f'{verdict.explanation}; second hit without recasting: per-hit mean '
+                               f'{second_treatment.mean:.6g} over {second_treatment.events:g} treatment hits against '
+                               f'{second_control.mean:.6g} over {second_control.events:g} control hits{second_ratio}; '
+                               f'{bonus_text(second_bonus)}; {second_reason}')
 
 
 RATIO_CHECKS = frozenset({BEHAVIOUR_RATIO, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_DURATION_RATIO,

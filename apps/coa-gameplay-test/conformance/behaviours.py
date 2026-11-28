@@ -5552,6 +5552,8 @@ class MountBlockSpec:
     name: str
     quote: str
     mount_spell: int = GENERIC_GROUND_MOUNT_SPELL
+    aura_spell: int | None = None
+    blocked_code: int = SPELL_FAILED_CASTER_AURASTATE
 
 
 def mount_block_label(spec: MountBlockSpec, moment: str) -> str:
@@ -5568,7 +5570,8 @@ def mount_block_scenario(class_file: dict, spec: MountBlockSpec) -> tuple[dict, 
     def label(moment: str) -> str:
         return mount_block_label(spec, moment)
 
-    brand = {'action': 'set_aura', 'actor': CASTER, 'spell': spec.spell}
+    aura = spec.spell if spec.aura_spell is None else spec.aura_spell
+    brand = {'action': 'set_aura', 'actor': CASTER, 'spell': aura}
     mounted_read_ms = mount.cast_time_ms + CAST_GATE_WAIT_MS
     steps = (base_steps(class_file)
              + [{'action': 'teleport', 'actor': CASTER, **OUTDOOR_LOCATION},
@@ -5587,28 +5590,32 @@ def mount_block_scenario(class_file: dict, spec: MountBlockSpec) -> tuple[dict, 
                 {**brand, 'stacks': 1},
                 {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
                 measurement(label('dismounted'), CASTER, 'aura', spell=spec.mount_spell)])
+    contract = (f'Outdoors, the caster holds {aura} (set by itself, so its apply hooks run) and casts the '
+                f'mount {spec.mount_spell}: refused with code {spec.blocked_code} and not mounted. '
+                f'Without {aura} the same cast goes through ({NO_CAST_FAILURE}) and mounts (the control). '
+                f'The mount holds over the same wait without {aura}; then {aura} is set again on '
+                f'the mounted caster, which must lose the mount, proving the '
+                f'"{spec.quote}" clause.')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour mount block',
-        'contract': f'Outdoors, the caster holds {spec.spell} (set by itself, so its apply hooks run) and casts the '
-                    f'mount {spec.mount_spell}: refused with code {SPELL_FAILED_CASTER_AURASTATE} and not mounted. '
-                    f'Without {spec.spell} the same cast goes through ({NO_CAST_FAILURE}) and mounts (the control). '
-                    f'The mount holds over the same wait without {spec.spell}; then {spec.spell} is set again on '
-                    f'the mounted caster, which must lose the mount, proving the '
-                    f'"{spec.quote}" clause.',
+        'contract': contract,
         'players': [player_fixture(class_file)],
         'steps': steps}
     model = {'kind': 'mount_block', 'quote': entry.quote}
     rule = prose_rule(entry.quote, spec.spell)
+    expected = {**MOUNT_BLOCK_EXPECTED, 'blocked': spec.blocked_code}
     expectations = [Expectation(label(moment), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.mount_spell, None,
-                                str(MOUNT_BLOCK_EXPECTED[moment]), rule, dict(model))
+                                str(expected[moment]), rule, dict(model))
                     for moment in MOUNT_BLOCK_MOMENTS]
     return scenario, expectations
 
 
 def mount_block_spec(entry: dict) -> MountBlockSpec:
     return MountBlockSpec(entry['spell'], entry['name'], entry['quote'],
-                          int(entry.get('mount_spell', GENERIC_GROUND_MOUNT_SPELL)))
+                          int(entry.get('mount_spell', GENERIC_GROUND_MOUNT_SPELL)),
+                          None if entry.get('aura_spell') is None else int(entry['aura_spell']),
+                          int(entry.get('blocked_code', SPELL_FAILED_CASTER_AURASTATE)))
 
 
 FLEE_BLOCK_ENGAGE_MS = 1000
@@ -5627,6 +5634,7 @@ class FleeBlockSpec:
     flee_health_pct: int
     reads: int
     read_interval_ms: int
+    aura_spell: int | None = None
 
 
 def flee_block_label(spec: FleeBlockSpec, moment: str) -> str:
@@ -5656,6 +5664,7 @@ def flee_block_scenario(class_file: dict, spec: FleeBlockSpec) -> tuple[dict, li
     def read_labels(arm: str) -> list[str]:
         return [label(f'{arm} read {read}') for read in range(1, spec.reads + 1)]
 
+    aura = spec.spell if spec.aura_spell is None else spec.aura_spell
     brand = facts_of(records, spec.spell)
     creatures = [{'id': creature, 'owner': CASTER, 'entry': spec.creature_entry, 'level': class_file['level'],
                   'health': FLEE_BLOCK_HEALTH, 'reaction': FLEE_BLOCK_REACTION_DEFENSIVE}
@@ -5667,15 +5676,16 @@ def flee_block_scenario(class_file: dict, spec: FleeBlockSpec) -> tuple[dict, li
              + [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': FLEE_BLOCK_BRANDED},
                 {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
                 measurement(label('cast'), CASTER, 'cast_failure', spell=spec.spell),
-                measurement(label('branded'), FLEE_BLOCK_BRANDED, 'aura', spell=spec.spell)]
+                measurement(label('branded'), FLEE_BLOCK_BRANDED, 'aura', spell=aura)]
              + provoked(FLEE_BLOCK_BRANDED, 'branded')
-             + [measurement(label('held'), FLEE_BLOCK_BRANDED, 'aura', spell=spec.spell)]
+             + [measurement(label('held'), FLEE_BLOCK_BRANDED, 'aura', spell=aura)]
              + provoked(FLEE_BLOCK_CONTROL, 'control'))
+    aura_note = '' if spec.aura_spell is None else f' (aura {aura})'
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour flee block',
         'contract': f'Two defensive {spec.creature_entry} creatures, whose SmartAI flees for assistance at low '
-                    f'health, stand by the caster. The caster casts {spec.spell} at the first (cast and aura read), '
+                    f'health, stand by the caster. The caster casts {spec.spell} at the first (cast and aura{aura_note} read), '
                     f'attacks it for {FLEE_BLOCK_ENGAGE_MS} ms so it fights back, stops, and brings it to '
                     f'{spec.flee_health_pct}% health; its movement is read {spec.reads} times '
                     f'{spec.read_interval_ms} ms apart and must never read moving, and the brand must still be up '
@@ -5689,11 +5699,11 @@ def flee_block_scenario(class_file: dict, spec: FleeBlockSpec) -> tuple[dict, li
     expectations = [
         Expectation(label('cast'), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None, str(NO_CAST_FAILURE),
                     rule, dict(model)),
-        Expectation(label('branded'), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None, str(STATE_PRESENT),
+        Expectation(label('branded'), BEHAVIOUR_CAST_CONDITION, spec.spell, aura, None, str(STATE_PRESENT),
                     rule, dict(model)),
         Expectation(label('blocked'), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.creature_entry, None,
                     str(STATE_ABSENT), rule, {**model, 'sum_labels': read_labels('branded')}),
-        Expectation(label('held'), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None, str(STATE_PRESENT),
+        Expectation(label('held'), BEHAVIOUR_CAST_CONDITION, spec.spell, aura, None, str(STATE_PRESENT),
                     rule, dict(model)),
         Expectation(label('control'), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.creature_entry, None,
                     str(STATE_PRESENT), rule, {**model, 'sum_labels': read_labels('control'), 'at_least': True})]
@@ -5702,7 +5712,8 @@ def flee_block_scenario(class_file: dict, spec: FleeBlockSpec) -> tuple[dict, li
 
 def flee_block_spec(entry: dict) -> FleeBlockSpec:
     return FleeBlockSpec(entry['spell'], entry['name'], entry['quote'], int(entry['creature_entry']),
-                         int(entry['flee_health_pct']), int(entry['reads']), int(entry['read_interval_ms']))
+                         int(entry['flee_health_pct']), int(entry['reads']), int(entry['read_interval_ms']),
+                         None if entry.get('aura_spell') is None else int(entry['aura_spell']))
 
 
 IMMUNITY_CASTS = 3
@@ -6870,6 +6881,7 @@ class HitRatioSpec:
     void_on_cast_failure: bool = False
     warmup_power: int | None = None
     avoided_grant: hit_ratio_avoided.AvoidedGrant | None = None
+    second_hit_expected: float | None = None
 
 
 ENGINE_AMOUNT_EPSILON = 1e-6
@@ -6976,6 +6988,11 @@ def hit_ratio_entry_label(entry: dict) -> str:
 def hit_ratio_reads(spec: HitRatioSpec, arm: str) -> list[tuple[str, str]]:
     base = f'{hit_ratio_label(spec.spell, spec.label_suffix)} {arm}'
     return [(f'{base} {mark} total', f'{base} {mark} count') for mark in ('start', *range(1, spec.trials + 1))]
+
+
+def hit_ratio_second_reads(spec: HitRatioSpec, arm: str) -> list[tuple[str, str]]:
+    base = f'{hit_ratio_label(spec.spell, spec.label_suffix)} {arm} second'
+    return [(f'{base} {mark} total', f'{base} {mark} count') for mark in range(1, spec.trials + 1)]
 
 
 def hit_ratio_target_armor_label(spec: HitRatioSpec, arm: str) -> str:
@@ -7114,9 +7131,19 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                                              spec.cast_power, after_required=arm)
             if spec.cast_wait_ms:
                 steps.append({'action': 'wait', 'label': f'{name} trial {trial} hits', 'ms': spec.cast_wait_ms})
-            if trial == spec.trials and not spec.clear_observed:
+            if trial == spec.trials and not spec.clear_observed and spec.second_hit_expected is None:
                 steps.append({'action': 'wait', 'label': f'{name} drain', 'ms': DRAIN_MS})
             steps += reads(marks[trial])
+            if spec.second_hit_expected is not None:
+                second_marks = hit_ratio_second_reads(spec, name)
+                steps += healed + hit_ratio_cast(records, spec.observe_spell, spec.caster, spec.target,
+                                                 spec.cast_power, after_required=arm)
+                if spec.cast_wait_ms:
+                    steps.append({'action': 'wait', 'label': f'{name} trial {trial} second hits',
+                                  'ms': spec.cast_wait_ms})
+                if trial == spec.trials and not spec.clear_observed:
+                    steps.append({'action': 'wait', 'label': f'{name} drain', 'ms': DRAIN_MS})
+                steps += reads(second_marks[trial - 1])
         if hit_ratio_target_amounts(spec):
             steps.append(measurement(hit_ratio_target_armor_label(spec, name), spec.target, 'armor'))
         steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
@@ -7207,6 +7234,12 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
             spec.cast_spell == spec.observe_spell or spec.cast_wait_ms < 0:
         raise ValueError(f'{spec.spell} hit_ratio casts {spec.cast_spell} to read the hits of another spell, with a '
                          f'non-negative cast_wait_ms and no swings')
+    if spec.second_hit_expected is not None and (
+            swinging or spec.rate or spec.expected_token or spec.versus is not None or spec.cast_spell is not None
+            or spec.clear_observed or spec.second_hit_expected <= 0):
+        raise ValueError(f'{spec.spell} hit_ratio second_hit_expected {spec.second_hit_expected!r} needs a positive '
+                         f'ratio on a plain observed-spell cast, without swings, rate, expected_token, versus, '
+                         f'cast_spell or clear_observed')
     if spec.cast_unit_auras and swinging:
         raise ValueError(f'{spec.spell} hit_ratio cast_unit_auras hold a fixture on a casting unit, not a swing')
     if hit_ratio_target_amounts(spec) and (swinging or spec.target == CASTER):
@@ -7405,6 +7438,20 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     if spec.scale_auras:
         model['scale_reads'] = {name: [hit_ratio_scale_label(spec, name, spell, effect)
                                        for spell, effect in spec.scale_auras] for name in HIT_RATIO_ARMS}
+    if spec.second_hit_expected is not None:
+        first_pairs, second_pairs = {}, {}
+        for name in HIT_RATIO_ARMS:
+            marks = [list(pair) for pair in hit_ratio_reads(spec, name)]
+            seconds = [list(pair) for pair in hit_ratio_second_reads(spec, name)]
+            first_pairs[name] = [[marks[0] if index == 0 else seconds[index - 1], marks[index + 1]]
+                                 for index in range(spec.trials)]
+            second_pairs[name] = [[marks[index + 1], seconds[index]] for index in range(spec.trials)]
+        model['second_hit'] = {'expected': spec.second_hit_expected,
+                               'expected_bonus': (spec.second_hit_expected - 1) * 100,
+                               'first_pairs': first_pairs, 'second_pairs': second_pairs}
+        scenario['contract'] += (f'; each trial casts {spec.observe_spell} a second time without reapplying the '
+                                 f'arm casts and judges the second hit against '
+                                 f'{(spec.second_hit_expected - 1) * 100:+g}%')
     expectation = Expectation(hit_ratio_label(spec.spell, spec.label_suffix), BEHAVIOUR_HIT_RATIO, spec.spell,
                               spec.observe_spell, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
                               model)
@@ -7485,7 +7532,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         tuple((int(spell), int(stacks), int(owned))
                               for spell, stacks, owned in entry.get('owned_auras', ())),
                         hit_ratio_band_points(entry), hit_ratio_void.parse(entry.get(hit_ratio_void.NAME)),
-                        entry.get('warmup_power'), hit_ratio_avoided.parse(entry.get(hit_ratio_avoided.NAME)))
+                        entry.get('warmup_power'), hit_ratio_avoided.parse(entry.get(hit_ratio_avoided.NAME)),
+                        None if entry.get('second_hit_expected') is None else float(entry['second_hit_expected']))
 
 
 def hit_ratio_band_points(entry: dict) -> float | None:

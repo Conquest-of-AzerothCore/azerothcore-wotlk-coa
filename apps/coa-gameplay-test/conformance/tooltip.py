@@ -87,6 +87,7 @@ class CasterStats:
     race: int | None = None
     class_id: int | None = None
     known_spells: frozenset[int] = field(default_factory=frozenset)
+    bonus_healing: float | None = None
 
 
 @dataclass(frozen=True)
@@ -392,11 +393,13 @@ class ScaledPeriod(Records):
 
 
 class Tooltip:
-    def __init__(self, records: Records, spell_id: int, caster: CasterStats, expanding: tuple[int, ...] = ()):
+    def __init__(self, records: Records, spell_id: int, caster: CasterStats, expanding: tuple[int, ...] = (),
+                 standalone_chain_targets: bool = False):
         self.records = records
         self.spell_id = spell_id
         self.caster = caster
         self.expanding = expanding + (spell_id,)
+        self.standalone_chain_targets = standalone_chain_targets
         self.variable_cache: dict[int, dict[str, Variable]] = {}
         self.variables = self.variables_for(spell_id)
 
@@ -490,6 +493,8 @@ class Tooltip:
             return self.caster.rap
         if name in ('SP', 'sp'):
             return self.school_spell_power(SPELL_POWER_SCHOOLS.values())
+        if name in ('BH', 'bh') and self.caster.bonus_healing is not None:
+            return self.caster.bonus_healing
         if name.lower() in SPELL_POWER_SCHOOLS and name in (name.lower(), name.upper()):
             return self.school_spell_power([SPELL_POWER_SCHOOLS[name.lower()]])
         if name in ('PL', 'pl'):
@@ -511,7 +516,7 @@ class Tooltip:
         if len(name) == 2 and name[0] in CHAIN_TARGET_LETTERS and name[1] in EFFECT_DIGITS:
             spell_id = self.spell_reference(digits)
             return float(self.records.field('Spell', spell_id, f'EffectChainTarget[{int(name[1]) - 1}]')), None, None
-        if name[:-1] == 'ppl' and name[-1:] in EFFECT_DIGITS:
+        if name[:-1].lower() == 'ppl' and name[-1:] in EFFECT_DIGITS:
             spell_id = self.spell_reference(digits)
             effect = int(name[-1]) - 1
             return self.per_level_points(spell_id, effect), self.own_effect(spell_id, effect), spell_id
@@ -584,7 +589,8 @@ class Tooltip:
         refusal = expansion_refusal(self.records, markup, self.expanding)
         if refusal is not None:
             return Readout([], [unreadable_entry(markup.group(0), refusal)])
-        nested = Tooltip(self.records, spell_id, self.caster, self.expanding)
+        nested = Tooltip(self.records, spell_id, self.caster, self.expanding,
+                         standalone_chain_targets=self.standalone_chain_targets)
         readout = nested.read(self.records.field('Spell', spell_id, 'Description[enUS]'))
         return Readout([referenced(value, spell_id) for value in readout.values], readout.unreadable)
 
@@ -708,6 +714,9 @@ class Tooltip:
             return self.records.duration_ms(spell_id), None, 'duration_ms', None
         if letter in 'uUiI':
             return self.spell_counter(spell_id, letter.lower()), None, 'count', None
+        if self.standalone_chain_targets and letter in CHAIN_TARGET_LETTERS and digit and digit in EFFECT_DIGITS:
+            effect = int(digit) - 1
+            return float(self.records.field('Spell', spell_id, f'EffectChainTarget[{effect}]')), None, 'count', None
         raise Unreadable
 
 
@@ -783,7 +792,7 @@ class ExpressionParser:
             if effect_index is not None:
                 if self.first_effect_index is None:
                     self.first_effect_index = effect_index
-                if name[:-1] != 'ppl':
+                if name[:-1].lower() != 'ppl':
                     self.effect_indices.add(effect_index)
             if self.spell_id is None:
                 self.spell_id = spell_id
@@ -887,9 +896,11 @@ def mixed_period_reason(text: str, effect: int) -> str:
     return f'{text} changes with the duration or the period of effect {effect} without being a total over its ticks'
 
 
-def read_tooltip(dbc: DataSet, spell_id: int, caster: CasterStats) -> Readout:
+def read_tooltip(dbc: DataSet, spell_id: int, caster: CasterStats,
+                 standalone_chain_targets: bool = False) -> Readout:
     records = Records(dbc)
     if not records.has_spell(spell_id):
         raise ValueError(f'Spell {spell_id} is not in Spell.dbc')
     description = records.field('Spell', spell_id, 'Description[enUS]')
-    return Tooltip(records, spell_id, caster).read(description)
+    return Tooltip(records, spell_id, caster,
+                   standalone_chain_targets=standalone_chain_targets).read(description)
