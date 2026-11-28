@@ -28,6 +28,7 @@ ALLY = 'ally'
 ALLY_CASTS_KEY = 'value_ally_casts'
 VALUE_REAGENTS_KEY = 'value_reagents'
 HONOUR_MIN_RANGE_KEY = 'honour_min_range'
+MISSILE_WAIT_AT_DUMMY_KEY = 'missile_wait_at_dummy'
 BASE_MANA_POWER_COST_KEY = 'base_mana_power_cost'
 BASE_HEALTH_KEY = 'base_health'
 BASE_ENERGY_KEY = 'base_energy'
@@ -173,6 +174,15 @@ def honour_min_range(class_file: dict | None) -> bool:
     return value
 
 
+def missile_wait_at_dummy(class_file: dict | None) -> bool:
+    if class_file is None or MISSILE_WAIT_AT_DUMMY_KEY not in class_file:
+        return False
+    value = class_file[MISSILE_WAIT_AT_DUMMY_KEY]
+    if type(value) is not bool:
+        raise ValueError(f'{MISSILE_WAIT_AT_DUMMY_KEY} must be a boolean')
+    return value
+
+
 def cast_distance(records: Records, spell_id: int, min_range: bool = False) -> float:
     range_index = records.field('Spell', spell_id, 'RangeIndex')
     flags = records.field('SpellRange', range_index, 'Flags')
@@ -191,9 +201,9 @@ def cast_distance(records: Records, spell_id: int, min_range: bool = False) -> f
     return distance
 
 
-def missile_wait_ms(records: Records, spell_id: int, distance: float) -> int:
+def missile_wait_ms(records: Records, spell_id: int, distance: float, allow_dummy: bool = False) -> int:
     speed = records.field('Spell', spell_id, 'Speed')
-    if distance == DUMMY_DISTANCE or speed <= 0:
+    if (distance == DUMMY_DISTANCE and not allow_dummy) or speed <= 0:
         return 0
     return math.ceil(max(distance, MISSILE_MIN_DISTANCE_YD) / speed * 1000) + CAST_MARGIN_MS
 
@@ -983,7 +993,11 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             cast_steps.append({'action': 'wait', 'label': CAST_WAIT_LABEL,
                                'ms': facts.cast_time_ms + CAST_MARGIN_MS})
         use_min_range = honour_min_range(class_file)
-        travel_ms = (missile_wait_ms(records, rank_id, cast_distance(records, rank_id, use_min_range))
+        wait_at_dummy = missile_wait_at_dummy(class_file) and any(
+            step.get('metric', '').startswith('aura_') or step.get('metric') in SUMMON_AURA_METRICS.values()
+            for step in after_cast)
+        travel_ms = (missile_wait_ms(records, rank_id, cast_distance(records, rank_id, use_min_range),
+                                     allow_dummy=wait_at_dummy)
                      if is_hostile(facts) else 0)
         if travel_ms:
             cast_steps.append({'action': 'wait', 'label': MISSILE_WAIT_LABEL, 'ms': travel_ms})

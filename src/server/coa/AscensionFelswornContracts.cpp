@@ -80,8 +80,8 @@ void ApplyContracts(SpellInfo* info)
             info->Effects[EFFECT_0].DieSides = 1;
     if (id == 523495 || id == 804052)
         info->MaxAffectedTargets = 0;
-    if (id == 803477 && !info->DurationEntry)
-        info->DurationEntry = sSpellDurationStore.LookupEntry(18);
+    if (id == 804220)
+        info->Effects[2].Effect = 0;
     if (id == 804758 && !info->ProcFlags)
         info->ProcFlags = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS |
                           PROC_FLAG_DONE_RANGED_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS |

@@ -1344,5 +1344,29 @@ class ValueReagentsTest(unittest.TestCase):
         self.assertNotIn({'action': 'add_item', 'actor': CASTER, 'item': 1210, 'count': 1}, sc_plain['steps'])
 
 
+class MissileWaitAtDummyTest(unittest.TestCase):
+    def test_non_boolean_missile_wait_at_dummy_is_refused(self):
+        from values import MISSILE_WAIT_AT_DUMMY_KEY, missile_wait_at_dummy
+        for bad in (1, 'true', None, []):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                missile_wait_at_dummy({MISSILE_WAIT_AT_DUMMY_KEY: bad})
+        self.assertFalse(missile_wait_at_dummy(None))
+        self.assertFalse(missile_wait_at_dummy({}))
+        self.assertTrue(missile_wait_at_dummy({MISSILE_WAIT_AT_DUMMY_KEY: True}))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cripple_waits_for_missile_at_dummy_only_when_opted_in(self):
+        from values import MISSILE_WAIT_AT_DUMMY_KEY, MISSILE_WAIT_LABEL
+        felsworn = load_class_file(14)
+        cripple = ClassSpell(704371, 'Cripple', (704371,), 704371, 0, False)
+        without = {key: value for key, value in felsworn.items() if key != MISSILE_WAIT_AT_DUMMY_KEY}
+        with_opt = {**without, MISSILE_WAIT_AT_DUMMY_KEY: True}
+        sc_plain, _, _ = value_scenario(without, cripple, 704371)
+        sc_opt, _, _ = value_scenario(with_opt, cripple, 704371)
+        self.assertFalse(any(step.get('label') == MISSILE_WAIT_LABEL for step in sc_plain['steps']))
+        wait = next(step for step in sc_opt['steps'] if step.get('label') == MISSILE_WAIT_LABEL)
+        self.assertEqual(wait['ms'], 600)
+
+
 if __name__ == '__main__':
     unittest.main()

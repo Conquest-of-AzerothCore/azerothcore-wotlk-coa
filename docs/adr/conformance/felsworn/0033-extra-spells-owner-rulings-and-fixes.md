@@ -38,9 +38,11 @@ migration `data/sql/updates/pending_db_world/rev_20261127_05_felsworn_extra_spel
    `aura_ascension_felsworn_lifecycle::Tick` (`AscensionFelswornAuras.cpp`) to step `EFFECT_0`
    (`SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK`) and `EFFECT_1` (`SPELL_AURA_MOD_DECREASE_SPEED`) toward `0` on each 2 s
    tick (`-40% -> -32% -> -24% -> -16% -> -8% -> 0%`), even if the caster dies.
-3. **D-3 (`803477` *Sunder* ATK Reducer duration)**: In `AscensionFelswornContracts.cpp`, assign `SpellDuration.dbc`
-   row `18` (`20000 ms`, matching `$807428s3 = 20000`) when `!info->DurationEntry` so `803477` does not expire
-   immediately at `0 ms`.
+3. **D-3 (`803477` *Sunder* ATK Reducer duration — live Stage 2B correction)**: Live testing revealed that Inner Demon
+   automatically toggles helper aura `807428` (`AscensionFelsworn.cpp:274`), whose `Effect[2]` already adds `+20000 ms`
+   flat `SPELLMOD_DURATION` to `803477` (matching `felsworn-sunder-inner-demon-attack-power-6859.json`). Setting
+   `DurationEntry = 18` (`20000 ms`) on `803477` doubled its duration to `40000 ms` (`inner_demon_gone_21s` stayed
+   present at `21509 ms`). Reverted the `DurationEntry` override on `803477` so `807428` supplies the exact `20000 ms`.
 4. **D-4 (`500028`/`500422`/`500423` *Chaos Rush* dash while rooted)**: In `felsworn_casts::OnSpellBeforeEffects`
    (`AscensionFelswornAbilities.cpp`), remove `MECHANIC_ROOT` auras before `E1` triggers `802028`
    (`SPELL_EFFECT_JUMP_DEST`), so `802028` passes `Spell::CheckCast(true)` (`Spell.cpp:6814`) when cast while rooted.
@@ -48,9 +50,14 @@ migration `data/sql/updates/pending_db_world/rev_20261127_05_felsworn_extra_spel
    `AscensionFelswornContracts.cpp` to include ranged, negative magic spells, and periodic ticks, and guard
    `aura_ascension_felsworn_betrayers_inclinations::CheckProc` (`AscensionFelswornAuras.cpp`) against `804766`
    self-procs and non-damaging magic/periodic events.
-6. **D-6 (Illidari vs Man'ari Intuition per-caster exclusivity)**: Add `(1154, 523478)` and `(1154, 523495)` to
-   `spell_group` `1154` (`stack_rule = 2` `EXCLUSIVE_FROM_SAME_CASTER`) in `rev_20261127_05_felsworn_extra_spells.sql`,
-   preserving cross-class groups `1078`/`1089`, `2110001`, and `2110004`.
+6. **D-6 (Illidari vs Man'ari Intuition exclusivity & Mark of the Wild non-stacking)**: Add `(1154, 523478)` and
+   `(1154, 523495)` to `spell_group` `1154` (`stack_rule = 2` `EXCLUSIVE_FROM_SAME_CASTER`) in
+   `rev_20261127_05_felsworn_extra_spells.sql`. Live Stage 2B testing (`no_stack_motw`) further proved that keeping
+   `523478` and `523495` inside subgroup `1078` alongside `1126` caused `SpellMgr::CheckSpellGroupStackRules`
+   (`SpellMgr.cpp:903-911`) to skip parent group `1089` (`stack_rule = 4` `EXCLUSIVE_HIGHEST`), allowing Man'ari
+   Intuition and Greater Man'ari Intuition to stack armor (+309) and primary stats (+12) with Mark of the Wild (`9885`).
+   Moved `523478` and `523495` out of `1078` and directly into `1089`, and added `(2110004, 523495)` alongside
+   `(2110004, 523478)` in `2110004` (`CoA class buffs: armor and all attributes`).
 7. **D-7 (`954534` *Enslave Elemental* 8 s PvP cap)**: Add `spellproto->SpellFamilyName == 20 && spellproto->Id == 954534`
    returning `8 * IN_MILLISECONDS` to `GetDiminishingReturnsLimitDuration` in `src/server/game/Spells/SpellMgr.cpp`.
 8. **D-8 (`804052` *Eye of Archimonde* target cap) & `Q-fs-ex-1` (`523479..523483`, `523495`)**: Clamp
@@ -61,6 +68,12 @@ migration `data/sql/updates/pending_db_world/rev_20261127_05_felsworn_extra_spel
    (`AscensionFelswornAbilities.cpp`), set visual stack amount to
    `std::min<uint64>(aura->GetSpellInfo()->StackAmount, count + 1)` while keeping expiry damage `count * CalcValue`
    (`176 * count`).
+10. **Stage 2B fix (`804220` *Betray* Inner Demon trigger `804349`)**: DBC `804220` `Effect[2]` (`TRIGGER_SPELL 804349`)
+    fired `804349` on every Betray cast outside Inner Demon, failing `OnSpellCheckCast` (`804349 && !Inner`) and
+    emitting a spurious `SMSG_CAST_FAILED` (`SPELL_FAILED_DONT_REPORT = 27`) packet to the client. Cleared `804220`
+    `Effects[2].Effect = 0` in `AscensionFelswornContracts.cpp` and dispatched `Cast(player, target, 804349)` in
+    `felsworn_casts::OnSpellHitResult` (`AscensionFelswornAbilities.cpp`) only when `spell->GetScriptValue(804216)` is
+    set, matching all other Inner Demon secondary effects (`801312`, `802060`, `801895`, `712399`, `520236`).
 
 ## Consequences
 

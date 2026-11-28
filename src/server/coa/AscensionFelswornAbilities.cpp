@@ -359,6 +359,8 @@ class felsworn_casts : public AllSpellScript
         }
         if (info->Id == 704371 && player->HasAura(560641))
             Cast(player, target, 704397);
+        if (info->Id == 804220 && spell->GetScriptValue(804216) && target != player && !player->IsFriendlyTo(target))
+            Cast(player, target, 804349);
         if (Named(info, 801904) && Inner(player) && target != player && !player->IsFriendlyTo(target))
             Cast(player, player, 803089);
         if (!damage || target == player || player->IsFriendlyTo(target))

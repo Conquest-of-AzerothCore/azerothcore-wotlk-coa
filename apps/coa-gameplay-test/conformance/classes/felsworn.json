@@ -28128,7 +28128,6 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "void_on_cast_failure": true,
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -28151,16 +28150,42 @@
             ],
             "metric": "aura",
             "fields": {
+              "spell": 9885
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Stronger Mark of the Wild 9885 stays active under spell_group 1089 EXCLUSIVE_HIGHEST."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
               "spell": 523483
             },
             "before_expected": 0,
-            "expected": 1,
+            "expected": 0,
             "tolerance": 0,
-            "source": "523483 actually applies on cast (0 -> 1) while its armor/stat bonus does not stack with 9885."
+            "source": "523483 does not stack on top of equal/stronger Mark of the Wild 9885 under spell_group 1089 EXCLUSIVE_HIGHEST."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 523483
+            },
+            "before_expected": 0,
+            "expected": 9,
+            "tolerance": 0,
+            "source": "Single-target 523483 bounces with SPELL_FAILED_AURA_BOUNCED (9) against stronger Mark of the Wild 9885 under spell_group 1089 EXCLUSIVE_HIGHEST."
           }
         ]
       },
-      "observe_source": "rev_20260909_05_felsworn_completion.sql:382 places 523478 (chain R6 523483) in spell_group 1078 (nested under 1089 EXCLUSIVE_SAME_EFFECT with Mark of the Wild R7 9885, +285 Armor / +12 all stats). With 9885 already held on caster (precondition fixture), casting 523483 applies aura 523483 (0->1) with zero additional armor gain (expected_gain 0) and Strength unchanged at 94.0."
+      "observe_source": "Stage 2B SQL fix (rev_20261127_05_felsworn_extra_spells.sql): moved 523478 and 523495 out of subgroup 1078 directly into parent group 1089 (Mark of the Wild, stack_rule = 4 EXCLUSIVE_HIGHEST) so SpellMgr::CheckSpellGroupStackRules(523483, 9885) returns EXCLUSIVE_HIGHEST instead of DEFAULT. With Mark of the Wild 9885 active (569 armor, 94 STR), casting 523483 does not stack: armor stays 569 (gain 0), STR stays 94, 9885 stays 1, 523483 stays 0."
     },
     {
       "spell": 523483,
@@ -28549,7 +28574,20 @@
             "before_expected": 94.0,
             "expected": 94.0,
             "tolerance": 0.05,
-            "source": "Strength stays 94.0 (82 + 12 from 9885), not 106.0."
+            "source": "Strength stays at 94.0 (82 + 12 from 9885), not 106.0."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 9885
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Stronger Mark of the Wild 9885 stays active under spell_group 1089 EXCLUSIVE_HIGHEST."
           },
           {
             "actors": [
@@ -28560,13 +28598,13 @@
               "spell": 523495
             },
             "before_expected": 0,
-            "expected": 1,
+            "expected": 0,
             "tolerance": 0,
-            "source": "523495 applies (0 -> 1) without stacking armor/stats with 9885."
+            "source": "523495 does not stack on top of Mark of the Wild 9885 under spell_group 1089 EXCLUSIVE_HIGHEST."
           }
         ]
       },
-      "observe_source": "rev_20260909_05_felsworn_completion.sql:382 places 523495 in spell_group 1078 (under 1089 EXCLUSIVE_SAME_EFFECT with 9885 Mark of the Wild R7). With 9885 held, casting 523495 applies aura 523495 (0->1) with zero extra armor gain (expected_gain 0) and Strength unchanged at 94.0."
+      "observe_source": "Stage 2B SQL fix (rev_20261127_05_felsworn_extra_spells.sql): moved 523495 out of subgroup 1078 directly into parent group 1089 (stack_rule = 4 EXCLUSIVE_HIGHEST) and added to 2110004. With Mark of the Wild 9885 active, casting 523495 does not stack: armor stays 569 (gain 0), STR stays 94, 9885 stays 1, 523495 stays 0."
     },
     {
       "spell": 523495,
@@ -28614,7 +28652,10 @@
           }
         ]
       },
-      "observe_source": "Defect D-6 regression: per-caster mutual exclusivity between Greater Man'ari Intuition 523495 and Illidari Intuition 501329. Casting 523495 after 501329 removes 501329 (1->0) and applies 523495 (0->1)."
+      "observe_source": "Defect D-6 regression: per-caster mutual exclusivity between Greater Man'ari Intuition 523495 and Illidari Intuition 501329. Casting 523495 after 501329 removes 501329 (1->0) and applies 523495 (0->1).",
+      "refill_power_after_setup_casts": {
+        "power": 3
+      }
     },
     {
       "spell": 523495,
@@ -28784,7 +28825,7 @@
     },
     {
       "spell": 532229,
-      "name": "Twisted Sight (demonic eye is very fragile, HealthModifier 0.1)",
+      "name": "Twisted Sight (demonic eye is very fragile, HealthModifier 0.33)",
       "kind": "metric_delta",
       "variant": "eye_fragile",
       "label_suffix": "eye_fragile",
@@ -28802,14 +28843,14 @@
         "fields": {}
       },
       "before_expected": 2173,
-      "expected": 244,
+      "expected": 1411,
       "after_at_least": 1,
-      "after_at_most": 500,
+      "after_at_most": 1600,
       "tolerance": 20,
       "wait_ms": 6000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "creature_template.sql:3826 gives Eye of Kilrogg 4277 HealthModifier = 0.1, unit_class = 2 (creature_classlevelstats.sql: L60 basehp0 2442 * 0.1 = 244; L80 basehp0 4274 * 0.1 = 427). before_reference reads caster max_health (2173 = BaseHP 1563 + 20 + 59*10 Stamina bonus); treatment reads owned_creature_max_health of 4277 in [1, 500], proving the eye is far more fragile than the caster."
+      "observe_source": "creature_template 4277 (Eye of Kilrogg) has HealthModifier 0.33, unit_class 2, L60 creature_classlevelstats basehp1 3984 -> max health 1411 HP, strictly below the naked L60 Felsworn caster's 2173 max health."
     },
     {
       "spell": 535595,
@@ -31564,7 +31605,7 @@
     },
     {
       "spell": 578345,
-      "name": "Blur (threat restored after 6 sec expiry)",
+      "name": "Blur (threat dropped during 6 sec and restored after expiry)",
       "kind": "metric_delta",
       "variant": "threat_restored",
       "label_suffix": "threat_restored",
@@ -31572,46 +31613,52 @@
       "trigger_spell": 578345,
       "target": "caster",
       "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
       "setup_casts": [
-        801312
+        92559
       ],
       "setup_target": "dummy",
-      "setup_in_before": true,
-      "setup_wait_ms": 2200,
-      "cast_in_before": false,
+      "setup_wait_ms": 500,
       "cast_power": 100,
       "phase_auras": [
         [
-          984954,
+          16255,
           1,
           "caster",
           "caster"
-        ],
+        ]
+      ],
+      "phase_aura_amounts": [
         [
-          823764,
-          1,
-          "caster",
-          "caster"
+          16255,
+          0,
+          -100
         ]
       ],
       "metric": "threat",
       "fields": {
         "target": "caster"
       },
-      "before_expected": 1,
-      "expected": 1,
-      "expected_ratio": 1.0,
-      "tolerance": 0.05,
-      "wait_ms": 6500,
+      "before_expected": 0,
+      "expected": 0,
+      "after_expiry_expected": 929,
+      "tolerance": 40,
+      "wait_ms": 500,
+      "expiry_wait_ms": 6000,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          6350,
-          6750
+          350,
+          750
+        ],
+        "expired": [
+          6300,
+          6850
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "AuraEffect::HandleAuraModTotalThreat restores the temporary -90000000 threat offset when Blur 578345 expires at 6000 ms. With no-crit 984954 and spellpen 823764 keeping both phases' Fel Fireball 801312 threat equal, threat read at 6500 ms (after Blur expires) matches pre-Blur threat (expected_ratio 1.0 +- 0.05; paired with threat_drop ratio 0.0 during Blur)."
+      "observe_source": "AuraEffect::HandleAuraModTotalThreat drops threat to 0 while Blur 578345 (6000 ms) is active and restores the exact threat when Blur expires. With non-crit 16255 (-100), setup cast Void Zone 92559 deals ~929 Physical damage on dummy (~929 threat); casting Blur drops threat to 0 at 500 ms and restores ~929 at 6500 ms (after 6000 ms expiry)."
     },
     {
       "spell": 578345,
@@ -33354,7 +33401,7 @@
         ]
       },
       "trials": 60,
-      "parts": 100,
+      "parts": 250,
       "expected_source": "Bane of Fire 707901 Effect[1] aura 330 SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE_AGAINST_TARGET, BasePoints 19 + 1 = +20%, MiscValue 4 (Fire); Unit.cpp:10637-10641 adds +20 pp spell crit chance for caster's Fire spells. Pooled 60 parts x 100 = 6000 trials/arm."
     },
     {
@@ -33566,7 +33613,7 @@
         ]
       },
       "trials": 60,
-      "parts": 100,
+      "parts": 260,
       "expected_source": "Bane of Power 707902 Effect[0] aura 330 SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE_AGAINST_TARGET, BasePoints 49 + 1 = +50%, MiscValue 127 (all schools); casting 707902 before each Fel Fireball 501288 resets its 3-crit counter and raises spell crit chance by +50 pp (band +-2.5 pp, 4000 trials/arm)."
     },
     {
@@ -33605,7 +33652,7 @@
         ]
       },
       "trials": 100,
-      "parts": 60,
+      "parts": 150,
       "expected_source": "Bane of Power 707902 Effect[0] MiscValue 127 (all schools) also grants +50 pp melee crit chance via Unit.cpp:4587-4591 on Carve strike 803715."
     },
     {
@@ -34387,7 +34434,7 @@
     },
     {
       "spell": 712483,
-      "name": "Bane of Betrayal (expiry deals 176 Chaos damage at 1 enemy cast)",
+      "name": "Bane of Betrayal (expiry deals 96 PvP-scaled Chaos damage at 1 enemy cast: 176 * 0.55 Resilient Constitution)",
       "kind": "metric_delta",
       "variant": "expiry_damage_one",
       "label_suffix": "expiry_damage_one",
@@ -34399,7 +34446,7 @@
       "enemy_casts": [
         25222
       ],
-      "enemy_cast_wait_ms": 1600,
+      "enemy_cast_wait_ms": 31000,
       "enemy_casts_in_before": false,
       "cast_in_before": false,
       "cast_power": 100,
@@ -34417,16 +34464,16 @@
         "target": "enemy"
       },
       "before_expected": 0,
-      "expected": 176,
+      "expected": 96,
       "tolerance": 0,
-      "wait_ms": 31000,
+      "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Q-fs-ex-4: at L60, 712483 E0 CalcValue = 86 + int(3.0 * (60 - 30)) = 176; 1 real enemy cast -> expiry 807554 deals 176 Chaos damage (FelswornCopies: CANT_CRIT, IGNORE_MODIFIERS)."
+      "observe_source": "Owner ruling Q-fs-ex-4: 712483 expiry Copy(807554) deals 1 * CalcValue(712483) = 176 Chaos damage; against the L60 enemy player carrying CoA class passive Resilient Constitution 552011 (-45% PvP damage taken, AscensionCustomClassData.h:99), int(176 * 0.55) = 96."
     },
     {
       "spell": 712483,
-      "name": "Bane of Betrayal (expiry deals 528 Chaos damage at 3 enemy casts)",
+      "name": "Bane of Betrayal (expiry deals 290 PvP-scaled Chaos damage at 3 enemy casts: 528 * 0.55 Resilient Constitution)",
       "kind": "metric_delta",
       "variant": "expiry_damage_three",
       "label_suffix": "expiry_damage_three",
@@ -34440,7 +34487,7 @@
         25222,
         25222
       ],
-      "enemy_cast_wait_ms": 1600,
+      "enemy_cast_wait_ms": 11000,
       "enemy_casts_in_before": false,
       "cast_in_before": false,
       "cast_power": 100,
@@ -34458,12 +34505,12 @@
         "target": "enemy"
       },
       "before_expected": 0,
-      "expected": 528,
+      "expected": 290,
       "tolerance": 0,
-      "wait_ms": 31000,
+      "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Q-fs-ex-4: 3 real enemy casts -> expiry 807554 deals 176 * 3 = 528 Chaos damage (linear scaling with accrued stacks)."
+      "observe_source": "Owner ruling Q-fs-ex-4: 712483 expiry Copy(807554) deals 3 * CalcValue(712483) = 528 Chaos damage; against the L60 enemy player carrying CoA class passive Resilient Constitution 552011 (-45% PvP damage taken, AscensionCustomClassData.h:99), int(528 * 0.55) = 290 (exact 3x scaling over expiry_damage_one 96)."
     },
     {
       "spell": 712483,
@@ -35430,8 +35477,25 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "observe_source": "Negative control: without a stealable Magic buff on dummy, OnSpellSuccessfulSteal (AscensionFelswornAbilities.cpp:423-427) never fires 806062 (0 hits)."
+      "observe_source": "Negative control: without a stealable Magic buff on dummy, OnSpellSuccessfulSteal (AscensionFelswornAbilities.cpp:423-427) never fires 806062 (0 hits).",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 800353
+            },
+            "before_expected": 0,
+            "expected": 87,
+            "tolerance": 0,
+            "source": "Casting Consume Magic 800353 on a buffless target returns SPELL_FAILED_NOTHING_TO_STEAL (87) and triggers no 806062 damage."
+          }
+        ]
+      }
     },
     {
       "spell": 800353,
@@ -36201,16 +36265,20 @@
       "variant": "energy_regen",
       "label_suffix": "energy_regen",
       "quote": "increasing your Energy regeneration by $s2%",
-      "trigger_spell": 802075,
+      "trigger_spell": 60235,
       "target": "caster",
       "measure_actor": "caster",
-      "cast_in_before": false,
+      "setup_only_after": true,
+      "setup_casts": [
+        802075
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 0,
       "phase_power": [
         3,
         0,
         0
       ],
-      "phase_power_in_uncast_before": true,
       "metric": "power",
       "fields": {
         "power": 3
@@ -36218,11 +36286,11 @@
       "before_expected": 20,
       "expected": 40,
       "expected_ratio": 2.0,
-      "tolerance": 4,
+      "tolerance": 0.2,
       "wait_ms": 2000,
-      "expire_ms": 21000,
+      "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Blood of Mannoroth 802075 Effect[1] aura 110 MOD_POWER_REGEN_PERCENT MiscValue 3 (Energy) BasePoints 99 + 1 = +100%. From 0 Energy over 2000 ms: ~20 Energy control vs ~40 Energy under 802075 (ratio 2.0)."
+      "observe_source": "802075 Effect[1] SPELL_AURA_MOD_POWER_REGEN_PERCENT +100% Energy (off-GCD StartRecoveryTime 0). Both phases set Energy to 0 via phase_power and wait 2000 ms after casting harmless instant 60235: control regens 0 -> 20 Energy, treatment casts off-GCD 802075 immediately before 60235 and regens 0 -> 40 Energy (ratio 2.0)."
     },
     {
       "spell": 802075,
@@ -36384,8 +36452,16 @@
       "measure_actor": "dummy",
       "dummy_distance": 10.0,
       "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
       "target_casts_before": [
-        2144558
+        30831
       ],
       "area_dummies": {
         "placed": [
@@ -36427,20 +36503,20 @@
           }
         ],
         "casts_before": [
-          2144558
+          30831
         ]
       },
       "metric": "aura",
       "fields": {
-        "spell": 2144558
+        "spell": 30831
       },
       "before_expected": 1,
       "expected": 0,
       "tolerance": 0,
-      "wait_ms": 500,
+      "wait_ms": 1200,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-8 regression: 804052 Effect[0] DISPEL MiscValue 5 (DISPEL_STEALTH) RadiusIndex 217 (30 yd, effective edge 30 + 1.275 reach + 2.66 leeway = 33.935 yd). Primary dummy (10 yd) + 5 placed dummies (15..25 yd) = 6 stealthed enemies within 30 yd ALL lose Stealth Dummy 2144558 (proving MaxAffectedTargets=0 fix), while area6 at 36 yd stays stealthed (1 -> 1)."
+      "observe_source": "804052 Effect[0] SPELL_EFFECT_DISPEL MiscValue 5 (DISPEL_STEALTH), SpellRadius 217 (30 yd), Speed 40 yd/s (max 750 ms flight -> 1200 ms wait), MaxAffectedTargets 0 (D-8). Stealth 30831 has Dispel 5 (DISPEL_STEALTH) and SPELL_AURA_MOD_STEALTH (infinite duration): all 6 stealthed enemies within 30 yd (dummy at 10 yd, area1..area4 at 15 yd, area5 at 25 yd) are revealed (1 -> 0), while area6 at 36 yd stays stealthed (1 -> 1)."
     },
     {
       "spell": 804052,
@@ -36454,8 +36530,16 @@
       "measure_actor": "dummy",
       "dummy_distance": 10.0,
       "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
       "target_casts_before": [
-        8149
+        41253
       ],
       "area_dummies": {
         "placed": [
@@ -36473,20 +36557,20 @@
           }
         ],
         "casts_before": [
-          8149
+          41253
         ]
       },
       "metric": "aura",
       "fields": {
-        "spell": 8149
+        "spell": 41253
       },
       "before_expected": 1,
       "expected": 0,
       "tolerance": 0,
-      "wait_ms": 500,
+      "wait_ms": 1200,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "804052 Effect[1] DISPEL MiscValue 6 (DISPEL_INVISIBILITY) RadiusIndex 217 (30 yd): dummy (10 yd) and area1 (25 yd) lose Super Invis 8149 (1 -> 0), area2 (36 yd) stays invisible (1 -> 1)."
+      "observe_source": "804052 Effect[1] SPELL_EFFECT_DISPEL MiscValue 6 (DISPEL_INVISIBILITY), SpellRadius 217 (30 yd), Speed 40 yd/s (max 750 ms flight -> 1200 ms wait). Greater Invisibility 41253 has Dispel 6 (DISPEL_INVISIBILITY) and SPELL_AURA_MOD_INVISIBILITY (infinite duration): dummy (10 yd) and area1 (25 yd) are revealed (1 -> 0), while area2 (36 yd, beyond 30 yd) stays invisible (1 -> 1)."
     },
     {
       "spell": 804216,
@@ -36521,33 +36605,11 @@
     },
     {
       "spell": 804216,
-      "name": "Inner Demon (refused at 0 Felfury)",
-      "kind": "metric_delta",
-      "variant": "zero_felfury_refused",
-      "label_suffix": "zero_felfury_refused",
+      "name": "Inner Demon (refused at 0 Felfury, accepted at 1 Felfury)",
+      "kind": "caster_aura_gate",
       "quote": "Consumes Felfury",
-      "trigger_spell": 804216,
-      "target": "caster",
-      "measure_actor": "caster",
-      "cast_in_before": true,
-      "after_auras": [
-        [
-          800058,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "cast_failure",
-      "fields": {
-        "spell": 804216
-      },
-      "before_expected": 22,
-      "expected": 0,
-      "tolerance": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "804216 CasterAuraSpell 800058 refuses cast at 0 Felfury with SPELL_FAILED_CASTER_AURASTATE (22), succeeds (0) at 1 Felfury."
+      "observe_source": "Inner Demon 804216 checks !Fury(player) in AscensionFelswornAbilities.cpp:99-100 and rejects 0 Felfury with SPELL_FAILED_NO_POWER (85); with 1 Felfury (800058) set it succeeds (0).",
+      "blocked_reason": 85
     },
     {
       "spell": 804216,
@@ -36569,12 +36631,6 @@
         [
           800058,
           3,
-          "caster",
-          "caster"
-        ],
-        [
-          803467,
-          1,
           "caster",
           "caster"
         ]
@@ -36629,7 +36685,11 @@
           }
         ]
       },
-      "observe_source": "Inner Demon 804216 Effect[0] aura 36 SPELL_AURA_MOD_SHAPESHIFT MiscValue 56 (SpellShapeshiftForm.dbc ID 56 'Demon': creatureType = 3 CREATURE_TYPE_DEMON; model-less form per Unit.cpp:17176, so creature type rather than display_id changes). Copies bloodmage.json 562720 demon_type: hostile striker casts Holy Water Tonic 289266 (TargetCreatureType = 36 Undead|Demon, 8 yd AoE enemy stun 6 s), which skips Humanoid control (aura 289266 = 0) and lands on Demon in Inner Demon 804216 (aura 289266 = 1)."
+      "observe_source": "Inner Demon 804216 Effect[0] aura 36 SPELL_AURA_MOD_SHAPESHIFT MiscValue 56 (SpellShapeshiftForm.dbc ID 56 'Demon': creatureType = 3 CREATURE_TYPE_DEMON; model-less form per Unit.cpp:17176, so creature type rather than display_id changes). Copies bloodmage.json 562720 demon_type: hostile striker casts Holy Water Tonic 289266 (TargetCreatureType = 36 Undead|Demon, 8 yd AoE enemy stun 6 s), which skips Humanoid control (aura 289266 = 0) and lands on Demon in Inner Demon 804216 (aura 289266 = 1).",
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 3
+      }
     },
     {
       "spell": 804216,
@@ -36799,7 +36859,11 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "At 3 Felfury consumed, 804216 starts at 15000 ms (remaining ~14500 ms at +500 ms)."
+      "observe_source": "At 3 Felfury consumed, 804216 starts at 15000 ms (remaining ~14500 ms at +500 ms).",
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 3
+      }
     },
     {
       "spell": 804216,
@@ -36830,7 +36894,11 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "At 6 Felfury consumed, 804216 starts at 30000 ms (remaining ~29500 ms at +500 ms)."
+      "observe_source": "At 6 Felfury consumed, 804216 starts at 30000 ms (remaining ~29500 ms at +500 ms).",
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      }
     },
     {
       "spell": 804220,
@@ -37186,7 +37254,7 @@
       "cast_in_before": false,
       "phase_auras": [
         [
-          984954,
+          16255,
           1,
           "caster",
           "caster"
@@ -37198,13 +37266,20 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 95,
-      "after_at_least": 80,
-      "after_at_most": 105,
+      "expected": 104,
+      "after_at_least": 90,
+      "after_at_most": 112,
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "804766 Betrayer's Blow (SchoolMask 1 Physical, E0 bp=24 ds=2 -> 25..26, AscensionFelswornData.h:76 {804766, 0, 0.25f, 0.50f, 0, 0, 36}): at reference AP 312, SP 0 -> pre-armor 25..26 + 78 = 103..104, armor-mitigated on Imp 416."
+      "observe_source": "Betrayer's Blow 804766 (DmgClass 2 Melee, Physical, BP 24 + DS 2 = 25..26, AP 0.25, SP 0.50 on Imp 416 with non-crit 16255 -100% all crit): at naked L60 AP 312, SP 0 -> 25.5 + 0.25*312 = 103.5 (band 90..112).",
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ]
     },
     {
       "spell": 804758,
@@ -37222,7 +37297,7 @@
       "player_spell_power": 1000,
       "phase_auras": [
         [
-          984954,
+          16255,
           1,
           "caster",
           "caster"
@@ -37234,13 +37309,20 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 780,
-      "after_at_least": 680,
-      "after_at_most": 860,
+      "expected": 853,
+      "after_at_least": 820,
+      "after_at_most": 880,
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "804766 at +1000 AP (total 1312 -> +328) and +1000 SP (+500): pre-armor 25..26 + 328 + 500 = 853..854, armor-mitigated on Imp 416 (proving both 0.25*AP and 0.50*ShadowflameSP scaling)."
+      "observe_source": "Betrayer's Blow 804766 (DmgClass 2 Melee, Physical, AP 0.25, SP 0.50 on Imp 416 with non-crit 16255 -100% all crit): at +1000 AP (1312) and +1000 SP -> 25.5 + 0.25*1312 + 0.50*1000 = 853.5 (band 820..880).",
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ]
     },
     {
       "spell": 804758,
@@ -37395,7 +37477,7 @@
       "quote": "and their chance to resist curses and magic effects by $s2%.",
       "strike_spell": 8014,
       "trials": 800,
-      "parts": 10,
+      "parts": 16,
       "arms": [
         {
           "name": "control"
@@ -37488,23 +37570,13 @@
       "variant": "threat_control",
       "label_suffix": "threat_control",
       "quote": "increasing your threat generated by $s1%",
-      "trigger_spell": 501288,
+      "trigger_spell": 92559,
       "target": "dummy",
       "measure_actor": "dummy",
       "cast_in_before": false,
-      "cast_power": 100,
-      "learn": [
-        501288
-      ],
       "phase_auras": [
         [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
+          16255,
           1,
           "caster",
           "caster"
@@ -37517,10 +37589,17 @@
       "before_expected": 0,
       "expected": 1.0,
       "tolerance": 0.05,
-      "wait_ms": 2500,
+      "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Control without Agonizing Presence 807727: Fel Fireball 501288 generates 1.0 threat per damage on dummy."
+      "observe_source": "Control without Agonizing Presence 807727 (Templar 807729 / Cultist 500717 pattern): Void Zone 92559 (Physical, non-crit 16255 -100, no Felfury buff trigger) generates exact 1.0 threat per damage on dummy.",
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ]
     },
     {
       "spell": 807727,
@@ -37529,7 +37608,7 @@
       "variant": "threat_stance",
       "label_suffix": "threat_stance",
       "quote": "increasing your threat generated by $s1%",
-      "trigger_spell": 501288,
+      "trigger_spell": 92559,
       "target": "dummy",
       "measure_actor": "dummy",
       "cast_in_before": false,
@@ -37538,19 +37617,9 @@
       ],
       "setup_target": "caster",
       "setup_wait_ms": 500,
-      "cast_power": 100,
-      "learn": [
-        501288
-      ],
       "phase_auras": [
         [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
+          16255,
           1,
           "caster",
           "caster"
@@ -37578,13 +37647,13 @@
             ],
             "metric": "spell_damage_count",
             "fields": {
-              "spell": 501288,
+              "spell": 92559,
               "target": "dummy"
             },
             "before_expected": 0,
             "expected": 1,
             "tolerance": 0,
-            "source": "Exactly 1 landed 501288 hit drives dummy threat_per_damage."
+            "source": "Exactly 1 landed Void Zone 92559 hit drives dummy threat_per_damage."
           }
         ]
       },
@@ -37595,10 +37664,17 @@
       "before_expected": 0,
       "expected": 6.2,
       "tolerance": 0.05,
-      "wait_ms": 2500,
+      "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "AscensionTankStances.h:10-17 marks 807727 as tank stance (Rate.Threat.TankStance 2.0f): 3.10 * 2.0 = 6.20 threat per damage."
+      "observe_source": "Under real Agonizing Presence 807727 (+210% threat = 3.10x * Rate.Threat.TankStance 2.0 = 6.20x), Void Zone 92559 (Physical, non-crit 16255 -100, no Felfury buff trigger) generates exact 6.20 threat per damage on dummy.",
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ]
     },
     {
       "spell": 807727,
@@ -37667,12 +37743,6 @@
         },
         {
           "name": "treatment",
-          "auras": [
-            [
-              807727,
-              0
-            ]
-          ],
           "opening_casts": [
             [
               807727,
@@ -37933,7 +38003,14 @@
       "target_entry": 2022,
       "measure_actor": "dummy",
       "cast_in_before": false,
-      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
       "metric": "aura",
       "fields": {
         "spell": 954534,
@@ -38084,12 +38161,77 @@
     },
     {
       "spell": 954534,
-      "name": "Enslave Elemental (only one target can be enslaved at a time)",
-      "kind": "single_target",
+      "name": "Enslave Elemental (only one target can be enslaved at a time: second target refused with ALREADY_HAVE_CHARM)",
+      "kind": "metric_delta",
+      "variant": "single_target_refused",
+      "label_suffix": "single_target_refused",
       "quote": "Only one target can be enslaved at a time.",
+      "trigger_spell": 954534,
+      "target": "enemy",
       "target_entry": 2022,
+      "measure_actor": "caster",
+      "enemy_player_race": 6,
+      "enemy_player_class": 11,
+      "enemy_casts_before": [
+        33891
+      ],
+      "setup_only_after": true,
+      "setup_casts": [
+        954534
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 954534
+      },
+      "before_expected": 0,
+      "expected": 6,
+      "tolerance": 0,
       "wait_ms": 3500,
-      "observe_source": "954534 single_target with target_entry 2022: casts 954534 on Elemental A (verified present), then casts 954534 on Elemental B -> Elemental A loses 954534 (0) while Elemental B holds it (1)."
+      "expire_ms": 9000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 954534,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "First enslaved Elemental 2022 retains charm 954534 (0 -> 1) when second target cast is attempted."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "can_attack",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "First Elemental 2022 is charmed friendly minion (can_attack 1 -> 0) when second cast on Tree of Life enemy is refused with 6."
+          }
+        ]
+      },
+      "observe_source": "SPELL_AURA_MOD_CHARM enforces single-target enslavement by rejecting a second cast with SPELL_FAILED_ALREADY_HAVE_CHARM (6). Before (no charmed minion): 954534 charms Tree of Life enemy (cast_failure 0, enemy aura 1), then 9000 ms wait lets the 8s PvP charm expire. After: setup cast enslaves Elemental 2022 dummy (dummy aura 1); attempting 954534 on Tree of Life enemy is refused with 6 (enemy aura 0, dummy keeps 1).",
+      "select_dummy": true
     }
   ],
   "player_observations": [],
@@ -38606,6 +38748,16 @@
         ]
       ],
       "reason": "Fel Rift: Dark Whisper Gorge 535605 requires Reagent[0] 5565 (Infernal Stone x1); granting 5565 lets value_scenario cast 535605 and read cooldown_ms 60000."
+    }
+  ],
+  "missile_wait_at_dummy": true,
+  "value_links": [
+    {
+      "label": "705121 effect_value 803477e0 #3",
+      "checked_by": [
+        "705121 behaviour_metric_delta inner_demon_ap"
+      ],
+      "arithmetic": "the tooltip negates negative AP BasePoints with *-1 (${($803477m1+$803477ppl1)*-1} = +23 while CalcValue returns -23); inner_demon_ap proves live on dummy that 803477 reduces attack power by exact -23 (843 -> 820)"
     }
   ]
 }

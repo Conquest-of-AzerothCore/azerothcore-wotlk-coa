@@ -4969,7 +4969,6 @@
     "clause": "Increase the friendly target's armor by ${$m1+0}",
     "labels": [
       "523483 effect_value e0 #0",
-      "523483 aura_amount e0 #0",
       "523483 behaviour_metric_delta armor_ally"
     ],
     "kind": "claim"
@@ -5021,7 +5020,6 @@
     "clause": "Increase all party and raid members armor by ${$m1+0}",
     "labels": [
       "523495 effect_value e0 #0",
-      "523495 aura_amount e0 #0",
       "523495 behaviour_metric_delta armor_raid",
       "523495 behaviour_metric_delta ungrouped_control",
       "523495 behaviour_metric_delta no_stack_motw",
@@ -5377,7 +5375,6 @@
       {
         "claim": "slowing their movement speed by $s1%",
         "labels": [
-          "704371 effect_value e0 #0",
           "704371 aura_amount e0 #0",
           "704371 behaviour_metric_delta move_slow_initial"
         ]
@@ -5492,7 +5489,6 @@
       {
         "claim": "for $/1000;807428s3 sec",
         "labels": [
-          "705121 effect_value 807428e2 #4",
           "705121 behaviour_metric_delta inner_demon_held_5s",
           "705121 behaviour_metric_delta inner_demon_held_19s",
           "705121 behaviour_metric_delta inner_demon_gone_21s"
@@ -5951,7 +5947,8 @@
     "kind": "claim",
     "labels": [
       "804216 behaviour_metric_delta consumes_felfury",
-      "804216 behaviour_metric_delta zero_felfury_refused"
+      "804216 behaviour_cast_gate caster_aura_blocked",
+      "804216 behaviour_cast_gate caster_aura_allowed"
     ]
   },
   {
@@ -6169,7 +6166,7 @@
     "clause": "Only one target can be enslaved at a time.",
     "kind": "claim",
     "labels": [
-      "954534 behaviour_single_target"
+      "954534 behaviour_metric_delta single_target_refused"
     ]
   }
 ]
