@@ -5,7 +5,7 @@
     "all": {
       "arguments": [],
       "files": {
-        "manifest.json": "d350366e32a6480c6850a21c7c0b371dd7931fc0702973d0152b7f3ee6446df1",
+        "manifest.json": "13c1df87162f36c459ba19c5fae6cc865df1cf29f418a86cc32056ef29266172",
         "scenarios/conformance-witch-doctor-behaviour-300660-ally-heal-reach-hex-jump.json": "032bb2e0d4c45960f5190171369160af84e3b75138161944e342764c735e56c7",
         "scenarios/conformance-witch-doctor-behaviour-300660-hit-ratio-bottle.json": "24cb861e159598d79dfd67453ae395ebc186ef73982854610bc729728a0e99b7",
         "scenarios/conformance-witch-doctor-behaviour-300660-hit-ratio-loas-brew.json": "789f99a6019827e6efd90fddf5799358d2a329eca774b35b3dd3784db53d504e",

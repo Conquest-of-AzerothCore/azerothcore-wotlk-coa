@@ -255,6 +255,13 @@
       "citation": "2026-08-30 18:34:42.078, spell 807908 Mojo Cauldron, Ascension combat log, private archive"
     }
   ],
+  "excluded_extra_spells": [
+    {
+      "spell": 552011,
+      "name": "Resilient Constitution",
+      "reason": "Generic 21-class PvP passive granted via AscensionCustomClassData.h / AscensionLiveBaselineData.h / trainer_spell with 0 Witch Doctor overrides; already conformance-proved on Necromancer (class 23, owner ruling Q-n1 2026-11-13)."
+    }
+  ],
   "disabled_foreign_effects": [
     {
       "spell": 504761,

@@ -215,6 +215,18 @@
       "citation": "2026-08-23 18:25:38.772, spell 1200012 Blood Covenant, Ascension combat log, private archive"
     }
   ],
+  "excluded_extra_spells": [
+    {
+      "spell": 552011,
+      "name": "Resilient Constitution",
+      "reason": "Generic 21-class PvP passive granted via AscensionCustomClassData.h / AscensionLiveBaselineData.h / trainer_spell with 0 Bloodmage overrides; already conformance-proved on Necromancer (class 23, owner ruling Q-n1 2026-11-13)."
+    },
+    {
+      "spell": 501684,
+      "name": "Night Hunter's Howl (Rank 6)",
+      "reason": "Books of Ascension upgrade row in modules/mod-spellbook/src/SpellbookRankData.h:47 ({ 20, 51, 6, 501682, 501684 }) sold via trainer_spell(L51) and intentionally excluded from AscensionSpellProgressionData.h as documented and tested in bloodmage-howl-prestige-5658.json (#5658) and bloodmage-night-hunters-howl-untalent-ranks-13141.json (#13141); 0 live log events."
+    }
+  ],
   "disabled_foreign_effects": [],
   "foreign_aura_grants": [],
   "effect_overrides": [],
