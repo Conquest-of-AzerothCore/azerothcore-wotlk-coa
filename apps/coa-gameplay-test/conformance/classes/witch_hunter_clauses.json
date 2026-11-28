@@ -6660,12 +6660,8 @@
     "spell": 572306,
     "clause": "Purge the evil from an enemy, removing all enrage effects from them.",
     "labels": [
-      "572306 behaviour_dispel_removal 38166 enemy caster",
-      "572306 behaviour_dispel_removal 42705 enemy caster",
-      "572306 behaviour_dispel_removal 38166 enemy target",
-      "572306 behaviour_dispel_removal 42705 enemy target",
-      "572306 behaviour_dispel_removal 1459 magic caster",
-      "572306 behaviour_dispel_removal 1459 magic target"
+      "572306 behaviour_metric_delta enrages",
+      "572306 behaviour_metric_delta magic_kept"
     ],
     "kind": "claim"
   },
@@ -7134,12 +7130,11 @@
     "spell": 802281,
     "clause": "While active you will appear as neutral to all aggressive creatures.",
     "labels": [
-      "802281 behaviour_metric_delta neutral_to_hostile",
       "802281 behaviour_metric_delta reaction_hostile_and_friendly",
       "802281 behaviour_metric_delta undead_form"
     ],
     "kind": "claim",
-    "reason": "Hostile Undead 11200 can_attack drops 1 -> 0 and reaction_to shifts REP_HOSTILE (1) -> REP_NEUTRAL (3) symmetrically while friendly bystander (entry 68, FACTION_FRIENDLY 35) stays REP_FRIENDLY (4 -> 4) per settled IfNormalReaction fix (AscensionWitchHunterDefenses.cpp:430-443)."
+    "reason": "Hostile Undead 11200 reaction_to shifts REP_HOSTILE (1) -> REP_NEUTRAL (3) symmetrically while friendly bystander (entry 68, FACTION_FRIENDLY 35) stays REP_FRIENDLY (4 -> 4) per settled IfNormalReaction fix (AscensionWitchHunterDefenses.cpp:430-443)."
   },
   {
     "spell": 802281,

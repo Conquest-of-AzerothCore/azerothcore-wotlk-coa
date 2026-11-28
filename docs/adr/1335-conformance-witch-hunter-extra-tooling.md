@@ -1,4 +1,4 @@
-# 1333. Conformance tooling for Witch Hunter extra spells
+# 1335. Conformance tooling for Witch Hunter extra spells
 
 - Status: proposed (provisional number, renumbered at merge)
 - Date: 2026-11-27
@@ -57,9 +57,11 @@ gaps that cannot be expressed cleanly without extending the shared tooling and h
      `cast_time_ms` live-aura restriction.
    - Extend `value_reagents` `destination_unit` to allow `'dummy'`: spawn the dummy at `cast_distance`, include
      `missile_wait_ms`, and route `PERSISTENT_AREA_AURA (27)` aura reads to `dummy`.
-   - Extend `value_reagents` to accept optional `target_entry` and `distance` overrides (`value_target_override`) so
-     creature-type-gated or min-range spells (`802281` Undead `11200` at `15 yd`, `802826` Undead `11200`) spawn a valid
-     dummy without altering other classes.
+   - Extend `value_reagents` to accept optional `target_entry`, `distance`, `target_auras`, and `location` overrides
+     (`value_target_override`, `value_target_auras`, `value_location_override`) so creature-type-gated, missile-travel,
+     or non-sanctuary dispel-gated spells (`802281` Undead `11200` at `15 yd`, `802826` Risen Student `180066`,
+     `500093..501343` at `5 yd`, `572306` with Enrage `8599` on `dummy` outside Northshire sanctuary) execute cleanly
+     without altering other classes.
 3. **`apps/coa-gameplay-test/conformance/hits.py`**:
    - Add `plain_school_weapon_part` under opt-in `weapon_school_hits` for `SCHOOL_DAMAGE` + `NORMALIZED_WEAPON_DMG`
      spells whose tooltip states `"Weapon Damage"` without a weapon token (`574343`).
@@ -68,9 +70,14 @@ gaps that cannot be expressed cleanly without extending the shared tooling and h
 4. **`apps/coa-gameplay-test/conformance/behaviours.py` and `compare.py`**:
    - Add `'melee_hit_rating'` and `'ranged_hit_rating'` to `HIT_RATIO_FIXTURE_STATS` so pooled `hit_ratio` landed-rate
      scenarios (`562390` *Brand of the Profane* `+2%` melee/ranged hit) can zero melee and ranged hit rating.
-   - Mirror `judge_trigger_with_value` in `compare.py::judge_roll` so rolled `SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE`
-     (`227`) carriers (`807682..807710` *Brand of the Damned*, `die_sides = 3`) strip power terms on both `effect_value`
-     and `aura_amount` without needing `effect_overrides`.
+   - Mirror `judge_trigger_with_value` in `compare.py::judge_roll` when `effect_overrides` opts in with
+     `trigger_with_value: true` so rolled `SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE` (`227`) carriers whose
+     triggered spell carries the power term (`807682..807710` *Brand of the Damned*, `die_sides = 3`, forwarding
+     `BASE_POINT0` to `807683`) strip power terms on `effect_value` and `aura_amount` while rolled aura 227 carriers
+     that scale directly in `CalcValue` (`520270..562025` *Darkflock*) stay unchanged.
+   - Extend `compare.py::judge_base_roll` to support rolled `die_sides > 1`, primary-stat stripping (`unstat`) when
+     `unpowered` leaves no power term (`680491`, `572295..572298` *Dark Tonic* `+$STA*6` added in `OnEffectLaunch`), and
+     `behaviour_hit_ratio` as a linked `power_term_label` alongside `hit_mean`.
 5. **`apps/coa-gameplay-test/conformance/coverage.py`**:
    - Register `stealth_detection`, `reputation_gain`, `pet_entry`, `pet_health`, and `reaction_to` as `STATE` metrics
      with matching `STATE_PROMISES`, and widen `display_id` / `display_of_creature` promises to match `"form"`.

@@ -33,7 +33,13 @@ server defects and resolved eight owner rulings (`Q-wh-ex-1..8`):
    but `AscensionWitchHunterCoefficients.h:134` read `school = 32` (Shadow SP only) instead of `34`
    (`max(Holy, Shadow)`). The client tooltip and server both compute `1046..1048 + AP + SP` on `807710`, so
    `807682..807710` are NOT added to `WitchUnscaledByLevelEffects`.
-7. **Confirmed no-code rulings**: `Q-wh-ex-2` (`503679` Caltrops single owner `504447` hit), `Q-wh-ex-4` (`802308`
+7. **`523485` *Knight's Edict* (R1–R4) and `523510` *Greater Knight's Edict* (Live-verification Defect)**: Live gameplay
+   verification (`523488`/`523510` `no_stack_motw`) proved both stacked with *Mark of the Wild* (`9885`, armor
+   `582 -> 891`, Strength `67 -> 79`), contradicting *"Does not stack with Mark of the Wild"*. Mark of the Wild R1
+   (`1126`) belongs to subgroup `1078` under group `1089` (`stack_rule = 4`, `SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST`),
+   whereas `523485` and `523510` were omitted from group `1089` (and placing them inside `1078` would cause
+   `SpellMgr::CheckSpellGroupStackRules` to skip parent group `1089`).
+8. **Confirmed no-code rulings**: `Q-wh-ex-2` (`503679` Caltrops single owner `504447` hit), `Q-wh-ex-4` (`802308`
    melee+ranged haste), `Q-wh-ex-5` (`802826` stun + `-200%` healing), `Q-wh-ex-6` (`681457` Undead/Demon filter), and
    `Q-wh-ex-8` (`804191`/`680269` obsolete `$?s500056` conditional) match the intended server behaviour with no C++
    changes.
@@ -57,6 +63,9 @@ server defects and resolved eight owner rulings (`Q-wh-ex-1..8`):
 4. **`data/sql/updates/pending_db_world/rev_20261127_06_witch_hunter_extra_spells.sql`**:
    - Bind `spell_ascension_witch_hunter_greater_knights_edict` to `680303` and `681442` (`DELETE` + `INSERT` in
      `spell_script_names`).
+   - Add `523485` and `523510` directly to `spell_group 1089` (`DELETE` + `INSERT`) so *Knight's Edict* (all ranks via
+     `spell_ranks`) and *Greater Knight's Edict* obey `SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST (4)` against *Mark of
+     the Wild* (`1126` in subgroup `1078` of `1089`).
 5. **`src/test/server/coa/WitchHunterExtraContractsTest.cpp`**:
    - Add offline Google Test regressions verifying `ApplyContracts` for `680230`, `523510`, and `807733` (including a
      guard test for unexpected `E2`), plus the `807683` twilight school mask in `WitchCoefficients`.

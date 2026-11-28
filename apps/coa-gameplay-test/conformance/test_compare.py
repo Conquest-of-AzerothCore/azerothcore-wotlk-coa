@@ -866,7 +866,7 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
         self.assertNotIn('trigger_with_value', verdict.detail or {})
 
-    def rolled_aura_227_verdicts(self, measured: str = '1047'):
+    def rolled_aura_227_verdicts(self, measured: str = '1047', opted_in: bool = True):
         text = '${$m1+0+$AP*1+$SP*1}'
 
         def tokens(caster, forced):
@@ -877,6 +877,9 @@ class CompareTest(unittest.TestCase):
         items = [expectation(label, check, text, 'read flat', 0, {'samples': 1}) for check, label in labels.items()]
         reader = FakeTooltips(tokens, points={(RANK, 0): (1045, 3)},
                               fields={(RANK, 'Effect[0]'): 6, (RANK, 'EffectApplyAuraName[0]'): 227})
+        if opted_in:
+            reader.class_file = {'effect_overrides': [{'spell': RANK, 'effect': 0, 'trigger_with_value': True,
+                                                       'citation': 'seeded'}]}
         steps = [assert_step(label, measured) for label in labels.values()]
         verdicts = self.value_run(items, [text], steps, reader)
         return [verdicts[label] for label in labels.values()]
@@ -888,6 +891,12 @@ class CompareTest(unittest.TestCase):
             detail = verdict.detail['trigger_with_value']
             self.assertAlmostEqual(detail['power_term'], 313.0)
             self.assertIn('SpellAuraEffects.cpp:6566', verdict.explanation)
+
+    def test_an_unflagged_rolled_aura_227_carrier_keeps_its_power_term(self):
+        for verdict in self.rolled_aura_227_verdicts(measured=str(1047 + 313), opted_in=False):
+            self.assertEqual(verdict.status, 'ok')
+            self.assertAlmostEqual(verdict.expected, 1047.0 + 313.0)
+            self.assertNotIn('trigger_with_value', verdict.detail or {})
 
     def test_a_rolled_aura_227_carrier_holding_power_term_alerts(self):
         for verdict in self.rolled_aura_227_verdicts(measured=str(1047 + 313)):
@@ -912,6 +921,34 @@ class CompareTest(unittest.TestCase):
         verdict = self.unlinked_base_roll_verdict(term=0.0)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('holds no power term', verdict.explanation)
+
+    def test_a_rolled_stat_base_roll_only_token_is_judged_on_its_base_roll_and_accepts_hit_ratio_link(self):
+        text = '${$m1+0+$STA*6}'
+
+        def tokens(caster, forced):
+            base = forced[2] if forced is not None else 746
+            return [Displayed(text, float(base) + caster.stats.get(2, 0.0) * 6.0, 0, 'flat')]
+
+        item = expectation('1001 effect_value e0 #0', 'effect_value', text, 'read flat', 0, {'samples': 28})
+        reader = FakeTooltips(tokens, points={(1001, 0): (745, 55)})
+        override = {'spell': 1001, 'effect': 0, 'base_roll_only': True, 'placeholder_sample_count': True,
+                    'power_term_label': '1001 behaviour_hit_ratio stamina_scaling',
+                    'contrast_label': '1001 hit_mean', 'citation': 'seeded'}
+        reader.class_file = {'effect_overrides': [override]}
+        steps = [assert_step('stat 2', '93')] + [assert_step(f'1001 effect_value e0 #0 sample {i}', '773')
+                                                 for i in range(1, 29)]
+        steps.append(assert_step('1001 effect_value e0 #0', '773'))
+        with mock.patch('compare.resolve_base_roll_links', side_effect=lambda verdicts: verdicts):
+            verdict = self.value_run([item], [text], steps, reader)['1001 effect_value e0 #0']
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.expected, 773.0)
+        self.assertAlmostEqual(verdict.detail['base_roll_only']['power_term'], 558.0)
+        linked = resolve_base_roll_links([
+            verdict,
+            self.linked_hit('1001 behaviour_hit_ratio stamina_scaling', 'ok', check='behaviour_hit_ratio'),
+            self.linked_hit('1001 hit_mean', 'ok', check='hit_mean'),
+        ])[0]
+        self.assertEqual(linked.status, 'ok')
 
     def test_fewer_reads_than_generation_sized_stay_measured(self):
         verdict = self.spell_power_roll_verdict(177)

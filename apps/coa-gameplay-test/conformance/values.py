@@ -349,19 +349,25 @@ def value_reagent_entry(class_file: dict, rank_id: int) -> tuple[tuple[tuple[int
     if len(entries) > 1:
         raise ValueError(f'{VALUE_REAGENTS_KEY} lists {rank_id} more than once')
     entry = entries[0]
-    extra = set(entry) - {'spell', 'items', 'destination_unit', 'target_entry', 'distance', 'reason'}
+    extra = set(entry) - {'spell', 'items', 'destination_unit', 'target_entry', 'distance', 'target_auras', 'location', 'reason'}
     raw_items = entry.get('items', [])
     destination = entry.get('destination_unit')
     target_entry = entry.get('target_entry')
     distance = entry.get('distance')
-    if extra or not isinstance(raw_items, list) or destination not in (None, CASTER, TARGET):
+    raw_target_auras = entry.get('target_auras', [])
+    location = entry.get('location')
+    if extra or not isinstance(raw_items, list) or not isinstance(raw_target_auras, list) or destination not in (None, CASTER, TARGET):
         raise ValueError(f'{VALUE_REAGENTS_KEY} entry for {rank_id} takes spell, items, and optional destination_unit '
-                         f'{CASTER!r} or {TARGET!r}, target_entry, and distance, not {entry!r}')
+                         f'{CASTER!r} or {TARGET!r}, target_entry, distance, target_auras, and location, not {entry!r}')
+    if location is not None and (not isinstance(location, dict) or set(location) != {'map', 'x', 'y', 'z', 'o'}):
+        raise ValueError(f'{VALUE_REAGENTS_KEY} location for {rank_id} must define map, x, y, z, o, not {location!r}')
     if target_entry is not None and (type(target_entry) is not int or target_entry <= 0):
         raise ValueError(f'{VALUE_REAGENTS_KEY} target_entry for {rank_id} must be a positive int, not {target_entry!r}')
     if distance is not None and (isinstance(distance, bool) or not isinstance(distance, (int, float))
                                  or not math.isfinite(distance) or not 0 < distance <= 100):
         raise ValueError(f'{VALUE_REAGENTS_KEY} distance for {rank_id} must be in (0, 100], not {distance!r}')
+    for raw_aura in raw_target_auras:
+        cast_aura_entry(raw_aura)
     items = []
     for raw in raw_items:
         if (not isinstance(raw, list) or len(raw) != 2
@@ -370,10 +376,28 @@ def value_reagent_entry(class_file: dict, rank_id: int) -> tuple[tuple[tuple[int
             raise ValueError(f'{VALUE_REAGENTS_KEY} item for {rank_id} must be [positive_item, positive_count], '
                              f'not {raw!r}')
         items.append((raw[0], raw[1]))
-    if not items and destination is None and target_entry is None and distance is None:
+    if not items and destination is None and target_entry is None and distance is None and not raw_target_auras and location is None:
         raise ValueError(f'{VALUE_REAGENTS_KEY} entry for {rank_id} must name items, destination_unit, target_entry, '
-                         f'or distance')
+                         f'distance, target_auras, or location')
     return tuple(items), destination
+
+
+def value_target_auras(class_file: dict, rank_id: int) -> list[dict]:
+    entries = [entry for entry in class_file.get(VALUE_REAGENTS_KEY, []) if entry['spell'] == rank_id]
+    if not entries:
+        return []
+    steps = []
+    for raw_aura in entries[0].get('target_auras', []):
+        aura_spell, stacks = cast_aura_entry(raw_aura)
+        steps.append({'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'spell': aura_spell, 'stacks': stacks})
+    return steps
+
+
+def value_location_override(class_file: dict, rank_id: int) -> dict | None:
+    entries = [entry for entry in class_file.get(VALUE_REAGENTS_KEY, []) if entry['spell'] == rank_id]
+    if not entries or entries[0].get('location') is None:
+        return None
+    return dict(entries[0]['location'])
 
 
 def value_target_override(class_file: dict, rank_id: int) -> tuple[int | None, float | None]:
@@ -967,7 +991,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                 cast_steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
             cast_steps += ally_setup_steps(records, ally_cast)
             cast['target'] = ALLY
-        cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id)
+        cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id) + value_target_auras(class_file, rank_id)
         for item_id, count in reagent_items:
             cast_steps.append({'action': 'add_item', 'actor': CASTER, 'item': item_id, 'count': count})
         if destination_unit is not None:
@@ -1020,4 +1044,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                                   'level': class_file['level'], 'health': DUMMY_HEALTH, 'distance': distance}]
     if (targets_resurrect(facts) or needs_ally_target or ally_cast is not None) and cast_wanted:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
+    location_override = value_location_override(class_file, rank_id)
+    if location_override is not None:
+        scenario['location'] = location_override
     return scenario, expectations, periodic_totals

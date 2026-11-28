@@ -754,6 +754,93 @@
       "power_term_label": "804192 script_hit 567570 hound_strike",
       "contrast_label": "804192 script_hit 567570 hound_strike_rap",
       "citation": "ADR 0745, mentor D-219, D-57 and D-198: 705455 effect_value 804192e2 #1 reads the CalcValue base roll 56 = int(57 x 0.98743) (EffectBasePoints[2] 56, EffectDieSides[2] 1); the +0.15 x RAP term of ${$m3*$<scalingbp>+$RAP*0.15} is added by the class script after CalcValue and counted by the two script hit labels"
+    },
+    {
+      "spell": 680491,
+      "effect": 0,
+      "base_roll_only": true,
+      "placeholder_sample_count": true,
+      "power_term_label": "572298 behaviour_hit_ratio stamina_scaling",
+      "contrast_label": "572298 hit_mean",
+      "citation": "AscensionWitchHunterTonics.cpp:42-78 (spell_ascension_witch_hunter_dark_tonic::ScaleHealing): adds 6.0 * STAT_STAMINA in OnEffectLaunch after SpellEffectInfo::CalcValue(); CalcValue reads the base roll, while 572298 hit_mean and 572298 behaviour_hit_ratio stamina_scaling prove the full Stamina-scaled heal."
+    },
+    {
+      "spell": 572295,
+      "effect": 0,
+      "base_roll_only": true,
+      "placeholder_sample_count": true,
+      "power_term_label": "572298 behaviour_hit_ratio stamina_scaling",
+      "contrast_label": "572298 hit_mean",
+      "citation": "AscensionWitchHunterTonics.cpp:42-78 (spell_ascension_witch_hunter_dark_tonic::ScaleHealing): adds 6.0 * STAT_STAMINA in OnEffectLaunch after SpellEffectInfo::CalcValue(); CalcValue reads the base roll, while 572298 hit_mean and 572298 behaviour_hit_ratio stamina_scaling prove the full Stamina-scaled heal."
+    },
+    {
+      "spell": 572296,
+      "effect": 0,
+      "base_roll_only": true,
+      "placeholder_sample_count": true,
+      "power_term_label": "572298 behaviour_hit_ratio stamina_scaling",
+      "contrast_label": "572298 hit_mean",
+      "citation": "AscensionWitchHunterTonics.cpp:42-78 (spell_ascension_witch_hunter_dark_tonic::ScaleHealing): adds 6.0 * STAT_STAMINA in OnEffectLaunch after SpellEffectInfo::CalcValue(); CalcValue reads the base roll, while 572298 hit_mean and 572298 behaviour_hit_ratio stamina_scaling prove the full Stamina-scaled heal."
+    },
+    {
+      "spell": 572297,
+      "effect": 0,
+      "base_roll_only": true,
+      "placeholder_sample_count": true,
+      "power_term_label": "572298 behaviour_hit_ratio stamina_scaling",
+      "contrast_label": "572298 hit_mean",
+      "citation": "AscensionWitchHunterTonics.cpp:42-78 (spell_ascension_witch_hunter_dark_tonic::ScaleHealing): adds 6.0 * STAT_STAMINA in OnEffectLaunch after SpellEffectInfo::CalcValue(); CalcValue reads the base roll, while 572298 hit_mean and 572298 behaviour_hit_ratio stamina_scaling prove the full Stamina-scaled heal."
+    },
+    {
+      "spell": 572298,
+      "effect": 0,
+      "base_roll_only": true,
+      "placeholder_sample_count": true,
+      "power_term_label": "572298 behaviour_hit_ratio stamina_scaling",
+      "contrast_label": "572298 hit_mean",
+      "citation": "AscensionWitchHunterTonics.cpp:42-78 (spell_ascension_witch_hunter_dark_tonic::ScaleHealing): adds 6.0 * STAT_STAMINA in OnEffectLaunch after SpellEffectInfo::CalcValue(); CalcValue reads the base roll, while 572298 hit_mean and 572298 behaviour_hit_ratio stamina_scaling prove the full Stamina-scaled heal."
+    },
+    {
+      "spell": 807682,
+      "effect": 0,
+      "trigger_with_value": true,
+      "citation": "AscensionWitchHunterDefenses.cpp:126-137 & AscensionWitchHunterCoefficients.h:134: Brand of the Damned carrier aura 227 forwards its CalcValue base roll as BASE_POINT0 to triggered 807683, which applies +1.0*AP + 1.0*max(Holy,Shadow) SP."
+    },
+    {
+      "spell": 807705,
+      "effect": 0,
+      "trigger_with_value": true,
+      "citation": "AscensionWitchHunterDefenses.cpp:126-137 & AscensionWitchHunterCoefficients.h:134: Brand of the Damned carrier aura 227 forwards its CalcValue base roll as BASE_POINT0 to triggered 807683, which applies +1.0*AP + 1.0*max(Holy,Shadow) SP."
+    },
+    {
+      "spell": 807706,
+      "effect": 0,
+      "trigger_with_value": true,
+      "citation": "AscensionWitchHunterDefenses.cpp:126-137 & AscensionWitchHunterCoefficients.h:134: Brand of the Damned carrier aura 227 forwards its CalcValue base roll as BASE_POINT0 to triggered 807683, which applies +1.0*AP + 1.0*max(Holy,Shadow) SP."
+    },
+    {
+      "spell": 807707,
+      "effect": 0,
+      "trigger_with_value": true,
+      "citation": "AscensionWitchHunterDefenses.cpp:126-137 & AscensionWitchHunterCoefficients.h:134: Brand of the Damned carrier aura 227 forwards its CalcValue base roll as BASE_POINT0 to triggered 807683, which applies +1.0*AP + 1.0*max(Holy,Shadow) SP."
+    },
+    {
+      "spell": 807708,
+      "effect": 0,
+      "trigger_with_value": true,
+      "citation": "AscensionWitchHunterDefenses.cpp:126-137 & AscensionWitchHunterCoefficients.h:134: Brand of the Damned carrier aura 227 forwards its CalcValue base roll as BASE_POINT0 to triggered 807683, which applies +1.0*AP + 1.0*max(Holy,Shadow) SP."
+    },
+    {
+      "spell": 807709,
+      "effect": 0,
+      "trigger_with_value": true,
+      "citation": "AscensionWitchHunterDefenses.cpp:126-137 & AscensionWitchHunterCoefficients.h:134: Brand of the Damned carrier aura 227 forwards its CalcValue base roll as BASE_POINT0 to triggered 807683, which applies +1.0*AP + 1.0*max(Holy,Shadow) SP."
+    },
+    {
+      "spell": 807710,
+      "effect": 0,
+      "trigger_with_value": true,
+      "citation": "AscensionWitchHunterDefenses.cpp:126-137 & AscensionWitchHunterCoefficients.h:134: Brand of the Damned carrier aura 227 forwards its CalcValue base roll as BASE_POINT0 to triggered 807683, which applies +1.0*AP + 1.0*max(Holy,Shadow) SP."
     }
   ],
   "item_armor_subclass_effects": [
@@ -26901,7 +26988,8 @@
       "cast_spell": 501342,
       "cast_target": "dummy",
       "target": "dummy",
-      "observe_source": "Spell.dbc 501342 DurationIndex 32 = 8000 ms (8 sec, $d). Cast at dummy, reading applied aura duration and expiry alongside existing witch_hunter.json base_slow_held/base_slow_ends."
+      "observe_source": "Spell.dbc 501342 DurationIndex 32 = 8000 ms (8 sec, $d). Cast at dummy, reading applied aura duration and expiry alongside existing witch_hunter.json base_slow_held/base_slow_ends.",
+      "read_after_ms": 400
     },
     {
       "spell": 500094,
@@ -26914,14 +27002,14 @@
       "target": "caster",
       "measure_actor": "caster",
       "cast_in_before": false,
-      "cast_power": 1000,
       "disable_regeneration": true,
-      "metric": "power",
+      "metric": "spell_energize_total",
       "fields": {
+        "spell": 500094,
         "power": 0
       },
-      "before_expected": 1000,
-      "expected": 1480,
+      "before_expected": 0,
+      "expected": 480,
       "expected_gain": 480,
       "tolerance": 1,
       "wait_ms": 500,
@@ -26943,24 +27031,15 @@
             "tolerance": 0,
             "precondition": true,
             "source": "L60 Human Witch Hunter max mana is 2400 (base_mana 1720 + 20 + 44*15)."
-          },
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_energize_total",
-            "fields": {
-              "spell": 500094,
-              "power": 0
-            },
-            "before_expected": 0,
-            "expected": 480,
-            "tolerance": 1,
-            "source": "500094 Effect[0] ENERGIZE_PCT 20% of 2400 max mana = 480 mana."
           }
         ]
       },
-      "observe_source": "Spell.dbc 500094 Effect[0] 137 SPELL_EFFECT_ENERGIZE_PCT, MiscValue 0 (POWER_MANA), BasePoints 19 + DieSides 1 = 20% ($s1). Starting at 1000/2400 mana with regeneration disabled, casting 500094 restores 480 mana (1000 -> 1480, spell_energize_total 0 -> 480). Live evidence: 2026-08-16 19:03:08.884, spell 500094 (209 casts, 418 energizes), Ascension combat log, private archive."
+      "observe_source": "Spell.dbc 500094 Effect[0] 137 SPELL_EFFECT_ENERGIZE_PCT, MiscValue 0 (POWER_MANA), BasePoints 19 + DieSides 1 = 20% ($s1). Starting at 1000/2400 mana with regeneration disabled, casting 500094 restores 480 mana (1000 -> 1480, spell_energize_total 0 -> 480). Live evidence: 2026-08-16 19:03:08.884, spell 500094 (209 casts, 418 energizes), Ascension combat log, private archive.",
+      "phase_power": [
+        0,
+        1000,
+        1000
+      ]
     },
     {
       "spell": 500094,
@@ -26974,8 +27053,9 @@
       "measure_actor": "caster",
       "cast_in_before": false,
       "disable_regeneration": true,
-      "metric": "power",
+      "metric": "spell_energize_total",
       "fields": {
+        "spell": 500094,
         "power": 1
       },
       "before_expected": 0,
@@ -27001,24 +27081,15 @@
             "tolerance": 0,
             "precondition": true,
             "source": "Witch Hunter max internal Rage is 1000 (100 displayed Rage)."
-          },
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_energize_total",
-            "fields": {
-              "spell": 500094,
-              "power": 1
-            },
-            "before_expected": 0,
-            "expected": 500,
-            "tolerance": 1,
-            "source": "500094 Effect[1] ENERGIZE_PCT 50% of 1000 max internal Rage = 500 (50 displayed Rage)."
           }
         ]
       },
-      "observe_source": "Spell.dbc 500094 Effect[1] 137 SPELL_EFFECT_ENERGIZE_PCT, MiscValue 1 (POWER_RAGE), BasePoints 49 + DieSides 1 = 50% ($s2). Starting at 0/1000 internal Rage with regeneration disabled, casting 500094 restores 500 internal Rage (0 -> 500, spell_energize_total 0 -> 500)."
+      "observe_source": "Spell.dbc 500094 Effect[1] 137 SPELL_EFFECT_ENERGIZE_PCT, MiscValue 1 (POWER_RAGE), BasePoints 49 + DieSides 1 = 50% ($s2). Starting at 0/1000 internal Rage with regeneration disabled, casting 500094 restores 500 internal Rage (0 -> 500, spell_energize_total 0 -> 500).",
+      "phase_power": [
+        1,
+        0,
+        0
+      ]
     },
     {
       "spell": 503679,
@@ -27616,7 +27687,7 @@
     },
     {
       "spell": 523488,
-      "name": "Knight's Edict (does not stack with Mark of the Wild 9885)",
+      "name": "Knight's Edict (replaces weaker Mark of the Wild 9884 without stacking)",
       "kind": "metric_delta",
       "variant": "no_stack_motw",
       "label_suffix": "no_stack_motw",
@@ -27627,7 +27698,7 @@
       "cast_in_before": false,
       "phase_auras": [
         [
-          9885,
+          9884,
           1,
           "caster",
           "caster"
@@ -27635,9 +27706,9 @@
       ],
       "metric": "armor",
       "fields": {},
-      "before_expected": 563,
-      "expected": 563,
-      "expected_gain": 0,
+      "before_expected": 533,
+      "expected": 582,
+      "expected_gain": 49,
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
@@ -27653,10 +27724,23 @@
             "fields": {
               "stat": 0
             },
-            "before_expected": 67.0,
+            "before_expected": 65.0,
             "expected": 67.0,
             "tolerance": 0.05,
-            "source": "Strength stays at 67.0 (55 + 12 from Mark of the Wild 9885), not 79.0 (stacked)."
+            "source": "Strength moves from 65.0 (55 + 10 from Mark of the Wild R6 9884) to 67.0 (55 + 12 from Knight's Edict R4 523488), not 77.0 (stacked)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 9884
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Weaker Mark of the Wild R6 9884 is replaced (1 -> 0) via spell_group 1089 EXCLUSIVE_HIGHEST."
           },
           {
             "actors": [
@@ -27669,7 +27753,7 @@
             "before_expected": 0,
             "expected": 1,
             "tolerance": 0,
-            "source": "523488 applies on cast (0 -> 1) while its armor/stat bonus does not stack with 9885."
+            "source": "523488 applies on cast (0 -> 1) replacing 9884 without stacking."
           }
         ]
       },
@@ -28074,7 +28158,6 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "void_on_cast_failure": true,
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -28123,7 +28206,7 @@
     },
     {
       "spell": 523510,
-      "name": "Greater Knight's Edict (does not stack with Mark of the Wild 9885)",
+      "name": "Greater Knight's Edict (replaces weaker Mark of the Wild 9884 without stacking)",
       "kind": "metric_delta",
       "variant": "no_stack_motw",
       "label_suffix": "no_stack_motw",
@@ -28134,7 +28217,7 @@
       "cast_in_before": false,
       "phase_auras": [
         [
-          9885,
+          9884,
           1,
           "caster",
           "caster"
@@ -28142,9 +28225,9 @@
       ],
       "metric": "armor",
       "fields": {},
-      "before_expected": 563,
-      "expected": 563,
-      "expected_gain": 0,
+      "before_expected": 533,
+      "expected": 582,
+      "expected_gain": 49,
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
@@ -28158,12 +28241,25 @@
             ],
             "metric": "aura",
             "fields": {
+              "spell": 9884
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Weaker Mark of the Wild R6 9884 is replaced (1 -> 0) via spell_group 1089 EXCLUSIVE_HIGHEST."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
               "spell": 523510
             },
             "before_expected": 0,
             "expected": 1,
             "tolerance": 0,
-            "source": "523510 applies (0 -> 1) while its armor bonus does not stack with Mark of the Wild 9885."
+            "source": "523510 applies on cast (0 -> 1) replacing 9884 without stacking."
           }
         ]
       },
@@ -28333,7 +28429,7 @@
     },
     {
       "spell": 562225,
-      "name": "Night Hunter (reveals stealthed enemy at 15 yd at night)",
+      "name": "Night Hunter (reveals stealthed enemy at 24 yd at night)",
       "kind": "metric_delta",
       "variant": "night_stealth_detect",
       "label_suffix": "night_stealth_detect",
@@ -28343,7 +28439,7 @@
       "target": "caster",
       "measure_actor": "caster",
       "cast_in_before": false,
-      "dummy_distance": 15,
+      "dummy_distance": 24,
       "phase_auras": [
         [
           1787,
@@ -28362,7 +28458,13 @@
       "wait_ms": 1200,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "AscensionWitchHunterCompletion.cpp:356-362 & AscensionWitchHunterDefenses.cpp:55-56,118: at night (hour 0), 562225 Effect[1] SPELL_AURA_MOD_STEALTH_DETECT = +100, raising stealth detect range against L60 Stealth 1787 (300 stealth, base range ~10.275 yd) by +30 yd (clamped to 30 yd, Object.cpp:2125-2131): stealthed enemy at 15 yd goes from can_detect 0 (before cast) to 1 (after cast)."
+      "observe_source": "AscensionWitchHunterCompletion.cpp:356-362 & AscensionWitchHunterDefenses.cpp:55-56,118: at night (hour 0), 562225 Effect[1] SPELL_AURA_MOD_STEALTH_DETECT = +100, raising stealth detect range against L60 Stealth 1787 (300 stealth, base range ~10.275 yd) by +30 yd (clamped to 30 yd, Object.cpp:2125-2131): stealthed enemy at 15 yd goes from can_detect 0 (before cast) to 1 (after cast).",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 500
     },
     {
       "spell": 562225,
@@ -28444,7 +28546,7 @@
       "target": "caster",
       "measure_actor": "caster",
       "cast_in_before": false,
-      "dummy_distance": 15,
+      "dummy_distance": 24,
       "phase_auras": [
         [
           1787,
@@ -28481,7 +28583,13 @@
       "wait_ms": 1200,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Daytime stealth-detection control for 562225 at realm-local hour 12: aura 562225 applies (0 -> 1), Effect[1] calculates 0 stealth detection, so stealthed dummy at 15 yd remains undetected (can_detect 0 -> 0)."
+      "observe_source": "Daytime stealth-detection control for 562225 at realm-local hour 12: aura 562225 applies (0 -> 1), Effect[1] calculates 0 stealth detection, so stealthed dummy at 15 yd remains undetected (can_detect 0 -> 0).",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 500
     },
     {
       "spell": 562390,
@@ -28815,46 +28923,136 @@
     },
     {
       "spell": 572306,
-      "name": "Purge Evil (removes all enrage effects from enemy)",
-      "kind": "dispel_removal",
+      "name": "Purge Evil (removes all enrage effects from enemy, leaving caster enrage untouched)",
+      "kind": "metric_delta",
       "variant": "enrages",
       "label_suffix": "enrages",
       "quote": "Purge the evil from an enemy, removing all enrage effects from them.",
-      "debuffs": [
-        38166,
-        42705
+      "trigger_spell": 572306,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          8599,
+          1,
+          "dummy",
+          "dummy"
+        ],
+        [
+          50420,
+          1,
+          "dummy",
+          "dummy"
+        ],
+        [
+          8599,
+          1,
+          "caster",
+          "caster"
+        ]
       ],
-      "wait_ms": 1000,
-      "arms": [
-        {
-          "name": "enemy",
-          "target": "dummy",
-          "removed": true,
-          "caster_removed": false
-        }
-      ],
-      "observe_source": "Spell.dbc 572306 Effect[0] 38 SPELL_EFFECT_DISPEL, EffectMiscValue[0] 9 (DISPEL_ENRAGE), BasePoints 99 + DieSides 1 = 100 removals, TARGET_UNIT_TARGET_ENEMY. Enrage 38166 (Dispel 9, 30 s) and Enrage 42705 (Dispel 9, 60 s) are set on both dummy and caster; casting 572306 on dummy removes both enrages from dummy while leaving caster's untouched."
+      "metric": "aura",
+      "fields": {
+        "spell": 8599
+      },
+      "fields_sum": {
+        "spell": 50420
+      },
+      "before_expected": 2,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 8599
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Caster's own Enrage 8599 stays intact (1 -> 1) when casting Purge Evil 572306 on enemy dummy."
+          }
+        ]
+      },
+      "observe_source": "Spell.dbc 572306 Effect[0] 38 SPELL_EFFECT_DISPEL, EffectMiscValue[0] 9 (DISPEL_ENRAGE), BasePoints 99 + DieSides 1 = 100 removals, TARGET_UNIT_TARGET_ENEMY. Dummy self-applies two positive Dispel 9 enrage buffs (8599 Enrage 120s and 50420 Enrage 300s, actor=dummy target=dummy, matching bloodmage 572412 enrage_dispel); fields_sum reads 2 -> 0 after casting 572306 while caster's own 8599 stays 1 -> 1.",
+      "location": {
+        "map": 0,
+        "x": -9617.06,
+        "y": -288.949,
+        "z": 57.3053,
+        "o": 0
+      }
     },
     {
       "spell": 572306,
-      "name": "Purge Evil (non-enrage Magic buff kept on enemy)",
-      "kind": "dispel_removal",
+      "name": "Purge Evil (removes enemy enrage while keeping non-enrage Magic buff)",
+      "kind": "metric_delta",
       "variant": "magic_kept",
       "label_suffix": "magic_kept",
       "quote": "Purge the evil from an enemy, removing all enrage effects from them.",
-      "debuffs": [
-        1459
+      "trigger_spell": 572306,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          8599,
+          1,
+          "dummy",
+          "dummy"
+        ],
+        [
+          1459,
+          1,
+          "dummy",
+          "dummy"
+        ]
       ],
-      "wait_ms": 1000,
-      "arms": [
-        {
-          "name": "magic",
-          "target": "dummy",
-          "removed": false,
-          "caster_removed": false
-        }
-      ],
-      "observe_source": "Negative control for 572306 DISPEL_ENRAGE: Arcane Intellect 1459 (Dispel 1, Magic) is not an enrage effect and stays on dummy after casting 572306."
+      "metric": "aura",
+      "fields": {
+        "spell": 1459
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 8599
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Enrage 8599 on dummy is removed (1 -> 0) by the same Purge Evil 572306 cast that leaves Magic buff 1459 intact (1 -> 1)."
+          }
+        ]
+      },
+      "observe_source": "Negative dispel-type control for 572306 (DISPEL_ENRAGE): dummy carries both positive Enrage 8599 (Dispel 9) and Arcane Intellect 1459 (Dispel 1 Magic); casting 572306 succeeds (cast_failure 0), strips 8599 (1 -> 0), and keeps 1459 untouched (1 -> 1).",
+      "location": {
+        "map": 0,
+        "x": -9617.06,
+        "y": -288.949,
+        "z": 57.3053,
+        "o": 0
+      }
     },
     {
       "spell": 680230,
@@ -29009,8 +29207,9 @@
       "measure_actor": "caster",
       "cast_in_before": false,
       "disable_regeneration": true,
-      "metric": "power",
+      "metric": "spell_energize_total",
       "fields": {
+        "spell": 500179,
         "power": 1
       },
       "before_expected": 0,
@@ -29020,26 +29219,12 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "ally_arm": {
-        "allies": 0,
-        "arms": [
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_energize_total",
-            "fields": {
-              "spell": 500179,
-              "power": 1
-            },
-            "before_expected": 0,
-            "expected": 100,
-            "tolerance": 0,
-            "source": "AscensionWitchHunterAbilities.cpp:531-532 casts 500179 (100 internal Rage = 10 displayed Rage) on landed 680230."
-          }
-        ]
-      },
-      "observe_source": "AscensionWitchHunterAbilities.cpp:531-532: landed 680230 casts Slash 500179 (Effect[0] ENERGIZE BasePoints 99 + DieSides 1 = 100 internal Rage = 10 displayed Rage, $/10;500179s1). With regeneration disabled, caster Rage rises 0 -> 100 and spell_energize_total 500179 reads 0 -> 100."
+      "observe_source": "AscensionWitchHunterAbilities.cpp:531-532: landed 680230 casts Slash 500179 (Effect[0] ENERGIZE BasePoints 99 + DieSides 1 = 100 internal Rage = 10 displayed Rage, $/10;500179s1). With regeneration disabled, caster Rage rises 0 -> 100 and spell_energize_total 500179 reads 0 -> 100.",
+      "phase_power": [
+        1,
+        0,
+        0
+      ]
     },
     {
       "spell": 680303,
@@ -29210,7 +29395,6 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "void_on_cast_failure": true,
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -29473,7 +29657,8 @@
       "hit_spell": 680515,
       "control_spell": 680615,
       "samples": 5,
-      "observe_source": "Spell.dbc 680515 Effect[2] 63 SPELL_EFFECT_THREAT (30) and spell_threat row (680515, 0, 1.3, 0) (rev_20261026_20_coa_tank_ability_threat.sql:100) vs 1.0x melee control Noctis Blade 680615 (Black Knight 2H sword 2529 compatible, no threat effect or spell_threat row). Direction-only proof: every 680515 threat/damage sample lies strictly above every 680615 sample."
+      "observe_source": "Spell.dbc 680515 Effect[2] 63 SPELL_EFFECT_THREAT (30) and spell_threat row (680515, 0, 1.3, 0) (rev_20261026_20_coa_tank_ability_threat.sql:100) vs 1.0x melee control Noctis Blade 680615 (Black Knight 2H sword 2529 compatible, no threat effect or spell_threat row). Direction-only proof: every 680515 threat/damage sample lies strictly above every 680615 sample.",
+      "settle_ms": 1100
     },
     {
       "spell": 680515,
@@ -29709,15 +29894,6 @@
       "setup_wait_ms": 1600,
       "cast_in_before": false,
       "cast_power": 1000,
-      "after_trigger_casts": [
-        {
-          "spell": 680515,
-          "target": "dummy",
-          "delay_ms": 1600,
-          "in_before": false,
-          "reset_cooldown": true
-        }
-      ],
       "metric": "aura_stacks",
       "fields": {
         "spell": 582588,
@@ -29905,7 +30081,6 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "void_on_cast_failure": true,
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -30051,8 +30226,8 @@
       "fields": {
         "school": 5
       },
-      "before_expected": 70.0,
-      "expected": 70.0,
+      "before_expected": 60.0,
+      "expected": 60.0,
       "expected_gain": 0.0,
       "tolerance": 0.01,
       "wait_ms": 1200,
@@ -30188,7 +30363,6 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "void_on_cast_failure": true,
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -30667,7 +30841,7 @@
             "tolerance": 0
           },
           {
-            "dx": 13.0,
+            "dx": 20.0,
             "dy": 0.0,
             "before_expected": 0,
             "expected": 0,
@@ -31505,8 +31679,8 @@
       "fields": {
         "hand": 2
       },
-      "before_expected": 2800.0,
-      "expected": 2153.85,
+      "before_expected": 2434.78,
+      "expected": 1872.91,
       "expected_ratio": 0.76923,
       "tolerance": 0.02,
       "wait_ms": 500,
@@ -31599,24 +31773,20 @@
       "setup_only_after": true,
       "setup_wait_ms": 3200,
       "cast_in_before": true,
-      "phase_power": [
-        1,
-        1000,
-        1000
-      ],
       "disable_regeneration": true,
       "metric": "power",
       "fields": {
         "power": 1
       },
-      "before_expected": 600,
-      "expected": 760,
+      "before_expected": 0,
+      "expected": 160,
       "expected_gain": 160,
       "tolerance": 2,
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "802308 Effect[0] aura 72 -40% across all power types: Shadowblast 680269 (400 raw Rage) leaves 600/1000 raw Rage without 802308 and 760/1000 (cost 240, +160 saved) with 802308."
+      "observe_source": "802308 Effect[0] aura 72 -40% across all power types: Shadowblast 680269 (400 raw Rage) leaves 600/1000 raw Rage without 802308 and 760/1000 (cost 240, +160 saved) with 802308.",
+      "cast_power": 400
     },
     {
       "spell": 802308,
@@ -32034,50 +32204,6 @@
       "observe_source": "AscensionWitchHunterCompletion.cpp:447 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE | AURA_INTERRUPT_FLAG_DIRECT_DAMAGE to 802281: hostile Light of the Naaru 41394 strike at 2500 ms removes 802281."
     },
     {
-      "spell": 802281,
-      "name": "Infiltrate (hostile creature treats disguised caster as neutral)",
-      "kind": "metric_delta",
-      "variant": "neutral_to_hostile",
-      "label_suffix": "neutral_to_hostile",
-      "quote": "While active you will appear as neutral to all aggressive creatures.",
-      "trigger_spell": 802281,
-      "target": "dummy",
-      "measure_actor": "dummy",
-      "target_entry": 11200,
-      "dummy_distance": 15,
-      "cast_in_before": false,
-      "metric": "can_attack",
-      "fields": {
-        "target": "caster"
-      },
-      "before_expected": 1,
-      "expected": 0,
-      "tolerance": 0,
-      "wait_ms": 2500,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "ally_arm": {
-        "allies": 0,
-        "arms": [
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "aura",
-            "fields": {
-              "spell": 802281,
-              "caster": "caster"
-            },
-            "before_expected": 0,
-            "expected": 1,
-            "tolerance": 0,
-            "source": "Confirms Infiltrate 802281 is active on caster when hostile Undead 11200 can_attack drops 1 -> 0."
-          }
-        ]
-      },
-      "observe_source": "AscensionWitchHunterDefenses.cpp:430-443 IfNormalReaction overrides normally hostile/unfriendly creatures to REP_NEUTRAL while 802281 is active: hostile Undead 11200 dummy->IsValidAttackTarget(caster) drops from 1 (hostile) to 0 (neutral). Friendly NPC preservation and reaction_to shifts are verified by reaction_hostile_and_friendly, and dungeon-map refusal is verified by dungeon_refused."
-    },
-    {
       "spell": 802826,
       "name": "Holy Water Tonic (stuns Undead within 8 yd for 10 sec)",
       "kind": "metric_delta",
@@ -32087,7 +32213,7 @@
       "trigger_spell": 802826,
       "target": "caster",
       "measure_actor": "dummy",
-      "target_entry": 11200,
+      "target_entry": 180066,
       "gate_timing": "start",
       "trigger_only_after": true,
       "metric": "aura",
@@ -32108,7 +32234,7 @@
         ],
         "expired": [
           10100,
-          10500
+          10600
         ]
       },
       "void_on_cast_failure": true,
@@ -32219,7 +32345,7 @@
       "trigger_spell": 680515,
       "target": "dummy",
       "measure_actor": "caster",
-      "target_entry": 11200,
+      "target_entry": 180066,
       "learn": [
         680515,
         802826
@@ -32259,7 +32385,7 @@
             "before_expected": 0,
             "expected": 1,
             "tolerance": 0,
-            "source": "Confirms Undead 11200 carries 802826 while taking Pommel Smash 680515 damage."
+            "source": "Confirms Risen Student 180066 carries 802826 while taking Pommel Smash 680515 damage."
           }
         ]
       },
@@ -32627,8 +32753,8 @@
       "fields": {
         "id": 72
       },
-      "before_expected": 1000.0,
-      "expected": 1050.0,
+      "before_expected": 1100.0,
+      "expected": 1150.0,
       "expected_gain": 50.0,
       "tolerance": 0.01,
       "wait_ms": 500,
@@ -32649,10 +32775,10 @@
             "fields": {
               "id": 72
             },
-            "before_expected": 1000.0,
-            "expected": 1050.0,
+            "before_expected": 1100.0,
+            "expected": 1150.0,
             "tolerance": 0.01,
-            "source": "Party ally at 15 yd gains +5% reputation gain (1000 -> 1050) for faction 72 (Stormwind)."
+            "source": "Party ally (Human Diplomacy 1100 base) at 15 yd gains +5% (+50) reputation gain (1100 -> 1150) for faction 72 (Stormwind)."
           },
           {
             "actors": [
@@ -32662,10 +32788,10 @@
             "fields": {
               "id": 72
             },
-            "before_expected": 1000.0,
-            "expected": 1000.0,
+            "before_expected": 1100.0,
+            "expected": 1100.0,
             "tolerance": 0.01,
-            "source": "Grouped ally2 at 50 yd (outside 40 yd + 4.16 yd leeway) remains at 1000."
+            "source": "Grouped ally2 at 50 yd (outside 40 yd + 4.16 yd leeway) remains at 1100."
           }
         ]
       },
@@ -32684,14 +32810,22 @@
       "cast_in_before": false,
       "metric": "dodge_chance",
       "fields": {},
-      "before_expected": 0.0,
-      "expected": 30.0,
+      "before_expected": 1.6024,
+      "expected": 31.6024,
       "expected_gain": 30.0,
       "tolerance": 0.01,
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Stoicism 804802 Effect[0] aura 49 SPELL_AURA_MOD_DODGE_PERCENT BasePoints 29 + 1 = +30%: caster dodge_chance increases by +30.0 (expected_gain 30.0)."
+      "observe_source": "Stoicism 804802 Effect[0] aura 49 SPELL_AURA_MOD_DODGE_PERCENT BasePoints 29 + 1 = +30%: caster dodge_chance increases by +30.0 (expected_gain 30.0).",
+      "phase_auras": [
+        [
+          300268,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 804802,
@@ -33087,7 +33221,7 @@
         "casts_wait_ms": 1500
       },
       "trials": 70,
-      "parts": 120,
+      "parts": 180,
       "expected_source": "807773 Effect[0] aura 330 SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE_AGAINST_TARGET +10%, MiscValue 126 (all Magic schools): Unit.cpp:10637-10641 adds +10 pp spell crit chance for caster's Darkslayer's Lantern 802139 (Fire, Magic) against cursed dummy."
     },
     {
@@ -33407,22 +33541,16 @@
       "variant": "threat_control",
       "label_suffix": "threat_control",
       "quote": "You put yourself on guard against evil, increasing your threat generated by $s1%.",
-      "trigger_spell": 501342,
+      "trigger_spell": 92559,
       "target": "dummy",
       "measure_actor": "dummy",
       "cast_in_before": false,
       "learn": [
-        501342
+        92559
       ],
       "phase_auras": [
         [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          680486,
+          16255,
           1,
           "caster",
           "caster"
@@ -33435,10 +33563,17 @@
       "before_expected": 0.0,
       "expected": 1.0,
       "tolerance": 0.05,
-      "wait_ms": 2000,
+      "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Control without Night's Watch 807733: Bola Throw 501342 (Physical, 1.0x spell_threat) generates 1.0 threat per damage on dummy."
+      "observe_source": "Control without Night's Watch 807733: Bola Throw 501342 (Physical, 1.0x spell_threat) generates 1.0 threat per damage on dummy.",
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ]
     },
     {
       "spell": 807733,
@@ -33447,19 +33582,98 @@
       "variant": "threat_stance_physical",
       "label_suffix": "threat_stance_physical",
       "quote": "You put yourself on guard against evil, increasing your threat generated by $s1%.",
-      "trigger_spell": 501342,
+      "trigger_spell": 92559,
       "target": "dummy",
       "measure_actor": "dummy",
       "cast_in_before": false,
       "learn": [
-        501342,
+        92559,
         807733
       ],
       "setup_casts": [
         807733
       ],
       "setup_target": "caster",
-      "setup_wait_ms": 500,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0.0,
+      "expected": 6.2,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 807733
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Night's Watch 807733 active from real cast."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 92559,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exactly 1 landed Void Zone 92559 (Physical) hit drives dummy threat_per_damage."
+          }
+        ]
+      },
+      "observe_source": "Settled Stage 1 E2 fix + AscensionTankStances.h (Rate.Threat.TankStance 2.0f): Physical Bola Throw 501342 yields 3.10 * 2.0 = 6.20 threat per damage (not 12.28).",
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ]
+    },
+    {
+      "spell": 807733,
+      "name": "Night's Watch (Holyfire threat_per_damage under stance is 6.20)",
+      "kind": "metric_delta",
+      "variant": "threat_stance_holy",
+      "label_suffix": "threat_stance_holy",
+      "quote": "You put yourself on guard against evil, increasing your threat generated by $s1%.",
+      "trigger_spell": 45648,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "learn": [
+        45648,
+        807733
+      ],
+      "setup_casts": [
+        807733
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
       "phase_auras": [
         [
           823764,
@@ -33468,7 +33682,7 @@
           "caster"
         ],
         [
-          680486,
+          16255,
           1,
           "caster",
           "caster"
@@ -33506,90 +33720,24 @@
             ],
             "metric": "spell_damage_count",
             "fields": {
-              "spell": 501342,
+              "spell": 45648,
               "target": "dummy"
             },
             "before_expected": 0,
             "expected": 1,
             "tolerance": 0,
-            "source": "Exactly 1 landed Bola Throw 501342 hit drives dummy threat_per_damage."
+            "source": "Exactly 1 landed QA Holy Spell 45648 (Holy) hit drives dummy threat_per_damage."
           }
         ]
       },
-      "observe_source": "Settled Stage 1 E2 fix + AscensionTankStances.h (Rate.Threat.TankStance 2.0f): Physical Bola Throw 501342 yields 3.10 * 2.0 = 6.20 threat per damage (not 12.28)."
-    },
-    {
-      "spell": 807733,
-      "name": "Night's Watch (Holyfire threat_per_damage under stance is 6.20)",
-      "kind": "metric_delta",
-      "variant": "threat_stance_holy",
-      "label_suffix": "threat_stance_holy",
-      "quote": "You put yourself on guard against evil, increasing your threat generated by $s1%.",
-      "trigger_spell": 574343,
-      "target": "dummy",
-      "measure_actor": "dummy",
-      "cast_in_before": false,
-      "cast_power": 300,
-      "learn": [
-        574343,
-        807733
-      ],
-      "setup_casts": [
-        807733
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 500,
-      "phase_auras": [
+      "observe_source": "Holyfire Dawn Blade 574343 under Night's Watch 807733 yields 3.10 * 2.0 = 6.20 threat per damage (matches Physical after Stage 1 E2 fix).",
+      "phase_aura_amounts": [
         [
-          823764,
-          1,
-          "caster",
-          "caster"
+          16255,
+          0,
+          -100
         ]
-      ],
-      "metric": "threat_per_damage",
-      "fields": {
-        "target": "caster"
-      },
-      "before_expected": 0.0,
-      "expected": 6.2,
-      "tolerance": 0.05,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "ally_arm": {
-        "allies": 0,
-        "arms": [
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "aura",
-            "fields": {
-              "spell": 807733
-            },
-            "before_expected": 0,
-            "expected": 1,
-            "tolerance": 0,
-            "source": "Night's Watch 807733 active from real cast."
-          },
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_damage_count",
-            "fields": {
-              "spell": 574343,
-              "target": "dummy"
-            },
-            "before_expected": 0,
-            "expected": 1,
-            "tolerance": 0,
-            "source": "Exactly 1 landed Dawn Blade 574343 hit (2H-compatible, Holyfire) drives dummy threat_per_damage."
-          }
-        ]
-      },
-      "observe_source": "Holyfire Dawn Blade 574343 under Night's Watch 807733 yields 3.10 * 2.0 = 6.20 threat per damage (matches Physical after Stage 1 E2 fix)."
+      ]
     },
     {
       "spell": 807733,
@@ -33613,12 +33761,6 @@
         },
         {
           "name": "treatment",
-          "auras": [
-            [
-              807733,
-              0
-            ]
-          ],
           "opening_casts": [
             [
               807733,
@@ -33715,7 +33857,7 @@
       "label_suffix": "melee_hit_landed",
       "quote": "Brand an enemy increasing their chance to be hit by melee and ranged attacks by $s2% for $d.",
       "expected": 1.0,
-      "observe_spell": 681350,
+      "observe_spell": 680515,
       "control": {
         "auras": [
           [
@@ -33746,7 +33888,7 @@
       },
       "isolation": {
         "reach_yd": 0,
-        "source": "Stake 681350 (EffectImplicitTargetA[0] 6, radius 0) and Brand of the Profane 562390 (EffectImplicitTargetA[0] 6, radius 0) are single-target casts aimed at each stream dummy by id, and streams are never grouped."
+        "source": "Pommel Smash 680515 (DmgClass 2 MELEE, TargetAuraState 0, EffectImplicitTargetA[0] 6, radius 0) and Brand of the Profane 562390 (EffectImplicitTargetA[0] 6, radius 0) are single-target casts aimed at each stream dummy by id, and streams are never grouped."
       },
       "observe_source": "Brand of the Profane 562390 Effect[2] aura 184 SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE +2% (, 5 min duration). Observes Stake 681350 (DmgClass 2 melee, Inquisition 1H sword 2027, 12% base mana refilled via cast_power 1000, expertise_rating 10000 inherited from witch_hunter.json to remove dodge/parry) with melee_hit_rating 0 and 823764 in both arms. Same-level dummy melee miss chance is 5% (95% landed control vs 97% with 562390 = +2 points), pooled across 96 parts x 100 trials (8 streams)."
     },
@@ -33918,7 +34060,8 @@
     520214,
     520215,
     520216,
-    520217
+    520217,
+    680269
   ],
   "self_stack_bonus": [],
   "dual_target_effects": [],
@@ -34028,8 +34171,65 @@
     },
     {
       "spell": 802826,
-      "target_entry": 11200,
-      "reason": "Holy Water Tonic 802826 requires TargetCreatureType 36 (Undead or Demon) to apply its 10000 ms stun and -200% healing debuff; spawning Undead 11200 lets value_scenario read aura_duration_ms 10000 on dummy and cooldown_ms 120000."
+      "target_entry": 180066,
+      "reason": "Holy Water Tonic 802826 (Mechanic 18 BANISH) requires a non-immune Undead or Demon target (TargetCreatureType 36); Risen Student 180066 (L60 Undead, CreatureImmunitiesId 0, no SmartAI) lets value_scenario read aura_duration_ms 10000 on dummy and cooldown_ms 120000."
+    },
+    {
+      "spell": 500093,
+      "distance": 5,
+      "reason": "Bola Throw rank 500093 has Speed 20.0 yd/s; distance 5 yd triggers missile_wait_ms so aura_amount and aura_duration_ms are read after the missile lands."
+    },
+    {
+      "spell": 501337,
+      "distance": 5,
+      "reason": "Bola Throw rank 501337 has Speed 20.0 yd/s; distance 5 yd triggers missile_wait_ms so aura_amount and aura_duration_ms are read after the missile lands."
+    },
+    {
+      "spell": 501338,
+      "distance": 5,
+      "reason": "Bola Throw rank 501338 has Speed 20.0 yd/s; distance 5 yd triggers missile_wait_ms so aura_amount and aura_duration_ms are read after the missile lands."
+    },
+    {
+      "spell": 501339,
+      "distance": 5,
+      "reason": "Bola Throw rank 501339 has Speed 20.0 yd/s; distance 5 yd triggers missile_wait_ms so aura_amount and aura_duration_ms are read after the missile lands."
+    },
+    {
+      "spell": 501340,
+      "distance": 5,
+      "reason": "Bola Throw rank 501340 has Speed 20.0 yd/s; distance 5 yd triggers missile_wait_ms so aura_amount and aura_duration_ms are read after the missile lands."
+    },
+    {
+      "spell": 501341,
+      "distance": 5,
+      "reason": "Bola Throw rank 501341 has Speed 20.0 yd/s; distance 5 yd triggers missile_wait_ms so aura_amount and aura_duration_ms are read after the missile lands."
+    },
+    {
+      "spell": 501342,
+      "distance": 5,
+      "reason": "Bola Throw rank 501342 has Speed 20.0 yd/s; distance 5 yd triggers missile_wait_ms so aura_amount and aura_duration_ms are read after the missile lands."
+    },
+    {
+      "spell": 501343,
+      "distance": 5,
+      "reason": "Bola Throw rank 501343 has Speed 20.0 yd/s; distance 5 yd triggers missile_wait_ms so aura_amount and aura_duration_ms are read after the missile lands."
+    },
+    {
+      "spell": 572306,
+      "target_auras": [
+        [
+          8599,
+          1
+        ]
+      ],
+      "reason": "Purge Evil 572306 refuses hostile dispel inside Northshire sanctuary (Spell.cpp:6329) and refuses with SPELL_FAILED_NOTHING_TO_DISPEL (86) unless the enemy carries an Enrage aura; spawning at outdoor Elwynn Forest Area 12 with Enrage 8599 on dummy lets value_scenario measure cooldown_ms 20000.",
+      "location": {
+        "map": 0,
+        "x": -9617.06,
+        "y": -288.949,
+        "z": 57.3053,
+        "o": 0
+      }
     }
   ],
   "plain_weapon_hits": [

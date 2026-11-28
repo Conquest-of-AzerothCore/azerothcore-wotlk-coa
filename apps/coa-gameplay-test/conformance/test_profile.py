@@ -336,16 +336,24 @@ class WeaponSetDataTest(unittest.TestCase):
         tab_of = {fields[field]: fields['Tab']
                   for _, fields in table_rows(dbc, 'CharacterAdvancement', ['ClassType', 'Tab'] + rank_fields)
                   if fields['ClassType'] in types for field in rank_fields if fields[field]}
+        extra_ids = [entry['spell'] for entry in self.witch_hunter.get('extra_spells', [])]
+        extra_ranks = set()
         expected = {}
         for class_spell in class_spells(DBC_DIR, WITCH_HUNTER_CLASS_ID, HEADER, self.witch_hunter['level'],
-                                        self.witch_hunter.get('extra_spells', [])):
+                                        extra_ids):
             tab = next((tab_of[rank] for rank in class_spell.ranks if rank in tab_of), None)
             if tab in TAB_WEAPON_SETS:
                 for rank in class_spell.ranks:
                     expected[str(rank)] = armed_for(
                         {**self.witch_hunter, 'spell_weapon_sets': {str(rank): TAB_WEAPON_SETS[tab]}},
                         self.records, rank)['weapon_set']
-        self.assertEqual(self.witch_hunter['spell_weapon_sets'], expected)
+            elif class_spell.spell_id in extra_ids:
+                extra_ranks.update(str(rank) for rank in class_spell.ranks)
+        actual = self.witch_hunter['spell_weapon_sets']
+        self.assertEqual({spell: name for spell, name in actual.items() if spell not in extra_ranks}, expected)
+        for spell in sorted(set(actual) & extra_ranks):
+            with self.subTest(extra_spell=spell):
+                self.assertEqual(armed_for(self.witch_hunter, self.records, int(spell))['weapon_set'], actual[spell])
 
     def test_two_handed_and_ranged_spells_take_their_sets_from_the_dbc(self):
         for spell_id in (NOCTIS_BLADE, GRASP_OF_THE_UNDYING_LEECH, WIDE_SWINGS, GRASP_OF_THE_UNDYING):

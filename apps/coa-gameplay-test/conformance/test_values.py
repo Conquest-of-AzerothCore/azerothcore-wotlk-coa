@@ -1309,6 +1309,19 @@ class ValueReagentsTest(unittest.TestCase):
         self.assertEqual(dur_exp.rule, 'read duration_ms')
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_value_reagents_target_auras_sets_buff_on_dummy_before_cast(self):
+        from values import VALUE_REAGENTS_KEY
+        witch_hunter = load_class_file(15)
+        purge_evil = ClassSpell(572306, 'Purge Evil', (572306,), 572306, 40, False)
+        loc = {'map': 0, 'x': -9617.06, 'y': -288.949, 'z': 57.3053, 'o': 0}
+        with_opt = {**witch_hunter, VALUE_REAGENTS_KEY: [{'spell': 572306, 'target_auras': [[8599, 1]], 'location': loc}]}
+        scenario, _, _ = value_scenario(with_opt, purge_evil, 572306)
+        aura_step = {'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'spell': 8599, 'stacks': 1}
+        cast_index = next(i for i, step in enumerate(scenario['steps']) if step.get('action') == 'cast')
+        self.assertIn(aura_step, scenario['steps'][:cast_index])
+        self.assertEqual(scenario['location'], loc)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_permanent_own_duration_reads_spell_duration_ms_even_with_cast_time(self):
         witch_hunter = load_class_file(15)
         infiltrate = ClassSpell(802281, 'Infiltrate', (802281,), 802281, 22, False)
